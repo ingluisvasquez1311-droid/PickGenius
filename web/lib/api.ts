@@ -1,4 +1,12 @@
-const API_URL = 'http://localhost:3001';
+const getApiUrl = () => {
+    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    if (!url.startsWith('http')) {
+        return `https://${url}`;
+    }
+    return url;
+};
+
+const API_URL = getApiUrl();
 
 export async function getStatus() {
     try {
