@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Firebase
+firebase-debug.log
+.firebase/
+firebase-credentials.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Build
+dist/
+build/
+
+# Cache
+.cache/
+.next/
+
+# Data & Backups
+data/
+backups/
+*.csv
+
+# Streamlit
+.streamlit/secrets.toml

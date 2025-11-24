@@ -1,0 +1,84 @@
+# 🚀 Comandos para Deploy
+
+## 1. Preparar Git
+
+```powershell
+# Verificar estado
+git status
+
+# Agregar todos los archivos
+git add .
+
+# Commit
+git commit -m "feat: NBA Sync Service completo con auto-sync, dashboard y deployment"
+
+# Si no tienes remote configurado:
+git remote add origin https://github.com/TU-USUARIO/tiren-parleys.git
+
+# Push
+git push -u origin main
+```
+
+## 2. Deploy en Render
+
+1. Ve a https://render.com/
+2. Sign up/Login con GitHub
+3. New + → Web Service
+4. Conecta el repositorio `tiren-parleys`
+5. Configuración:
+   - **Name**: `tiren-parleys-nba`
+   - **Build**: `npm install`
+   - **Start**: `npm start`
+   - **Plan**: Free
+
+6. Variables de entorno (Environment):
+   ```
+   NBA_API_KEY=tu-key-de-balldontlie
+   GOOGLE_CLOUD_PROJECT=tu-proyecto-id
+   FIREBASE_API_KEY=tu-firebase-key
+   GEMINI_API_KEY=tu-gemini-key
+   NODE_ENV=production
+   ```
+
+7. Secret Files:
+   - Filename: `firebase-credentials.json`
+   - Content: (pegar contenido del archivo)
+
+8. Click "Create Web Service"
+
+## 3. Verificar Deployment
+
+```powershell
+# Una vez deployado, prueba:
+curl https://tu-servicio.onrender.com/health
+curl https://tu-servicio.onrender.com/api/status
+
+# Trigger manual sync
+curl -X POST https://tu-servicio.onrender.com/api/sync
+```
+
+## 4. Deploy Dashboard (Opcional)
+
+### Opción A: Streamlit Cloud
+
+1. Ve a https://share.streamlit.io/
+2. Connect GitHub
+3. Repository: `tiren-parleys`
+4. Main file: `dashboard.py`
+5. Deploy
+
+### Opción B: Render (Streamlit)
+
+1. New + → Web Service
+2. Same repository
+3. Build: `pip install -r requirements.txt`
+4. Start: `streamlit run dashboard.py --server.port=$PORT --server.address=0.0.0.0`
+
+## 5. Resultado
+
+- **API**: https://tiren-parleys-nba.onrender.com
+- **Dashboard**: https://tiren-parleys.streamlit.app
+- **Auto-sync**: Cada 24 horas automáticamente
+- **Datos**: En Firestore (cloud)
+
+¡Listo! 🎉

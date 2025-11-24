@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tirens Parleys</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background-color: #2d2d2d;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            color: #b0b0b0;
+        }
+        .status {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #333;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .status-value {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Tirens Parleys</h1>
+        <p>AI-Powered Sports Analysis Platform</p>
+        
+        <div class="status">
+            <div class="status-item">
+                <span>System Status:</span>
+                <span class="status-value">Online</span>
+            </div>
+            <div class="status-item">
+                <span>Environment:</span>
+                <span class="status-value" id="env">Loading...</span>
+            </div>
+            <div class="status-item">
+                <span>API Connection:</span>
+                <span class="status-value" id="api">Checking...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple health check
+        fetch('/health')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('env').textContent = data.environment;
+            })
+            .catch(err => {
+                document.getElementById('env').textContent = 'Error';
+                document.getElementById('env').style.color = '#f44336';
+            });
+
+        fetch('/api/status')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('api').textContent = data.status === 'active' ? 'Connected' : 'Issues';
+            })
+            .catch(err => {
+                document.getElementById('api').textContent = 'Offline';
+                document.getElementById('api').style.color = '#f44336';
+            });
+    </script>
+</body>
+</html>

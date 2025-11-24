@@ -1,0 +1,45 @@
+const API_URL = 'http://localhost:3001';
+
+export async function getStatus() {
+    try {
+        const res = await fetch(`${API_URL}/api/status`, { cache: 'no-store' });
+        return res.json();
+    } catch (error) {
+        console.error('Error fetching status:', error);
+        return null;
+    }
+}
+
+export async function getFootballStats(league?: string) {
+    try {
+        const url = league
+            ? `${API_URL}/api/football/stats/${encodeURIComponent(league)}`
+            : `${API_URL}/api/football/stats`;
+
+        const res = await fetch(url, { cache: 'no-store' });
+        return res.json();
+    } catch (error) {
+        console.error('Error fetching football stats:', error);
+        return null;
+    }
+}
+
+// Mock data for development when backend is offline or empty
+export const MOCK_MATCHES = [
+    {
+        id: '1',
+        homeTeam: 'Lakers',
+        awayTeam: 'Warriors',
+        date: '2024-11-24T20:00:00',
+        league: 'NBA',
+        prediction: { pick: 'Lakers -5.5', confidence: 85 }
+    },
+    {
+        id: '2',
+        homeTeam: 'Real Madrid',
+        awayTeam: 'Barcelona',
+        date: '2024-11-25T15:00:00',
+        league: 'La Liga',
+        prediction: { pick: 'Ambos Marcan', confidence: 78 }
+    }
+];
