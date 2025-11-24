@@ -1,0 +1,28 @@
+services:
+  # 1. Backend Service (API & Data Sync)
+  - type: web
+    name: tiren-parleys-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+
+  # 2. Frontend Service (Next.js Web Interface)
+  - type: web
+    name: tiren-parleys-web
+    env: node
+    plan: free
+    rootDir: web
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: tiren-parleys-api
+          property: url
