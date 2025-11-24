@@ -3,9 +3,12 @@ import MatchCard from '@/components/sports/MatchCard';
 import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
 import PlayerStatsTable from '@/components/sports/PlayerStatsTable';
-import { MOCK_MATCHES } from '@/lib/api';
+import { getNBAGames } from '@/lib/api';
 
-export default function NBAPage() {
+export default async function NBAPage() {
+    // Fetch real NBA games from API
+    const nbaGames = await getNBAGames();
+
     return (
         <main className="min-h-screen pb-20 bg-[#0b0b0b]">
             <div className="container pt-8">
@@ -32,21 +35,24 @@ export default function NBAPage() {
                         </div>
 
                         <div className="flex flex-col">
-                            {MOCK_MATCHES.filter(m => m.league === 'NBA').map((match) => (
-                                <MatchCard
-                                    key={match.id}
-                                    homeTeam={match.homeTeam}
-                                    awayTeam={match.awayTeam}
-                                    date={match.date}
-                                    league={match.league}
-                                    prediction={match.prediction}
-                                />
-                            ))}
-                            {/* More Mock Data for density */}
-                            <MatchCard homeTeam="Bucks" awayTeam="Suns" date={new Date().toISOString()} league="NBA" />
-                            <MatchCard homeTeam="Nuggets" awayTeam="Clippers" date={new Date().toISOString()} league="NBA" />
-                            <MatchCard homeTeam="Mavericks" awayTeam="Kings" date={new Date().toISOString()} league="NBA" />
-                            <MatchCard homeTeam="Knicks" awayTeam="Nets" date={new Date().toISOString()} league="NBA" />
+                            {nbaGames.length > 0 ? (
+                                nbaGames.map((match) => (
+                                    <MatchCard
+                                        key={match.id}
+                                        homeTeam={match.homeTeam}
+                                        awayTeam={match.awayTeam}
+                                        date={match.date}
+                                        league={match.league}
+                                        homeScore={match.homeScore}
+                                        awayScore={match.awayScore}
+                                        status={match.status}
+                                    />
+                                ))
+                            ) : (
+                                <div className="glass-card p-8 text-center text-[var(--text-muted)]">
+                                    No hay partidos programados para hoy
+                                </div>
+                            )}
                         </div>
                     </div>
 
