@@ -68,6 +68,18 @@ app.get('/api/football/stats/:league?', async (req, res) => {
     }
 });
 
+// NBA endpoints
+app.get('/api/nba/games', async (req, res) => {
+    try {
+        console.log('🏀 Fetching NBA games...');
+        const games = await autoSyncService.fetchTodayGames();
+        res.json({ success: true, games });
+    } catch (error) {
+        console.error('❌ NBA games error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
     res.json({

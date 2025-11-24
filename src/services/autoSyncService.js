@@ -185,6 +185,29 @@ class AutoSyncService {
 
         console.log('🕐 Daily auto-sync scheduled');
     }
+
+    // Fetch today's games for the web interface
+    async fetchTodayGames() {
+        try {
+            const today = new Date();
+            const games = await this.fetchRecentGames(today, today);
+
+            // Transform to match web interface format
+            return games.map(game => ({
+                id: game.id,
+                homeTeam: game.home_team?.full_name || game.home_team?.name || 'TBD',
+                awayTeam: game.visitor_team?.full_name || game.visitor_team?.name || 'TBD',
+                homeScore: game.home_team_score,
+                awayScore: game.visitor_team_score,
+                date: game.date,
+                status: game.status || 'Scheduled',
+                league: 'NBA'
+            }));
+        } catch (error) {
+            console.error('Error fetching today games:', error.message);
+            return [];
+        }
+    }
 }
 
 module.exports = new AutoSyncService();

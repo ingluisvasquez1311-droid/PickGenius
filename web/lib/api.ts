@@ -32,6 +32,17 @@ export async function getFootballStats(league?: string) {
     }
 }
 
+export async function getNBAGames() {
+    try {
+        const res = await fetch(`${API_URL}/api/nba/games`, { cache: 'no-store' });
+        const data = await res.json();
+        return data.success ? data.games : [];
+    } catch (error) {
+        console.error('Error fetching NBA games:', error);
+        return [];
+    }
+}
+
 // Mock data for development when backend is offline or empty
 export const MOCK_MATCHES = [
     {
