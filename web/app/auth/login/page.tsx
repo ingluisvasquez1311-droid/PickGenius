@@ -32,7 +32,7 @@ export default function LoginPage() {
         <main className="min-h-screen flex items-center justify-center bg-[#0b0b0b] p-4">
             <div className="glass-card p-8 w-full max-w-md">
                 <h1 className="text-3xl font-bold mb-2 text-center">
-                    Bienvenido a <span className="text-[var(--primary)]">Tiren Parleys</span>
+                    Bienvenido a <span className="text-[var(--primary)]">PickGenius</span>
                 </h1>
                 <p className="text-[var(--text-muted)] text-center mb-8">
                     Inicia sesión para acceder a tus predicciones

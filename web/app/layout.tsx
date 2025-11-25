@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Tirens Parleys | Predicciones Deportivas con IA",
+  title: "PickGenius | Predicciones Deportivas con IA",
   description: "Domina tus parleys de NBA y Fútbol con análisis de inteligencia artificial y estadísticas avanzadas.",
 };
 

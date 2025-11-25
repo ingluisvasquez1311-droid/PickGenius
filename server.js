@@ -37,7 +37,7 @@ app.post('/api/sync', async (req, res) => {
 // Status endpoint
 app.get('/api/status', (req, res) => {
     res.json({
-        service: 'Tirens Parleys - NBA & Football Sync',
+        service: 'PickGenius - NBA & Football Sync',
         version: '2.0.0',
         uptime: process.uptime(),
         timestamp: new Date().toISOString()
@@ -83,7 +83,7 @@ app.get('/api/nba/games', async (req, res) => {
 // Root endpoint
 app.get('/', (req, res) => {
     res.json({
-        message: '🏀⚽ Tirens Parleys - Sports Sync Service',
+        message: '🏀⚽ PickGenius - Sports Sync Service',
         endpoints: {
             health: '/health',
             status: '/api/status',

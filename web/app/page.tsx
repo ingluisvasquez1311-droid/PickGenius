@@ -29,7 +29,7 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-20">
         <div className="container">
-          <h2 className="text-4xl text-center mb-16">¿Por qué <span className="text-gradient">Tirens Parleys</span>?</h2>
+          <h2 className="text-4xl text-center mb-16">¿Por qué <span className="text-gradient">PickGenius</span>?</h2>
 
           <div className="grid-auto">
             <div className="glass-card p-8">
