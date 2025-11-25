@@ -1,5 +1,5 @@
 import Navbar from "@/components/layout/Navbar";
-import LiveTicker from "@/components/sports/LiveTicker";
+// import LiveTicker from "@/components/sports/LiveTicker"; // Temporarily disabled
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -18,7 +18,7 @@ export default function RootLayout({
     <html lang="es">
       <body>
         <AuthProvider>
-          <LiveTicker />
+          {/* <LiveTicker /> */}
           <Navbar />
           {children}
         </AuthProvider>
