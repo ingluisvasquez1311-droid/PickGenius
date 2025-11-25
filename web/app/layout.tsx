@@ -2,6 +2,7 @@ import Navbar from "@/components/layout/Navbar";
 import LiveTicker from "@/components/sports/LiveTicker";
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "PickGenius | Predicciones Deportivas con IA",
@@ -16,11 +17,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        <Navbar />
-        <div className="pt-20">
+        <AuthProvider>
           <LiveTicker />
+          <Navbar />
           {children}
-        </div>
+        </AuthProvider>
       </body>
     </html>
   );
