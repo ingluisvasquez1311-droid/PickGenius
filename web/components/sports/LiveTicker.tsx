@@ -2,6 +2,8 @@
 
 import React from 'react';
 
+'use client';
+
 export default function LiveTicker() {
   return (
     <div className="w-full bg-[var(--bg-dark)] border-b border-[rgba(255,255,255,0.05)] overflow-hidden py-2">
