@@ -15,6 +15,12 @@ export class FirestoreNBAProvider implements NBADataProvider {
 
     async getTodayGames(): Promise<NBAGame[]> {
         try {
+            // Return empty if Firebase is not initialized
+            if (!db) {
+                console.warn(`[${this.name}] Firestore not initialized`);
+                return [];
+            }
+
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const tomorrow = new Date(today);
@@ -63,6 +69,12 @@ export class FirestoreNBAProvider implements NBADataProvider {
 
     async getGamesByDateRange(startDate: Date, endDate: Date): Promise<NBAGame[]> {
         try {
+            // Return empty if Firebase is not initialized
+            if (!db) {
+                console.warn(`[${this.name}] Firestore not initialized`);
+                return [];
+            }
+
             const gamesRef = collection(db, 'nba_regular_season_box_scores_2024_25');
             const q = query(
                 gamesRef,
