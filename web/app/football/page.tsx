@@ -1,55 +1,138 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import MatchCard from '@/components/sports/MatchCard';
 import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
 import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
 
+interface FootballMatch {
+  id: number;
+  homeTeam: { name: string };
+  awayTeam: { name: string };
+  utcDate: string;
+  score: {
+    fullTime: { home: number | null; away: number | null };
+  };
+  status: string;
+  competition: { name: string };
+}
+
 export default function FootballPage() {
+  const [matches, setMatches] = useState<FootballMatch[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMatches() {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+
+        // Fetch from multiple leagues
+        const leagueIds = [
+          'PL',  // Premier League
+          'PD',  // La Liga
+          'SA',  // Serie A
+          'BL1', // Bundesliga
+          'FL1'  // Ligue 1
+        ];
+
+        const allMatches: FootballMatch[] = [];
+
+        for (const leagueId of leagueIds) {
+          try {
+            const response = await fetch(
+              `https://api.football-data.org/v4/competitions/${leagueId}/matches?dateFrom=${today}&dateTo=${today}`,
+              {
+                headers: {
+                  'X-Auth-Token': 'e8c7b9a4f3d2e1c0b9a8f7e6d5c4b3a2'
+                }
+              }
+            );
+            const data = await response.json();
+            if (data.matches) {
+              allMatches.push(...data.matches);
+            }
+          } catch (err) {
+            console.error(`Error fetching ${leagueId}:`, err);
+          }
+        }
+
+        setMatches(allMatches);
+      } catch (error) {
+        console.error('Error fetching football matches:', error);
+        setMatches([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMatches();
+  }, []);
+
+  // Group matches by league
+  const matchesByLeague = matches.reduce((acc, match) => {
+    const league = match.competition.name;
+    if (!acc[league]) acc[league] = [];
+    acc[league].push(match);
+    return acc;
+  }, {} as Record<string, FootballMatch[]>);
+
   return (
     <main className="min-h-screen pb-20 bg-[#0b0b0b]">
       <div className="container pt-8">
 
         {/* Header Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatWidget label="Partidos Live" value="12" icon="⚽" color="var(--danger)" />
-          <StatWidget label="Acierto Mago" value="82%" trend="up" color="var(--success)" />
-          <StatWidget label="BTTS Trend" value="High" trend="up" color="var(--accent)" />
-          <StatWidget label="Ligas Activas" value="5" icon="🌍" />
+          <StatWidget label="Partidos Hoy" value={matches.length.toString()} icon="⚽" />
+          <StatWidget label="Acierto IA" value="82%" trend="up" color="var(--success)" />
+          <StatWidget label="ROI Mensual" value="+18.2%" trend="up" color="var(--accent)" />
+          <StatWidget label="Ligas Activas" value="5" icon="🏆" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-          {/* MAIN COLUMN (Match List) */}
+          {/* MAIN COLUMN (Match List) - Spans 8 cols */}
           <div className="lg:col-span-8">
+            {loading ? (
+              <div className="glass-card p-8 text-center text-[var(--text-muted)]">
+                Cargando partidos...
+              </div>
+            ) : Object.keys(matchesByLeague).length > 0 ? (
+              Object.entries(matchesByLeague).map(([league, leagueMatches]) => (
+                <div key={league} className="mb-6">
+                  <div className="glass-card p-4 mb-4 flex justify-between items-center">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                      <span className="text-2xl">⚽</span> {league}
+                    </h2>
+                    <span className="text-xs font-bold bg-[rgba(255,255,255,0.1)] px-2 py-1 rounded text-[var(--text-muted)]">
+                      HOY
+                    </span>
+                  </div>
 
-            {/* Premier League Section */}
-            <div className="mb-6">
-              <div className="glass-card p-3 mb-2 flex items-center gap-3">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black font-bold text-xs">PL</div>
-                <h2 className="font-bold">Premier League</h2>
+                  <div className="flex flex-col">
+                    {leagueMatches.map((match) => (
+                      <MatchCard
+                        key={match.id}
+                        homeTeam={match.homeTeam.name}
+                        awayTeam={match.awayTeam.name}
+                        date={match.utcDate}
+                        league={league}
+                        homeScore={match.score.fullTime.home}
+                        awayScore={match.score.fullTime.away}
+                        status={match.status}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="glass-card p-8 text-center text-[var(--text-muted)]">
+                No hay partidos programados para hoy
               </div>
-              <div className="flex flex-col">
-                <MatchCard homeTeam="Liverpool" awayTeam="Chelsea" date={new Date().toISOString()} league="Premier League" status="Live" homeScore={1} awayScore={1} />
-                <MatchCard homeTeam="Man City" awayTeam="Arsenal" date={new Date().toISOString()} league="Premier League" status="Scheduled" />
-                <MatchCard homeTeam="Spurs" awayTeam="United" date={new Date().toISOString()} league="Premier League" status="Scheduled" />
-              </div>
-            </div>
-
-            {/* La Liga Section */}
-            <div className="mb-6">
-              <div className="glass-card p-3 mb-2 flex items-center gap-3">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black font-bold text-xs">LL</div>
-                <h2 className="font-bold">La Liga</h2>
-              </div>
-              <div className="flex flex-col">
-                <MatchCard homeTeam="Real Madrid" awayTeam="Barcelona" date={new Date().toISOString()} league="La Liga" status="Scheduled" prediction={{ pick: "BTTS", odds: "-150", confidence: 90 }} />
-                <MatchCard homeTeam="Atletico" awayTeam="Sevilla" date={new Date().toISOString()} league="La Liga" status="Scheduled" />
-              </div>
-            </div>
-
+            )}
           </div>
 
-          {/* SIDEBAR COLUMN (Widgets) */}
+          {/* SIDEBAR COLUMN (Widgets) - Spans 4 cols */}
           <div className="lg:col-span-4 flex flex-col gap-6">
 
             {/* Wizard's Corner */}
@@ -73,16 +156,27 @@ export default function FootballPage() {
             {/* Trending */}
             <div className="glass-card p-4">
               <h3 className="font-bold mb-4 text-[var(--accent)]">📈 Tendencias</h3>
-              <div className="flex flex-col gap-3">
-                <div className="flex justify-between text-sm">
-                  <span>Over 2.5 Goles</span>
-                  <span className="font-bold text-[var(--success)]">80% Last 5</span>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span>Goles Over 2.5</span>
+                  <span className="text-[var(--success)]">↑ 65%</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span>Home Wins</span>
-                  <span className="font-bold">65% Today</span>
+                <div className="flex justify-between">
+                  <span>Ambos Marcan</span>
+                  <span className="text-[var(--success)]">↑ 58%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Local Gana</span>
+                  <span className="text-[var(--warning)]">→ 45%</span>
                 </div>
               </div>
+            </div>
+
+            {/* Premium */}
+            <div className="glass-card p-6 flex flex-col items-center justify-center text-center min-h-[200px] opacity-50 border-dashed border-2 border-[rgba(255,255,255,0.1)]">
+              <span className="text-4xl mb-2">👑</span>
+              <h3 className="font-bold">Premium Access</h3>
+              <p className="text-sm text-[var(--text-muted)]">Análisis profundo de cada partido</p>
             </div>
 
           </div>
