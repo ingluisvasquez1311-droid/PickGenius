@@ -5,6 +5,8 @@ import MatchCard from '@/components/sports/MatchCard';
 import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
 import PlayerStatsTable from '@/components/sports/PlayerStatsTable';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import { cacheData, getCachedData } from '@/lib/cache';
 
 interface NBAGame {
     id: number;
@@ -22,6 +24,14 @@ export default function NBAPage() {
 
     useEffect(() => {
         async function fetchGames() {
+            // Check cache first
+            const cached = getCachedData<NBAGame[]>('cache_nba_games');
+            if (cached) {
+                setGames(cached);
+                setLoading(false);
+                return;
+            }
+
             try {
                 const today = new Date().toISOString().split('T')[0];
                 const response = await fetch(
@@ -33,7 +43,10 @@ export default function NBAPage() {
                     }
                 );
                 const data = await response.json();
-                setGames(data.data || []);
+                const gamesData = data.data || [];
+
+                setGames(gamesData);
+                cacheData('cache_nba_games', gamesData);
             } catch (error) {
                 console.error('Error fetching NBA games:', error);
                 setGames([]);
@@ -70,11 +83,13 @@ export default function NBAPage() {
                             </span>
                         </div>
 
-                        <div className="flex flex-col">
+                        <div className="flex flex-col gap-4">
                             {loading ? (
-                                <div className="glass-card p-8 text-center text-[var(--text-muted)]">
-                                    Cargando partidos...
-                                </div>
+                                <>
+                                    <SkeletonLoader />
+                                    <SkeletonLoader />
+                                    <SkeletonLoader />
+                                </>
                             ) : games.length > 0 ? (
                                 games.map((game) => (
                                     <MatchCard
