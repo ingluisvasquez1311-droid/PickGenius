@@ -25,6 +25,10 @@ export interface UserProfile {
  * Create a new user profile in Firestore
  */
 export async function createUserProfile(uid: string, email: string): Promise<UserProfile> {
+    if (!db) {
+        throw new Error('Firestore not initialized');
+    }
+
     const userRef = doc(db, 'users', uid);
 
     const newProfile: Omit<UserProfile, 'createdAt' | 'lastLogin'> & {
@@ -54,6 +58,8 @@ export async function createUserProfile(uid: string, email: string): Promise<Use
  * Get user profile from Firestore
  */
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+    if (!db) return null;
+
     const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
 
@@ -79,6 +85,8 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
  * Update user's last login timestamp
  */
 export async function updateLastLogin(uid: string): Promise<void> {
+    if (!db) return;
+
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, {
         lastLogin: serverTimestamp()
@@ -89,6 +97,8 @@ export async function updateLastLogin(uid: string): Promise<void> {
  * Add a team to user's favorites
  */
 export async function addFavoriteTeam(uid: string, teamName: string): Promise<void> {
+    if (!db) return;
+
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, {
         favoriteTeams: arrayUnion(teamName)
@@ -99,6 +109,8 @@ export async function addFavoriteTeam(uid: string, teamName: string): Promise<vo
  * Remove a team from user's favorites
  */
 export async function removeFavoriteTeam(uid: string, teamName: string): Promise<void> {
+    if (!db) return;
+
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, {
         favoriteTeams: arrayRemove(teamName)
@@ -109,6 +121,8 @@ export async function removeFavoriteTeam(uid: string, teamName: string): Promise
  * Increment predictions used counter
  */
 export async function incrementPredictionsUsed(uid: string): Promise<void> {
+    if (!db) return;
+
     const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
 
@@ -124,6 +138,8 @@ export async function incrementPredictionsUsed(uid: string): Promise<void> {
  * Reset daily predictions counter (should be called by a scheduled function)
  */
 export async function resetDailyPredictions(uid: string): Promise<void> {
+    if (!db) return;
+
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, {
         predictionsUsed: 0
@@ -134,6 +150,8 @@ export async function resetDailyPredictions(uid: string): Promise<void> {
  * Upgrade user to premium
  */
 export async function upgradeToPremium(uid: string, subscriptionEndDate: Date): Promise<void> {
+    if (!db) return;
+
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, {
         isPremium: true,
