@@ -134,7 +134,7 @@ pytest tests/test_sync_scripts.py --cov=src --cov-report=html
 
 4. **Action**:
    - Programa: `powershell.exe`
-   - Argumentos: `-ExecutionPolicy Bypass -File "c:\Users\Daniel\Tiren Parleys\cron_sync.ps1"`
+   - Argumentos: `-ExecutionPolicy Bypass -File "c:\Users\Daniel\PickGenius\cron_sync.ps1"`
 
 5. **Conditions**:
    - ☑️ Iniciar solo si el equipo está conectado a AC

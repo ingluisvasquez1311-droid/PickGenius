@@ -2,7 +2,7 @@
 # Para Windows Task Scheduler
 
 # Configuración
-$SCRIPT_DIR = "c:\Users\Daniel\Tiren Parleys"
+$SCRIPT_DIR = "c:\Users\Daniel\PickGenius"
 $LOG_DIR = "$SCRIPT_DIR\logs\cron"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"
 $LOG_FILE = "$LOG_DIR\cron_$TIMESTAMP.log"

@@ -1,0 +1,166 @@
+import { db } from './firebase';
+import {
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    arrayUnion,
+    arrayRemove,
+    serverTimestamp
+} from 'firebase/firestore';
+
+export interface UserProfile {
+    uid: string;
+    email: string;
+    isPremium: boolean;
+    subscriptionEnd?: Date;
+    predictionsUsed: number;
+    predictionsLimit: number;
+    favoriteTeams: string[];
+    createdAt: Date;
+    lastLogin: Date;
+}
+
+/**
+ * Create a new user profile in Firestore
+ */
+export async function createUserProfile(uid: string, email: string): Promise<UserProfile> {
+    const userRef = doc(db, 'users', uid);
+
+    const newProfile: Omit<UserProfile, 'createdAt' | 'lastLogin'> & {
+        createdAt: any;
+        lastLogin: any;
+    } = {
+        uid,
+        email,
+        isPremium: false,
+        predictionsUsed: 0,
+        predictionsLimit: 3, // Free tier: 3 predictions per day
+        favoriteTeams: [],
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp()
+    };
+
+    await setDoc(userRef, newProfile);
+
+    return {
+        ...newProfile,
+        createdAt: new Date(),
+        lastLogin: new Date()
+    };
+}
+
+/**
+ * Get user profile from Firestore
+ */
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+        return null;
+    }
+
+    const data = userSnap.data();
+    return {
+        uid: data.uid,
+        email: data.email,
+        isPremium: data.isPremium || false,
+        subscriptionEnd: data.subscriptionEnd?.toDate(),
+        predictionsUsed: data.predictionsUsed || 0,
+        predictionsLimit: data.predictionsLimit || 3,
+        favoriteTeams: data.favoriteTeams || [],
+        createdAt: data.createdAt?.toDate() || new Date(),
+        lastLogin: data.lastLogin?.toDate() || new Date()
+    };
+}
+
+/**
+ * Update user's last login timestamp
+ */
+export async function updateLastLogin(uid: string): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+        lastLogin: serverTimestamp()
+    });
+}
+
+/**
+ * Add a team to user's favorites
+ */
+export async function addFavoriteTeam(uid: string, teamName: string): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+        favoriteTeams: arrayUnion(teamName)
+    });
+}
+
+/**
+ * Remove a team from user's favorites
+ */
+export async function removeFavoriteTeam(uid: string, teamName: string): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+        favoriteTeams: arrayRemove(teamName)
+    });
+}
+
+/**
+ * Increment predictions used counter
+ */
+export async function incrementPredictionsUsed(uid: string): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+        const currentCount = userSnap.data().predictionsUsed || 0;
+        await updateDoc(userRef, {
+            predictionsUsed: currentCount + 1
+        });
+    }
+}
+
+/**
+ * Reset daily predictions counter (should be called by a scheduled function)
+ */
+export async function resetDailyPredictions(uid: string): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+        predictionsUsed: 0
+    });
+}
+
+/**
+ * Upgrade user to premium
+ */
+export async function upgradeToPremium(uid: string, subscriptionEndDate: Date): Promise<void> {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+        isPremium: true,
+        subscriptionEnd: subscriptionEndDate,
+        predictionsLimit: -1 // -1 means unlimited
+    });
+}
+
+/**
+ * Check if user can make a prediction
+ */
+export async function canMakePrediction(uid: string): Promise<{ canPredict: boolean; remaining: number }> {
+    const profile = await getUserProfile(uid);
+
+    if (!profile) {
+        return { canPredict: false, remaining: 0 };
+    }
+
+    // Premium users have unlimited predictions
+    if (profile.isPremium) {
+        return { canPredict: true, remaining: -1 };
+    }
+
+    // Free users have daily limit
+    const remaining = profile.predictionsLimit - profile.predictionsUsed;
+    return {
+        canPredict: remaining > 0,
+        remaining: Math.max(0, remaining)
+    };
+}

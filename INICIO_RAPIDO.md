@@ -57,7 +57,7 @@ Mientras se ejecuta la sincronización, en **otra terminal**:
 
 ```powershell
 # Activar entorno virtual
-& "c:/Users/Daniel/Tiren Parleys/.venv/Scripts/Activate.ps1"
+& "c:/Users/Daniel/PickGenius/.venv/Scripts/Activate.ps1"
 
 # Monitorear en tiempo real (cada 30 segundos durante 120 minutos)
 python src\scripts\monitor_sync.py monitor nba_regular_season_box_scores_2024_25 30 120

@@ -6,47 +6,31 @@ import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
 import PlayerStatsTable from '@/components/sports/PlayerStatsTable';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { cacheData, getCachedData } from '@/lib/cache';
+import { getTodayGames, type NBAGame } from '@/lib/nbaDataService';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface NBAGame {
-    id: number;
-    home_team: { full_name: string };
-    visitor_team: { full_name: string };
-    home_team_score: number;
-    visitor_team_score: number;
-    date: string;
-    status: string;
-}
+import PredictionModal from '@/components/sports/PredictionModal';
 
 export default function NBAPage() {
     const [games, setGames] = useState<NBAGame[]>([]);
     const [loading, setLoading] = useState(true);
+    const { user, addFavorite, removeFavorite } = useAuth();
+
+    // Prediction Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedGame, setSelectedGame] = useState<{
+        id: string;
+        homeTeam: string;
+        awayTeam: string;
+        date: Date;
+    } | null>(null);
 
     useEffect(() => {
         async function fetchGames() {
-            // Check cache first
-            const cached = getCachedData<NBAGame[]>('cache_nba_games');
-            if (cached) {
-                setGames(cached);
-                setLoading(false);
-                return;
-            }
-
+            setLoading(true);
             try {
-                const today = new Date().toISOString().split('T')[0];
-                const response = await fetch(
-                    `https://api.balldontlie.io/v1/games?start_date=${today}&end_date=${today}`,
-                    {
-                        headers: {
-                            'Authorization': '4c8f3e0a-8b2d-4f1e-9c3a-7d6e5f4a3b2c'
-                        }
-                    }
-                );
-                const data = await response.json();
-                const gamesData = data.data || [];
-
+                const gamesData = await getTodayGames();
                 setGames(gamesData);
-                cacheData('cache_nba_games', gamesData);
             } catch (error) {
                 console.error('Error fetching NBA games:', error);
                 setGames([]);
@@ -57,6 +41,34 @@ export default function NBAPage() {
 
         fetchGames();
     }, []);
+
+    const handleFavoriteToggle = async (teamName: string, isFavorite: boolean) => {
+        if (!user) {
+            alert('Debes iniciar sesión para agregar favoritos');
+            return;
+        }
+
+        try {
+            if (isFavorite) {
+                await removeFavorite(teamName);
+            } else {
+                await addFavorite(teamName);
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            alert('Error al actualizar favoritos');
+        }
+    };
+
+    const handlePredictionClick = (game: NBAGame) => {
+        setSelectedGame({
+            id: game.id,
+            homeTeam: game.homeTeam,
+            awayTeam: game.awayTeam,
+            date: game.date
+        });
+        setIsModalOpen(true);
+    };
 
     return (
         <main className="min-h-screen pb-20 bg-[#0b0b0b]">
@@ -91,18 +103,31 @@ export default function NBAPage() {
                                     <SkeletonLoader />
                                 </>
                             ) : games.length > 0 ? (
-                                games.map((game) => (
-                                    <MatchCard
-                                        key={game.id}
-                                        homeTeam={game.home_team.full_name}
-                                        awayTeam={game.visitor_team.full_name}
-                                        date={game.date}
-                                        league="NBA"
-                                        homeScore={game.home_team_score}
-                                        awayScore={game.visitor_team_score}
-                                        status={game.status}
-                                    />
-                                ))
+                                games.map((game) => {
+                                    const isHomeFavorite = user?.favoriteTeams.includes(game.homeTeam);
+                                    const isAwayFavorite = user?.favoriteTeams.includes(game.awayTeam);
+                                    const isFavorite = isHomeFavorite || isAwayFavorite;
+
+                                    return (
+                                        <MatchCard
+                                            key={game.id}
+                                            homeTeam={game.homeTeam}
+                                            awayTeam={game.awayTeam}
+                                            date={game.date.toISOString()}
+                                            league="NBA"
+                                            homeScore={game.homeScore}
+                                            awayScore={game.awayScore}
+                                            status={game.status}
+                                            isFavorite={isFavorite}
+                                            onFavoriteToggle={() => {
+                                                // Toggle the team that's not already favorited, or the home team
+                                                const teamToToggle = isHomeFavorite ? game.homeTeam : game.awayTeam;
+                                                handleFavoriteToggle(teamToToggle, user?.favoriteTeams.includes(teamToToggle) || false);
+                                            }}
+                                            onPredict={() => handlePredictionClick(game)}
+                                        />
+                                    );
+                                })
                             ) : (
                                 <div className="glass-card p-8 text-center text-[var(--text-muted)]">
                                     No hay partidos programados para hoy
@@ -158,6 +183,15 @@ export default function NBAPage() {
 
                 </div>
             </div>
+
+            {/* Prediction Modal */}
+            {selectedGame && (
+                <PredictionModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    gameInfo={selectedGame}
+                />
+            )}
         </main>
     );
 }

@@ -1,7 +1,7 @@
 services:
   # 1. Backend Service (API & Data Sync)
   - type: web
-    name: tiren-parleys-api
+    name: pickgenius-api
     env: node
     plan: free
     buildCommand: npm install
@@ -14,7 +14,7 @@ services:
 
   # 2. Frontend Service (Next.js Web Interface)
   - type: web
-    name: tiren-parleys-web
+    name: pickgenius-web
     env: node
     plan: free
     rootDir: web
@@ -24,5 +24,5 @@ services:
       - key: NEXT_PUBLIC_API_URL
         fromService:
           type: web
-          name: tiren-parleys-api
+          name: pickgenius-api
           property: host

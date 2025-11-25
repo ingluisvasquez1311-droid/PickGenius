@@ -14,10 +14,10 @@ Abre una **nueva terminal PowerShell** y ejecuta:
 
 ```powershell
 # Ir al directorio del proyecto
-cd "c:\Users\Daniel\Tiren Parleys"
+cd "c:\Users\Daniel\PickGenius"
 
 # Activar entorno virtual
-& "c:/Users/Daniel/Tiren Parleys/.venv/Scripts/Activate.ps1"
+& "c:/Users/Daniel/PickGenius/.venv/Scripts/Activate.ps1"
 
 # Ejecutar sincronización
 python src\scripts\fetch_missing_data.py
@@ -39,8 +39,8 @@ La sincronización tomará **2-4 horas**. Verás mensajes como:
 En **otra terminal** puedes monitorear el progreso:
 
 ```powershell
-cd "c:\Users\Daniel\Tiren Parleys"
-& "c:/Users/Daniel/Tiren Parleys/.venv/Scripts/Activate.ps1"
+cd "c:\Users\Daniel\PickGenius"
+& "c:/Users/Daniel/PickGenius/.venv/Scripts/Activate.ps1"
 python src\scripts\monitor_sync.py summary
 ```
 

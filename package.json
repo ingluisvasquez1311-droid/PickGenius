@@ -1,7 +1,7 @@
 {
-  "name": "tirens-parleys",
-  "version": "2.0.0",
-  "description": "Plataforma de análisis deportivo con IA para NBA y Football",
+  "name": "pickgenius",
+  "version": "3.0.0",
+  "description": "PickGenius - Plataforma de análisis deportivo con IA y cache inteligente para NBA y Football",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,0 +1,58 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection - users can only read/write their own data
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false; // Prevent user deletion via client
+    }
+    
+    // NBA data collections - read-only for all authenticated users
+    match /nba_regular_season_box_scores_2024_25/{document} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only server can write
+    }
+    
+    match /nba_regular_season_box_scores_2010_2024_part_3/{document} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only server can write
+    }
+    
+    // Predictions history - users can only access their own predictions
+    match /predictions/{userId}/history/{predictionId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if false; // Predictions are immutable once created
+      allow delete: if isOwner(userId);
+    }
+    
+    // Football data collections (if you add them later)
+    match /football_matches/{document} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+    
+    // Admin-only collections
+    match /admin/{document=**} {
+      allow read, write: if false; // Only server-side access
+    }
+    
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

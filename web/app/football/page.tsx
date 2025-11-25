@@ -5,62 +5,34 @@ import MatchCard from '@/components/sports/MatchCard';
 import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
 import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
-
-interface FootballMatch {
-  id: number;
-  homeTeam: { name: string };
-  awayTeam: { name: string };
-  utcDate: string;
-  score: {
-    fullTime: { home: number | null; away: number | null };
-  };
-  status: string;
-  competition: { name: string };
-}
+import PredictionModal from '@/components/sports/PredictionModal';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import { getFootballMatches, type FootballMatch } from '@/lib/footballDataService';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function FootballPage() {
-  const [matches, setMatches] = useState<FootballMatch[]>([]);
+  const [matchesByLeague, setMatchesByLeague] = useState<Record<string, FootballMatch[]>>({});
   const [loading, setLoading] = useState(true);
+  const { user, addFavorite, removeFavorite } = useAuth();
+
+  // Prediction Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<{
+    id: string;
+    homeTeam: string;
+    awayTeam: string;
+    date: Date;
+  } | null>(null);
 
   useEffect(() => {
     async function fetchMatches() {
+      setLoading(true);
       try {
-        const today = new Date().toISOString().split('T')[0];
-
-        // Fetch from multiple leagues
-        const leagueIds = [
-          'PL',  // Premier League
-          'PD',  // La Liga
-          'SA',  // Serie A
-          'BL1', // Bundesliga
-          'FL1'  // Ligue 1
-        ];
-
-        const allMatches: FootballMatch[] = [];
-
-        for (const leagueId of leagueIds) {
-          try {
-            const response = await fetch(
-              `https://api.football-data.org/v4/competitions/${leagueId}/matches?dateFrom=${today}&dateTo=${today}`,
-              {
-                headers: {
-                  'X-Auth-Token': 'e8c7b9a4f3d2e1c0b9a8f7e6d5c4b3a2'
-                }
-              }
-            );
-            const data = await response.json();
-            if (data.matches) {
-              allMatches.push(...data.matches);
-            }
-          } catch (err) {
-            console.error(`Error fetching ${leagueId}:`, err);
-          }
-        }
-
-        setMatches(allMatches);
+        const data = await getFootballMatches();
+        setMatchesByLeague(data);
       } catch (error) {
         console.error('Error fetching football matches:', error);
-        setMatches([]);
+        setMatchesByLeague({});
       } finally {
         setLoading(false);
       }
@@ -69,13 +41,50 @@ export default function FootballPage() {
     fetchMatches();
   }, []);
 
-  // Group matches by league
-  const matchesByLeague = matches.reduce((acc, match) => {
-    const league = match.competition.name;
-    if (!acc[league]) acc[league] = [];
-    acc[league].push(match);
-    return acc;
-  }, {} as Record<string, FootballMatch[]>);
+  const handleFavoriteToggle = async (teamName: string, isFavorite: boolean) => {
+    if (!user) {
+      alert('Debes iniciar sesión para agregar favoritos');
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        await removeFavorite(teamName);
+      } else {
+        await addFavorite(teamName);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('Error al actualizar favoritos');
+    }
+  };
+
+  const handlePredictionClick = (match: FootballMatch) => {
+    setSelectedGame({
+      id: match.id.toString(),
+      homeTeam: match.homeTeam.name,
+      awayTeam: match.awayTeam.name,
+      date: new Date(match.utcDate)
+    });
+    setIsModalOpen(true);
+  };
+
+  const mapStatus = (status: string): "Scheduled" | "Live" | "Finished" => {
+    switch (status) {
+      case 'IN_PLAY':
+      case 'PAUSED':
+        return 'Live';
+      case 'FINISHED':
+      case 'AWARDED':
+        return 'Finished';
+      case 'TIMED':
+      case 'SCHEDULED':
+      default:
+        return 'Scheduled';
+    }
+  };
+
+  const totalMatches = Object.values(matchesByLeague).reduce((acc, league) => acc + league.length, 0);
 
   return (
     <main className="min-h-screen pb-20 bg-[#0b0b0b]">
@@ -83,19 +92,20 @@ export default function FootballPage() {
 
         {/* Header Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatWidget label="Partidos Hoy" value={matches.length.toString()} icon="⚽" />
+          <StatWidget label="Partidos Hoy" value={totalMatches.toString()} icon="⚽" />
           <StatWidget label="Acierto IA" value="82%" trend="up" color="var(--success)" />
           <StatWidget label="ROI Mensual" value="+18.2%" trend="up" color="var(--accent)" />
-          <StatWidget label="Ligas Activas" value="5" icon="🏆" />
+          <StatWidget label="Ligas Activas" value={Object.keys(matchesByLeague).length.toString()} icon="🏆" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-          {/* MAIN COLUMN (Match List) - Spans 8 cols */}
           <div className="lg:col-span-8">
             {loading ? (
-              <div className="glass-card p-8 text-center text-[var(--text-muted)]">
-                Cargando partidos...
+              <div className="flex flex-col gap-4">
+                <SkeletonLoader />
+                <SkeletonLoader />
+                <SkeletonLoader />
               </div>
             ) : Object.keys(matchesByLeague).length > 0 ? (
               Object.entries(matchesByLeague).map(([league, leagueMatches]) => (
@@ -109,19 +119,31 @@ export default function FootballPage() {
                     </span>
                   </div>
 
-                  <div className="flex flex-col">
-                    {leagueMatches.map((match) => (
-                      <MatchCard
-                        key={match.id}
-                        homeTeam={match.homeTeam.name}
-                        awayTeam={match.awayTeam.name}
-                        date={match.utcDate}
-                        league={league}
-                        homeScore={match.score.fullTime.home}
-                        awayScore={match.score.fullTime.away}
-                        status={match.status}
-                      />
-                    ))}
+                  <div className="flex flex-col gap-4">
+                    {leagueMatches.map((match) => {
+                      const isHomeFavorite = user?.favoriteTeams.includes(match.homeTeam.name);
+                      const isAwayFavorite = user?.favoriteTeams.includes(match.awayTeam.name);
+                      const isFavorite = isHomeFavorite || isAwayFavorite;
+
+                      return (
+                        <MatchCard
+                          key={match.id}
+                          homeTeam={match.homeTeam.name}
+                          awayTeam={match.awayTeam.name}
+                          date={match.utcDate}
+                          league={league}
+                          homeScore={match.score.fullTime.home}
+                          awayScore={match.score.fullTime.away}
+                          status={mapStatus(match.status)}
+                          isFavorite={isFavorite}
+                          onFavoriteToggle={() => {
+                            const teamToToggle = isHomeFavorite ? match.homeTeam.name : match.awayTeam.name;
+                            handleFavoriteToggle(teamToToggle, user?.favoriteTeams.includes(teamToToggle) || false);
+                          }}
+                          onPredict={() => handlePredictionClick(match)}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               ))
@@ -183,6 +205,15 @@ export default function FootballPage() {
 
         </div>
       </div>
+
+      {/* Prediction Modal */}
+      {selectedGame && (
+        <PredictionModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          gameInfo={selectedGame}
+        />
+      )}
     </main>
   );
 }

@@ -20,10 +20,11 @@ export default function Navbar() {
                     {!loading && (
                         user ? (
                             <div className="flex items-center gap-4">
-                                <span className="text-sm text-[var(--text-muted)]">
-                                    {user.email}
-                                    {user.isPremium && <span className="ml-2 text-xs bg-[var(--primary)] text-black px-2 py-1 rounded font-bold">PREMIUM</span>}
-                                </span>
+                                <Link href="/profile" className="text-sm hover:text-[var(--primary)] transition-colors flex items-center gap-2">
+                                    <span>👤</span>
+                                    <span className="hidden md:inline">{user.email.split('@')[0]}</span>
+                                    {user.isPremium && <span className="text-xs bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-black px-2 py-1 rounded font-bold">👑</span>}
+                                </Link>
                                 <button
                                     onClick={() => signOut()}
                                     className="text-sm hover:text-[var(--danger)] transition-colors"
@@ -44,7 +45,7 @@ export default function Navbar() {
                     )}
                 </div>
 
-                <span className="text-xs text-[var(--text-muted)]">v2.0</span>
+                <span className="text-xs text-[var(--text-muted)] hidden md:block">v2.0</span>
             </div>
         </nav>
     );

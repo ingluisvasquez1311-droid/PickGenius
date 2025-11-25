@@ -15,6 +15,7 @@ interface MatchCardProps {
     };
     onFavoriteToggle?: () => void;
     isFavorite?: boolean;
+    onPredict?: () => void;
 }
 
 export default function MatchCard({
@@ -27,7 +28,8 @@ export default function MatchCard({
     status = 'Scheduled',
     prediction,
     onFavoriteToggle,
-    isFavorite
+    isFavorite,
+    onPredict
 }: MatchCardProps) {
     const isLive = status === 'Live';
     const time = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -81,10 +83,13 @@ export default function MatchCard({
                 {onFavoriteToggle && (
                     <button
                         onClick={onFavoriteToggle}
-                        className="p-2 hover:bg-[rgba(255,255,255,0.1)] rounded transition-colors"
-                        aria-label="Toggle favorite"
+                        className="p-2 hover:bg-[rgba(255,255,255,0.1)] rounded transition-all duration-200 transform hover:scale-110"
+                        aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                        title={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
                     >
-                        <span className="text-xl">{isFavorite ? '⭐' : '☆'}</span>
+                        <span className={`text-xl transition-all ${isFavorite ? 'animate-pulse' : ''}`}>
+                            {isFavorite ? '⭐' : '☆'}
+                        </span>
                     </button>
                 )}
 
@@ -96,7 +101,12 @@ export default function MatchCard({
                             <div className="text-[var(--text-muted)]">{prediction.odds}</div>
                         </div>
                     ) : (
-                        <div className="text-xs text-center text-[var(--text-muted)]">-</div>
+                        <button
+                            onClick={onPredict}
+                            className="text-xs bg-[rgba(255,255,255,0.1)] hover:bg-[var(--primary)] hover:text-black transition-colors px-2 py-1 rounded"
+                        >
+                            🤖 IA Pick
+                        </button>
                     )}
                 </div>
 

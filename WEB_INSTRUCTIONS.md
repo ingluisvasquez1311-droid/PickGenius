@@ -8,7 +8,7 @@ Este servidor provee los datos de la API y conecta con Firebase.
 
 ```powershell
 # En una terminal nueva:
-cd "C:\Users\Daniel\Tiren Parleys"
+cd "C:\Users\Daniel\PickGenius"
 node server.js
 ```
 *El servidor iniciará en el puerto **3001**.*
@@ -19,7 +19,7 @@ Esta es la página web que verán los usuarios.
 
 ```powershell
 # En OTRA terminal nueva:
-cd "C:\Users\Daniel\Tiren Parleys\web"
+cd "C:\Users\Daniel\PickGenius\web"
 npm run dev
 ```
 *La web iniciará en **http://localhost:3000**.*

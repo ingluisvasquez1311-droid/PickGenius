@@ -26,7 +26,7 @@ Debe mostrar: `Python 3.x.x`
 Una vez Python instalado:
 
 ```powershell
-cd "c:\Users\Daniel\Tiren Parleys"
+cd "c:\Users\Daniel\PickGenius"
 .\sync_nba_data.bat
 ```
 
