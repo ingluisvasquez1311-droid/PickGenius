@@ -1,13 +1,49 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import MatchCard from '@/components/sports/MatchCard';
 import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
 import PlayerStatsTable from '@/components/sports/PlayerStatsTable';
-import { getNBAGames } from '@/lib/api';
 
-export default async function NBAPage() {
-    // Fetch real NBA games from API
-    const nbaGames = await getNBAGames();
+interface NBAGame {
+    id: number;
+    home_team: { full_name: string };
+    visitor_team: { full_name: string };
+    home_team_score: number;
+    visitor_team_score: number;
+    date: string;
+    status: string;
+}
+
+export default function NBAPage() {
+    const [games, setGames] = useState<NBAGame[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchGames() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const response = await fetch(
+                    `https://api.balldontlie.io/v1/games?start_date=${today}&end_date=${today}`,
+                    {
+                        headers: {
+                            'Authorization': '4c8f3e0a-8b2d-4f1e-9c3a-7d6e5f4a3b2c'
+                        }
+                    }
+                );
+                const data = await response.json();
+                setGames(data.data || []);
+            } catch (error) {
+                console.error('Error fetching NBA games:', error);
+                setGames([]);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchGames();
+    }, []);
 
     return (
         <main className="min-h-screen pb-20 bg-[#0b0b0b]">
@@ -15,7 +51,7 @@ export default async function NBAPage() {
 
                 {/* Header Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <StatWidget label="Partidos Hoy" value="8" icon="🏀" />
+                    <StatWidget label="Partidos Hoy" value={games.length.toString()} icon="🏀" />
                     <StatWidget label="Acierto IA" value="78%" trend="up" color="var(--success)" />
                     <StatWidget label="ROI Mensual" value="+15.4%" trend="up" color="var(--accent)" />
                     <StatWidget label="Racha Mago" value="5 W" icon="🔥" />
@@ -35,17 +71,21 @@ export default async function NBAPage() {
                         </div>
 
                         <div className="flex flex-col">
-                            {nbaGames.length > 0 ? (
-                                nbaGames.map((match) => (
+                            {loading ? (
+                                <div className="glass-card p-8 text-center text-[var(--text-muted)]">
+                                    Cargando partidos...
+                                </div>
+                            ) : games.length > 0 ? (
+                                games.map((game) => (
                                     <MatchCard
-                                        key={match.id}
-                                        homeTeam={match.homeTeam}
-                                        awayTeam={match.awayTeam}
-                                        date={match.date}
-                                        league={match.league}
-                                        homeScore={match.homeScore}
-                                        awayScore={match.awayScore}
-                                        status={match.status}
+                                        key={game.id}
+                                        homeTeam={game.home_team.full_name}
+                                        awayTeam={game.visitor_team.full_name}
+                                        date={game.date}
+                                        league="NBA"
+                                        homeScore={game.home_team_score}
+                                        awayScore={game.visitor_team_score}
+                                        status={game.status}
                                     />
                                 ))
                             ) : (
