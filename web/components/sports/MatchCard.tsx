@@ -1,16 +1,39 @@
 import React from 'react';
-date,
+
+interface MatchCardProps {
+    homeTeam: string;
+    awayTeam: string;
+    date: string;
+    league: string;
+    homeScore?: number | null;
+    awayScore?: number | null;
+    status?: 'Scheduled' | 'Live' | 'Finished';
+    prediction?: {
+        pick: string;
+        odds?: string;
+        confidence?: number;
+    };
+    onFavoriteToggle?: () => void;
+    isFavorite?: boolean;
+}
+
+export default function MatchCard({
+    homeTeam,
+    awayTeam,
+    date,
     league,
     homeScore,
     awayScore,
     status = 'Scheduled',
-    prediction
+    prediction,
+    onFavoriteToggle,
+    isFavorite
 }: MatchCardProps) {
     const isLive = status === 'Live';
     const time = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     return (
-        <div className="glass-card hover:bg-[rgba(255,255,255,0.08)] transition-colors duration-200 mb-2">
+        <div className="glass-card hover:bg-[rgba(255,255,255,0.08)] transition-colors duration-200 mb-2 fade-in">
             <div className="flex items-center p-3 gap-4">
 
                 {/* Time / Status Column */}
@@ -53,6 +76,17 @@ date,
                         <span className="font-mono font-bold">{awayScore ?? '-'}</span>
                     </div>
                 </div>
+
+                {/* Favorite Button */}
+                {onFavoriteToggle && (
+                    <button
+                        onClick={onFavoriteToggle}
+                        className="p-2 hover:bg-[rgba(255,255,255,0.1)] rounded transition-colors"
+                        aria-label="Toggle favorite"
+                    >
+                        <span className="text-xl">{isFavorite ? '⭐' : '☆'}</span>
+                    </button>
+                )}
 
                 {/* Odds / Info Column (Hidden on small screens) */}
                 <div className="hidden md:flex flex-col gap-1 w-24 border-l border-[rgba(255,255,255,0.1)] pl-4">
