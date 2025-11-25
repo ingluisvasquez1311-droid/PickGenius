@@ -1,24 +1,5 @@
 import React from 'react';
-
-interface MatchCardProps {
-    homeTeam: string;
-    awayTeam: string;
-    date: string;
-    league: string;
-    homeScore?: number;
-    awayScore?: number;
-    status?: 'Scheduled' | 'Live' | 'Finished';
-    prediction?: {
-        pick: string;
-        odds?: string;
-        confidence?: number;
-    };
-}
-
-export default function MatchCard({
-    homeTeam,
-    awayTeam,
-    date,
+date,
     league,
     homeScore,
     awayScore,

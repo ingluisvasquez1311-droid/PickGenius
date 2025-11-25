@@ -5,8 +5,6 @@ import MatchCard from '@/components/sports/MatchCard';
 import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
 import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
-import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { cacheData, getCachedData } from '@/lib/cache';
 
 interface FootballMatch {
   id: number;
@@ -26,14 +24,6 @@ export default function FootballPage() {
 
   useEffect(() => {
     async function fetchMatches() {
-      // Check cache first
-      const cached = getCachedData<FootballMatch[]>('cache_football_matches');
-      if (cached) {
-        setMatches(cached);
-        setLoading(false);
-        return;
-      }
-
       try {
         const today = new Date().toISOString().split('T')[0];
 
@@ -68,7 +58,6 @@ export default function FootballPage() {
         }
 
         setMatches(allMatches);
-        cacheData('cache_football_matches', allMatches);
       } catch (error) {
         console.error('Error fetching football matches:', error);
         setMatches([]);
@@ -105,10 +94,8 @@ export default function FootballPage() {
           {/* MAIN COLUMN (Match List) - Spans 8 cols */}
           <div className="lg:col-span-8">
             {loading ? (
-              <div className="flex flex-col gap-4">
-                <SkeletonLoader />
-                <SkeletonLoader />
-                <SkeletonLoader />
+              <div className="glass-card p-8 text-center text-[var(--text-muted)]">
+                Cargando partidos...
               </div>
             ) : Object.keys(matchesByLeague).length > 0 ? (
               Object.entries(matchesByLeague).map(([league, leagueMatches]) => (

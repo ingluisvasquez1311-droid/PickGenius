@@ -96,6 +96,25 @@ h6 {
   padding: 0 20px;
 }
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 12px;
+  }
+
+  .glass-card {
+    border-radius: 12px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+}
+
 .grid-auto {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
