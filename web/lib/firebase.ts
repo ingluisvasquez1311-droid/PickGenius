@@ -3,8 +3,8 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-    // Usando la API Key de Google Cloud Console que sabemos que existe
-    apiKey: 'AIzaSyBrHhNDFYBD9Vur1O9nqgaQPzs04s7A',
+    // Usando la API Key original del proyecto 'pickgenius'
+    apiKey: 'AIzaSyOLWgzGFXkU8eNbezJeLLMPZ4DWjkM',
     authDomain: 'pickgenius.firebaseapp.com',
     projectId: 'pickgenius',
     storageBucket: 'pickgenius.firebasestorage.app',
