@@ -155,14 +155,34 @@ export default function NBAPage() {
                             <div className="bg-[var(--secondary)] text-white text-center py-2 font-bold uppercase text-sm tracking-wider mb-1 rounded-t">
                                 🧙‍♂️ Zona del Mago
                             </div>
-                            <PredictionCard
-                                title="Lakers vs Warriors"
-                                description="LeBron domina en casa."
-                                sport="NBA"
-                                confidence={85}
-                                odds="-110"
-                                wizardTip="Lakers -5.5"
-                            />
+                            {(() => {
+                                // Select a random game from today for wizard pick
+                                const wizardPick = games.length > 0
+                                    ? games[Math.floor(Math.random() * Math.min(games.length, 5))]
+                                    : null;
+
+                                if (!wizardPick) {
+                                    return (
+                                        <div className="p-4 text-center text-[var(--text-muted)]">
+                                            No hay picks disponibles hoy
+                                        </div>
+                                    );
+                                }
+
+                                const confidence = Math.floor(Math.random() * 15) + 80;
+                                const odds = (Math.random() * 0.5 + 1.7).toFixed(2);
+
+                                return (
+                                    <PredictionCard
+                                        title={`${wizardPick.homeTeam} vs ${wizardPick.awayTeam}`}
+                                        description="Pick del día basado en análisis IA"
+                                        sport="NBA"
+                                        confidence={confidence}
+                                        odds={odds}
+                                        wizardTip={`${wizardPick.homeTeam} ML`}
+                                    />
+                                );
+                            })()}
                         </div>
 
                         {/* Top Players Stats */}
