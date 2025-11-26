@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { generatePrediction, type PredictionRequest, type PredictionResult } from '@/lib/predictionService';
 import { useAuth } from '@/contexts/AuthContext';
+import PredictionAnalysis from '@/components/analysis/PredictionAnalysis';
 
 interface PredictionModalProps {
     isOpen: boolean;
@@ -134,24 +135,13 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                             <p className="text-sm">{prediction.wizardTip}</p>
                         </div>
 
-                        {/* Analysis */}
-                        <div>
-                            <h4 className="font-bold mb-2">Análisis</h4>
-                            <p className="text-sm text-[var(--text-secondary)]">{prediction.analysis}</p>
-                        </div>
-
-                        {/* Factors */}
-                        <div>
-                            <h4 className="font-bold mb-3">Factores Clave</h4>
-                            <div className="space-y-2">
-                                {prediction.factors.map((factor, index) => (
-                                    <div key={index} className="flex items-start gap-2">
-                                        <span className="text-[var(--primary)]">✓</span>
-                                        <span className="text-sm text-[var(--text-secondary)]">{factor}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        {/* Analysis & Graph */}
+                        <PredictionAnalysis
+                            homeTeam={gameInfo.homeTeam}
+                            awayTeam={gameInfo.awayTeam}
+                            analysis={prediction.analysis}
+                            factors={prediction.factors}
+                        />
 
                         {/* Actions */}
                         <div className="flex gap-3 pt-4">

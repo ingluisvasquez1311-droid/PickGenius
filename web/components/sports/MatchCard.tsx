@@ -1,4 +1,5 @@
 import React from 'react';
+import { useBettingSlip } from '@/contexts/BettingSlipContext';
 
 interface MatchCardProps {
     homeTeam: string;
@@ -31,6 +32,7 @@ export default function MatchCard({
     isFavorite,
     onPredict
 }: MatchCardProps) {
+    const { addToSlip } = useBettingSlip();
     const isLive = status === 'En Vivo';
     const time = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -99,10 +101,24 @@ export default function MatchCard({
                 {/* Odds / Info Column (Hidden on small screens) */}
                 <div className="hidden md:flex flex-col gap-1 w-24 border-l border-[rgba(255,255,255,0.1)] pl-4">
                     {prediction ? (
-                        <div className="text-xs text-center">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                addToSlip({
+                                    matchId: homeTeam + awayTeam + date, // Simple ID generation
+                                    selection: prediction.pick,
+                                    odds: parseFloat(prediction.odds?.replace(/[^0-9.]/g, '') || '1.90'), // Parse odds or default
+                                    matchLabel: `${homeTeam} vs ${awayTeam}`,
+                                    market: 'Match Winner'
+                                });
+                            }}
+                            className="text-xs text-center hover:bg-[rgba(255,255,255,0.1)] p-1 rounded transition-colors w-full"
+                            title="Agregar al ticket"
+                        >
                             <div className="text-[var(--primary)] font-bold">{prediction.pick}</div>
                             <div className="text-[var(--text-muted)]">{prediction.odds}</div>
-                        </div>
+                            <div className="text-[10px] text-[var(--success)] opacity-0 hover:opacity-100 transition-opacity">+ Ticket</div>
+                        </button>
                     ) : (
                         <button
                             onClick={onPredict}
