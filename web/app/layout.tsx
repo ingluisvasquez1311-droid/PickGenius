@@ -9,6 +9,14 @@ import BettingSlip from "@/components/betting/BettingSlip";
 export const metadata: Metadata = {
   title: "PickGenius | Predicciones Deportivas con IA",
   description: "Domina tus parleys de NBA y Fútbol con análisis de inteligencia artificial y estadísticas avanzadas.",
+  manifest: "/manifest.json",
+  themeColor: "#00ff88",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "PickGenius"
+  }
 };
 
 export default function RootLayout({
