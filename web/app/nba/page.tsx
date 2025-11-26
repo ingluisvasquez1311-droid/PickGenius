@@ -6,12 +6,17 @@ import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
 import PlayerStatsTable from '@/components/sports/PlayerStatsTable';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { getTodayGames, type NBAGame } from '@/lib/nbaDataService';
+import { getTodayGames as getNBAGames, type NBAGame } from '@/lib/nbaDataService';
+import { getTodayGames as getEuroleagueGames, type EuroleagueGame } from '@/lib/euroleagueDataService';
 import { useAuth } from '@/contexts/AuthContext';
 import PredictionModal from '@/components/sports/PredictionModal';
 
-export default function NBAPage() {
-    const [games, setGames] = useState<NBAGame[]>([]);
+type League = 'NBA' | 'Euroleague';
+
+export default function BasketballPage() {
+    const [selectedLeague, setSelectedLeague] = useState<League>('NBA');
+    const [nbaGames, setNbaGames] = useState<NBAGame[]>([]);
+    const [euroleagueGames, setEuroleagueGames] = useState<EuroleagueGame[]>([]);
     const [loading, setLoading] = useState(true);
     const { user, addFavorite, removeFavorite } = useAuth();
 
@@ -28,11 +33,16 @@ export default function NBAPage() {
         async function fetchGames() {
             setLoading(true);
             try {
-                const gamesData = await getTodayGames();
-                setGames(gamesData);
+                const [nbaData, euroData] = await Promise.all([
+                    getNBAGames(),
+                    getEuroleagueGames()
+                ]);
+                setNbaGames(nbaData);
+                setEuroleagueGames(euroData);
             } catch (error) {
-                console.error('Error fetching NBA games:', error);
-                setGames([]);
+                console.error('Error fetching basketball games:', error);
+                setNbaGames([]);
+                setEuroleagueGames([]);
             } finally {
                 setLoading(false);
             }
@@ -59,17 +69,18 @@ export default function NBAPage() {
         }
     };
 
-    const handlePredictionClick = (game: NBAGame) => {
+    const handlePredictionClick = (game: NBAGame | EuroleagueGame) => {
+        const isNBAGame = 'date' in game && game.date instanceof Date;
         setSelectedGame({
-            id: game.id,
+            id: game.id.toString(),
             homeTeam: game.homeTeam,
             awayTeam: game.awayTeam,
-            date: game.date
+            date: isNBAGame ? (game as NBAGame).date : new Date((game as EuroleagueGame).date)
         });
         setIsModalOpen(true);
     };
 
-    // Map NBA status to Spanish
+    // Map status to Spanish
     const mapStatus = (status: string): "Programado" | "En Vivo" | "Finalizado" => {
         switch (status) {
             case 'Live':
@@ -82,13 +93,38 @@ export default function NBAPage() {
         }
     };
 
+    // Get current games based on selected league
+    const currentGames = selectedLeague === 'NBA' ? nbaGames : euroleagueGames;
+
     return (
         <main className="min-h-screen pb-20 bg-[#0b0b0b]">
             <div className="container pt-8">
 
+                {/* League Selector Tabs */}
+                <div className="flex gap-2 mb-6">
+                    <button
+                        onClick={() => setSelectedLeague('NBA')}
+                        className={`flex-1 py-3 px-6 rounded-lg font-bold transition-all ${selectedLeague === 'NBA'
+                                ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-black'
+                                : 'glass-card text-[var(--text-muted)] hover:text-white'
+                            }`}
+                    >
+                        🏀 NBA
+                    </button>
+                    <button
+                        onClick={() => setSelectedLeague('Euroleague')}
+                        className={`flex-1 py-3 px-6 rounded-lg font-bold transition-all ${selectedLeague === 'Euroleague'
+                                ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-black'
+                                : 'glass-card text-[var(--text-muted)] hover:text-white'
+                            }`}
+                    >
+                        🇪🇺 Euroliga
+                    </button>
+                </div>
+
                 {/* Header Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <StatWidget label="Partidos Hoy" value={games.length.toString()} icon="🏀" />
+                    <StatWidget label="Partidos Hoy" value={currentGames.length.toString()} icon="🏀" />
                     <StatWidget label="Acierto IA" value="78%" trend="up" color="var(--success)" />
                     <StatWidget label="ROI Mensual" value="+15.4%" trend="up" color="var(--accent)" />
                     <StatWidget label="Racha Mago" value="5 W" icon="🔥" />
@@ -100,7 +136,8 @@ export default function NBAPage() {
                     <div className="lg:col-span-8">
                         <div className="glass-card p-4 mb-4 flex justify-between items-center">
                             <h2 className="text-xl font-bold flex items-center gap-2">
-                                <span className="text-2xl">🏀</span> NBA
+                                <span className="text-2xl">{selectedLeague === 'NBA' ? '🏀' : '🇪🇺'}</span>
+                                {selectedLeague}
                             </h2>
                             <span className="text-xs font-bold bg-[rgba(255,255,255,0.1)] px-2 py-1 rounded text-[var(--text-muted)]">
                                 HOY
@@ -114,28 +151,26 @@ export default function NBAPage() {
                                     <SkeletonLoader />
                                     <SkeletonLoader />
                                 </>
-                            ) : games.length > 0 ? (
-                                games.map((game) => {
-                                    const isHomeFavorite = user?.favoriteTeams.includes(game.homeTeam);
-                                    const isAwayFavorite = user?.favoriteTeams.includes(game.awayTeam);
-                                    const isFavorite = isHomeFavorite || isAwayFavorite;
+                            ) : currentGames.length > 0 ? (
+                                currentGames.map((game: any) => {
+                                    const isNBA = selectedLeague === 'NBA';
+                                    const gameTime = isNBA
+                                        ? new Date((game as NBAGame).date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                                        : (game as EuroleagueGame).time;
 
                                     return (
                                         <MatchCard
                                             key={game.id}
                                             homeTeam={game.homeTeam}
                                             awayTeam={game.awayTeam}
-                                            date={game.date.toISOString()}
-                                            league="NBA"
                                             homeScore={game.homeScore}
                                             awayScore={game.awayScore}
+                                            time={gameTime}
                                             status={mapStatus(game.status)}
-                                            isFavorite={isFavorite}
-                                            onFavoriteToggle={() => {
-                                                const teamToToggle = isHomeFavorite ? game.homeTeam : game.awayTeam;
-                                                handleFavoriteToggle(teamToToggle, user?.favoriteTeams.includes(teamToToggle) || false);
-                                            }}
-                                            onPredict={() => handlePredictionClick(game)}
+                                            sport="NBA"
+                                            isFavorite={false}
+                                            onFavoriteToggle={() => handleFavoriteToggle(game.homeTeam, false)}
+                                            onPredictClick={() => handlePredictionClick(game)}
                                         />
                                     );
                                 })
@@ -157,8 +192,8 @@ export default function NBAPage() {
                             </div>
                             {(() => {
                                 // Select a random game from today for wizard pick
-                                const wizardPick = games.length > 0
-                                    ? games[Math.floor(Math.random() * Math.min(games.length, 5))]
+                                const wizardPick = currentGames.length > 0
+                                    ? currentGames[Math.floor(Math.random() * Math.min(currentGames.length, 5))]
                                     : null;
 
                                 if (!wizardPick) {
