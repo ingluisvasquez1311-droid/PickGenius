@@ -29,12 +29,13 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
         }
 
         // Check if user can make prediction
-        const { canPredict, remaining } = await checkPredictionLimit();
+        // const { canPredict, remaining } = await checkPredictionLimit();
 
-        if (!canPredict) {
-            alert('Has alcanzado tu límite diario de predicciones. Actualiza a Premium para predicciones ilimitadas.');
-            return;
-        }
+        // TEMPORARY: Allow all predictions for testing
+        // if (!canPredict) {
+        //     alert('Has alcanzado tu límite diario de predicciones. Actualiza a Premium para predicciones ilimitadas.');
+        //     return;
+        // }
 
         setLoading(true);
         try {
@@ -64,7 +65,7 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold mb-2">Predicción AI</h2>
+                        <h2 className="text-2xl font-bold mb-2">Predicción IA</h2>
                         <p className="text-[var(--text-muted)] text-sm">
                             {gameInfo.homeTeam} vs {gameInfo.awayTeam}
                         </p>
@@ -86,6 +87,7 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                             Nuestro modelo de IA analizará miles de datos históricos para darte la mejor predicción
                         </p>
 
+                        {/* Limit display hidden for testing
                         {user && !user.isPremium && (
                             <div className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg p-4 mb-6">
                                 <p className="text-sm text-[var(--text-muted)]">
@@ -93,6 +95,7 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                                 </p>
                             </div>
                         )}
+                        */}
 
                         <button
                             onClick={handleGeneratePrediction}

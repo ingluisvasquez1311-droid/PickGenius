@@ -37,7 +37,7 @@ export default function MatchStatsSummary({ match }: MatchStatsSummaryProps) {
         // In a real app, this would come from the API
         stats = [
             { label: 'Probabilidad de Victoria', homeValue: '45%', awayValue: '30%', homePercent: 45 },
-            { label: 'Forma (Últimos 5)', homeValue: 'W-D-W-L-W', awayValue: 'L-W-D-D-W', homePercent: 60 },
+            { label: 'Forma (Últimos 5)', homeValue: 'G-E-G-P-G', awayValue: 'P-G-E-E-G', homePercent: 60 },
             { label: 'Goles PP (Promedio)', homeValue: 1.8, awayValue: 1.2, homePercent: 60 },
             { label: 'Posición en Liga', homeValue: '3º', awayValue: '5º', homePercent: 50 }, // Visual bar doesn't make much sense here but keeping structure
         ];

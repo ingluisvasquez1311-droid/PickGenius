@@ -9,7 +9,7 @@ export default function LiveTicker() {
         {/* Ticker Items */}
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="flex items-center gap-4 mx-8 text-sm">
-            <span className="font-bold text-[var(--danger)]">LIVE</span>
+            <span className="font-bold text-[var(--danger)]">EN VIVO</span>
             <span className="text-[var(--text-muted)]">Lakers 89 - 85 Warriors</span>
             <span className="text-[var(--accent)] font-mono">Q4 2:30</span>
             <div className="w-px h-4 bg-[rgba(255,255,255,0.1)]"></div>

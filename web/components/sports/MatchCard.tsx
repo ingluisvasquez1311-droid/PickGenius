@@ -7,7 +7,7 @@ interface MatchCardProps {
     league: string;
     homeScore?: number | null;
     awayScore?: number | null;
-    status?: 'Scheduled' | 'Live' | 'Finished';
+    status?: 'Programado' | 'En Vivo' | 'Finalizado';
     prediction?: {
         pick: string;
         odds?: string;
@@ -25,13 +25,13 @@ export default function MatchCard({
     league,
     homeScore,
     awayScore,
-    status = 'Scheduled',
+    status = 'Programado',
     prediction,
     onFavoriteToggle,
     isFavorite,
     onPredict
 }: MatchCardProps) {
-    const isLive = status === 'Live';
+    const isLive = status === 'En Vivo';
     const time = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     return (
@@ -42,7 +42,7 @@ export default function MatchCard({
                 <div className="w-16 flex flex-col items-center justify-center border-r border-[rgba(255,255,255,0.1)] pr-4">
                     {isLive ? (
                         <>
-                            <span className="text-[var(--danger)] font-bold text-xs animate-pulse">LIVE</span>
+                            <span className="text-[var(--danger)] font-bold text-xs animate-pulse">EN VIVO</span>
                             <span className="text-[var(--accent)] text-xs font-mono">Q4</span>
                         </>
                     ) : (

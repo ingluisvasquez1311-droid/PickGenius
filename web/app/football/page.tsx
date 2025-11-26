@@ -18,6 +18,9 @@ export default function FootballPage() {
   // Selected Match for Stats Bubble
   const [selectedMatch, setSelectedMatch] = useState<FootballMatch | null>(null);
 
+  // Collapsible Leagues State
+  const [expandedLeagues, setExpandedLeagues] = useState<Record<string, boolean>>({});
+
   // Prediction Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGameForModal, setSelectedGameForModal] = useState<{
@@ -33,6 +36,9 @@ export default function FootballPage() {
       try {
         const data = await getFootballMatches();
         setMatchesByLeague(data);
+        // Leagues are collapsed by default, so we don't need to set expandedLeagues here
+        // as the default state is empty (all false)
+
       } catch (error) {
         console.error('Error fetching football matches:', error);
         setMatchesByLeague({});
@@ -43,6 +49,13 @@ export default function FootballPage() {
 
     fetchMatches();
   }, []);
+
+  const toggleLeague = (league: string) => {
+    setExpandedLeagues(prev => ({
+      ...prev,
+      [league]: !prev[league]
+    }));
+  };
 
   const handleFavoriteToggle = async (teamName: string, isFavorite: boolean) => {
     if (!user) {
@@ -77,18 +90,18 @@ export default function FootballPage() {
     setSelectedMatch(match);
   };
 
-  const mapStatus = (status: string): "Scheduled" | "Live" | "Finished" => {
+  const mapStatus = (status: string): "Programado" | "En Vivo" | "Finalizado" => {
     switch (status) {
       case 'IN_PLAY':
       case 'PAUSED':
-        return 'Live';
+        return 'En Vivo';
       case 'FINISHED':
       case 'AWARDED':
-        return 'Finished';
+        return 'Finalizado';
       case 'TIMED':
       case 'SCHEDULED':
       default:
-        return 'Scheduled';
+        return 'Programado';
     }
   };
 
@@ -101,8 +114,6 @@ export default function FootballPage() {
         {/* Header Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatWidget label="Partidos Hoy" value={totalMatches.toString()} icon="⚽" />
-          <StatWidget label="Acierto IA" value="82%" trend="up" color="var(--success)" />
-          <StatWidget label="ROI Mensual" value="+18.2%" trend="up" color="var(--accent)" />
           <StatWidget label="Ligas Activas" value={Object.keys(matchesByLeague).length.toString()} icon="🏆" />
         </div>
 
@@ -116,52 +127,85 @@ export default function FootballPage() {
                 <SkeletonLoader />
               </div>
             ) : Object.keys(matchesByLeague).length > 0 ? (
-              Object.entries(matchesByLeague).map(([league, leagueMatches]) => (
-                <div key={league} className="mb-8">
-                  {/* League Header - Improved Styling */}
-                  <div className="flex items-center gap-3 mb-4 pl-2 border-l-4 border-[var(--primary)]">
-                    <h2 className="text-xl font-bold text-white">
-                      {league}
-                    </h2>
-                    <span className="text-xs font-bold bg-[var(--primary)] bg-opacity-20 text-[var(--primary)] px-2 py-0.5 rounded-full border border-[var(--primary)] border-opacity-30">
-                      {leagueMatches.length} Partidos
-                    </span>
-                  </div>
+              Object.entries(matchesByLeague).map(([league, leagueMatches]) => {
+                const isExpanded = expandedLeagues[league];
 
-                  <div className="flex flex-col gap-3">
-                    {leagueMatches.map((match) => {
-                      const isHomeFavorite = user?.favoriteTeams.includes(match.homeTeam.name);
-                      const isAwayFavorite = user?.favoriteTeams.includes(match.awayTeam.name);
-                      const isFavorite = isHomeFavorite || isAwayFavorite;
-                      const isSelected = selectedMatch?.id === match.id;
+                return (
+                  <div key={league} className="mb-4">
+                    {/* League Header - Clickable & Collapsible */}
+                    <div
+                      onClick={() => toggleLeague(league)}
+                      className="flex items-center justify-between gap-3 mb-2 pl-3 pr-4 py-3 bg-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.05)] border-l-4 border-[var(--primary)] rounded-r-lg cursor-pointer transition-colors select-none"
+                    >
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-lg font-bold text-white">
+                          {league}
+                        </h2>
+                        <span className="text-xs font-bold bg-[var(--primary)] bg-opacity-20 text-[var(--primary)] px-2 py-0.5 rounded-full border border-[var(--primary)] border-opacity-30">
+                          {leagueMatches.length}
+                        </span>
+                      </div>
 
-                      return (
-                        <div
-                          key={match.id}
-                          onClick={() => handleMatchClick(match)}
-                          className={`cursor-pointer transition-all duration-200 ${isSelected ? 'ring-2 ring-[var(--primary)] rounded-xl transform scale-[1.01]' : 'hover:bg-[rgba(255,255,255,0.02)] rounded-xl'}`}
-                        >
-                          <MatchCard
-                            homeTeam={match.homeTeam.name}
-                            awayTeam={match.awayTeam.name}
-                            date={match.utcDate}
-                            league={league}
-                            homeScore={match.score.fullTime.home}
-                            awayScore={match.score.fullTime.away}
-                            status={mapStatus(match.status)}
-                            isFavorite={isFavorite}
-                            onFavoriteToggle={() => {
-                              const teamToToggle = isHomeFavorite ? match.homeTeam.name : match.awayTeam.name;
-                              handleFavoriteToggle(teamToToggle, user?.favoriteTeams.includes(teamToToggle) || false);
-                            }}
-                            onPredict={(e) => handlePredictionClick(e as any, match)}
-                          />
+                      {/* Chevron Icon */}
+                      <span className={`text-[var(--text-muted)] transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                        ▼
+                      </span>
+                    </div>
+
+                    {/* Matches List - Conditionally Rendered */}
+                    {isExpanded && (
+                      <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+
+                        {/* Eventos Section */}
+                        <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-lg p-4 mb-2">
+                          <h3 className="text-[var(--primary)] font-bold text-sm mb-2 uppercase tracking-wide">Eventos Destacados</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-xs text-[var(--text-muted)] mb-1">Partidos Llamativos</p>
+                              <p className="text-sm text-white">🔥 Gran choque en la cumbre de la tabla. Se esperan goles.</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-[var(--text-muted)] mb-1">Consejo del Mago</p>
+                              <p className="text-sm text-white">💡 Atentos a los córners en la segunda mitad.</p>
+                            </div>
+                          </div>
                         </div>
-                      );
-                    })}
+
+                        {leagueMatches.map((match) => {
+                          const isHomeFavorite = user?.favoriteTeams.includes(match.homeTeam.name);
+                          const isAwayFavorite = user?.favoriteTeams.includes(match.awayTeam.name);
+                          const isFavorite = isHomeFavorite || isAwayFavorite;
+                          const isSelected = selectedMatch?.id === match.id;
+
+                          return (
+                            <div
+                              key={match.id}
+                              onClick={() => handleMatchClick(match)}
+                              className={`cursor-pointer transition-all duration-200 ${isSelected ? 'ring-2 ring-[var(--primary)] rounded-xl transform scale-[1.01]' : 'hover:bg-[rgba(255,255,255,0.02)] rounded-xl'}`}
+                            >
+                              <MatchCard
+                                homeTeam={match.homeTeam.name}
+                                awayTeam={match.awayTeam.name}
+                                date={match.utcDate}
+                                league={league}
+                                homeScore={match.score.fullTime.home}
+                                awayScore={match.score.fullTime.away}
+                                status={mapStatus(match.status)}
+                                isFavorite={isFavorite}
+                                onFavoriteToggle={() => {
+                                  const teamToToggle = isHomeFavorite ? match.homeTeam.name : match.awayTeam.name;
+                                  handleFavoriteToggle(teamToToggle, user?.favoriteTeams.includes(teamToToggle) || false);
+                                }}
+                                onPredict={(e) => handlePredictionClick(e as any, match)}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="glass-card p-8 text-center text-[var(--text-muted)]">
                 No hay partidos programados para hoy
@@ -195,7 +239,7 @@ export default function FootballPage() {
               <h3 className="font-bold mb-4 text-[var(--accent)]">📈 Tendencias</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span>Goles Over 2.5</span>
+                  <span>Más de 2.5 Goles</span>
                   <span className="text-[var(--success)]">↑ 65%</span>
                 </div>
                 <div className="flex justify-between">
