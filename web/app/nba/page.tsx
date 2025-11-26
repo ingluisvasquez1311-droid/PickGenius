@@ -8,7 +8,6 @@ import PlayerStatsTable from '@/components/sports/PlayerStatsTable';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import { getTodayGames, type NBAGame } from '@/lib/nbaDataService';
 import { useAuth } from '@/contexts/AuthContext';
-
 import PredictionModal from '@/components/sports/PredictionModal';
 
 export default function NBAPage() {
@@ -54,33 +53,105 @@ export default function NBAPage() {
             } else {
                 await addFavorite(teamName);
             }
-            <>
-                <SkeletonLoader />
-                <SkeletonLoader />
-                <SkeletonLoader />
-            </>
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            alert('Error al actualizar favoritos');
+        }
+    };
+
+    const handlePredictionClick = (game: NBAGame) => {
+        setSelectedGame({
+            id: game.id,
+            homeTeam: game.homeTeam,
+            awayTeam: game.awayTeam,
+            date: game.date
+        });
+        setIsModalOpen(true);
+    };
+
+    // Map NBA status to Spanish
+    const mapStatus = (status: string): "Programado" | "En Vivo" | "Finalizado" => {
+        switch (status) {
+            case 'Live':
+                return 'En Vivo';
+            case 'Finished':
+                return 'Finalizado';
+            case 'Scheduled':
+            default:
+                return 'Programado';
+        }
+    };
+
+    return (
+        <main className="min-h-screen pb-20 bg-[#0b0b0b]">
+            <div className="container pt-8">
+
+                {/* Header Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <StatWidget label="Partidos Hoy" value={games.length.toString()} icon="🏀" />
+                    <StatWidget label="Acierto IA" value="78%" trend="up" color="var(--success)" />
+                    <StatWidget label="ROI Mensual" value="+15.4%" trend="up" color="var(--accent)" />
+                    <StatWidget label="Racha Mago" value="5 W" icon="🔥" />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                    {/* MAIN COLUMN (Match List) - Spans 8 cols */}
+                    <div className="lg:col-span-8">
+                        <div className="glass-card p-4 mb-4 flex justify-between items-center">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <span className="text-2xl">🏀</span> NBA
+                            </h2>
+                            <span className="text-xs font-bold bg-[rgba(255,255,255,0.1)] px-2 py-1 rounded text-[var(--text-muted)]">
+                                HOY
+                            </span>
+                        </div>
+
+                        <div className="flex flex-col gap-4">
+                            {loading ? (
+                                <>
+                                    <SkeletonLoader />
+                                    <SkeletonLoader />
+                                    <SkeletonLoader />
+                                </>
                             ) : games.length > 0 ? (
-        games.map((game) => {
-            const isHomeFavorite = user?.favoriteTeams.includes(game.homeTeam);
-            const isAwayFavorite = user?.favoriteTeams.includes(game.awayTeam);
-            const isFavorite = isHomeFavorite || isAwayFavorite;
+                                games.map((game) => {
+                                    const isHomeFavorite = user?.favoriteTeams.includes(game.homeTeam);
+                                    const isAwayFavorite = user?.favoriteTeams.includes(game.awayTeam);
+                                    const isFavorite = isHomeFavorite || isAwayFavorite;
 
-            );
-})
-    ) : (
-    <div className="glass-card p-8 text-center text-[var(--text-muted)]">
-        No hay partidos programados para hoy
-    </div>
-)
-}
-                        </div >
-                    </div >
+                                    return (
+                                        <MatchCard
+                                            key={game.id}
+                                            homeTeam={game.homeTeam}
+                                            awayTeam={game.awayTeam}
+                                            date={game.date.toISOString()}
+                                            league="NBA"
+                                            homeScore={game.homeScore}
+                                            awayScore={game.awayScore}
+                                            status={mapStatus(game.status)}
+                                            isFavorite={isFavorite}
+                                            onFavoriteToggle={() => {
+                                                const teamToToggle = isHomeFavorite ? game.homeTeam : game.awayTeam;
+                                                handleFavoriteToggle(teamToToggle, user?.favoriteTeams.includes(teamToToggle) || false);
+                                            }}
+                                            onPredict={() => handlePredictionClick(game)}
+                                        />
+                                    );
+                                })
+                            ) : (
+                                <div className="glass-card p-8 text-center text-[var(--text-muted)]">
+                                    No hay partidos programados para hoy
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-    {/* SIDEBAR COLUMN (Widgets) - Spans 4 cols */ }
-    < div className = "lg:col-span-4 flex flex-col gap-6" >
+                    {/* SIDEBAR COLUMN (Widgets) - Spans 4 cols */}
+                    <div className="lg:col-span-4 flex flex-col gap-6">
 
-        {/* Wizard's Corner */ }
-        < div className = "glass-card p-1 border border-[var(--secondary)]" >
+                        {/* Wizard's Corner */}
+                        <div className="glass-card p-1 border border-[var(--secondary)]">
                             <div className="bg-[var(--secondary)] text-white text-center py-2 font-bold uppercase text-sm tracking-wider mb-1 rounded-t">
                                 🧙‍♂️ Zona del Mago
                             </div>
@@ -92,13 +163,13 @@ export default function NBAPage() {
                                 odds="-110"
                                 wizardTip="Lakers -5.5"
                             />
-                        </div >
+                        </div>
 
-    {/* Top Players Stats */ }
-    < PlayerStatsTable />
+                        {/* Top Players Stats */}
+                        <PlayerStatsTable />
 
-    {/* AI Insights */ }
-    < div className = "glass-card p-1 border border-[var(--primary)]" >
+                        {/* AI Insights */}
+                        <div className="glass-card p-1 border border-[var(--primary)]">
                             <div className="bg-[var(--primary)] text-black text-center py-2 font-bold uppercase text-sm tracking-wider mb-1 rounded-t">
                                 🤖 IA Picks
                             </div>
@@ -110,30 +181,28 @@ export default function NBAPage() {
                                 odds="+125"
                                 wizardTip="Under 215.5"
                             />
-                        </div >
+                        </div>
 
-    {/* Ad / Promo Placeholder */ }
-    < div className = "glass-card p-6 flex flex-col items-center justify-center text-center min-h-[200px] opacity-50 border-dashed border-2 border-[rgba(255,255,255,0.1)]" >
+                        {/* Ad / Promo Placeholder */}
+                        <div className="glass-card p-6 flex flex-col items-center justify-center text-center min-h-[200px] opacity-50 border-dashed border-2 border-[rgba(255,255,255,0.1)]">
                             <span className="text-4xl mb-2">👑</span>
                             <h3 className="font-bold">Premium Access</h3>
                             <p className="text-sm text-[var(--text-muted)]">Desbloquea todas las predicciones</p>
-                        </div >
+                        </div>
 
-                    </div >
+                    </div>
 
-                </div >
-            </div >
+                </div>
+            </div>
 
-    {/* Prediction Modal */ }
-{
-    selectedGame && (
-        <PredictionModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            gameInfo={selectedGame}
-        />
-    )
-}
-        </main >
+            {/* Prediction Modal */}
+            {selectedGame && (
+                <PredictionModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    gameInfo={selectedGame}
+                />
+            )}
+        </main>
     );
 }
