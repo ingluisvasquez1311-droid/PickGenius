@@ -15,7 +15,7 @@ interface MatchCardProps {
     };
     onFavoriteToggle?: () => void;
     isFavorite?: boolean;
-    onPredict?: () => void;
+    onPredict?: (e: React.MouseEvent) => void;
 }
 
 export default function MatchCard({
@@ -82,7 +82,10 @@ export default function MatchCard({
                 {/* Favorite Button */}
                 {onFavoriteToggle && (
                     <button
-                        onClick={onFavoriteToggle}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onFavoriteToggle();
+                        }}
                         className="p-2 hover:bg-[rgba(255,255,255,0.1)] rounded transition-all duration-200 transform hover:scale-110"
                         aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
                         title={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}

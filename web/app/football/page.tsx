@@ -15,9 +15,12 @@ export default function FootballPage() {
   const [loading, setLoading] = useState(true);
   const { user, addFavorite, removeFavorite } = useAuth();
 
+  // Selected Match for Stats Bubble
+  const [selectedMatch, setSelectedMatch] = useState<FootballMatch | null>(null);
+
   // Prediction Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<{
+  const [selectedGameForModal, setSelectedGameForModal] = useState<{
     id: string;
     homeTeam: string;
     awayTeam: string;
@@ -59,14 +62,19 @@ export default function FootballPage() {
     }
   };
 
-  const handlePredictionClick = (match: FootballMatch) => {
-    setSelectedGame({
+  const handlePredictionClick = (e: React.MouseEvent, match: FootballMatch) => {
+    e.stopPropagation(); // Prevent triggering match selection
+    setSelectedGameForModal({
       id: match.id.toString(),
       homeTeam: match.homeTeam.name,
       awayTeam: match.awayTeam.name,
       date: new Date(match.utcDate)
     });
     setIsModalOpen(true);
+  };
+
+  const handleMatchClick = (match: FootballMatch) => {
+    setSelectedMatch(match);
   };
 
   const mapStatus = (status: string): "Scheduled" | "Live" | "Finished" => {
@@ -109,39 +117,46 @@ export default function FootballPage() {
               </div>
             ) : Object.keys(matchesByLeague).length > 0 ? (
               Object.entries(matchesByLeague).map(([league, leagueMatches]) => (
-                <div key={league} className="mb-6">
-                  <div className="glass-card p-4 mb-4 flex justify-between items-center">
-                    <h2 className="text-xl font-bold flex items-center gap-2">
-                      <span className="text-2xl">⚽</span> {league}
+                <div key={league} className="mb-8">
+                  {/* League Header - Improved Styling */}
+                  <div className="flex items-center gap-3 mb-4 pl-2 border-l-4 border-[var(--primary)]">
+                    <h2 className="text-xl font-bold text-white">
+                      {league}
                     </h2>
-                    <span className="text-xs font-bold bg-[rgba(255,255,255,0.1)] px-2 py-1 rounded text-[var(--text-muted)]">
-                      HOY
+                    <span className="text-xs font-bold bg-[var(--primary)] bg-opacity-20 text-[var(--primary)] px-2 py-0.5 rounded-full border border-[var(--primary)] border-opacity-30">
+                      {leagueMatches.length} Partidos
                     </span>
                   </div>
 
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-3">
                     {leagueMatches.map((match) => {
                       const isHomeFavorite = user?.favoriteTeams.includes(match.homeTeam.name);
                       const isAwayFavorite = user?.favoriteTeams.includes(match.awayTeam.name);
                       const isFavorite = isHomeFavorite || isAwayFavorite;
+                      const isSelected = selectedMatch?.id === match.id;
 
                       return (
-                        <MatchCard
+                        <div
                           key={match.id}
-                          homeTeam={match.homeTeam.name}
-                          awayTeam={match.awayTeam.name}
-                          date={match.utcDate}
-                          league={league}
-                          homeScore={match.score.fullTime.home}
-                          awayScore={match.score.fullTime.away}
-                          status={mapStatus(match.status)}
-                          isFavorite={isFavorite}
-                          onFavoriteToggle={() => {
-                            const teamToToggle = isHomeFavorite ? match.homeTeam.name : match.awayTeam.name;
-                            handleFavoriteToggle(teamToToggle, user?.favoriteTeams.includes(teamToToggle) || false);
-                          }}
-                          onPredict={() => handlePredictionClick(match)}
-                        />
+                          onClick={() => handleMatchClick(match)}
+                          className={`cursor-pointer transition-all duration-200 ${isSelected ? 'ring-2 ring-[var(--primary)] rounded-xl transform scale-[1.01]' : 'hover:bg-[rgba(255,255,255,0.02)] rounded-xl'}`}
+                        >
+                          <MatchCard
+                            homeTeam={match.homeTeam.name}
+                            awayTeam={match.awayTeam.name}
+                            date={match.utcDate}
+                            league={league}
+                            homeScore={match.score.fullTime.home}
+                            awayScore={match.score.fullTime.away}
+                            status={mapStatus(match.status)}
+                            isFavorite={isFavorite}
+                            onFavoriteToggle={() => {
+                              const teamToToggle = isHomeFavorite ? match.homeTeam.name : match.awayTeam.name;
+                              handleFavoriteToggle(teamToToggle, user?.favoriteTeams.includes(teamToToggle) || false);
+                            }}
+                            onPredict={(e) => handlePredictionClick(e as any, match)}
+                          />
+                        </div>
                       );
                     })}
                   </div>
@@ -157,6 +172,9 @@ export default function FootballPage() {
           {/* SIDEBAR COLUMN (Widgets) - Spans 4 cols */}
           <div className="lg:col-span-4 flex flex-col gap-6">
 
+            {/* Dynamic Match Stats Bubble */}
+            <MatchStatsSummary match={selectedMatch} />
+
             {/* Wizard's Corner */}
             <div className="glass-card p-1 border border-[var(--secondary)]">
               <div className="bg-[var(--secondary)] text-white text-center py-2 font-bold uppercase text-sm tracking-wider mb-1 rounded-t">
@@ -171,9 +189,6 @@ export default function FootballPage() {
                 wizardTip="Ambos Marcan + Over 2.5"
               />
             </div>
-
-            {/* Live Match Stats */}
-            <MatchStatsSummary />
 
             {/* Trending */}
             <div className="glass-card p-4">
@@ -194,24 +209,17 @@ export default function FootballPage() {
               </div>
             </div>
 
-            {/* Premium */}
-            <div className="glass-card p-6 flex flex-col items-center justify-center text-center min-h-[200px] opacity-50 border-dashed border-2 border-[rgba(255,255,255,0.1)]">
-              <span className="text-4xl mb-2">👑</span>
-              <h3 className="font-bold">Premium Access</h3>
-              <p className="text-sm text-[var(--text-muted)]">Análisis profundo de cada partido</p>
-            </div>
-
           </div>
 
         </div>
       </div>
 
       {/* Prediction Modal */}
-      {selectedGame && (
+      {selectedGameForModal && (
         <PredictionModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          gameInfo={selectedGame}
+          gameInfo={selectedGameForModal}
         />
       )}
     </main>
