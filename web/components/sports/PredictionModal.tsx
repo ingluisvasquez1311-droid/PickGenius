@@ -24,17 +24,8 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
     if (!isOpen) return null;
 
     const handleGeneratePrediction = async () => {
-        if (!user) {
-            alert('Debes iniciar sesión para ver predicciones');
-            return;
-        }
-
-        // Check if user can make prediction
-        // const { canPredict, remaining } = await checkPredictionLimit();
-
-        // TEMPORARY: Allow all predictions for testing
-        // if (!canPredict) {
-        //     alert('Has alcanzado tu límite diario de predicciones. Actualiza a Premium para predicciones ilimitadas.');
+        // if (!user) {
+        //     alert('Debes iniciar sesión para ver predicciones');
         //     return;
         // }
 

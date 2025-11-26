@@ -1,4 +1,8 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 
 interface PlayerStat {
     id: string;
@@ -22,6 +26,101 @@ const MOCK_PLAYERS: PlayerStat[] = [
 ];
 
 export default function PlayerStatsTable() {
+    const [players, setPlayers] = useState<PlayerStat[]>(MOCK_PLAYERS);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchTopPerformers() {
+            try {
+                // Get today's date range
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+
+                // Query player_stats collection for today's top performers
+                const statsRef = collection(db, 'player_stats');
+                const q = query(
+                    statsRef,
+                    where('date', '>=', today),
+                    where('date', '<', tomorrow),
+                    orderBy('date', 'desc'),
+                    orderBy('points', 'desc'),
+                    limit(5)
+                );
+
+                const snapshot = await getDocs(q);
+
+                if (!snapshot.empty) {
+                    const topPlayers = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        const rating = calculateRating(data.points, data.rebounds, data.assists);
+
+                        return {
+                            id: doc.id,
+                            name: data.player_name || 'Unknown Player',
+                            team: data.team || 'N/A',
+                            number: data.jersey_number || '0',
+                            position: mapPosition(data.position),
+                            pts: data.points || 0,
+                            reb: data.rebounds || 0,
+                            ast: data.assists || 0,
+                            rating: rating,
+                            isStarter: data.is_starter || false
+                        };
+                    });
+
+                    setPlayers(topPlayers);
+                } else {
+                    // If no data for today, use mock data
+                    console.log('No player stats found for today, using mock data');
+                }
+            } catch (error) {
+                console.error('Error fetching top performers:', error);
+                // Keep mock data on error
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchTopPerformers();
+    }, []);
+
+    // Calculate a simple rating based on stats
+    function calculateRating(pts: number, reb: number, ast: number): number {
+        const score = (pts * 1.0) + (reb * 1.2) + (ast * 1.5);
+        const rating = Math.min(10, Math.max(5, score / 10));
+        return Math.round(rating * 10) / 10;
+    }
+
+    // Map position codes to Spanish names
+    function mapPosition(pos: string): string {
+        const positionMap: { [key: string]: string } = {
+            'G': 'Escolta',
+            'F': 'Alero',
+            'C': 'Centro',
+            'PG': 'Base',
+            'SG': 'Escolta',
+            'SF': 'Alero',
+            'PF': 'Ala-Pívot',
+            'C': 'Pívot'
+        };
+        return positionMap[pos] || pos;
+    }
+
+    if (loading) {
+        return (
+            <div className="glass-card overflow-hidden">
+                <div className="p-3 border-b border-[rgba(255,255,255,0.1)]">
+                    <span className="text-[var(--accent)] font-bold text-sm">Leyenda ⓘ</span>
+                </div>
+                <div className="p-8 text-center text-[var(--text-muted)]">
+                    Cargando mejores jugadores...
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="glass-card overflow-hidden">
             <div className="p-3 border-b border-[rgba(255,255,255,0.1)] flex justify-between items-center">
@@ -35,7 +134,7 @@ export default function PlayerStatsTable() {
             </div>
 
             <div className="flex flex-col">
-                {MOCK_PLAYERS.map((player) => (
+                {players.map((player) => (
                     <div key={player.id} className="flex items-center p-3 border-b border-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.05)] transition-colors">
 
                         {/* Avatar */}

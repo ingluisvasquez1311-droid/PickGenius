@@ -1,6 +1,6 @@
 import { cacheData, getCachedData } from './cache';
 import { FootballMatch, FootballDataProvider } from './football/types';
-import { FootballDataOrgProvider } from './football/providers/footballDataOrg';
+import { ApiSportsProvider } from './football/providers/apiSports';
 import { AllSportsApiProvider } from './football/providers/allSportsApi';
 
 // Mock data fallback
@@ -43,7 +43,7 @@ export async function getFootballMatches(): Promise<Record<string, FootballMatch
 
     // Initialize providers
     const providers: FootballDataProvider[] = [
-        new FootballDataOrgProvider(),
+        new ApiSportsProvider(),
         new AllSportsApiProvider()
     ];
 
