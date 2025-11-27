@@ -39,6 +39,11 @@ export default function PlayerStatsTable() {
                 tomorrow.setDate(tomorrow.getDate() + 1);
 
                 // Query player_stats collection for today's top performers
+                if (!db) {
+                    console.error('Firestore not initialized');
+                    setLoading(false);
+                    return;
+                }
                 const statsRef = collection(db, 'player_stats');
                 const q = query(
                     statsRef,
