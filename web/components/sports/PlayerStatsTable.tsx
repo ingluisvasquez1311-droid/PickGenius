@@ -103,7 +103,6 @@ export default function PlayerStatsTable() {
         const positionMap: { [key: string]: string } = {
             'G': 'Escolta',
             'F': 'Alero',
-            'C': 'Centro',
             'PG': 'Base',
             'SG': 'Escolta',
             'SF': 'Alero',
