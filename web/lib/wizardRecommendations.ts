@@ -1,4 +1,4 @@
-import { getTodayGames as getFootballGames } from './footballDataService';
+import { getFootballMatches as getFootballGames } from './footballDataService';
 import { getTodayGames as getNBAGames } from './nbaDataService';
 import { generatePrediction } from './predictionService';
 import { getCachedOrFetch } from './apiCache';
@@ -30,57 +30,68 @@ export async function getWizardPick(sport: 'nba' | 'football'): Promise<WizardPi
     return getCachedOrFetch(cacheKey, async () => {
         try {
             // 1. Get all matches for today
-            const todayMatches = sport === 'football'
-                ? await getFootballGames()
-                : await getNBAGames();
-        });
+            let todayMatches: any[] = [];
 
-    return {
-        match: {
-            id: match.id.toString(),
-            homeTeam: match.homeTeam,
-            awayTeam: match.awayTeam,
-            league: match.league || (sport === 'football' ? 'Football' : 'NBA'),
-            date: match.date
-        },
-        prediction
-    };
-} catch (error) {
-    console.error(`Failed to generate prediction for ${match.homeTeam} vs ${match.awayTeam}:`, error);
-    return null;
-}
+            if (sport === 'football') {
+                const matchesByLeague = await getFootballGames();
+                // Flatten the matches object into an array
+                Object.values(matchesByLeague).forEach(leagueMatches => {
+                    todayMatches = [...todayMatches, ...leagueMatches];
+                });
+            } else {
+                todayMatches = await getNBAGames();
+            }
+
+            if (!todayMatches || todayMatches.length === 0) {
+                return null;
+            }
+
+            // 2. Generate predictions for top matches (limit to avoid API quotas)
+            const predictions = await Promise.all(
+                todayMatches.slice(0, 10).map(async (match: any) => {
+                    try {
+                        const prediction = await generatePrediction({
+                            gameId: match.id.toString(),
+                            homeTeam: match.homeTeam.name || match.homeTeam,
+                            awayTeam: match.awayTeam.name || match.awayTeam,
+                            date: new Date(match.utcDate || match.date)
+                        });
+
+                        return {
+                            match: {
+                                id: match.id.toString(),
+                                homeTeam: match.homeTeam.name || match.homeTeam,
+                                awayTeam: match.awayTeam.name || match.awayTeam,
+                                league: match.competition?.name || match.league || (sport === 'football' ? 'Football' : 'NBA'),
+                                date: new Date(match.utcDate || match.date)
+                            },
+                            prediction
+                        };
+                    } catch (error) {
+                        console.error(`Failed to generate prediction for match ${match.id}:`, error);
+                        return null;
+                    }
                 })
             );
 
-// Filter out failed predictions
-const validPredictions = predictions.filter((p): p is WizardPick => p !== null);
+            // Filter out failed predictions
+            const validPredictions = predictions.filter((p): p is WizardPick => p !== null);
 
-if (validPredictions.length === 0) {
-    return null;
-}
+            if (validPredictions.length === 0) {
+                return null;
+            }
 
-// 3. Sort by confidence
-const sorted = validPredictions.sort((a, b) =>
-    b.prediction.confidence - a.prediction.confidence
-);
+            // 3. Sort by confidence
+            const sorted = validPredictions.sort((a, b) =>
+                b.prediction.confidence - a.prediction.confidence
+            );
 
-// 4. Select top picks from different leagues
-const diversePicks: WizardPick[] = [];
-const usedLeagues = new Set<string>();
-
-for (const pick of sorted) {
-    if (!usedLeagues.has(pick.match.league) && diversePicks.length < 3) {
-        diversePicks.push(pick);
-        usedLeagues.add(pick.match.league);
-    }
-}
-
-// Return the best pick
-return diversePicks[0] || sorted[0];
+            // Return the best pick
+            return sorted[0];
         } catch (error) {
-    console.error('Error generating wizard pick:', error);
-    return null;
-}
+            console.error('Error generating wizard pick:', error);
+            return null;
+        }
     }, 3600000); // Cache for 1 hour
 }
 
@@ -92,60 +103,84 @@ export async function getWizardPicks(sport: 'nba' | 'football', count: number = 
 
     return getCachedOrFetch(cacheKey, async () => {
         try {
-            const todayMatches = sport === 'football'
-                ? await getFootballGames()
-                : await getNBAGames();
+            // 1. Get all matches for today
+            let todayMatches: any[] = [];
 
-            if (todayMatches.length === 0) {
+            if (sport === 'football') {
+                const matchesByLeague = await getFootballGames();
+                // Flatten the matches object into an array
+                Object.values(matchesByLeague).forEach(leagueMatches => {
+                    todayMatches = [...todayMatches, ...leagueMatches];
+                });
+            } else {
+                todayMatches = await getNBAGames();
+            }
+
+            if (!todayMatches || todayMatches.length === 0) {
                 return [];
             }
 
+            // 2. Generate predictions
             const predictions = await Promise.all(
                 todayMatches.slice(0, 15).map(async (match: any) => {
                     try {
                         const prediction = await generatePrediction({
                             gameId: match.id.toString(),
-                            homeTeam: match.homeTeam,
-                            awayTeam: match.awayTeam,
-                            date: match.date
+                            homeTeam: match.homeTeam.name || match.homeTeam,
+                            awayTeam: match.awayTeam.name || match.awayTeam,
+                            date: new Date(match.utcDate || match.date)
                         });
 
                         return {
                             match: {
                                 id: match.id.toString(),
-                                homeTeam: match.homeTeam,
-                                awayTeam: match.awayTeam,
-                                league: match.league || (sport === 'football' ? 'Football' : 'NBA'),
-                                date: match.date
+                                homeTeam: match.homeTeam.name || match.homeTeam,
+                                awayTeam: match.awayTeam.name || match.awayTeam,
+                                league: match.competition?.name || match.league || (sport === 'football' ? 'Football' : 'NBA'),
+                                date: new Date(match.utcDate || match.date)
                             },
                             prediction
                         };
                     } catch (error) {
                         return null;
                     }
-                    for (const pick of sorted) {
-                        if (diversePicks.length >= count) break;
+                })
+            );
 
-                        if (!usedLeagues.has(pick.match.league)) {
-                            diversePicks.push(pick);
-                            usedLeagues.add(pick.match.league);
-                        }
-                    }
+            const validPredictions = predictions.filter((p): p is WizardPick => p !== null);
 
-                    // Fill remaining slots with highest confidence picks
-                    while (diversePicks.length < count && diversePicks.length < sorted.length) {
-                        const nextPick = sorted.find((p: WizardPick) => !diversePicks.includes(p));
-                        if (nextPick) {
-                            diversePicks.push(nextPick);
-                        } else {
-                            break;
-                        }
-                    }
+            // 3. Sort by confidence
+            const sorted = validPredictions.sort((a, b) =>
+                b.prediction.confidence - a.prediction.confidence
+            );
 
-                    return diversePicks;
-                } catch (error) {
-                    console.error('Error generating wizard picks:', error);
-                    return [];
+            // 4. Select top picks from different leagues
+            const diversePicks: WizardPick[] = [];
+            const usedLeagues = new Set<string>();
+
+            for (const pick of sorted) {
+                if (diversePicks.length >= count) break;
+
+                if (!usedLeagues.has(pick.match.league)) {
+                    diversePicks.push(pick);
+                    usedLeagues.add(pick.match.league);
                 }
-        }, 3600000); // Cache for 1 hour
+            }
+
+            // Fill remaining slots with highest confidence picks
+            while (diversePicks.length < count && diversePicks.length < sorted.length) {
+                const nextPick = sorted.find((p: WizardPick) => !diversePicks.includes(p));
+                if (nextPick) {
+                    diversePicks.push(nextPick);
+                } else {
+                    break;
+                }
+            }
+
+            return diversePicks;
+        } catch (error) {
+            console.error('Error generating wizard picks:', error);
+            return [];
+        }
+    }, 3600000); // Cache for 1 hour
 }
