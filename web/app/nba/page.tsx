@@ -105,8 +105,8 @@ export default function BasketballPage() {
                     <button
                         onClick={() => setSelectedLeague('NBA')}
                         className={`flex-1 py-3 px-6 rounded-lg font-bold transition-all ${selectedLeague === 'NBA'
-                                ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-black'
-                                : 'glass-card text-[var(--text-muted)] hover:text-white'
+                            ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-black'
+                            : 'glass-card text-[var(--text-muted)] hover:text-white'
                             }`}
                     >
                         🏀 NBA
@@ -114,8 +114,8 @@ export default function BasketballPage() {
                     <button
                         onClick={() => setSelectedLeague('Euroleague')}
                         className={`flex-1 py-3 px-6 rounded-lg font-bold transition-all ${selectedLeague === 'Euroleague'
-                                ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-black'
-                                : 'glass-card text-[var(--text-muted)] hover:text-white'
+                            ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-black'
+                            : 'glass-card text-[var(--text-muted)] hover:text-white'
                             }`}
                     >
                         🇪🇺 Euroliga
@@ -154,9 +154,9 @@ export default function BasketballPage() {
                             ) : currentGames.length > 0 ? (
                                 currentGames.map((game: any) => {
                                     const isNBA = selectedLeague === 'NBA';
-                                    const gameTime = isNBA
-                                        ? new Date((game as NBAGame).date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-                                        : (game as EuroleagueGame).time;
+                                    const gameDate = isNBA
+                                        ? (game as NBAGame).date.toISOString()
+                                        : new Date((game as EuroleagueGame).date).toISOString();
 
                                     return (
                                         <MatchCard
@@ -165,12 +165,12 @@ export default function BasketballPage() {
                                             awayTeam={game.awayTeam}
                                             homeScore={game.homeScore}
                                             awayScore={game.awayScore}
-                                            time={gameTime}
+                                            date={gameDate}
                                             status={mapStatus(game.status)}
-                                            sport="NBA"
+                                            league={selectedLeague}
                                             isFavorite={false}
                                             onFavoriteToggle={() => handleFavoriteToggle(game.homeTeam, false)}
-                                            onPredictClick={() => handlePredictionClick(game)}
+                                            onPredict={() => handlePredictionClick(game)}
                                         />
                                     );
                                 })
