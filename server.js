@@ -3,12 +3,14 @@
  * Incluye sincronización automática de NBA y Football con cache inteligente
  */
 
+require('dotenv').config();
 const express = require('express');
 const autoSyncService = require('./src/services/autoSyncService');
 const footballService = require('./src/services/football/footballService');
 const footballApiService = require('./src/services/football/footballApiService');
 const cacheManager = require('./src/services/cacheManager');
 const apiRateLimiter = require('./src/services/apiRateLimiter');
+const sofascoreRoutes = require('./src/routes/sofascore');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -31,6 +33,11 @@ app.get('/health', (req, res) => {
         service: 'PickGenius - Sports Sync with Intelligent Cache'
     });
 });
+
+// ========================================
+// SOFASCORE ROUTES
+// ========================================
+app.use('/api/sofascore', sofascoreRoutes);
 
 // Status endpoint
 app.get('/api/status', (req, res) => {

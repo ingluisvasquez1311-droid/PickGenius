@@ -1,0 +1,68 @@
+Fetching lineups for event 12697005...
+Successfully fetched lineups
+Home Team Players: 12
+First Player Structure: {
+  "player": {
+    "name": "Julian Strawther",
+    "slug": "strawther-julian",
+    "shortName": "J. Strawther",
+    "position": "G",
+    "jerseyNumber": "3",
+    "height": 198,
+    "userCount": 374,
+    "gender": "M",
+    "id": 1181392,
+    "country": {
+      "alpha2": "US",
+      "alpha3": "USA",
+      "name": "USA",
+      "slug": "usa"
+    },
+    "marketValueCurrency": "EUR",
+    "dateOfBirthTimestamp": 1019088000,
+    "fieldTranslations": {
+      "nameTranslation": {
+        "ar": "ستروثر، جوليان",
+        "hi": "स्ट्रॉथर, जूलियन",
+        "bn": "স্ট্রথার, জুলিয়ান"
+      },
+      "shortNameTranslation": {
+        "ar": "ج. ستروثر",
+        "hi": "जे. स्ट्रॉथर",
+        "bn": "জে. স্ট্রথার"
+      }
+    }
+  },
+  "teamId": 3417,
+  "shirtNumber": 3,
+  "jerseyNumber": "3",
+  "position": "G",
+  "substitute": true,
+  "statistics": {
+    "secondsPlayed": 1371,
+    "points": 4,
+    "twoPointsMade": 1,
+    "twoPointAttempts": 3,
+    "threePointsMade": 0,
+    "threePointAttempts": 1,
+    "freeThrowsMade": 2,
+    "freeThrowAttempts": 2,
+    "fieldGoalsMade": 1,
+    "fieldGoalAttempts": 4,
+    "rebounds": 2,
+    "defensiveRebounds": 2,
+    "offensiveRebounds": 0,
+    "turnovers": 1,
+    "blocks": 0,
+    "personalFouls": 3,
+    "assists": 1,
+    "steals": 0,
+    "plusMinus": -20,
+    "rating": 5.7,
+    "fieldGoalPct": 25,
+    "statisticsType": {
+      "sportSlug": "basketball",
+      "statisticsType": "player"
+    }
+  }
+}

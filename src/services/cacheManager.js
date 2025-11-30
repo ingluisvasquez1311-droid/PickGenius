@@ -11,9 +11,10 @@ class CacheManager {
     constructor() {
         this.collections = {
             football: 'football_fixtures_cache',
-            nba: 'nba_fixtures_cache'
+            nba: 'nba_fixtures_cache',
+            sofascore: 'sofascore_cache'
         };
-        
+
         // TTL por defecto en segundos
         this.defaultTTL = {
             fixtures: 6 * 60 * 60,      // 6 horas
@@ -129,8 +130,8 @@ class CacheManager {
      */
     async cleanupExpired(sport = null) {
         try {
-            const collections = sport 
-                ? [this.collections[sport]] 
+            const collections = sport
+                ? [this.collections[sport]]
                 : Object.values(this.collections);
 
             let totalDeleted = 0;
@@ -144,7 +145,7 @@ class CacheManager {
                     .limit(500);
 
                 const expiredSnapshot = await expiredQuery.get();
-                
+
                 if (!expiredSnapshot.empty) {
                     const batch = db.batch();
                     expiredSnapshot.docs.forEach(doc => {
@@ -210,8 +211,8 @@ class CacheManager {
      */
     async getStats(sport = null) {
         try {
-            const collections = sport 
-                ? [{ name: sport, collection: this.collections[sport] }] 
+            const collections = sport
+                ? [{ name: sport, collection: this.collections[sport] }]
                 : Object.entries(this.collections).map(([name, collection]) => ({ name, collection }));
 
             const stats = {};
@@ -250,7 +251,7 @@ class CacheManager {
     generateDocId(key, data) {
         if (data.fixtureId) return `fixture_${data.fixtureId}`;
         if (data.gameId) return `game_${data.gameId}`;
-        
+
         // Fallback: usar el key con timestamp
         return `${key}_${Date.now()}`.replace(/[^a-zA-Z0-9_-]/g, '_');
     }

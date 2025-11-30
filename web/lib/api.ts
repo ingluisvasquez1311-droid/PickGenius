@@ -6,7 +6,7 @@ const getApiUrl = () => {
     return url;
 };
 
-const API_URL = getApiUrl();
+export const API_URL = getApiUrl();
 
 export async function getStatus() {
     try {
