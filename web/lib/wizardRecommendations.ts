@@ -1,6 +1,6 @@
 import { getFootballMatches as getFootballGames } from './footballDataService';
 import { getTodayGames as getNBAGames } from './nbaDataService';
-import { generatePrediction } from './predictionService';
+import { PredictionResult } from './predictionService';
 import { getCachedOrFetch } from './apiCache';
 
 interface WizardPick {
@@ -11,12 +11,7 @@ interface WizardPick {
         league: string;
         date: Date;
     };
-    prediction: {
-        pick: string;
-        odds: string;
-        confidence: number;
-        wizardTip: string;
-    };
+    prediction: PredictionResult;
 }
 
 /**
