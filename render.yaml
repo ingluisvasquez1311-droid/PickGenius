@@ -1,9 +1,10 @@
 services:
-  # 1. Backend Service (API & Data Sync)
   - type: web
-    name: pickgenius-api
-    env: node
+    name: pickgenius-backend
+    runtime: node
+    region: oregon
     plan: free
+    branch: main
     buildCommand: npm install
     startCommand: node server.js
     envVars:
@@ -11,18 +12,3 @@ services:
         value: 10000
       - key: NODE_ENV
         value: production
-
-  # 2. Frontend Service (Next.js Web Interface)
-  - type: web
-    name: pickgenius-web
-    env: node
-    plan: free
-    rootDir: web
-    buildCommand: npm install && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: pickgenius-api
-          property: host
