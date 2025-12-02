@@ -1,6 +1,6 @@
 import { getFootballMatches as getFootballGames } from './footballDataService';
 import { getTodayGames as getNBAGames } from './nbaDataService';
-import { PredictionResult } from './predictionService';
+import { PredictionResult, generatePrediction } from './predictionService';
 import { getCachedOrFetch } from './apiCache';
 
 interface WizardPick {
