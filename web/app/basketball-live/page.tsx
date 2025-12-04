@@ -16,7 +16,7 @@ export default function BasketballLivePage() {
         async function fetchLiveEvents() {
             try {
                 setLoading(true);
-                const response = await fetch('https://www.sofascore.com/api/v1/sport/basketball/events/live');
+                const response = await fetch('/api/basketball/live');
 
                 if (!response.ok) {
                     throw new Error(`Error: ${response.status}`);
@@ -24,15 +24,39 @@ export default function BasketballLivePage() {
 
                 const data = await response.json();
 
-                if (data.events) {
-                    // Filtrar solo ligas profesionales
-                    const professionalEvents = data.events.filter((event: any) => {
+                if (data.success && data.data) {
+                    // Map NBA API format to our format
+                    const events = data.data.map((item: any) => ({
+                        id: item.id,
+                        tournament: {
+                            name: 'NBA',
+                            uniqueTournament: { name: 'NBA' }
+                        },
+                        homeTeam: {
+                            id: item.teams.home.id,
+                            name: item.teams.home.name
+                        },
+                        awayTeam: {
+                            id: item.teams.visitors.id,
+                            name: item.teams.visitors.name
+                        },
+                        homeScore: {
+                            current: item.scores.home.points
+                        },
+                        awayScore: {
+                            current: item.scores.visitors.points
+                        },
+                        status: {
+                            type: item.status.long === 'Scheduled' ? 'notstarted' :
+                                item.status.long === 'Finished' ? 'finished' : 'inprogress',
+                            description: item.status.long
+                        }
+                    }));
+
+                    // Filter NBA only
+                    const professionalEvents = events.filter((event: any) => {
                         const tournament = event.tournament?.name?.toLowerCase() || '';
-                        const uniqueTournament = event.tournament?.uniqueTournament?.name?.toLowerCase() || '';
-                        return tournament.includes('nba') ||
-                            uniqueTournament.includes('nba') ||
-                            tournament.includes('euroleague') ||
-                            tournament.includes('acb');
+                        return tournament.includes('nba');
                     });
 
                     setEvents(professionalEvents);

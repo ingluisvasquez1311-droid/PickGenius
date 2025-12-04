@@ -16,7 +16,7 @@ export default function FootballLivePage() {
         async function fetchLiveEvents() {
             try {
                 setLoading(true);
-                const response = await fetch('https://www.sofascore.com/api/v1/sport/football/events/live');
+                const response = await fetch('/api/football/live');
 
                 if (!response.ok) {
                     throw new Error(`Error: ${response.status}`);
@@ -24,8 +24,37 @@ export default function FootballLivePage() {
 
                 const data = await response.json();
 
-                if (data.events) {
-                    setEvents(data.events);
+                if (data.success && data.data) {
+                    // Map API-Sports format to our format
+                    const events = data.data.map((item: any) => ({
+                        id: item.fixture.id,
+                        tournament: {
+                            name: item.league.name,
+                            uniqueTournament: { name: item.league.name }
+                        },
+                        homeTeam: {
+                            id: item.teams.home.id,
+                            name: item.teams.home.name
+                        },
+                        awayTeam: {
+                            id: item.teams.away.id,
+                            name: item.teams.away.name
+                        },
+                        homeScore: {
+                            current: item.goals.home
+                        },
+                        awayScore: {
+                            current: item.goals.away
+                        },
+                        status: {
+                            type: item.fixture.status.short === 'NS' ? 'notstarted' :
+                                item.fixture.status.short === 'FT' ? 'finished' : 'inprogress',
+                            description: item.fixture.status.long
+                        },
+                        startTimestamp: new Date(item.fixture.date).getTime() / 1000
+                    }));
+
+                    setEvents(events);
                 } else {
                     setError('No se encontraron eventos');
                 }
