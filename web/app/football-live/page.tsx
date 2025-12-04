@@ -16,18 +16,18 @@ export default function FootballLivePage() {
         async function fetchLiveEvents() {
             try {
                 setLoading(true);
-                const response = await fetch(`/api/sofascore/football/live`);
+                const response = await fetch('https://www.sofascore.com/api/v1/sport/football/events/live');
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
 
                 const data = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(data.error || `Error: ${response.status}`);
-                }
-
-                if (data.success) {
-                    setEvents(data.data);
+                if (data.events) {
+                    setEvents(data.events);
                 } else {
-                    setError(data.error || 'Error desconocido');
+                    setError('No se encontraron eventos');
                 }
             } catch (err: any) {
                 setError(err.message);

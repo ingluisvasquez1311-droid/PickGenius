@@ -29,9 +29,9 @@ export default function BasketballGamePage() {
 
                 // Fetch game details, stats and lineups in parallel
                 const [detailsRes, statsRes, lineupsRes] = await Promise.all([
-                    fetch(`/api/sofascore/basketball/game/${eventId}`),
-                    fetch(`/api/sofascore/basketball/game/${eventId}/stats`),
-                    fetch(`/api/sofascore/basketball/game/${eventId}/lineups`)
+                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}`),
+                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/statistics`),
+                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/lineups`)
                 ]);
 
                 if (!detailsRes.ok || !statsRes.ok) {
@@ -42,16 +42,52 @@ export default function BasketballGamePage() {
                 const statsData = await statsRes.json();
                 const lineupsData = await lineupsRes.json();
 
-                if (detailsData.success) {
-                    setGameDetails(detailsData.data.event);
+                if (detailsData.event) {
+                    setGameDetails(detailsData.event);
                 }
 
-                if (statsData.success) {
-                    setStats(statsData.data);
+                if (statsData.statistics) {
+                    // Parse statistics
+                    const parsed: any = { periods: [] };
+                    statsData.statistics.forEach((periodStat: any) => {
+                        const periodData: any = {
+                            period: periodStat.period,
+                            scoring: {},
+                            rebounds: {},
+                            other: {}
+                        };
+
+                        periodStat.groups.forEach((group: any) => {
+                            const groupName = group.groupName;
+                            group.statisticsItems.forEach((item: any) => {
+                                const statData = {
+                                    name: item.name,
+                                    home: item.home,
+                                    away: item.away,
+                                    homeValue: item.homeValue,
+                                    awayValue: item.awayValue,
+                                    homeTotal: item.homeTotal,
+                                    awayTotal: item.awayTotal,
+                                    compareCode: item.compareCode
+                                };
+
+                                if (groupName === 'Scoring') {
+                                    periodData.scoring[item.name] = statData;
+                                } else if (groupName === 'Rebounds') {
+                                    periodData.rebounds[item.name] = statData;
+                                } else {
+                                    periodData.other[item.name] = statData;
+                                }
+                            });
+                        });
+
+                        parsed.periods.push(periodData);
+                    });
+                    setStats(parsed);
                 }
 
-                if (lineupsData.success) {
-                    setLineups(lineupsData.data);
+                if (lineupsData) {
+                    setLineups(lineupsData);
                 }
             } catch (err: any) {
                 setError(err.message);

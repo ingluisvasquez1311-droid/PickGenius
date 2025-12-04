@@ -34,11 +34,11 @@ export default function FootballGamePage() {
 
                 // Fetch game details, stats, lineups, incidents and h2h in parallel
                 const [detailsRes, statsRes, lineupsRes, incidentsRes, h2hRes] = await Promise.all([
-                    fetch(`/api/sofascore/football/match/${eventId}`),
-                    fetch(`/api/sofascore/football/match/${eventId}/stats`),
-                    fetch(`/api/sofascore/football/match/${eventId}/lineups`),
-                    fetch(`/api/sofascore/football/match/${eventId}/incidents`),
-                    fetch(`/api/sofascore/football/match/${eventId}/h2h`)
+                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}`),
+                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/statistics`),
+                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/lineups`),
+                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/incidents`),
+                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/h2h/events`)
                 ]);
 
                 if (!detailsRes.ok || !statsRes.ok) {
@@ -51,40 +51,40 @@ export default function FootballGamePage() {
                 const incidentsData = await incidentsRes.json();
                 const h2hData = await h2hRes.json();
 
-                if (detailsData.success) {
-                    setGameDetails(detailsData.data.event);
+                if (detailsData.event) {
+                    setGameDetails(detailsData.event);
                 }
 
-                if (statsData.success) {
-                    setStats(statsData.data);
+                if (statsData.statistics) {
+                    setStats(statsData);
                 }
 
-                if (lineupsData.success) {
-                    setLineups(lineupsData.data);
+                if (lineupsData) {
+                    setLineups(lineupsData);
                 }
 
-                if (incidentsData.success) {
-                    setIncidents(incidentsData.data.incidents || []);
+                if (incidentsData.incidents) {
+                    setIncidents(incidentsData.incidents || []);
                 }
 
-                if (h2hData.success) {
-                    setH2h(h2hData.data.events || []);
+                if (h2hData.events) {
+                    setH2h(h2hData.events || []);
                 }
 
                 // Fetch standings if we have tournament info
-                if (detailsData.success && detailsData.data.event.tournament) {
-                    const tournament = detailsData.data.event.tournament;
-                    const season = detailsData.data.event.season;
+                if (detailsData.event?.tournament) {
+                    const tournament = detailsData.event.tournament;
+                    const season = detailsData.event.season;
 
                     if (tournament.id && season?.id) {
                         const standingsRes = await fetch(
-                            `/api/sofascore/football/tournament/${tournament.id}/season/${season.id}/standings`
+                            `https://www.sofascore.com/api/v1/tournament/${tournament.id}/season/${season.id}/standings/total`
                         );
                         const standingsData = await standingsRes.json();
 
-                        if (standingsData.success && standingsData.data.standings) {
+                        if (standingsData.standings) {
                             // Get the first standings group (usually the main league table)
-                            const mainStandings = standingsData.data.standings[0];
+                            const mainStandings = standingsData.standings[0];
                             if (mainStandings && mainStandings.rows) {
                                 setStandings(mainStandings.rows);
                             }

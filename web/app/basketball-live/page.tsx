@@ -16,17 +16,17 @@ export default function BasketballLivePage() {
         async function fetchLiveEvents() {
             try {
                 setLoading(true);
-                const response = await fetch(`/api/sofascore/basketball/live`);
+                const response = await fetch('https://www.sofascore.com/api/v1/sport/basketball/events/live');
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
 
                 const data = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(data.error || `Error: ${response.status}`);
-                }
-
-                if (data.success) {
+                if (data.events) {
                     // Filtrar solo ligas profesionales
-                    const professionalEvents = data.data.filter((event: any) => {
+                    const professionalEvents = data.events.filter((event: any) => {
                         const tournament = event.tournament?.name?.toLowerCase() || '';
                         const uniqueTournament = event.tournament?.uniqueTournament?.name?.toLowerCase() || '';
                         return tournament.includes('nba') ||
@@ -37,7 +37,7 @@ export default function BasketballLivePage() {
 
                     setEvents(professionalEvents);
                 } else {
-                    setError(data.error || 'Error desconocido');
+                    setError('No se encontraron eventos');
                 }
             } catch (err: any) {
                 setError(err.message);
