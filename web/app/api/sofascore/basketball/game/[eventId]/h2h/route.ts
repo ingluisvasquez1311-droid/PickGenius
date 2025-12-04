@@ -3,10 +3,10 @@ import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballSe
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { eventId: string } }
+    { params }: { params: Promise<{ eventId: string }> }
 ) {
     try {
-        const { eventId } = params;
+        const { eventId } = await params;
         const result = await sofaScoreBasketballService.getH2H(eventId);
 
         if (result.success) {

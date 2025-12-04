@@ -3,10 +3,10 @@ import { sofaScoreFootballService } from '@/lib/services/sofaScoreFootballServic
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { tournamentId: string; seasonId: string } }
+    { params }: { params: Promise<{ tournamentId: string; seasonId: string }> }
 ) {
     try {
-        const { tournamentId, seasonId } = params;
+        const { tournamentId, seasonId } = await params;
         const result = await sofaScoreFootballService.getStandings(tournamentId, seasonId);
 
         if (result.success) {
