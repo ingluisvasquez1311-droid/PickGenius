@@ -1,7 +1,8 @@
 const getApiUrl = () => {
     // Since we're now using Next.js API routes, we use relative paths
     // This works both in development and production on Netlify
-    return process.env.NEXT_PUBLIC_API_URL || '';
+    // Force relative paths for Next.js API routes
+    return '';
 };
 
 export const API_URL = getApiUrl();

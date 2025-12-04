@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import LiveEventsList from '@/components/LiveEventsList';
 import Navigation from '@/components/Navigation';
 
-import { API_URL } from '@/lib/api';
+
 
 export default function FootballLivePage() {
     const [events, setEvents] = useState<any[]>([]);
