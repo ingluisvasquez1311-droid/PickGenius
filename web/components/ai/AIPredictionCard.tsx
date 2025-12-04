@@ -19,7 +19,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`${API_URL}/api/sofascore/predict/${sport}/${eventId}`);
+            const response = await fetch(`/api/sofascore/predict/${sport}/${eventId}`);
             const data = await response.json();
 
             if (data.success) {

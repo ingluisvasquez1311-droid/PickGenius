@@ -29,9 +29,9 @@ export default function BasketballGamePage() {
 
                 // Fetch game details, stats and lineups in parallel
                 const [detailsRes, statsRes, lineupsRes] = await Promise.all([
-                    fetch(`${API_URL}/api/sofascore/basketball/game/${eventId}`),
-                    fetch(`${API_URL}/api/sofascore/basketball/game/${eventId}/stats`),
-                    fetch(`${API_URL}/api/sofascore/basketball/game/${eventId}/lineups`)
+                    fetch(`/api/sofascore/basketball/game/${eventId}`),
+                    fetch(`/api/sofascore/basketball/game/${eventId}/stats`),
+                    fetch(`/api/sofascore/basketball/game/${eventId}/lineups`)
                 ]);
 
                 if (!detailsRes.ok || !statsRes.ok) {

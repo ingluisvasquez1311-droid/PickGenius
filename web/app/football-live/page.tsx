@@ -16,7 +16,7 @@ export default function FootballLivePage() {
         async function fetchLiveEvents() {
             try {
                 setLoading(true);
-                const response = await fetch(`${API_URL}/api/sofascore/football/live`);
+                const response = await fetch(`/api/sofascore/football/live`);
 
                 if (!response.ok) {
                     throw new Error(`Error: ${response.status}`);

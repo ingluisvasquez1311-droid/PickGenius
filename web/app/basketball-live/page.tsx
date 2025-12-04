@@ -16,7 +16,7 @@ export default function BasketballLivePage() {
         async function fetchLiveEvents() {
             try {
                 setLoading(true);
-                const response = await fetch(`${API_URL}/api/sofascore/basketball/live`);
+                const response = await fetch(`/api/sofascore/basketball/live`);
 
                 if (!response.ok) {
                     throw new Error(`Error: ${response.status}`);

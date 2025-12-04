@@ -34,11 +34,11 @@ export default function FootballGamePage() {
 
                 // Fetch game details, stats, lineups, incidents and h2h in parallel
                 const [detailsRes, statsRes, lineupsRes, incidentsRes, h2hRes] = await Promise.all([
-                    fetch(`${API_URL}/api/sofascore/football/match/${eventId}`),
-                    fetch(`${API_URL}/api/sofascore/football/match/${eventId}/stats`),
-                    fetch(`${API_URL}/api/sofascore/football/match/${eventId}/lineups`),
-                    fetch(`${API_URL}/api/sofascore/football/match/${eventId}/incidents`),
-                    fetch(`${API_URL}/api/sofascore/football/match/${eventId}/h2h`)
+                    fetch(`/api/sofascore/football/match/${eventId}`),
+                    fetch(`/api/sofascore/football/match/${eventId}/stats`),
+                    fetch(`/api/sofascore/football/match/${eventId}/lineups`),
+                    fetch(`/api/sofascore/football/match/${eventId}/incidents`),
+                    fetch(`/api/sofascore/football/match/${eventId}/h2h`)
                 ]);
 
                 if (!detailsRes.ok || !statsRes.ok) {
@@ -78,7 +78,7 @@ export default function FootballGamePage() {
 
                     if (tournament.id && season?.id) {
                         const standingsRes = await fetch(
-                            `${API_URL}/api/sofascore/football/tournament/${tournament.id}/season/${season.id}/standings`
+                            `/api/sofascore/football/tournament/${tournament.id}/season/${season.id}/standings`
                         );
                         const standingsData = await standingsRes.json();
 
