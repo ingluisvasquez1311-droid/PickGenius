@@ -1,0 +1,30 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballService';
+
+export async function GET(
+    request: NextRequest,
+    { params }: { params: { tournamentId: string; seasonId: string } }
+) {
+    try {
+        const { tournamentId, seasonId } = params;
+        const result = await sofaScoreBasketballService.getStandings(tournamentId, seasonId);
+
+        if (result.success) {
+            return NextResponse.json({
+                success: true,
+                data: result.data,
+                fromCache: result.fromCache
+            });
+        } else {
+            return NextResponse.json({
+                success: false,
+                error: result.error
+            }, { status: 500 });
+        }
+    } catch (error: any) {
+        return NextResponse.json({
+            success: false,
+            error: error.message
+        }, { status: 500 });
+    }
+}

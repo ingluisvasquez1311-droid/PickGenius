@@ -1,9 +1,7 @@
 const getApiUrl = () => {
-    const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    if (!url.startsWith('http')) {
-        return `https://${url}`;
-    }
-    return url;
+    // Since we're now using Next.js API routes, we use relative paths
+    // This works both in development and production on Netlify
+    return process.env.NEXT_PUBLIC_API_URL || '';
 };
 
 export const API_URL = getApiUrl();
