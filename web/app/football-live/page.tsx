@@ -18,11 +18,11 @@ export default function FootballLivePage() {
                 setLoading(true);
                 const response = await fetch(`/api/sofascore/football/live`);
 
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
-                }
-
                 const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || `Error: ${response.status}`);
+                }
 
                 if (data.success) {
                     setEvents(data.data);

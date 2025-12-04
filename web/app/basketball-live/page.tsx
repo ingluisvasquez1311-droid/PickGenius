@@ -18,11 +18,11 @@ export default function BasketballLivePage() {
                 setLoading(true);
                 const response = await fetch(`/api/sofascore/basketball/live`);
 
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
-                }
-
                 const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || `Error: ${response.status}`);
+                }
 
                 if (data.success) {
                     // Filtrar solo ligas profesionales
