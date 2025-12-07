@@ -18,13 +18,9 @@ export default function FootballLivePage() {
                 setLoading(true);
                 const response = await fetch('/api/football/live');
 
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
-                }
-
                 const data = await response.json();
 
-                if (data.success && data.data) {
+                if (response.ok && data.success && data.data) {
                     // Map API-Sports format to our format
                     const events = data.data.map((item: any) => ({
                         id: item.fixture.id,
@@ -56,9 +52,35 @@ export default function FootballLivePage() {
 
                     setEvents(events);
                 } else {
-                    setError('No se encontraron eventos');
+                    // API failed, use mock data
+                    console.warn('API failed, using mock data. Error:', data.error);
+                    const mockEvents = [
+                        {
+                            id: 1001,
+                            tournament: { name: 'Premier League', uniqueTournament: { name: 'Premier League' } },
+                            homeTeam: { id: 33, name: 'Manchester United' },
+                            awayTeam: { id: 34, name: 'Newcastle' },
+                            homeScore: { current: 2 },
+                            awayScore: { current: 1 },
+                            status: { type: 'inprogress', description: 'In Play' },
+                            startTimestamp: Date.now() / 1000
+                        },
+                        {
+                            id: 1002,
+                            tournament: { name: 'La Liga', uniqueTournament: { name: 'La Liga' } },
+                            homeTeam: { id: 541, name: 'Real Madrid' },
+                            awayTeam: { id: 529, name: 'Barcelona' },
+                            homeScore: { current: 0 },
+                            awayScore: { current: 0 },
+                            status: { type: 'notstarted', description: 'Not Started' },
+                            startTimestamp: (Date.now() + 3600000) / 1000
+                        }
+                    ];
+                    setEvents(mockEvents);
+                    setError('Usando datos de demostración (API key pendiente)');
                 }
             } catch (err: any) {
+                console.error('Fetch error:', err);
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -84,23 +106,6 @@ export default function FootballLivePage() {
         );
     }
 
-    if (error) {
-        return (
-            <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-                <div className="text-center text-red-400">
-                    <p className="text-xl mb-2">❌ Error</p>
-                    <p className="text-sm">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                    >
-                        Reintentar
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     // Filter events based on selected filter
     let filteredEvents = events;
     let title = 'Todos los Partidos';
@@ -121,8 +126,14 @@ export default function FootballLivePage() {
             <Navigation />
             <div className="min-h-screen bg-gray-950 text-white p-4">
                 <h1 className="text-3xl font-bold text-center mb-6 text-green-500">
-                    Partidos de Fútbol en Vivo
+                    ⚽ Partidos de Fútbol en Vivo
                 </h1>
+
+                {error && (
+                    <div className="bg-yellow-900 border border-yellow-600 text-yellow-200 px-4 py-3 rounded mb-4 text-center">
+                        ⚠️ {error}
+                    </div>
+                )}
 
                 {/* Filter Buttons - Split Left/Right */}
                 <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
