@@ -12,3 +12,21 @@ services:
         value: 10000
       - key: NODE_ENV
         value: production
+
+  - type: web
+    name: pickgenius-frontend
+    runtime: node
+    region: oregon
+    plan: free
+    branch: main
+    rootDir: web
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          type: web
+          name: pickgenius-backend
+          property: url
