@@ -321,7 +321,7 @@ router.get('/basketball/tournament/:tournamentId/season/:seasonId/standings', as
     }
 });
 
-const geminiService = require('../services/GeminiService');
+const geminiService = require('../services/geminiService');
 
 /**
  * GET /api/sofascore/predict/:sport/:eventId
