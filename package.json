@@ -9,22 +9,24 @@
     "test": "jest --coverage || true"
   },
   "engines": {
-    "node": "18.x",
-    "npm": "9.x"
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.0",
-    "@google/generative-ai": "^0.21.0",
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.6.0",
     "csv-parse": "^5.5.0",
     "csv-parser": "^3.0.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "firebase-admin": "^12.0.0",
+    "groq-sdk": "^0.37.0",
     "node-cron": "^3.0.3",
     "openai": "^6.9.1"
   },
   "devDependencies": {
+    "baseline-browser-mapping": "^2.9.5",
     "nodemon": "^3.0.1"
   }
 }
