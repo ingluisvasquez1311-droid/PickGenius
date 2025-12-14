@@ -5,36 +5,25 @@
 
 export interface PredictionRequest {
     gameId: string;
-    homeTeam: string;
-    awayTeam: string;
-    date: Date;
+    homeTeam?: string;
+    awayTeam?: string;
+    date?: Date;
+    sport: 'basketball' | 'football';
 }
 
-export interface PredictionResult {
-    pick: string;
-    confidence: number;
-    odds: string;
-    analysis: string;
-    wizardTip: string;
-    factors: string[];
-}
-
-/**
- * Generate AI prediction for a game
- * This is a client-side wrapper that will call the backend API
- */
 export async function generatePrediction(request: PredictionRequest): Promise<PredictionResult> {
     try {
-        // In a real implementation, this would call your backend API
-        // which would then use the Gemini API
-        // For now, returning mock data with realistic structure
-
         const response = await fetch('/api/predictions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(request)
+            body: JSON.stringify({
+                gameId: request.gameId,
+                sport: request.sport,
+                homeTeam: request.homeTeam,
+                awayTeam: request.awayTeam
+            })
         });
 
         if (!response.ok) {
@@ -42,11 +31,16 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
         }
 
         const data = await response.json();
+
+        // If API returns fallback/mock flag or fails gracefully
+        if (data.isFallback) {
+            console.warn('Using fallback prediction due to API error');
+            return generateMockPrediction(request);
+        }
+
         return data;
     } catch (error) {
         console.error('Error generating prediction:', error);
-
-        // Fallback mock prediction
         return generateMockPrediction(request);
     }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { generatePrediction } from '@/lib/predictionService';
 
 import { API_URL } from '@/lib/api';
 
@@ -19,25 +20,21 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`/api/sofascore/predict/${sport}/${eventId}`);
-            const data = await response.json();
+            // Use the centralized prediction service
+            // details are fetched server-side by the API now, so we only need ID and sport
+            const result = await generatePrediction({
+                gameId: eventId,
+                sport: sport as 'basketball' | 'football'
+            });
 
-            if (data.success) {
-                // Parsear la respuesta JSON que viene dentro del texto de Gemini
-                try {
-                    // Limpiar bloques de código markdown si existen
-                    const cleanJson = data.prediction.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const parsedPrediction = JSON.parse(cleanJson);
-                    setPrediction(parsedPrediction);
-                } catch (e) {
-                    // Si no es JSON válido, mostrar el texto crudo
-                    setPrediction({ reasoning: data.prediction });
-                }
+            if (result) {
+                setPrediction(result);
             } else {
-                setError(data.error || 'Error al generar predicción');
+                setError('No se pudo generar la predicción');
             }
         } catch (err: any) {
-            setError(err.message);
+            console.error(err);
+            setError(err.message || 'Error al generar predicción');
         } finally {
             setLoading(false);
         }

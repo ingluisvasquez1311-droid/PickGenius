@@ -255,6 +255,7 @@ export default function FootballGamePage() {
                         </div>
                     </div>
                 </div>
-            </>
-            );
+            </div>
+        </>
+    );
 }
