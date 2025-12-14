@@ -11,6 +11,15 @@ export interface PredictionRequest {
     sport: 'basketball' | 'football';
 }
 
+export interface PredictionResult {
+    pick: string;
+    confidence: number;
+    odds: string;
+    analysis: string;
+    wizardTip: string;
+    factors: string[];
+}
+
 export async function generatePrediction(request: PredictionRequest): Promise<PredictionResult> {
     try {
         const response = await fetch('/api/predictions', {
