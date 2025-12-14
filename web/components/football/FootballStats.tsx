@@ -95,24 +95,26 @@ export default function FootballStats({
                 </div>
             </div>
 
-            {/* Stats Groups */}
-            {allPeriod.groups.map((group, index) => (
-                <div key={index} className="mb-6">
-                    <h3 className="text-lg font-bold mb-4 text-yellow-400 flex items-center gap-2 uppercase">
-                        {group.groupName}
-                    </h3>
-                    <div className="bg-gray-800 rounded-lg p-4">
-                        {group.statisticsItems.map((item, itemIndex) => (
-                            <StatItem
-                                key={itemIndex}
-                                label={item.name}
-                                homeValue={item.home}
-                                awayValue={item.away}
-                            />
-                        ))}
+            {/* Stats Groups Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {allPeriod.groups.map((group, index) => (
+                    <div key={index} className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/50">
+                        <h3 className="text-md font-bold mb-4 text-purple-400 flex items-center gap-2 uppercase tracking-wider border-b border-gray-700 pb-2">
+                            {group.groupName}
+                        </h3>
+                        <div className="space-y-1">
+                            {group.statisticsItems.map((item, itemIndex) => (
+                                <StatItem
+                                    key={itemIndex}
+                                    label={item.name}
+                                    homeValue={item.home}
+                                    awayValue={item.away}
+                                />
+                            ))}
+                        </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 }

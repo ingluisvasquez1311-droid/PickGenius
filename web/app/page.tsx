@@ -17,7 +17,8 @@ export default function HomePage() {
     async function fetchStats() {
       try {
         // Fetch basketball events
-        const basketballRes = await fetch(`${API_URL}/api/sofascore/basketball/live`);
+        // const basketballRes = await fetch(`${API_URL}/api/sofascore/basketball/live`);
+        const basketballRes = await fetch('/api/basketball/live');
         const basketballData = await basketballRes.json();
 
         if (basketballData.success) {
@@ -33,7 +34,8 @@ export default function HomePage() {
         }
 
         // Fetch football events
-        const footballRes = await fetch(`${API_URL}/api/sofascore/football/live`);
+        // const footballRes = await fetch(`${API_URL}/api/sofascore/football/live`);
+        const footballRes = await fetch('/api/football/live');
         const footballData = await footballRes.json();
 
         if (footballData.success) {

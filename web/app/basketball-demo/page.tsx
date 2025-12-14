@@ -19,7 +19,9 @@ export default function BasketballLivePage() {
         async function fetchStats() {
             try {
                 setLoading(true);
-                const response = await fetch(`${API_URL}/api/sofascore/basketball/game/${EVENT_ID}/stats`);
+                // const response = await fetch(`${API_URL}/api/sofascore/basketball/game/${EVENT_ID}/stats`);
+                // Placeholder for now as we migrated to Official API
+                const response = await fetch('/api/basketball/live'); // Fallback to live list for demo purposes
 
                 if (!response.ok) {
                     throw new Error(`Error: ${response.status}`);

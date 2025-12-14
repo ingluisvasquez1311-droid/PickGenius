@@ -1,5 +1,22 @@
 import React from 'react';
-import { FootballMatch } from '@/lib/footballDataService';
+// import { FootballMatch } from '@/lib/footballDataService';
+
+export interface FootballMatch {
+    id: string;
+    status: string;
+    homeTeam: {
+        name: string;
+    };
+    awayTeam: {
+        name: string;
+    };
+    homeScore?: {
+        display: number;
+    };
+    awayScore?: {
+        display: number;
+    };
+}
 
 interface MatchStatsSummaryProps {
     match: FootballMatch | null;

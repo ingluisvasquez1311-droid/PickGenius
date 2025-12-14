@@ -27,33 +27,7 @@ export async function POST(request: NextRequest) {
         let homeTeamName = '';
         let awayTeamName = '';
 
-        if (sport === 'basketball') {
-            const result = await sofaScoreBasketballService.getLiveEvents(); // Using live events as it's the safest official endpoint implemented
-            // Ideally we would fetch specific event details, but our current impl uses live list. 
-            // Let's filter from live list if possible, or fetch details if implemented.
-            // checking service... getEventDetails is implemented!
-            // But wait, getEventDetails in the service MIGHT still use the scraping logic if not fully refactored? 
-            // In step 198/204 we updated the ROUTE handlers, but did we update the SERVICE classes?
-            // Actually, we updated the ROUTES to simply use `fetch` directly to Official APIs.
-            // We did NOT update the Service classes `SofaScore...Service`.
-            // The service classes `sofaScore...Service.ts` still point to `sofascore.com/api/v1` which BLOCKS Render.
-
-            // CRITICAL: We cannot use the service classes as they are. 
-            // We must use the Same logic we put in the live routes (Official APIs).
-            // OR we should refactor the services. 
-            // For now, to be safe and consistent with the "Fix 500 error", let's replicate the safe fetch logic here or make a helper.
-            // Re-using the logic from the route handlers is best.
-
-            // Actually, let's fetch from the Live Routes we just fixed! 
-            // That way we don't duplicate logic. 
-            // But internal fetch to localhost might be tricky on deployment.
-            // Better to re-implement the Official API fetch here safely.
-        }
-
-        // RE-PLANNING: 
-        // usage of `sofaScore...Service` will fail on Render (Sofascore blocked). 
-        // usage of `fetch('/api/basketball/live')` requires full URL.
-        // Best approach: Direct Official API call here (API-Sports / API-NBA).
+        // Determine API Keys based on sport logic below
 
         const NBA_API_KEY = process.env.NBA_API_KEY || process.env.NEXT_PUBLIC_NBA_API_KEY;
         const FOOTBALL_API_KEY = process.env.FOOTBALL_API_KEY_1 || process.env.NEXT_PUBLIC_FOOTBALL_API_KEY;
@@ -96,29 +70,87 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Sport not supported' }, { status: 400 });
         }
 
+        // Detect match status to provide appropriate analysis
+        const isLive = matchContext.status && !matchContext.status.includes('Not') && matchContext.status !== '0\'';
+        const analysisType = isLive ? 'LIVE IN-GAME ANALYSIS' : 'PRE-MATCH PREDICTION';
+
+        const prompt = `
+        You are an expert sports analyst with deep knowledge of ${matchContext.sport}.
+        
+        **ANALYSIS TYPE: ${analysisType}**
+        
+        **MATCH INFO:**
+        - Teams: ${matchContext.home} vs ${matchContext.away}
+        - Current Score: ${matchContext.score}
+        - Match Status: ${matchContext.status}
+        ${isLive ? `- Live Statistics: ${JSON.stringify(matchContext.statistics || {})}` : ''}
+        
+        ${isLive ? `
+        **LIVE MATCH INSTRUCTIONS:**
+        This match is CURRENTLY PLAYING. Analyze the CURRENT game flow and statistics.
+        - Focus on how the match is ACTUALLY developing RIGHT NOW
+        - Reference the current score and live statistics
+        - Predict how the match will END based on current momentum
+        - Adjust predictions based on what's happening in real-time
+        ` : `
+        **PRE-MATCH INSTRUCTIONS:**
+        This match HAS NOT STARTED yet. Provide a PREDICTION based on:
+        - Team form and recent performance
+        - Head-to-head history
+        - Tactical matchup analysis
+        - Expected lineups and key players
+        - Statistical trends and betting value
+        `}
+        
+        **IMPORTANT:** Return ONLY valid JSON (no markdown, no code blocks). Use this EXACT structure:
+        {
+            "winner": "${matchContext.home} or ${matchContext.away} (the team most likely to win)",
+            "confidence": 75,
+            "reasoning": "${isLive ?
+                'Detailed 3-4 sentence analysis explaining the CURRENT game situation. Reference live stats like possession, shots, momentum shifts. Explain why one team is likely to complete the victory based on HOW THE MATCH IS GOING.' :
+                'Detailed 3-4 sentence PRE-MATCH analysis. Explain why one team is favored based on form, tactics, historical performance. Be specific about matchup advantages.'
+            }",
+            "bettingTip": "Specific betting recommendation ${isLive ? '(e.g., Live bet: Over 2.5 Goals @ +130)' : '(e.g., Pre-match: ${matchContext.home} -1 @ -110)'}",
+            "predictions": {
+                "finalScore": "Predicted final score (e.g., '2-1')",
+                "totalGoals": "Expected total goals ${isLive ? 'at full time' : 'in the match'} (e.g., '3 goals')",
+                "corners": {
+                    "home": 6,
+                    "away": 4,
+                    "total": 10
+                },
+                "shots": {
+                    "home": 15,
+                    "away": 10,
+                    "onTarget": "${isLive ? 'Expected shots on target by full time' : 'Expected total shots on target'}"
+                },
+                "cards": {
+                    "yellowCards": 4,
+                    "redCards": 0,
+                    "details": "Expected cards ${isLive ? 'for the remainder and full match' : 'for the full match'}"
+                },
+                "offsides": {
+                    "total": 3,
+                    "details": "Expected offsides ${isLive ? 'by full time' : 'in the match'}"
+                }
+            },
+            "keyFactors": [
+                "${isLive ? 'Factor 1: Current game momentum or tactical shift happening' : 'Factor 1: Team form or historical advantage'}",
+                "${isLive ? 'Factor 2: Key stat from live game (e.g., shot dominance)' : 'Factor 2: Tactical matchup or key player advantage'}",
+                "${isLive ? 'Factor 3: Second half expectations based on first half' : 'Factor 3: Expected game plan or strategic advantage'}"
+            ]
+        }
+        
+        ${isLive ?
+                'CRITICAL: You are analyzing a LIVE match. Base your predictions on the CURRENT statistics and game flow. If one team is dominating possession and shots, reflect that clearly.' :
+                'CRITICAL: This is a PRE-MATCH prediction. Base your analysis on team quality, form, and tactical expectations. Do NOT reference live stats since the match has not started.'
+            }
+        `;
+
         // 2. Call Groq
         const groq = new Groq({ apiKey });
 
-        const prompt = `
-        Act as an expert sports betting analyst. Analyze this live game:
-        
-        Sport: ${matchContext.sport}
-        Match: ${matchContext.home} vs ${matchContext.away}
-        Current Score: ${matchContext.score}
-        Status: ${matchContext.status}
-        Context: ${JSON.stringify(matchContext)}
-        
-        Provide a prediction in strict JSON format:
-        {
-            "pick": "Short pick name (e.g. Lakers -5.5)",
-            "confidence": 85,
-            "odds": "-110",
-            "analysis": "2 sentences explaining the pick based on the live data.",
-            "wizardTip": "A fun, short tip from 'The Wizard' emoji style.",
-            "factors": ["Factor 1", "Factor 2", "Factor 3"]
-        }
-        `;
-
+        console.log('🤖 Calling Groq for prediction...');
         const completion = await groq.chat.completions.create({
             messages: [{ role: 'user', content: prompt }],
             model: 'llama-3.3-70b-versatile',
@@ -126,16 +158,41 @@ export async function POST(request: NextRequest) {
             response_format: { type: 'json_object' }
         });
 
-        const predictionJson = JSON.parse(completion.choices[0]?.message?.content || '{}');
+        const rawContent = completion.choices[0]?.message?.content;
+        console.log('📦 Raw Groq response:', rawContent?.substring(0, 200));
+
+        if (!rawContent) {
+            throw new Error('Empty response from Groq');
+        }
+
+        // Try to parse the JSON
+        let predictionJson;
+        try {
+            predictionJson = JSON.parse(rawContent);
+            console.log('✅ Successfully parsed prediction:', Object.keys(predictionJson));
+        } catch (parseError) {
+            console.error('❌ Failed to parse Groq response:', rawContent);
+            throw new Error('Invalid JSON from Groq: ' + parseError);
+        }
+
+        // Validate required fields
+        if (!predictionJson.winner || !predictionJson.confidence) {
+            console.warn('⚠️ Missing required fields in prediction:', predictionJson);
+        }
 
         return NextResponse.json(predictionJson);
 
     } catch (error: any) {
-        console.error('Prediction API Error:', error);
+        console.error('❌ Prediction API Error:', error.message);
+        console.error('Full error:', error);
+
         return NextResponse.json({
             success: false,
             error: error.message,
-            // Fallback mock to ensure UI doesn't break if API fails
+            winner: 'Error generando predicción',
+            confidence: 0,
+            reasoning: 'Hubo un error al contactar el servicio de IA. Por favor intenta de nuevo.',
+            bettingTip: 'No disponible',
             isFallback: true
         }, { status: 500 });
     }

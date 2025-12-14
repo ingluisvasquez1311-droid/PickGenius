@@ -20,7 +20,7 @@ export default function FootballLivePage() {
 
                 const data = await response.json();
 
-                if (response.ok && data.success && data.data) {
+                if (response.ok && data.success && Array.isArray(data.data)) {
                     // Detect data format (Sofascore or API-Sports)
                     const events = data.data.map((item: any) => {
                         // Sofascore Format (Native from Backend)

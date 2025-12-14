@@ -87,10 +87,12 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                     <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-green-400 rounded-full"
-                                            style={{ width: prediction.confidence?.replace('%', '') + '%' || '0%' }}
+                                            style={{ width: (typeof prediction.confidence === 'string' ? prediction.confidence : `${prediction.confidence}%`) }}
                                         ></div>
                                     </div>
-                                    <span className="text-white font-bold">{prediction.confidence || 'N/A'}</span>
+                                    <span className="text-white font-bold">
+                                        {typeof prediction.confidence === 'number' ? `${prediction.confidence}%` : prediction.confidence}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -102,33 +104,103 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             </p>
                         </div>
 
-                        {/* DETAILED STATS GRID */}
-                        {prediction.details && (
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-purple-900/40 p-3 rounded-lg border border-purple-500/20">
-                                    <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">
-                                        {sport === 'football' ? 'Goles' : 'Puntos'}
-                                    </p>
-                                    <p className="text-white font-semibold text-sm">{prediction.details.goals_points || '-'}</p>
+                        {/* COMPREHENSIVE PREDICTIONS */}
+                        {prediction.predictions && (
+                            <div className="space-y-3">
+                                <h4 className="text-yellow-400 text-sm font-bold uppercase tracking-wider">📊 Predicciones Detalladas</h4>
+
+                                {/* Score & Goals */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 p-3 rounded-lg border border-blue-500/20">
+                                        <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">Marcador Final</p>
+                                        <p className="text-white font-bold text-lg">{prediction.predictions.finalScore || '-'}</p>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-green-900/40 to-green-800/20 p-3 rounded-lg border border-green-500/20">
+                                        <p className="text-green-300 text-[10px] uppercase font-bold mb-1">Total Goles</p>
+                                        <p className="text-white font-bold text-lg">{prediction.predictions.totalGoals || '-'}</p>
+                                    </div>
                                 </div>
-                                <div className="bg-purple-900/40 p-3 rounded-lg border border-purple-500/20">
-                                    <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">
-                                        {sport === 'football' ? 'Corners' : 'Rebotes'}
-                                    </p>
-                                    <p className="text-white font-semibold text-sm">{prediction.details.corners_rebounds || '-'}</p>
-                                </div>
-                                <div className="bg-purple-900/40 p-3 rounded-lg border border-purple-500/20">
-                                    <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">
-                                        {sport === 'football' ? 'Tarjetas' : 'Faltas'}
-                                    </p>
-                                    <p className="text-white font-semibold text-sm">{prediction.details.cards_fouls || '-'}</p>
-                                </div>
-                                <div className="bg-purple-900/40 p-3 rounded-lg border border-purple-500/20">
-                                    <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">
-                                        {sport === 'football' ? 'Tiros al Arco' : 'Efectividad'}
-                                    </p>
-                                    <p className="text-white font-semibold text-sm">{prediction.details.shots_accuracy || '-'}</p>
-                                </div>
+
+                                {/* Corners */}
+                                {prediction.predictions.corners && (
+                                    <div className="bg-orange-900/30 p-3 rounded-lg border border-orange-500/20">
+                                        <p className="text-orange-300 text-[10px] uppercase font-bold mb-2">🚩 Córners Esperados</p>
+                                        <div className="grid grid-cols-3 gap-2 text-xs">
+                                            <div className="text-center">
+                                                <p className="text-gray-400">Local</p>
+                                                <p className="text-white font-bold text-lg">{prediction.predictions.corners.home}</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-gray-400">Total</p>
+                                                <p className="text-white font-bold text-lg">{prediction.predictions.corners.total}</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-gray-400">Visitante</p>
+                                                <p className="text-white font-bold text-lg">{prediction.predictions.corners.away}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Shots */}
+                                {prediction.predictions.shots && (
+                                    <div className="bg-red-900/30 p-3 rounded-lg border border-red-500/20">
+                                        <p className="text-red-300 text-[10px] uppercase font-bold mb-2">🎯 Tiros Esperados</p>
+                                        <div className="grid grid-cols-2 gap-2 text-xs mb-2">
+                                            <div className="text-center">
+                                                <p className="text-gray-400">Local</p>
+                                                <p className="text-white font-bold text-lg">{prediction.predictions.shots.home}</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-gray-400">Visitante</p>
+                                                <p className="text-white font-bold text-lg">{prediction.predictions.shots.away}</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-300 text-xs">{prediction.predictions.shots.onTarget}</p>
+                                    </div>
+                                )}
+
+                                {/* Cards */}
+                                {prediction.predictions.cards && (
+                                    <div className="bg-yellow-900/30 p-3 rounded-lg border border-yellow-500/20">
+                                        <p className="text-yellow-300 text-[10px] uppercase font-bold mb-2">🟨 Tarjetas</p>
+                                        <div className="grid grid-cols-2 gap-2 text-xs mb-2">
+                                            <div className="text-center">
+                                                <p className="text-gray-400">Amarillas</p>
+                                                <p className="text-yellow-400 font-bold text-lg">{prediction.predictions.cards.yellowCards}</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-gray-400">Rojas</p>
+                                                <p className="text-red-400 font-bold text-lg">{prediction.predictions.cards.redCards}</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-300 text-xs">{prediction.predictions.cards.details}</p>
+                                    </div>
+                                )}
+
+                                {/* Offsides */}
+                                {prediction.predictions.offsides && (
+                                    <div className="bg-purple-900/30 p-3 rounded-lg border border-purple-500/20">
+                                        <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">⛔ Fueras de Juego</p>
+                                        <p className="text-white font-bold text-lg mb-1">{prediction.predictions.offsides.total} totales</p>
+                                        <p className="text-gray-300 text-xs">{prediction.predictions.offsides.details}</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Key Factors */}
+                        {prediction.keyFactors && prediction.keyFactors.length > 0 && (
+                            <div className="bg-black/30 p-4 rounded-lg">
+                                <p className="text-purple-300 text-xs uppercase font-bold mb-2">🔑 Factores Clave</p>
+                                <ul className="space-y-1">
+                                    {prediction.keyFactors.map((factor: string, idx: number) => (
+                                        <li key={idx} className="text-gray-300 text-sm flex items-start gap-2">
+                                            <span className="text-purple-400 mt-0.5">•</span>
+                                            <span>{factor}</span>
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         )}
 

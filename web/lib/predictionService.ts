@@ -11,14 +11,38 @@ export interface PredictionRequest {
     sport: 'basketball' | 'football';
 }
 
+
 export interface PredictionResult {
-    pick: string;
+    winner: string;
     confidence: number;
-    odds: string;
-    analysis: string;
-    wizardTip: string;
-    factors: string[];
+    reasoning: string;
+    bettingTip: string;
+    predictions?: {
+        finalScore: string;
+        totalGoals: string;
+        corners: {
+            home: number;
+            away: number;
+            total: number;
+        };
+        shots: {
+            home: number;
+            away: number;
+            onTarget: string;
+        };
+        cards: {
+            yellowCards: number;
+            redCards: number;
+            details: string;
+        };
+        offsides: {
+            total: number;
+            details: string;
+        };
+    };
+    keyFactors?: string[];
 }
+
 
 export async function generatePrediction(request: PredictionRequest): Promise<PredictionResult> {
     try {
@@ -58,7 +82,18 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
  * Generate mock prediction (for development/fallback)
  */
 function generateMockPrediction(request: PredictionRequest): PredictionResult {
-    const picks = [
+    const isFootball = request.sport === 'football';
+
+    // Sport-specific picks
+    const picks = isFootball ? [
+        `${request.homeTeam} ML`,
+        `${request.awayTeam} ML`,
+        `${request.homeTeam} -1`,
+        `${request.awayTeam} +1`,
+        'Over 2.5 Goals',
+        'Under 2.5 Goals',
+        'Both Teams to Score'
+    ] : [
         `${request.homeTeam} ML`,
         `${request.awayTeam} ML`,
         `${request.homeTeam} -5.5`,
@@ -70,7 +105,13 @@ function generateMockPrediction(request: PredictionRequest): PredictionResult {
     const randomPick = picks[Math.floor(Math.random() * picks.length)];
     const confidence = Math.floor(Math.random() * 30) + 65; // 65-95%
 
-    const factors = [
+    const factors = isFootball ? [
+        'Ventaja de local fuerte',
+        'Racha de 5 victorias consecutivas',
+        'Defensa sólida en casa',
+        'Lesiones clave en el equipo contrario',
+        'Dominio en enfrentamientos directos recientes'
+    ] : [
         'Ventaja de local fuerte',
         'Racha de 5 victorias consecutivas',
         'Defensa top 5 de la liga',
@@ -83,12 +124,11 @@ function generateMockPrediction(request: PredictionRequest): PredictionResult {
         .slice(0, 3);
 
     return {
-        pick: randomPick,
+        winner: randomPick,
         confidence,
-        odds: confidence > 80 ? '-150' : '+120',
-        analysis: `Basado en el análisis de datos históricos y tendencias recientes, ${randomPick} presenta una oportunidad sólida. Los factores clave incluyen el rendimiento reciente del equipo y las estadísticas de enfrentamientos directos.`,
-        wizardTip: `🧙‍♂️ El Mago recomienda: ${randomPick} con confianza ${confidence}%`,
-        factors: randomFactors
+        reasoning: `Basado en el análisis de datos históricos y tendencias recientes de ${isFootball ? 'fútbol' : 'baloncesto'}, ${randomPick} presenta una oportunidad sólida. Los factores clave incluyen el rendimiento reciente del equipo y las estadísticas de enfrentamientos directos.`,
+        bettingTip: `🧙‍♂️ ${isFootball ? 'Pronóstico de fútbol' : 'Pronóstico NBA'}: ${randomPick} con confianza ${confidence}%`,
+        keyFactors: randomFactors
     };
 }
 

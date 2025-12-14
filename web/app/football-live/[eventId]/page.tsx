@@ -33,66 +33,34 @@ export default function FootballGamePage() {
             try {
                 setLoading(true);
 
-                // Fetch game details, stats, lineups, incidents and h2h in parallel
-                const [detailsRes, statsRes, lineupsRes, incidentsRes, h2hRes] = await Promise.all([
-                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}`),
-                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/statistics`),
-                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/lineups`),
-                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/incidents`),
-                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/h2h/events`)
-                ]);
+                // Fetch game details from internal API (Server-side proxy to API-Sports)
+                const response = await fetch(`/api/football/match/${eventId}`);
 
-                if (!detailsRes.ok || !statsRes.ok) {
+                if (!response.ok) {
                     throw new Error('Error al cargar datos del partido');
                 }
 
-                const detailsData = await detailsRes.json();
-                const statsData = await statsRes.json();
-                const lineupsData = await lineupsRes.json();
-                const incidentsData = await incidentsRes.json();
-                const h2hData = await h2hRes.json();
+                const data = await response.json();
 
-                if (detailsData.event) {
-                    setGameDetails(detailsData.event);
+                if (data.event) {
+                    setGameDetails(data.event);
                 }
 
-                if (statsData.statistics) {
-                    setStats(statsData);
+                if (data.statistics) {
+                    setStats(data.statistics);
                 }
 
-                if (lineupsData) {
-                    setLineups(lineupsData);
+                if (data.lineups) {
+                    setLineups(data.lineups);
                 }
 
-                if (incidentsData.incidents) {
-                    setIncidents(incidentsData.incidents || []);
+                if (data.incidents) {
+                    setIncidents(data.incidents);
                 }
 
-                if (h2hData.events) {
-                    setH2h(h2hData.events || []);
-                }
-
-                // Fetch standings if we have tournament info
-                if (detailsData.event?.tournament) {
-                    const tournament = detailsData.event.tournament;
-                    const season = detailsData.event.season;
-
-                    if (tournament.id && season?.id) {
-                        const standingsRes = await fetch(
-                            `https://www.sofascore.com/api/v1/tournament/${tournament.id}/season/${season.id}/standings/total`
-                        );
-                        const standingsData = await standingsRes.json();
-
-                        if (standingsData.standings) {
-                            // Get the first standings group (usually the main league table)
-                            const mainStandings = standingsData.standings[0];
-                            if (mainStandings && mainStandings.rows) {
-                                setStandings(mainStandings.rows);
-                            }
-                        }
-                    }
-                }
-
+                // Placeholder for H2H/Standings to prevent UI errors
+                setH2h([]);
+                setStandings([]);
             } catch (err: any) {
                 setError(err.message);
             } finally {
@@ -157,10 +125,10 @@ export default function FootballGamePage() {
                     </Link>
 
                     {/* DASHBOARD GRID LAYOUT (3 Columnas) */}
-                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 w-full">
 
                         {/* COLUMNA IZQUIERDA: Jugadores Local (3 cols) */}
-                        <div className="xl:col-span-3 order-2 xl:order-1">
+                        <div className="md:col-span-3 order-2 md:order-1 min-w-0">
                             {lineups && lineups.home ? (
                                 <FootballPlayerStatsTable
                                     teamName={gameDetails.homeTeam.name}
@@ -174,7 +142,7 @@ export default function FootballGamePage() {
                         </div>
 
                         {/* COLUMNA CENTRAL: Stats Principales + IA (6 cols) */}
-                        <div className="xl:col-span-6 order-1 xl:order-2 space-y-4">
+                        <div className="md:col-span-6 order-1 md:order-2 space-y-4 min-w-0">
 
                             {/* Predicción de IA (Prioridad Alta) */}
                             <AIPredictionCard eventId={eventId} sport="football" />
@@ -231,28 +199,28 @@ export default function FootballGamePage() {
                                     <MatchPlayerStats eventId={parseInt(eventId as string)} sport="football" />
                                 </div>
                             </div>
-
-                            {/* COLUMNA DERECHA: Jugadores Visitante (3 cols) */}
-                            <div className="xl:col-span-3 order-3 xl:order-3">
-                                {lineups && lineups.away ? (
-                                    <FootballPlayerStatsTable
-                                        teamName={gameDetails.awayTeam.name}
-                                        players={lineups.away.players}
-                                    />
-                                ) : (
-                                    <div className="bg-gray-900 p-4 rounded text-center text-gray-500 text-sm">
-                                        Alineaciones no disponibles
-                                    </div>
-                                )}
-                            </div>
-
                         </div>
 
-                        <div className="mt-6 text-center pb-8">
-                            <p className="text-xs text-gray-600">
-                                {gameDetails.status.description} • Actualización cada 30 segundos
-                            </p>
+                        {/* COLUMNA DERECHA: Jugadores Visitante (3 cols) */}
+                        <div className="md:col-span-3 order-3 md:order-3 min-w-0">
+                            {lineups && lineups.away ? (
+                                <FootballPlayerStatsTable
+                                    teamName={gameDetails.awayTeam.name}
+                                    players={lineups.away.players}
+                                />
+                            ) : (
+                                <div className="bg-gray-900 p-4 rounded text-center text-gray-500 text-sm">
+                                    Alineaciones no disponibles
+                                </div>
+                            )}
                         </div>
+
+                    </div>
+
+                    <div className="mt-6 text-center pb-8">
+                        <p className="text-xs text-gray-600">
+                            {gameDetails.status.description} • Actualización cada 30 segundos
+                        </p>
                     </div>
                 </div>
             </div>
