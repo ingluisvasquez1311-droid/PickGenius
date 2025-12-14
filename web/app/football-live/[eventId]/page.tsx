@@ -8,6 +8,7 @@ import Navigation from '@/components/Navigation';
 import PossessionChart from '@/components/charts/PossessionChart';
 import AIPredictionCard from '@/components/ai/AIPredictionCard';
 import FootballPlayerStatsTable from '@/components/football/FootballPlayerStatsTable';
+import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
 import IncidentsTimeline from '@/components/football/IncidentsTimeline';
 import HeadToHead from '@/components/football/HeadToHead';
 import StandingsTable from '@/components/football/StandingsTable';
@@ -225,64 +226,35 @@ export default function FootballGamePage() {
                                     />
                                 )}
 
-                                {/* Top Performers */}
-                                {lineups && (() => {
-                                    // Extract all players with statistics
-                                    const allPlayers = [
-                                        ...(lineups.home?.players || []).map((p: any) => ({
-                                            ...p,
-                                            team: { name: gameDetails.homeTeam.name, shortName: gameDetails.homeTeam.shortName }
-                                        })),
-                                        ...(lineups.away?.players || []).map((p: any) => ({
-                                            ...p,
-                                            team: { name: gameDetails.awayTeam.name, shortName: gameDetails.awayTeam.shortName }
-                                        }))
-                                    ].filter(p => p.statistics);
-
-                                    // Top scorers
-                                    const topScorers = allPlayers
-                                        .filter(p => p.statistics?.goals && p.statistics.goals > 0)
-                                        .sort((a, b) => (b.statistics?.goals || 0) - (a.statistics?.goals || 0));
-
-                                    // Top assists
-                                    const topAssists = allPlayers
-                                        .filter(p => p.statistics?.assists && p.statistics.assists > 0)
-                                        .sort((a, b) => (b.statistics?.assists || 0) - (a.statistics?.assists || 0));
-
-                                    return (
-                                        <TopPerformers
-                                            topScorers={topScorers}
-                                            topAssists={topAssists}
-                                            isLive={gameDetails.status.type === 'inprogress'}
-                                        />
-                                    );
-                                })()}
-                            </div>
-                        </div>
-
-                        {/* COLUMNA DERECHA: Jugadores Visitante (3 cols) */}
-                        <div className="xl:col-span-3 order-3 xl:order-3">
-                            {lineups && lineups.away ? (
-                                <FootballPlayerStatsTable
-                                    teamName={gameDetails.awayTeam.name}
-                                    players={lineups.away.players}
-                                />
-                            ) : (
-                                <div className="bg-gray-900 p-4 rounded text-center text-gray-500 text-sm">
-                                    Alineaciones no disponibles
+                                {/* Best Players / Legends */}
+                                <div className="mt-4">
+                                    <MatchPlayerStats eventId={parseInt(eventId as string)} sport="football" />
                                 </div>
-                            )}
+                            </div>
+
+                            {/* COLUMNA DERECHA: Jugadores Visitante (3 cols) */}
+                            <div className="xl:col-span-3 order-3 xl:order-3">
+                                {lineups && lineups.away ? (
+                                    <FootballPlayerStatsTable
+                                        teamName={gameDetails.awayTeam.name}
+                                        players={lineups.away.players}
+                                    />
+                                ) : (
+                                    <div className="bg-gray-900 p-4 rounded text-center text-gray-500 text-sm">
+                                        Alineaciones no disponibles
+                                    </div>
+                                )}
+                            </div>
+
                         </div>
 
-                    </div>
-
-                    <div className="mt-6 text-center pb-8">
-                        <p className="text-xs text-gray-600">
-                            {gameDetails.status.description} • Actualización cada 30 segundos
-                        </p>
+                        <div className="mt-6 text-center pb-8">
+                            <p className="text-xs text-gray-600">
+                                {gameDetails.status.description} • Actualización cada 30 segundos
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </>
-    );
+            </>
+            );
 }

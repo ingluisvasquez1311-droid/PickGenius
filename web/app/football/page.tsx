@@ -4,19 +4,24 @@ import React, { useEffect, useState } from 'react';
 import MatchCard from '@/components/sports/MatchCard';
 import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
-import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
+
 import PredictionModal from '@/components/sports/PredictionModal';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { getFootballMatches, type FootballMatch } from '@/lib/footballDataService';
+import { sofascoreService, type SofascoreEvent } from '@/lib/services/sofascoreService';
 import { useAuth } from '@/contexts/AuthContext';
+
+// Type alias for compatibility
+type FootballMatch = SofascoreEvent;
 
 export default function FootballPage() {
   const [matchesByLeague, setMatchesByLeague] = useState<Record<string, FootballMatch[]>>({});
   const [loading, setLoading] = useState(true);
   const { user, addFavorite, removeFavorite } = useAuth();
 
-  // Selected Match for Stats Bubble
-  const [selectedMatch, setSelectedMatch] = useState<FootballMatch | null>(null);
+  // Filter State
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'live' | 'upcoming' | 'finished'>('all');
+
+
 
   // Collapsible Leagues State
   const [expandedLeagues, setExpandedLeagues] = useState<Record<string, boolean>>({});
@@ -34,11 +39,19 @@ export default function FootballPage() {
     async function fetchMatches() {
       setLoading(true);
       try {
-        const data = await getFootballMatches();
-        setMatchesByLeague(data);
-        // Leagues are collapsed by default, so we don't need to set expandedLeagues here
-        // as the default state is empty (all false)
+        const matches = await sofascoreService.getAllFootballMatches();
 
+        // Group matches by league/tournament name
+        const grouped = matches.reduce((acc, match) => {
+          const leagueName = match.tournament.uniqueTournament?.name || match.tournament.name;
+          if (!acc[leagueName]) {
+            acc[leagueName] = [];
+          }
+          acc[leagueName].push(match);
+          return acc;
+        }, {} as Record<string, FootballMatch[]>);
+
+        setMatchesByLeague(grouped);
       } catch (error) {
         console.error('Error fetching football matches:', error);
         setMatchesByLeague({});
@@ -81,31 +94,47 @@ export default function FootballPage() {
       id: match.id.toString(),
       homeTeam: match.homeTeam.name,
       awayTeam: match.awayTeam.name,
-      date: new Date(match.utcDate)
+      date: new Date(match.startTimestamp * 1000) // Convert Unix timestamp to Date
     });
     setIsModalOpen(true);
   };
 
   const handleMatchClick = (match: FootballMatch) => {
-    setSelectedMatch(match);
+    // Navigate to match detail page with Sofascore ID
+    window.location.href = `/football-live/${match.id}`;
   };
 
-  const mapStatus = (status: string): "Programado" | "En Vivo" | "Finalizado" => {
-    switch (status) {
-      case 'IN_PLAY':
-      case 'PAUSED':
+  const mapStatus = (status: FootballMatch['status']): "Programado" | "En Vivo" | "Finalizado" => {
+    switch (status.type) {
+      case 'inprogress':
         return 'En Vivo';
-      case 'FINISHED':
-      case 'AWARDED':
+      case 'finished':
         return 'Finalizado';
-      case 'TIMED':
-      case 'SCHEDULED':
+      case 'notstarted':
       default:
         return 'Programado';
     }
   };
 
-  const totalMatches = Object.values(matchesByLeague).reduce((acc, league) => acc + league.length, 0);
+  // Filter matches by status
+  const filterMatchesByStatus = (matches: FootballMatch[]) => {
+    if (selectedFilter === 'all') return matches;
+
+    return matches.filter(match => {
+      const status = mapStatus(match.status);
+      if (selectedFilter === 'live') return status === 'En Vivo';
+      if (selectedFilter === 'upcoming') return status === 'Programado';
+      if (selectedFilter === 'finished') return status === 'Finalizado';
+      return true;
+    });
+  };
+
+  // Calculate counts for each filter
+  const allMatches = Object.values(matchesByLeague).flat();
+  const liveCount = allMatches.filter(m => mapStatus(m.status) === 'En Vivo').length;
+  const upcomingCount = allMatches.filter(m => mapStatus(m.status) === 'Programado').length;
+  const finishedCount = allMatches.filter(m => mapStatus(m.status) === 'Finalizado').length;
+  const totalMatches = allMatches.length;
 
   return (
     <main className="min-h-screen pb-20 bg-[#0b0b0b]">
@@ -115,6 +144,47 @@ export default function FootballPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatWidget label="Partidos Hoy" value={totalMatches.toString()} icon="⚽" />
           <StatWidget label="Ligas Activas" value={Object.keys(matchesByLeague).length.toString()} icon="🏆" />
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap gap-3 mb-6 p-4 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl">
+          <button
+            onClick={() => setSelectedFilter('all')}
+            className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${selectedFilter === 'all'
+              ? 'bg-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/30'
+              : 'bg-[rgba(255,255,255,0.03)] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
+              }`}
+          >
+            Todos <span className="ml-2 opacity-70">({totalMatches})</span>
+          </button>
+          <button
+            onClick={() => setSelectedFilter('live')}
+            className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${selectedFilter === 'live'
+              ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
+              : 'bg-[rgba(255,255,255,0.03)] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
+              }`}
+          >
+            {selectedFilter === 'live' && <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>}
+            En Vivo <span className="ml-2 opacity-70">({liveCount})</span>
+          </button>
+          <button
+            onClick={() => setSelectedFilter('upcoming')}
+            className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${selectedFilter === 'upcoming'
+              ? 'bg-[var(--primary)] text-white shadow-lg shadow-[var(--primary)]/30'
+              : 'bg-[rgba(255,255,255,0.03)] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
+              }`}
+          >
+            Próximos <span className="ml-2 opacity-70">({upcomingCount})</span>
+          </button>
+          <button
+            onClick={() => setSelectedFilter('finished')}
+            className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 ${selectedFilter === 'finished'
+              ? 'bg-gray-600 text-white shadow-lg shadow-gray-600/30'
+              : 'bg-[rgba(255,255,255,0.03)] text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
+              }`}
+          >
+            Finalizados <span className="ml-2 opacity-70">({finishedCount})</span>
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -128,7 +198,11 @@ export default function FootballPage() {
               </div>
             ) : Object.keys(matchesByLeague).length > 0 ? (
               Object.entries(matchesByLeague).map(([league, leagueMatches]) => {
+                const filteredMatches = filterMatchesByStatus(leagueMatches);
                 const isExpanded = expandedLeagues[league];
+
+                // Skip leagues with no matches after filtering
+                if (filteredMatches.length === 0) return null;
 
                 return (
                   <div key={league} className="mb-4">
@@ -142,7 +216,7 @@ export default function FootballPage() {
                           {league}
                         </h2>
                         <span className="text-xs font-bold bg-[var(--primary)] bg-opacity-20 text-[var(--primary)] px-2 py-0.5 rounded-full border border-[var(--primary)] border-opacity-30">
-                          {leagueMatches.length}
+                          {filteredMatches.length}
                         </span>
                       </div>
 
@@ -171,25 +245,24 @@ export default function FootballPage() {
                           </div>
                         </div>
 
-                        {leagueMatches.map((match) => {
+                        {filteredMatches.map((match) => {
                           const isHomeFavorite = user?.favoriteTeams.includes(match.homeTeam.name);
                           const isAwayFavorite = user?.favoriteTeams.includes(match.awayTeam.name);
                           const isFavorite = isHomeFavorite || isAwayFavorite;
-                          const isSelected = selectedMatch?.id === match.id;
 
                           return (
                             <div
                               key={match.id}
                               onClick={() => handleMatchClick(match)}
-                              className={`cursor-pointer transition-all duration-200 ${isSelected ? 'ring-2 ring-[var(--primary)] rounded-xl transform scale-[1.01]' : 'hover:bg-[rgba(255,255,255,0.02)] rounded-xl'}`}
+                              className="cursor-pointer transition-all duration-200 hover:bg-[rgba(255,255,255,0.02)] rounded-xl"
                             >
                               <MatchCard
                                 homeTeam={match.homeTeam.name}
                                 awayTeam={match.awayTeam.name}
-                                date={match.utcDate}
+                                date={new Date(match.startTimestamp * 1000).toISOString()}
                                 league={league}
-                                homeScore={match.score.fullTime.home}
-                                awayScore={match.score.fullTime.away}
+                                homeScore={match.homeScore.current}
+                                awayScore={match.awayScore.current}
                                 status={mapStatus(match.status)}
                                 isFavorite={isFavorite}
                                 onFavoriteToggle={() => {
@@ -216,8 +289,7 @@ export default function FootballPage() {
           {/* SIDEBAR COLUMN (Widgets) - Spans 4 cols */}
           <div className="lg:col-span-4 flex flex-col gap-6">
 
-            {/* Dynamic Match Stats Bubble */}
-            <MatchStatsSummary match={selectedMatch} />
+
 
             {/* Wizard's Corner */}
             <div className="glass-card p-1 border border-[var(--secondary)]">

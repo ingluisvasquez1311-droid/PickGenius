@@ -1,258 +1,165 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import BasketballStats from '@/components/basketball/BasketballStats';
-import Link from 'next/link';
-import StatRadarChart from '@/components/charts/StatRadarChart';
-import PeriodScoreChart from '@/components/charts/PeriodScoreChart';
+import React, { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
-import PlayerStatsTable from '@/components/basketball/PlayerStatsTable';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import AIPredictionCard from '@/components/ai/AIPredictionCard';
+import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
 
-import { API_URL } from '@/lib/api';
-
-export default function BasketballGamePage() {
+export default function BasketballLivePage() {
     const params = useParams();
+    const router = useRouter();
     const eventId = params.eventId as string;
 
-    const [gameDetails, setGameDetails] = useState<any>(null);
-    const [stats, setStats] = useState<any>(null);
-    const [lineups, setLineups] = useState<any>(null);
+    const [game, setGame] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        async function fetchGameData() {
+        async function fetchGameDetails() {
+            if (!eventId) return;
+
             try {
-                setLoading(true);
-
-                // Fetch game details, stats and lineups in parallel
-                const [detailsRes, statsRes, lineupsRes] = await Promise.all([
-                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}`),
-                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/statistics`),
-                    fetch(`https://www.sofascore.com/api/v1/event/${eventId}/lineups`)
-                ]);
-
-                if (!detailsRes.ok || !statsRes.ok) {
-                    throw new Error('Error al cargar datos del partido');
+                const response = await fetch(`https://api.sofascore.com/api/v1/event/${eventId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setGame(data.event);
                 }
-
-                const detailsData = await detailsRes.json();
-                const statsData = await statsRes.json();
-                const lineupsData = await lineupsRes.json();
-
-                if (detailsData.event) {
-                    setGameDetails(detailsData.event);
-                }
-
-                if (statsData.statistics) {
-                    // Parse statistics
-                    const parsed: any = { periods: [] };
-                    statsData.statistics.forEach((periodStat: any) => {
-                        const periodData: any = {
-                            period: periodStat.period,
-                            scoring: {},
-                            rebounds: {},
-                            other: {}
-                        };
-
-                        periodStat.groups.forEach((group: any) => {
-                            const groupName = group.groupName;
-                            group.statisticsItems.forEach((item: any) => {
-                                const statData = {
-                                    name: item.name,
-                                    home: item.home,
-                                    away: item.away,
-                                    homeValue: item.homeValue,
-                                    awayValue: item.awayValue,
-                                    homeTotal: item.homeTotal,
-                                    awayTotal: item.awayTotal,
-                                    compareCode: item.compareCode
-                                };
-
-                                if (groupName === 'Scoring') {
-                                    periodData.scoring[item.name] = statData;
-                                } else if (groupName === 'Rebounds') {
-                                    periodData.rebounds[item.name] = statData;
-                                } else {
-                                    periodData.other[item.name] = statData;
-                                }
-                            });
-                        });
-
-                        parsed.periods.push(periodData);
-                    });
-                    setStats(parsed);
-                }
-
-                if (lineupsData) {
-                    setLineups(lineupsData);
-                }
-            } catch (err: any) {
-                setError(err.message);
+            } catch (error) {
+                console.error('Error fetching game details:', error);
             } finally {
                 setLoading(false);
             }
         }
 
-        fetchGameData();
-
-        // Auto-refresh cada 30 segundos para partidos en vivo
-        const interval = setInterval(fetchGameData, 30000);
-
-        return () => clearInterval(interval);
+        fetchGameDetails();
     }, [eventId]);
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-gray-400">Cargando partido...</p>
+            <div className="min-h-screen bg-[#0b0b0b] pb-20">
+                <Navigation />
+                <div className="container pt-24">
+                    <SkeletonLoader />
                 </div>
             </div>
         );
     }
 
-    if (error || !stats || !gameDetails) {
+    if (!game) {
         return (
-            <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-                <div className="text-center text-red-400">
-                    <p className="text-xl mb-2">❌ Error</p>
-                    <p className="text-sm">{error || 'No se pudieron cargar los datos'}</p>
-                    <Link
-                        href="/basketball-live"
-                        className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                        Volver a la lista
-                    </Link>
+            <div className="min-h-screen bg-[#0b0b0b] pb-20 flex items-center justify-center">
+                <Navigation />
+                <div className="text-center">
+                    <h2 className="text-xl font-bold">Partido no encontrado</h2>
+                    <button onClick={() => router.back()} className="mt-4 btn-primary px-4 py-2 rounded">
+                        Volver
+                    </button>
                 </div>
             </div>
         );
     }
 
-    // Preparar datos para el gráfico de radar
-    const allPeriodStats = stats.periods.find((p: any) => p.period === 'ALL');
-    const radarData = allPeriodStats ? [
-        {
-            label: 'FG%',
-            home: parseFloat(allPeriodStats.scoring['Field goals']?.homeValue || 0),
-            away: parseFloat(allPeriodStats.scoring['Field goals']?.awayValue || 0),
-            fullMark: 100
-        },
-        {
-            label: '3PT%',
-            home: parseFloat(allPeriodStats.scoring['3 pointers']?.homeValue || 0),
-            away: parseFloat(allPeriodStats.scoring['3 pointers']?.awayValue || 0),
-            fullMark: 100
-        },
-        {
-            label: 'FT%',
-            home: parseFloat(allPeriodStats.scoring['Free throws']?.homeValue || 0),
-            away: parseFloat(allPeriodStats.scoring['Free throws']?.awayValue || 0),
-            fullMark: 100
-        },
-        {
-            label: 'Rebotes',
-            home: parseInt(allPeriodStats.rebounds['Rebounds']?.home || 0),
-            away: parseInt(allPeriodStats.rebounds['Rebounds']?.away || 0),
-            fullMark: 60
-        },
-        {
-            label: 'Asistencias',
-            home: parseInt(allPeriodStats.other['Assists']?.home || 0),
-            away: parseInt(allPeriodStats.other['Assists']?.away || 0),
-            fullMark: 40
-        },
-    ] : [];
-
-    // Preparar datos para el gráfico de periodos
-    const periodData = stats.periods
-        .filter((p: any) => ['Q1', 'Q2', 'Q3', 'Q4', 'OT'].includes(p.period))
-        .map((p: any) => ({
-            name: p.period,
-            home: parseInt(p.scoring['Points']?.home || 0),
-            away: parseInt(p.scoring['Points']?.away || 0)
-        }));
+    const isLive = game.status.type === 'inprogress';
 
     return (
-        <>
+        <div className="min-h-screen bg-[#0b0b0b] pb-20">
             <Navigation />
-            <div className="min-h-screen bg-gray-950 py-4 overflow-x-hidden">
-                <div className="container mx-auto px-2 max-w-[1600px]">
-                    <Link
-                        href="/basketball-live"
-                        className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-4 text-sm"
-                    >
-                        ← Volver
-                    </Link>
 
-                    {/* DASHBOARD GRID LAYOUT */}
-                    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-
-                        {/* COLUMNA IZQUIERDA: Jugadores Local (3 cols) */}
-                        <div className="xl:col-span-3 order-2 xl:order-1">
-                            {lineups && (
-                                <PlayerStatsTable
-                                    teamName={gameDetails.homeTeam.name}
-                                    players={lineups.home.players}
-                                />
-                            )}
-                        </div>
-
-                        {/* COLUMNA CENTRAL: Stats Principales + IA (6 cols) */}
-                        <div className="xl:col-span-6 order-1 xl:order-2 space-y-4">
-
-                            {/* Predicción de IA (Prioridad Alta) */}
-                            <AIPredictionCard eventId={eventId} sport="basketball" />
-
-                            {/* Estadísticas Generales (Barras) */}
-                            <BasketballStats
-                                eventId={eventId}
-                                homeTeam={gameDetails.homeTeam.name}
-                                awayTeam={gameDetails.awayTeam.name}
-                                stats={stats}
-                            />
-
-                            {/* Gráficos Visuales */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {radarData.length > 0 && (
-                                    <StatRadarChart
-                                        homeTeam={gameDetails.homeTeam.name}
-                                        awayTeam={gameDetails.awayTeam.name}
-                                        stats={radarData}
-                                    />
-                                )}
-                                {periodData.length > 0 && (
-                                    <PeriodScoreChart
-                                        homeTeam={gameDetails.homeTeam.name}
-                                        awayTeam={gameDetails.awayTeam.name}
-                                        periods={periodData}
-                                    />
-                                )}
+            <div className="container pt-24 md:pt-28">
+                {/* Header / Scoreboard */}
+                <div className="glass-card p-6 mb-6">
+                    <div className="flex justify-between items-center text-center">
+                        <div className="flex-1">
+                            <h2 className="text-xl md:text-3xl font-bold mb-2">{game.homeTeam.name}</h2>
+                            <div className="text-4xl md:text-6xl font-bold font-mono">
+                                {game.homeScore?.current || 0}
                             </div>
                         </div>
 
-                        {/* COLUMNA DERECHA: Jugadores Visitante (3 cols) */}
-                        <div className="xl:col-span-3 order-3 xl:order-3">
-                            {lineups && (
-                                <PlayerStatsTable
-                                    teamName={gameDetails.awayTeam.name}
-                                    players={lineups.away.players}
-                                />
-                            )}
+                        <div className="px-4">
+                            <div className={`text-sm font-bold uppercase tracking-wider mb-2 ${isLive ? 'text-red-500 animate-pulse' : 'text-[var(--text-muted)]'}`}>
+                                {isLive ? 'EN VIVO' : game.status.description}
+                            </div>
+                            <div className="text-xs text-[var(--text-muted)]">
+                                {new Date(game.startTimestamp * 1000).toLocaleDateString()}
+                            </div>
+                        </div>
+
+                        <div className="flex-1">
+                            <h2 className="text-xl md:text-3xl font-bold mb-2">{game.awayTeam.name}</h2>
+                            <div className="text-4xl md:text-6xl font-bold font-mono">
+                                {game.awayScore?.current || 0}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                    {/* Main Content - 8 cols */}
+                    <div className="lg:col-span-8 space-y-6">
+
+                        {/* AI Prediction */}
+                        <AIPredictionCard
+                            sport="basketball"
+                            eventId={eventId}
+                        />
+
+                        {/* Best Players (Legends) */}
+                        <MatchPlayerStats eventId={parseInt(eventId)} sport="basketball" />
+
+                        {/* Quarter Scores Table (Simple) */}
+                        <div className="glass-card p-4">
+                            <h3 className="text-sm font-bold uppercase mb-4 border-b border-[rgba(255,255,255,0.1)] pb-2">Marcador por Cuartos</h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="text-[var(--text-muted)] border-b border-[rgba(255,255,255,0.05)]">
+                                            <th className="text-left py-2">Equipo</th>
+                                            <th className="text-center py-2">C1</th>
+                                            <th className="text-center py-2">C2</th>
+                                            <th className="text-center py-2">C3</th>
+                                            <th className="text-center py-2">C4</th>
+                                            <th className="text-right py-2 font-bold">T</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className="border-b border-[rgba(255,255,255,0.05)]">
+                                            <td className="py-2 font-bold">{game.homeTeam.name}</td>
+                                            <td className="text-center">{game.homeScore?.period1}</td>
+                                            <td className="text-center">{game.homeScore?.period2}</td>
+                                            <td className="text-center">{game.homeScore?.period3}</td>
+                                            <td className="text-center">{game.homeScore?.period4}</td>
+                                            <td className="text-right font-bold text-lg">{game.homeScore?.current}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="py-2 font-bold">{game.awayTeam.name}</td>
+                                            <td className="text-center">{game.awayScore?.period1}</td>
+                                            <td className="text-center">{game.awayScore?.period2}</td>
+                                            <td className="text-center">{game.awayScore?.period3}</td>
+                                            <td className="text-center">{game.awayScore?.period4}</td>
+                                            <td className="text-right font-bold text-lg">{game.awayScore?.current}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                     </div>
 
-                    <div className="mt-6 text-center pb-8">
-                        <p className="text-xs text-gray-600">
-                            {gameDetails.status.description} • Actualización en tiempo real
-                        </p>
+                    {/* Sidebar - 4 cols */}
+                    <div className="lg:col-span-4 space-y-6">
+                        {/* Additional widgets can go here */}
+                        <div className="glass-card p-6 flex flex-col items-center justify-center text-center opacity-70">
+                            <span className="text-3xl mb-2">📊</span>
+                            <h3 className="font-bold">Estadísticas Detalladas</h3>
+                            <p className="text-sm text-[var(--text-muted)]">Próximamente más datos en vivo</p>
+                        </div>
                     </div>
+
                 </div>
             </div>
-        </>
+        </div>
     );
 }

@@ -9,13 +9,13 @@ export default function Navbar() {
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 glass-card border-b border-[rgba(255,255,255,0.1)]">
             <div className="container flex justify-between items-center py-4">
-                <Link href="/" className="text-2xl font-bold">
-                    Pick<span className="text-gradient">Genius</span>
+                <Link href="/" className="flex items-center gap-2">
+                    <img src="/logo/logo-full.svg" alt="PickGenius" className="h-10 w-auto" />
                 </Link>
 
                 <div className="flex gap-6 items-center">
-                    <Link href="/nba" className="hover:text-[var(--primary)] transition-colors">🏀 NBA</Link>
-                    <Link href="/football" className="hover:text-[var(--primary)] transition-colors">⚽ Fútbol</Link>
+                    <Link href="/basketball-live" className="hover:text-[var(--primary)] transition-colors">🏀 Baloncesto</Link>
+                    <Link href="/football-live" className="hover:text-[var(--primary)] transition-colors">⚽ Fútbol</Link>
 
                     {!loading && (
                         user ? (

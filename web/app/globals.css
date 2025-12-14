@@ -5,29 +5,24 @@
 @tailwind utilities;
 
 :root {
-  /* Brand Colors */
-  --primary: #00ff9d;
-  /* Neon Green */
-  --primary-glow: rgba(0, 255, 157, 0.5);
-  --secondary: #7000ff;
-  /* Electric Purple */
-  --accent: #00d2ff;
-  /* Cyan */
-
-  /* Backgrounds */
-  --bg-dark: #0a0a0a;
-  --bg-card: rgba(255, 255, 255, 0.05);
-  --bg-card-hover: rgba(255, 255, 255, 0.1);
-
-  /* Text */
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  
+  /* Brand Colors - Vibrant & Professional */
+  --primary: #a855f7;  /* Purple 500 */
+  --primary-dark: #7e22ce;
+  --accent: #06b6d4;   /* Cyan 500 */
+  --success: #10b981;  /* Emerald 500 */
+  --warning: #f59e0b;  /* Amber 500 */
+  --danger: #ef4444;   /* Red 500 */
+  
+  /* UI Colors */
+  --surface: #171717;
+  --surface-highlight: #262626;
+  --border: rgba(255, 255, 255, 0.1);
   --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-muted: #666666;
-
-  /* Status */
-  --success: #00ff9d;
-  --warning: #ffd700;
-  --danger: #ff4d4d;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
 }
 
 * {

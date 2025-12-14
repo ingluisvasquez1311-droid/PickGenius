@@ -5,18 +5,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   outputFileTracingRoot: path.join(__dirname, "../"),
   async rewrites() {
-    const backendHost = process.env.NEXT_PUBLIC_BACKEND_HOST;
-    const backendUrl = backendHost ? `https://${backendHost}` : 'http://localhost:3001';
-    return [
-      {
-        source: '/api/football/live',
-        destination: `${backendUrl}/api/sofascore/football/live`,
-      },
-      {
-        source: '/api/basketball/live',
-        destination: `${backendUrl}/api/sofascore/basketball/live`,
-      }
-    ];
+    return [];
   },
 };
 

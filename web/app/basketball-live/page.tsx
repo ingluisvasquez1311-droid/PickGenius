@@ -25,33 +25,50 @@ export default function BasketballLivePage() {
                 const data = await response.json();
 
                 if (data.success && data.data) {
-                    // Map NBA API format to our format
-                    const events = data.data.map((item: any) => ({
-                        id: item.id,
-                        tournament: {
-                            name: 'NBA',
-                            uniqueTournament: { name: 'NBA' }
-                        },
-                        homeTeam: {
-                            id: item.teams.home.id,
-                            name: item.teams.home.name
-                        },
-                        awayTeam: {
-                            id: item.teams.visitors.id,
-                            name: item.teams.visitors.name
-                        },
-                        homeScore: {
-                            current: item.scores.home.points
-                        },
-                        awayScore: {
-                            current: item.scores.visitors.points
-                        },
-                        status: {
-                            type: item.status.long === 'Scheduled' ? 'notstarted' :
-                                item.status.long === 'Finished' ? 'finished' : 'inprogress',
-                            description: item.status.long
+                    // Detect data format (Sofascore or API-NBA)
+                    const events = data.data.map((item: any) => {
+                        // Sofascore Format (Native from Backend)
+                        if (item.tournament && item.homeTeam && item.awayTeam) {
+                            return {
+                                id: item.id,
+                                tournament: item.tournament,
+                                homeTeam: item.homeTeam,
+                                awayTeam: item.awayTeam,
+                                homeScore: item.homeScore || { current: 0 },
+                                awayScore: item.awayScore || { current: 0 },
+                                status: item.status,
+                                startTimestamp: item.startTimestamp
+                            };
                         }
-                    }));
+
+                        // API-NBA Format (Legacy/Fallback)
+                        return {
+                            id: item.id,
+                            tournament: {
+                                name: 'NBA',
+                                uniqueTournament: { name: 'NBA' }
+                            },
+                            homeTeam: {
+                                id: item.teams.home.id,
+                                name: item.teams.home.name
+                            },
+                            awayTeam: {
+                                id: item.teams.visitors.id,
+                                name: item.teams.visitors.name
+                            },
+                            homeScore: {
+                                current: item.scores.home.points
+                            },
+                            awayScore: {
+                                current: item.scores.visitors.points
+                            },
+                            status: {
+                                type: item.status.long === 'Scheduled' ? 'notstarted' :
+                                    item.status.long === 'Finished' ? 'finished' : 'inprogress',
+                                description: item.status.long
+                            }
+                        };
+                    });
 
                     // Filter NBA only
                     const professionalEvents = events.filter((event: any) => {

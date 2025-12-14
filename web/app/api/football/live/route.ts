@@ -1,41 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sofaScoreFootballService } from '@/lib/services/sofaScoreFootballService';
 
-// Football Live API Route - Dec 7, 2025
-const API_KEY = process.env.FOOTBALL_API_KEY || process.env.NEXT_PUBLIC_FOOTBALL_API_KEY;
-const BASE_URL = 'https://v3.football.api-sports.io';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
     try {
-        if (!API_KEY) {
+        const result = await sofaScoreFootballService.getLiveEvents();
+
+        if (!result.success) {
             return NextResponse.json({
                 success: false,
-                error: 'API key not configured'
+                error: result.error
             }, { status: 500 });
         }
 
-        const today = new Date().toISOString().split('T')[0];
-
-        const response = await fetch(`${BASE_URL}/fixtures?date=${today}&season=2024`, {
-            headers: {
-                'x-apisports-key': API_KEY
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`API-Sports error: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        const leagueIds = [39, 140, 135, 78, 61];
-        const matches = data.response?.filter((item: any) =>
-            leagueIds.includes(item.league.id)
-        ) || [];
-
         return NextResponse.json({
             success: true,
-            data: matches,
-            count: matches.length
+            data: result.data || [],
+            count: Array.isArray(result.data) ? result.data.length : 0
         });
     } catch (error: any) {
         return NextResponse.json({

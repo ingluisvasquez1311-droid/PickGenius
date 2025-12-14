@@ -21,34 +21,51 @@ export default function FootballLivePage() {
                 const data = await response.json();
 
                 if (response.ok && data.success && data.data) {
-                    // Map API-Sports format to our format
-                    const events = data.data.map((item: any) => ({
-                        id: item.fixture.id,
-                        tournament: {
-                            name: item.league.name,
-                            uniqueTournament: { name: item.league.name }
-                        },
-                        homeTeam: {
-                            id: item.teams.home.id,
-                            name: item.teams.home.name
-                        },
-                        awayTeam: {
-                            id: item.teams.away.id,
-                            name: item.teams.away.name
-                        },
-                        homeScore: {
-                            current: item.goals.home
-                        },
-                        awayScore: {
-                            current: item.goals.away
-                        },
-                        status: {
-                            type: item.fixture.status.short === 'NS' ? 'notstarted' :
-                                item.fixture.status.short === 'FT' ? 'finished' : 'inprogress',
-                            description: item.fixture.status.long
-                        },
-                        startTimestamp: new Date(item.fixture.date).getTime() / 1000
-                    }));
+                    // Detect data format (Sofascore or API-Sports)
+                    const events = data.data.map((item: any) => {
+                        // Sofascore Format (Native from Backend)
+                        if (item.tournament && item.homeTeam && item.awayTeam) {
+                            return {
+                                id: item.id,
+                                tournament: item.tournament,
+                                homeTeam: item.homeTeam,
+                                awayTeam: item.awayTeam,
+                                homeScore: item.homeScore || { current: 0 },
+                                awayScore: item.awayScore || { current: 0 },
+                                status: item.status,
+                                startTimestamp: item.startTimestamp
+                            };
+                        }
+
+                        // API-Sports Format (Legacy/Fallback)
+                        return {
+                            id: item.fixture.id,
+                            tournament: {
+                                name: item.league.name,
+                                uniqueTournament: { name: item.league.name }
+                            },
+                            homeTeam: {
+                                id: item.teams.home.id,
+                                name: item.teams.home.name
+                            },
+                            awayTeam: {
+                                id: item.teams.away.id,
+                                name: item.teams.away.name
+                            },
+                            homeScore: {
+                                current: item.goals.home
+                            },
+                            awayScore: {
+                                current: item.goals.away
+                            },
+                            status: {
+                                type: item.fixture.status.short === 'NS' ? 'notstarted' :
+                                    item.fixture.status.short === 'FT' ? 'finished' : 'inprogress',
+                                description: item.fixture.status.long
+                            },
+                            startTimestamp: new Date(item.fixture.date).getTime() / 1000
+                        };
+                    });
 
                     setEvents(events);
                 } else {
