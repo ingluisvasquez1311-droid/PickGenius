@@ -1,4 +1,4 @@
-import { getFootballMatches as getFootballGames } from './footballDataService';
+import { sofaScoreFootballService } from './services/sofaScoreFootballService';
 import { getTodayGames as getNBAGames } from './nbaDataService';
 import { PredictionResult, generatePrediction } from './predictionService';
 import { getCachedOrFetch } from './apiCache';
@@ -28,11 +28,10 @@ export async function getWizardPick(sport: 'nba' | 'football'): Promise<WizardPi
             let todayMatches: any[] = [];
 
             if (sport === 'football') {
-                const matchesByLeague = await getFootballGames();
-                // Flatten the matches object into an array
-                Object.values(matchesByLeague).forEach(leagueMatches => {
-                    todayMatches = [...todayMatches, ...leagueMatches];
-                });
+                const response = await sofaScoreFootballService.getLiveEvents();
+                if (response.success && response.data?.events) {
+                    todayMatches = response.data.events;
+                }
             } else {
                 todayMatches = await getNBAGames();
             }
@@ -102,11 +101,10 @@ export async function getWizardPicks(sport: 'nba' | 'football', count: number = 
             let todayMatches: any[] = [];
 
             if (sport === 'football') {
-                const matchesByLeague = await getFootballGames();
-                // Flatten the matches object into an array
-                Object.values(matchesByLeague).forEach(leagueMatches => {
-                    todayMatches = [...todayMatches, ...leagueMatches];
-                });
+                const response = await sofaScoreFootballService.getLiveEvents();
+                if (response.success && response.data?.events) {
+                    todayMatches = response.data.events;
+                }
             } else {
                 todayMatches = await getNBAGames();
             }
