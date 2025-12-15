@@ -1,7 +1,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ToastProvider from "@/components/ui/ToastProvider";
-// import LiveTicker from "@/components/sports/LiveTicker"; // Temporarily disabled
+import LiveTicker from "@/components/sports/LiveTicker";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -65,8 +65,8 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <BettingSlipProvider>
-            {/* <LiveTicker /> */}
             <Navbar />
+            <LiveTicker />
             {children}
             <Footer />
             <ToastProvider />

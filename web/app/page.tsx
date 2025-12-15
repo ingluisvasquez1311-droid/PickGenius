@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { API_URL } from '@/lib/api';
+import Image from 'next/image';
 
 interface SportStats {
   liveEvents: number;
@@ -17,7 +17,6 @@ export default function HomePage() {
     async function fetchStats() {
       try {
         // Fetch basketball events
-        // const basketballRes = await fetch(`${API_URL}/api/sofascore/basketball/live`);
         const basketballRes = await fetch('/api/basketball/live');
         const basketballData = await basketballRes.json();
 
@@ -34,7 +33,6 @@ export default function HomePage() {
         }
 
         // Fetch football events
-        // const footballRes = await fetch(`${API_URL}/api/sofascore/football/live`);
         const footballRes = await fetch('/api/football/live');
         const footballData = await footballRes.json();
 
@@ -53,106 +51,158 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
-  const sportCards = [
-    {
-      title: 'Baloncesto',
-      icon: '🏀',
-      href: '/basketball-live',
-      stats: basketballStats,
-      color: 'from-blue-600 to-blue-800',
-      hoverColor: 'hover:from-blue-500 hover:to-blue-700',
-    },
-    {
-      title: 'Fútbol',
-      icon: '⚽',
-      href: '/football-live',
-      stats: footballStats,
-      color: 'from-green-600 to-green-800',
-      hoverColor: 'hover:from-green-500 hover:to-green-700',
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-gray-950">
-      <div className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-4">
-            📊 PickGenius Estadísticas en Vivo
+    <div className="min-h-screen bg-[#050505] overflow-hidden relative selection:bg-purple-500/30">
+
+      {/* Background Ambience */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[40%] left-[50%] transform -translate-x-1/2 w-[60%] h-[40%] bg-indigo-900/10 rounded-full blur-[100px]"></div>
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20 bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+      </div>
+
+      <div className="container mx-auto px-4 pt-32 pb-20 relative z-10">
+
+        {/* HERO SECTION */}
+        <div className="flex flex-col items-center text-center mb-24">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-purple-300 mb-6 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-700">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+            </span>
+            IA V2.0 ACTIVADA
+          </div>
+
+          <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tight leading-[0.9] text-white animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+            DOMINA EL <br />
+            <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent bg-[200%_auto] animate-aurora">
+              JUEGO
+            </span>
           </h1>
-          <p className="text-xl text-gray-400 mb-8">
-            Estadísticas en tiempo real de tus deportes favoritos
+
+          <p className="text-xl text-gray-400 max-w-2xl mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+            Predicciones deportivas con inteligencia artificial y estadísticas en tiempo real.
+            <span className="text-white font-semibold"> Deja de adivinar, empieza a ganar.</span>
           </p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-full text-sm text-gray-400">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            Datos en tiempo real
-          </div>
-        </div>
 
-        {/* Sport Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
-          {sportCards.map((sport) => (
-            <Link
-              key={sport.href}
-              href={sport.href}
-              className={`
-                  relative overflow-hidden rounded-2xl p-8 
-                  bg-gradient-to-br ${sport.color} ${sport.hoverColor}
-                  transform transition-all duration-300 hover:scale-105
-                  shadow-2xl hover:shadow-3xl
-                `}
-            >
-              <div className="relative z-10">
-                <div className="text-6xl mb-4">{sport.icon}</div>
-                <h2 className="text-3xl font-bold text-white mb-2">
-                  {sport.title}
-                </h2>
-                <div className="flex items-baseline gap-2 mb-4">
-                  {sport.stats.loading ? (
-                    <div className="text-gray-300">Cargando...</div>
-                  ) : (
-                    <>
-                      <span className="text-5xl font-bold text-white">
-                        {sport.stats.liveEvents}
-                      </span>
-                      <span className="text-gray-200">eventos en vivo</span>
-                    </>
-                  )}
-                </div>
-                <div className="inline-flex items-center gap-2 text-white text-sm font-semibold">
-                  Ver estadísticas
-                  <span>→</span>
-                </div>
-              </div>
-
-              {/* Decorative circles */}
-              <div className="absolute -right-8 -top-8 w-32 h-32 bg-white opacity-10 rounded-full"></div>
-              <div className="absolute -left-4 -bottom-4 w-24 h-24 bg-white opacity-10 rounded-full"></div>
+          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+            <Link href="/football-live" className="group relative px-8 py-4 bg-white text-black font-bold rounded-xl hover:scale-105 transition-all duration-300 shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)]">
+              <span className="relative z-10 flex items-center gap-2">
+                Ver Fútbol en Vivo ⚽
+              </span>
             </Link>
-          ))}
-        </div>
-
-        {/* Features Section */}
-        <div className="max-w-4xl mx-auto">
-          <h3 className="text-2xl font-bold text-white text-center mb-8">
-            Características
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { icon: '⚡', title: 'Tiempo Real', desc: 'Actualización automática cada minuto' },
-              { icon: '📊', title: 'Estadísticas Detalladas', desc: 'Puntos, rebotes, asistencias y más' },
-              { icon: '🎯', title: 'Ligas Profesionales', desc: 'NBA, EuroLeague, LaLiga y más' },
-            ].map((feature, idx) => (
-              <div key={idx} className="bg-gray-800 rounded-lg p-6 text-center">
-                <div className="text-4xl mb-3">{feature.icon}</div>
-                <h4 className="text-lg font-semibold text-white mb-2">
-                  {feature.title}
-                </h4>
-                <p className="text-sm text-gray-400">{feature.desc}</p>
-              </div>
-            ))}
+            <Link href="/basketball-live" className="group px-8 py-4 bg-white/5 text-white border border-white/10 font-bold rounded-xl hover:bg-white/10 hover:border-white/20 transition-all duration-300 backdrop-blur-sm">
+              Ver Baloncesto 🏀
+            </Link>
           </div>
         </div>
+
+        {/* FLOATING STATS PREVIEW */}
+        <div className="relative h-[400px] w-full max-w-5xl mx-auto mb-32 hidden md:block">
+          {/* Card 1: Football - Left Floater */}
+          <div className="absolute top-10 left-0 w-80 glass-brutal rounded-2xl p-6 transform -rotate-6 animate-float z-20 hover:z-30 transition-all hover:scale-110 duration-500 cursor-default border-t-4 border-t-green-500">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center font-bold text-xs">LIV</div>
+                <span className="font-bold">Liverpool</span>
+              </div>
+              <span className="text-2xl font-mono font-bold">2</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center font-bold text-xs">CHE</div>
+                <span className="font-bold">Chelsea</span>
+              </div>
+              <span className="text-2xl font-mono font-bold">1</span>
+            </div>
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-green-400 font-bold">IA: Gana Liverpool</span>
+                <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">85% Confianza</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Basketball - Right Floater */}
+          <div className="absolute bottom-10 right-0 w-80 glass-brutal rounded-2xl p-6 transform rotate-6 animate-float-delayed z-20 hover:z-30 transition-all hover:scale-110 duration-500 cursor-default border-t-4 border-t-orange-500">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="font-bold">Lakers</span>
+              </div>
+              <span className="text-2xl font-mono font-bold">112</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-bold">Warriors</span>
+              </div>
+              <span className="text-2xl font-mono font-bold">108</span>
+            </div>
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden mb-2">
+                <div className="bg-orange-500 h-full w-[70%]"></div>
+              </div>
+              <span className="text-xs text-gray-400">Probabilidad de victoria: Lakers 70%</span>
+            </div>
+          </div>
+
+          {/* Card 3: Center Hero */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 glass-brutal rounded-2xl p-8 z-10 shadow-[0_0_100px_rgba(168,85,247,0.15)] text-center">
+            <div className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-2">Powered by Gemini AI</div>
+            <h3 className="text-3xl font-bold text-white mb-2">Estadísticas Smart</h3>
+            <p className="text-gray-400 text-sm mb-6">Analizamos millones de datos por segundo para darte la ventaja competitiva.</p>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white/5 rounded p-2">
+                <div className="text-xl font-bold text-white">92%</div>
+                <div className="text-[10px] text-gray-500">Precisión</div>
+              </div>
+              <div className="bg-white/5 rounded p-2">
+                <div className="text-xl font-bold text-white">12k</div>
+                <div className="text-[10px] text-gray-500">Partidos</div>
+              </div>
+              <div className="bg-white/5 rounded p-2">
+                <div className="text-xl font-bold text-white">24/7</div>
+                <div className="text-[10px] text-gray-500">Monitor</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* LIVE CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {/* Basketball */}
+          <Link href="/basketball-live" className="group relative overflow-hidden rounded-3xl bg-[#111] border border-white/10 hover:border-purple-500/50 transition-all duration-500 hover:shadow-[0_0_50px_rgba(168,85,247,0.2)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="p-8 relative z-10">
+              <div className="flex justify-between items-start mb-8">
+                <div className="p-3 bg-white/5 rounded-xl text-3xl">🏀</div>
+                <div className="flex flex-col items-end">
+                  <span className="text-xs font-bold text-gray-500 uppercase">En Vivo</span>
+                  <span className="text-2xl font-bold text-white tabular-nums">{basketballStats.liveEvents}</span>
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">Baloncesto</h3>
+              <p className="text-gray-400 text-sm">NBA, EuroLeague y ligas internacionales al instante.</p>
+            </div>
+          </Link>
+
+          {/* Football */}
+          <Link href="/football-live" className="group relative overflow-hidden rounded-3xl bg-[#111] border border-white/10 hover:border-green-500/50 transition-all duration-500 hover:shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="p-8 relative z-10">
+              <div className="flex justify-between items-start mb-8">
+                <div className="p-3 bg-white/5 rounded-xl text-3xl">⚽</div>
+                <div className="flex flex-col items-end">
+                  <span className="text-xs font-bold text-gray-500 uppercase">En Vivo</span>
+                  <span className="text-2xl font-bold text-white tabular-nums">{footballStats.liveEvents}</span>
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-green-400 transition-colors">Fútbol</h3>
+              <p className="text-gray-400 text-sm">Resultados, estadísticas y predicciones de las mejores ligas.</p>
+            </div>
+          </Link>
+        </div>
+
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import confetti from 'canvas-confetti';
 import { generatePrediction } from '@/lib/predictionService';
 
 import { API_URL } from '@/lib/api';
@@ -32,6 +33,20 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             if (result) {
                 setPrediction(result);
                 toast.success('¡Predicción generada con éxito!', { id: toastId });
+
+                // Trigger Confetti if confidence is high
+                if (result.confidence && (
+                    (typeof result.confidence === 'number' && result.confidence >= 75) ||
+                    (typeof result.confidence === 'string' && parseInt(result.confidence) >= 75)
+                )) {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#a855f7', '#06b6d4', '#ffffff'] // Brand colors
+                    });
+                }
+
             } else {
                 setError('No se pudo generar la predicción');
                 toast.error('No se pudo generar la predicción', { id: toastId });
