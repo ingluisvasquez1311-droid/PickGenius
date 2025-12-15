@@ -5,8 +5,8 @@ export const revalidate = 0;
 
 const BASE_URL = 'https://api.sofascore.com/api/v1';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-    const { id } = params;
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
 
     if (!id) {
         return NextResponse.json({ success: false, error: 'Match ID is required' }, { status: 400 });
