@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function AdminPage() {
     const { user } = useAuth();
-    
+
     // Mock Data for the Admin View
     const users = [
         { id: 1, email: 'usuario1@example.com', plan: 'Premium (Trial)', status: 'Active', joined: '2023-12-01' },
@@ -74,8 +74,8 @@ export default function AdminPage() {
                                         <td className="p-4 font-medium text-white">{u.email}</td>
                                         <td className="p-4">
                                             <span className={`px-2 py-1 rounded text-xs font-bold 
-                                                ${u.plan.includes('Premium') ? 'bg-purple-500/20 text-purple-300' : 
-                                                  u.plan === 'Admin' ? 'bg-red-500/20 text-red-300' : 'bg-gray-700 text-gray-300'}`}>
+                                                ${u.plan.includes('Premium') ? 'bg-purple-500/20 text-purple-300' :
+                                                    u.plan === 'Admin' ? 'bg-red-500/20 text-red-300' : 'bg-gray-700 text-gray-300'}`}>
                                                 {u.plan}
                                             </span>
                                         </td>
