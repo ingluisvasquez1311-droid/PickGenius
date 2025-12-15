@@ -7,10 +7,11 @@ const BASE_URL = 'https://www.sofascore.com/api/v1';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    { params }: { params: Promise<{ path: string[] }> }
 ) {
     try {
-        const path = params.path.join('/');
+        const { path: pathArray } = await params;
+        const path = pathArray.join('/');
         const query = request.nextUrl.search; // Keep query parameters
         const targetUrl = `${BASE_URL}/${path}${query}`;
 
