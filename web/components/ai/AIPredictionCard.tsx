@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { generatePrediction } from '@/lib/predictionService';
 
 import { API_URL } from '@/lib/api';
@@ -19,6 +20,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
         try {
             setLoading(true);
             setError(null);
+            const toastId = toast.loading('Analizando estadísticas del partido...');
 
             // Use the centralized prediction service
             // details are fetched server-side by the API now, so we only need ID and sport
@@ -29,12 +31,15 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
 
             if (result) {
                 setPrediction(result);
+                toast.success('¡Predicción generada con éxito!', { id: toastId });
             } else {
                 setError('No se pudo generar la predicción');
+                toast.error('No se pudo generar la predicción', { id: toastId });
             }
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Error al generar predicción');
+            toast.error(err.message || 'Error al generar predicción');
         } finally {
             setLoading(false);
         }

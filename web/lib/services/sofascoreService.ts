@@ -1,4 +1,9 @@
-const BASE_URL = 'https://www.sofascore.com/api/v1';
+// Determinar la URL base dependiendo del entorno (Servidor vs Cliente)
+// Si estamos en el servidor, usamos la API directa.
+// Si estamos en el cliente, usamos nuestro Proxy para evitar CORS.
+const BASE_URL = typeof window === 'undefined'
+    ? 'https://www.sofascore.com/api/v1'
+    : '/api/proxy/sofascore';
 
 export interface SofascoreTeam {
     id: number;

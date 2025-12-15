@@ -87,13 +87,33 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
     );
 };
 
+import SkeletonLoader from './ui/SkeletonLoader';
+
+// ... (existing interfaces)
+
 interface LiveEventsListProps {
     events: LiveEvent[];
     sport: 'basketball' | 'football';
     title: string;
+    loading?: boolean;
 }
 
-export default function LiveEventsList({ events, sport, title }: LiveEventsListProps) {
+export default function LiveEventsList({ events, sport, title, loading }: LiveEventsListProps) {
+    if (loading) {
+        return (
+            <div>
+                <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="h-[140px] rounded-lg overflow-hidden relative">
+                            <SkeletonLoader />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
     if (events.length === 0) {
         return (
             <div className="text-center py-12 text-gray-400">

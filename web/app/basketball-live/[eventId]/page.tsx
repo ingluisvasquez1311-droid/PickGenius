@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Navigation from '@/components/Navigation';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import AIPredictionCard from '@/components/ai/AIPredictionCard';
 import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
 
 export default function BasketballLivePage() {
     const params = useParams();
@@ -20,10 +20,13 @@ export default function BasketballLivePage() {
             if (!eventId) return;
 
             try {
-                const response = await fetch(`https://api.sofascore.com/api/v1/event/${eventId}`);
+                // Use our new Proxy API Route
+                const response = await fetch(`/api/basketball/match/${eventId}`);
                 if (response.ok) {
                     const data = await response.json();
-                    setGame(data.event);
+                    if (data.success) {
+                        setGame(data.data);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching game details:', error);
@@ -38,7 +41,6 @@ export default function BasketballLivePage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-[#0b0b0b] pb-20">
-                <Navigation />
                 <div className="container pt-24">
                     <SkeletonLoader />
                 </div>
@@ -49,7 +51,6 @@ export default function BasketballLivePage() {
     if (!game) {
         return (
             <div className="min-h-screen bg-[#0b0b0b] pb-20 flex items-center justify-center">
-                <Navigation />
                 <div className="text-center">
                     <h2 className="text-xl font-bold">Partido no encontrado</h2>
                     <button onClick={() => router.back()} className="mt-4 btn-primary px-4 py-2 rounded">
@@ -64,7 +65,6 @@ export default function BasketballLivePage() {
 
     return (
         <div className="min-h-screen bg-[#0b0b0b] pb-20">
-            <Navigation />
 
             <div className="container pt-24 md:pt-28">
                 {/* Header / Scoreboard */}
@@ -95,21 +95,31 @@ export default function BasketballLivePage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* 3-Column Layout (Matching Football) */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 w-full">
 
-                    {/* Main Content - 8 cols */}
-                    <div className="lg:col-span-8 space-y-6">
+                    {/* Left Column: Home Players (3 cols) */}
+                    <div className="md:col-span-3 order-2 md:order-1 min-w-0">
+                        <ErrorBoundary>
+                            <MatchPlayerStats
+                                eventId={parseInt(eventId)}
+                                sport="basketball"
+                                team="home"
+                            />
+                        </ErrorBoundary>
+                    </div>
 
+                    {/* Center Column: AI + Quarter Scores (6 cols) */}
+                    <div className="md:col-span-6 order-1 md:order-2 space-y-4 min-w-0">
                         {/* AI Prediction */}
-                        <AIPredictionCard
-                            sport="basketball"
-                            eventId={eventId}
-                        />
+                        <ErrorBoundary>
+                            <AIPredictionCard
+                                sport="basketball"
+                                eventId={eventId}
+                            />
+                        </ErrorBoundary>
 
-                        {/* Best Players (Legends) */}
-                        <MatchPlayerStats eventId={parseInt(eventId)} sport="basketball" />
-
-                        {/* Quarter Scores Table (Simple) */}
+                        {/* Quarter Scores Table */}
                         <div className="glass-card p-4">
                             <h3 className="text-sm font-bold uppercase mb-4 border-b border-[rgba(255,255,255,0.1)] pb-2">Marcador por Cuartos</h3>
                             <div className="overflow-x-auto">
@@ -145,17 +155,17 @@ export default function BasketballLivePage() {
                                 </table>
                             </div>
                         </div>
-
                     </div>
 
-                    {/* Sidebar - 4 cols */}
-                    <div className="lg:col-span-4 space-y-6">
-                        {/* Additional widgets can go here */}
-                        <div className="glass-card p-6 flex flex-col items-center justify-center text-center opacity-70">
-                            <span className="text-3xl mb-2">📊</span>
-                            <h3 className="font-bold">Estadísticas Detalladas</h3>
-                            <p className="text-sm text-[var(--text-muted)]">Próximamente más datos en vivo</p>
-                        </div>
+                    {/* Right Column: Away Players (3 cols) */}
+                    <div className="md:col-span-3 order-3 md:order-3 min-w-0">
+                        <ErrorBoundary>
+                            <MatchPlayerStats
+                                eventId={parseInt(eventId)}
+                                sport="basketball"
+                                team="away"
+                            />
+                        </ErrorBoundary>
                     </div>
 
                 </div>

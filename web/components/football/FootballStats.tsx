@@ -31,14 +31,14 @@ const StatItem: React.FC<StatItemProps> = ({
                 <span className="text-xs text-gray-400 uppercase">{label}</span>
                 <span className="text-sm font-semibold text-red-400">{awayValue}</span>
             </div>
-            <div className="flex items-center gap-1 h-2">
+            <div className="flex items-center gap-1 h-2 overflow-hidden rounded-full bg-gray-800">
                 <div
-                    className="h-full bg-green-500 rounded-l transition-all duration-300"
-                    style={{ width: `${homeBar}%` }}
+                    className="h-full bg-green-500 rounded-l transition-all duration-1000 ease-out"
+                    style={{ width: `${homeBar}%`, animation: 'slideInLeft 1s ease-out' }}
                 />
                 <div
-                    className="h-full bg-red-500 rounded-r transition-all duration-300"
-                    style={{ width: `${awayBar}%` }}
+                    className="h-full bg-red-500 rounded-r transition-all duration-1000 ease-out"
+                    style={{ width: `${awayBar}%`, animation: 'slideInRight 1s ease-out' }}
                 />
             </div>
         </div>

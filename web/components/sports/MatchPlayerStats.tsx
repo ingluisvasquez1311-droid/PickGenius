@@ -23,9 +23,10 @@ interface Player {
 interface MatchPlayerStatsProps {
     eventId: number;
     sport: 'football' | 'basketball';
+    team?: 'home' | 'away'; // Optional filter
 }
 
-export default function MatchPlayerStats({ eventId, sport }: MatchPlayerStatsProps) {
+export default function MatchPlayerStats({ eventId, sport, team }: MatchPlayerStatsProps) {
     const [players, setPlayers] = useState<{ home: Player[], away: Player[] }>({ home: [], away: [] });
     const [loading, setLoading] = useState(true);
 
@@ -48,8 +49,8 @@ export default function MatchPlayerStats({ eventId, sport }: MatchPlayerStatsPro
                     const processTeam = (teamLineup: any) => {
                         const allPlayers = [...(teamLineup.players || []), ...(teamLineup.bench || [])];
                         return allPlayers
-                            .filter((p: any) => p.statistics && p.statistics.rating > 0)
-                            .sort((a: any, b: any) => b.statistics.rating - a.statistics.rating)
+                            .filter((p: any) => p.statistics && (p.statistics.rating > 0 || p.statistics.points > 0))
+                            .sort((a: any, b: any) => (b.statistics.rating || 0) - (a.statistics.rating || 0))
                             .slice(0, 5); // Take top 5
                     };
 
@@ -104,12 +105,40 @@ export default function MatchPlayerStats({ eventId, sport }: MatchPlayerStatsPro
                     ${(p.statistics.rating || 0) >= 8 ? 'bg-[var(--success)] text-black' :
                         (p.statistics.rating || 0) >= 7 ? 'bg-[var(--primary)] text-black' :
                             'bg-[rgba(255,255,255,0.1)]'}`}>
-                    {p.statistics.rating?.toFixed(1)}
+                    {p.statistics.rating?.toFixed(1) || '-'}
                 </div>
             </div>
         </div>
     );
 
+    // If filtering by team
+    if (team === 'home') {
+        return (
+            <div className="glass-card p-4">
+                <h3 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-[var(--primary)] pb-2">
+                    Top Local
+                </h3>
+                <div className="flex flex-col">
+                    {players.home.map((p, i) => renderPlayerRow(p, i + 1))}
+                </div>
+            </div>
+        );
+    }
+
+    if (team === 'away') {
+        return (
+            <div className="glass-card p-4">
+                <h3 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-[var(--danger)] pb-2">
+                    Top Visitante
+                </h3>
+                <div className="flex flex-col">
+                    {players.away.map((p, i) => renderPlayerRow(p, i + 1))}
+                </div>
+            </div>
+        );
+    }
+
+    // Default: Render both side-by-side (legacy mode)
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div className="glass-card p-4">

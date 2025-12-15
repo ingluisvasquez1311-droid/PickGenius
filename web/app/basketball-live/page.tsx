@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import LiveEventsList from '@/components/LiveEventsList';
-import Navigation from '@/components/Navigation';
 
 
 
@@ -95,16 +94,7 @@ export default function BasketballLivePage() {
         return () => clearInterval(interval);
     }, []);
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-gray-400">Cargando eventos...</p>
-                </div>
-            </div>
-        );
-    }
+
 
     if (error) {
         return (
@@ -140,7 +130,6 @@ export default function BasketballLivePage() {
 
     return (
         <>
-            <Navigation />
             <div className="min-h-screen bg-gray-950 text-white p-4">
                 <h1 className="text-3xl font-bold text-center mb-6 text-blue-400">
                     🏀 Baloncesto en Vivo
@@ -198,6 +187,7 @@ export default function BasketballLivePage() {
                     events={filteredEvents}
                     sport="basketball"
                     title={title}
+                    loading={loading}
                 />
 
                 <div className="mt-8 text-center">

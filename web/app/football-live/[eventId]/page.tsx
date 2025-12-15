@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import FootballStats from '@/components/football/FootballStats';
 import Link from 'next/link';
-import Navigation from '@/components/Navigation';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import PossessionChart from '@/components/charts/PossessionChart';
 import AIPredictionCard from '@/components/ai/AIPredictionCard';
 import FootballPlayerStatsTable from '@/components/football/FootballPlayerStatsTable';
@@ -114,7 +114,6 @@ export default function FootballGamePage() {
 
     return (
         <>
-            <Navigation />
             <div className="min-h-screen bg-gray-950 py-4 overflow-x-hidden">
                 <div className="container mx-auto px-2 max-w-[1600px]">
                     <Link
@@ -129,51 +128,61 @@ export default function FootballGamePage() {
 
                         {/* COLUMNA IZQUIERDA: Jugadores Local (3 cols) */}
                         <div className="md:col-span-3 order-2 md:order-1 min-w-0">
-                            {lineups && lineups.home ? (
-                                <FootballPlayerStatsTable
-                                    teamName={gameDetails.homeTeam.name}
-                                    players={lineups.home.players}
-                                />
-                            ) : (
-                                <div className="bg-gray-900 p-4 rounded text-center text-gray-500 text-sm">
-                                    Alineaciones no disponibles
-                                </div>
-                            )}
+                            <ErrorBoundary>
+                                {lineups && lineups.home ? (
+                                    <FootballPlayerStatsTable
+                                        teamName={gameDetails.homeTeam.name}
+                                        players={lineups.home.players}
+                                    />
+                                ) : (
+                                    <div className="bg-gray-900 p-4 rounded text-center text-gray-500 text-sm">
+                                        Alineaciones no disponibles
+                                    </div>
+                                )}
+                            </ErrorBoundary>
                         </div>
 
                         {/* COLUMNA CENTRAL: Stats Principales + IA (6 cols) */}
                         <div className="md:col-span-6 order-1 md:order-2 space-y-4 min-w-0">
 
                             {/* Predicción de IA (Prioridad Alta) */}
-                            <AIPredictionCard eventId={eventId} sport="football" />
+                            <ErrorBoundary>
+                                <AIPredictionCard eventId={eventId} sport="football" />
+                            </ErrorBoundary>
 
                             {/* Estadísticas Generales (Barras) */}
-                            <FootballStats
-                                eventId={eventId}
-                                homeTeam={gameDetails.homeTeam.name}
-                                awayTeam={gameDetails.awayTeam.name}
-                                stats={stats}
-                            />
+                            <ErrorBoundary>
+                                <FootballStats
+                                    eventId={eventId}
+                                    homeTeam={gameDetails.homeTeam.name}
+                                    awayTeam={gameDetails.awayTeam.name}
+                                    stats={stats}
+                                />
+                            </ErrorBoundary>
 
                             {/* Gráficos Visuales */}
                             <div className="grid grid-cols-1 gap-4">
                                 {/* Gráfico de Posesión */}
                                 {possessionItem && (
-                                    <PossessionChart
-                                        homeTeam={gameDetails.homeTeam.name}
-                                        awayTeam={gameDetails.awayTeam.name}
-                                        homePossession={homePossession}
-                                        awayPossession={awayPossession}
-                                    />
+                                    <ErrorBoundary>
+                                        <PossessionChart
+                                            homeTeam={gameDetails.homeTeam.name}
+                                            awayTeam={gameDetails.awayTeam.name}
+                                            homePossession={homePossession}
+                                            awayPossession={awayPossession}
+                                        />
+                                    </ErrorBoundary>
                                 )}
 
                                 {/* Línea de Tiempo de Incidentes */}
                                 {incidents && incidents.length > 0 && (
-                                    <IncidentsTimeline
-                                        incidents={incidents}
-                                        homeTeam={gameDetails.homeTeam.name}
-                                        awayTeam={gameDetails.awayTeam.name}
-                                    />
+                                    <ErrorBoundary>
+                                        <IncidentsTimeline
+                                            incidents={incidents}
+                                            homeTeam={gameDetails.homeTeam.name}
+                                            awayTeam={gameDetails.awayTeam.name}
+                                        />
+                                    </ErrorBoundary>
                                 )}
 
                                 {/* Head to Head */}
@@ -196,7 +205,9 @@ export default function FootballGamePage() {
 
                                 {/* Best Players / Legends */}
                                 <div className="mt-4">
-                                    <MatchPlayerStats eventId={parseInt(eventId as string)} sport="football" />
+                                    <ErrorBoundary>
+                                        <MatchPlayerStats eventId={parseInt(eventId as string)} sport="football" />
+                                    </ErrorBoundary>
                                 </div>
                             </div>
                         </div>

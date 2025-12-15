@@ -13,6 +13,7 @@ interface PredictionModalProps {
         homeTeam: string;
         awayTeam: string;
         date: Date;
+        sport?: 'basketball' | 'football';
     };
 }
 
@@ -35,7 +36,8 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                 gameId: gameInfo.id,
                 homeTeam: gameInfo.homeTeam,
                 awayTeam: gameInfo.awayTeam,
-                date: gameInfo.date
+                date: gameInfo.date,
+                sport: (gameInfo.sport || 'basketball') as 'basketball' | 'football'
             };
 
             const result = await generatePrediction(request);
@@ -102,8 +104,8 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                         {/* Pick */}
                         <div className="bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] p-6 rounded-lg text-center">
                             <div className="text-sm font-bold text-black opacity-75 mb-2">PICK RECOMENDADO</div>
-                            <div className="text-3xl font-bold text-black mb-2">{prediction.pick}</div>
-                            <div className="text-lg text-black opacity-90">{prediction.odds}</div>
+                            <div className="text-3xl font-bold text-black mb-2">{prediction.winner}</div>
+                            <div className="text-lg text-black opacity-90">{prediction.bettingTip.split('@')[1] ? `@ ${prediction.bettingTip.split('@')[1]}` : ''}</div>
                         </div>
 
                         {/* Confidence */}
@@ -123,7 +125,7 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                         {/* Wizard Tip */}
                         <div className="glass-card p-4 border-2 border-[var(--secondary)]">
                             <div className="font-bold text-[var(--secondary)] mb-2">💡 Consejo del Mago</div>
-                            <p className="text-sm">{prediction.wizardTip}</p>
+                            <p className="text-sm">{prediction.bettingTip}</p>
                         </div>
 
                         {/* Analysis & Graph */}
@@ -156,8 +158,8 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                                 <PredictionAnalysis
                                     homeTeam={gameInfo.homeTeam}
                                     awayTeam={gameInfo.awayTeam}
-                                    analysis={prediction.analysis}
-                                    factors={prediction.factors}
+                                    analysis={prediction.reasoning}
+                                    factors={prediction.keyFactors || []}
                                     attributes={{
                                         home: { ...homeAttr, h2h: homeH2H },
                                         away: { ...awayAttr, h2h: awayH2H }

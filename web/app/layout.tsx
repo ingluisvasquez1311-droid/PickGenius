@@ -1,22 +1,58 @@
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import ToastProvider from "@/components/ui/ToastProvider";
 // import LiveTicker from "@/components/sports/LiveTicker"; // Temporarily disabled
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BettingSlipProvider } from "@/contexts/BettingSlipContext";
 import BettingSlip from "@/components/betting/BettingSlip";
 
+export const viewport: Viewport = {
+  themeColor: "#050505",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
+
 export const metadata: Metadata = {
   title: "PickGenius | Predicciones Deportivas con IA",
   description: "Domina tus parleys de NBA y Fútbol con análisis de inteligencia artificial y estadísticas avanzadas.",
   manifest: "/manifest.json",
-  themeColor: "#00ff88",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+  openGraph: {
+    title: "PickGenius | Predicciones Deportivas con IA",
+    description: "Análisis y estadísticas deportivas impulsadas por Inteligencia Artificial.",
+    url: "https://pickgenius.ai",
+    siteName: "PickGenius",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "PickGenius AI Dashboard",
+      },
+    ],
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PickGenius AI",
+    description: "Predicciones deportivas inteligentes en tiempo real.",
+    images: ["/og-image.jpg"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "PickGenius"
-  }
+    title: "PickGenius",
+    startupImage: [
+      "/icon-512.png",
+    ],
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
@@ -32,6 +68,8 @@ export default function RootLayout({
             {/* <LiveTicker /> */}
             <Navbar />
             {children}
+            <Footer />
+            <ToastProvider />
             <BettingSlip />
           </BettingSlipProvider>
         </AuthProvider>
