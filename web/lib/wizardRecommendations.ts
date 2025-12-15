@@ -48,7 +48,8 @@ export async function getWizardPick(sport: 'nba' | 'football'): Promise<WizardPi
                             gameId: match.id.toString(),
                             homeTeam: match.homeTeam.name || match.homeTeam,
                             awayTeam: match.awayTeam.name || match.awayTeam,
-                            date: new Date(match.utcDate || match.date)
+                            date: new Date(match.utcDate || match.date),
+                            sport: sport
                         });
 
                         return {
@@ -56,8 +57,8 @@ export async function getWizardPick(sport: 'nba' | 'football'): Promise<WizardPi
                                 id: match.id.toString(),
                                 homeTeam: match.homeTeam.name || match.homeTeam,
                                 awayTeam: match.awayTeam.name || match.awayTeam,
-                                league: match.competition?.name || match.league || (sport === 'football' ? 'Football' : 'NBA'),
-                                date: new Date(match.utcDate || match.date)
+                                league: match.tournament?.name || match.competition?.name || match.league || (sport === 'football' ? 'Football' : 'NBA'),
+                                date: new Date(match.startTimestamp ? match.startTimestamp * 1000 : (match.utcDate || match.date))
                             },
                             prediction
                         };
@@ -121,7 +122,8 @@ export async function getWizardPicks(sport: 'nba' | 'football', count: number = 
                             gameId: match.id.toString(),
                             homeTeam: match.homeTeam.name || match.homeTeam,
                             awayTeam: match.awayTeam.name || match.awayTeam,
-                            date: new Date(match.utcDate || match.date)
+                            date: new Date(match.utcDate || match.date),
+                            sport: sport
                         });
 
                         return {
@@ -129,8 +131,8 @@ export async function getWizardPicks(sport: 'nba' | 'football', count: number = 
                                 id: match.id.toString(),
                                 homeTeam: match.homeTeam.name || match.homeTeam,
                                 awayTeam: match.awayTeam.name || match.awayTeam,
-                                league: match.competition?.name || match.league || (sport === 'football' ? 'Football' : 'NBA'),
-                                date: new Date(match.utcDate || match.date)
+                                league: match.tournament?.name || match.competition?.name || match.league || (sport === 'football' ? 'Football' : 'NBA'),
+                                date: new Date(match.startTimestamp ? match.startTimestamp * 1000 : (match.utcDate || match.date))
                             },
                             prediction
                         };
