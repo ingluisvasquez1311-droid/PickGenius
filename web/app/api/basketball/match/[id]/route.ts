@@ -7,6 +7,7 @@ const BASE_URL = 'https://api.sofascore.com/api/v1';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+    // Force git update
 
     if (!id) {
         return NextResponse.json({ success: false, error: 'Match ID is required' }, { status: 400 });
