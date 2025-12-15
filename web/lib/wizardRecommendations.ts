@@ -123,7 +123,7 @@ export async function getWizardPicks(sport: 'nba' | 'football', count: number = 
                             homeTeam: match.homeTeam.name || match.homeTeam,
                             awayTeam: match.awayTeam.name || match.awayTeam,
                             date: new Date(match.utcDate || match.date),
-                            sport: sport
+                            sport: sport === 'nba' ? 'basketball' : 'football'
                         });
 
                         return {
