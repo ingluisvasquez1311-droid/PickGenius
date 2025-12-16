@@ -56,21 +56,32 @@ export async function POST(request: NextRequest) {
                 // Add H2H or standings if needed for better AI context
             };
         } else if (sport === 'football') {
-            if (!FOOTBALL_API_KEY) throw new Error("Football API Key missing");
-            const response = await fetch(`https://v3.football.api-sports.io/fixtures?id=${gameId}`, {
-                headers: { 'x-apisports-key': FOOTBALL_API_KEY }
-            });
-            const data = await response.json();
-            const game = data.response?.[0];
-            if (!game) throw new Error("Game not found in Football API");
+            // Use our internal Sofascore Service (Unified Provider)
+            const response = await sofaScoreFootballService.getEventDetails(gameId);
+
+            if (!response.success || !response.data) {
+                console.error("Sofascore Football API Error:", response.error);
+                throw new Error("Game not found in Sofascore API");
+            }
+
+            const event = response.data.event;
+
+            // Try to get detailed stats for better analysis
+            let statistics = {};
+            try {
+                const statsRes = await sofaScoreFootballService.getEventStatistics(gameId);
+                if (statsRes.success) statistics = statsRes.data;
+            } catch (ignore) { console.warn('Could not fetch stats for prediction'); }
 
             matchContext = {
-                sport: 'Football',
-                home: game.teams.home.name,
-                away: game.teams.away.name,
-                score: `${game.goals.home} - ${game.goals.away}`,
-                status: `${game.fixture.status.elapsed}'`,
-                statistics: game.statistics // might need separate call if not in fixture details
+                sport: 'Football (Sofascore)',
+                home: event.homeTeam.name,
+                away: event.awayTeam.name,
+                score: `${event.homeScore?.current ?? 0} - ${event.awayScore?.current ?? 0}`,
+                status: event.status?.description || 'Scheduled',
+                startTime: event.startTimestamp,
+                tournament: event.tournament?.name,
+                statistics: statistics
             };
         } else {
             return NextResponse.json({ success: false, error: 'Sport not supported' }, { status: 400 });
