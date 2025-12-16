@@ -72,10 +72,6 @@ export async function GET(request: NextRequest) {
     } catch (error: any) {
         console.error('❌ Basketball API Route Error:', error);
 
-        // Return Empty 200 OK instead of 500 to prevent UI crash
-    } catch (error: any) {
-        console.error('❌ Basketball API Route Error:', error);
-
         // FALLBACK: Return Mock Data so the site looks alive even if blocked
         const mockEvents = [
             {
@@ -108,7 +104,6 @@ export async function GET(request: NextRequest) {
             error: error.message
         });
     }
-}
 }
 
 function getDescription(game: any): string {
