@@ -92,6 +92,17 @@ export default function Navbar() {
                                 <span>💎</span>
                                 <span className="hidden sm:inline">Value Bets</span>
                             </Link>
+                            <Link
+                                href="/streaks"
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2
+                                    ${isActive('/streaks')
+                                        ? 'bg-orange-600/20 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.3)]'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                <span>🔥</span>
+                                <span className="hidden sm:inline">Rachas</span>
+                            </Link>
 
                         </div>
 
