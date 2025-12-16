@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import NewsSection from '@/components/home/NewsSection';
 
 interface SportStats {
   liveEvents: number;
@@ -202,6 +203,9 @@ export default function HomePage() {
             </div>
           </Link>
         </div>
+
+        {/* NEWS SECTION */}
+        <NewsSection />
 
       </div>
     </div>

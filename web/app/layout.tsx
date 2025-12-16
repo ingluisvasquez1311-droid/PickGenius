@@ -67,7 +67,9 @@ export default function RootLayout({
           <BettingSlipProvider>
             <Navbar />
             <LiveTicker />
-            {children}
+            <main className="pt-24 min-h-screen">
+              {children}
+            </main>
             <Footer />
             <ToastProvider />
             <BettingSlip />

@@ -214,6 +214,17 @@ class SofaScoreBasketballService {
             86400
         );
     }
+
+    /**
+     * Get Best Players for an event
+     */
+    async getBestPlayers(eventId: string): Promise<ApiResponse> {
+        return this.makeRequest(
+            `/event/${eventId}/best-players`,
+            `basketball_best_players_${eventId}`,
+            120 // 2 minutes cache
+        );
+    }
 }
 
 // Export singleton instance

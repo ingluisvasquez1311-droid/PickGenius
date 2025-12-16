@@ -3,20 +3,18 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-    // Usando la API Key original del proyecto 'pickgenius'
-    apiKey: 'AIzaSyOLWgzGFXkU8eNbezJeLLMPZ4DWjkM',
-    authDomain: 'pickgenius.firebaseapp.com',
-    projectId: 'pickgenius',
-    storageBucket: 'pickgenius.firebasestorage.app',
-    messagingSenderId: '994608420829',
-    appId: '1:994608420829:web:f0177c5fff7e7ea8b27f107'
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Debug logging (remove after fixing)
-console.log('[Firebase] Config loaded:', {
+// Debug logging
+console.log('[Firebase Config Check]', {
     hasApiKey: !!firebaseConfig.apiKey,
-    hasAuthDomain: !!firebaseConfig.authDomain,
-    hasProjectId: !!firebaseConfig.projectId,
+    keyPrefix: firebaseConfig.apiKey ? firebaseConfig.apiKey.substring(0, 8) + '...' : 'MISSING',
     projectId: firebaseConfig.projectId
 });
 

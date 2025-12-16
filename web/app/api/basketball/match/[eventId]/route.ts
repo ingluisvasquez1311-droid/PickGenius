@@ -5,19 +5,18 @@ export const revalidate = 0;
 
 const BASE_URL = 'https://api.sofascore.com/api/v1';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    // Force git update
+export async function GET(request: NextRequest, { params }: { params: { eventId: string } }) {
+    const eventId = params.eventId;
 
-    if (!id) {
+    if (!eventId) {
         return NextResponse.json({ success: false, error: 'Match ID is required' }, { status: 400 });
     }
 
     try {
-        console.log(`🏀 Fetching Basketball Match Details for ID ${id}...`);
+        console.log(`🏀 Fetching Basketball Match Details for ID ${eventId}...`);
 
         // Fetch details from Sofascore (Server-side avoids CORS)
-        const response = await fetch(`${BASE_URL}/event/${id}`, {
+        const response = await fetch(`${BASE_URL}/event/${eventId}`, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Referer': 'https://www.sofascore.com/'
