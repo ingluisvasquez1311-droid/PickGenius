@@ -144,6 +144,17 @@ class SofaScoreFootballService {
         );
     }
     /**
+     * Get unique tournament details (includes current season ID)
+     */
+    async getTournamentDetails(uniqueTournamentId: string): Promise<ApiResponse> {
+        return this.makeRequest(
+            `/unique-tournament/${uniqueTournamentId}`,
+            `football_tournament_${uniqueTournamentId}`,
+            86400 // Cache for 24 hours (seasons don't change often)
+        );
+    }
+
+    /**
      * Get scheduled events for a specific date (YYYY-MM-DD)
      */
     async getScheduledEvents(date: string): Promise<ApiResponse> {

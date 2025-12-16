@@ -232,6 +232,17 @@ class SofaScoreBasketballService {
     }
 
     /**
+     * Get unique tournament details (includes current season ID)
+     */
+    async getTournamentDetails(uniqueTournamentId: string): Promise<ApiResponse> {
+        return this.makeRequest(
+            `/unique-tournament/${uniqueTournamentId}`,
+            `basketball_tournament_${uniqueTournamentId}`,
+            86400 // Cache for 24 hours
+        );
+    }
+
+    /**
      * Get scheduled events for a specific date (YYYY-MM-DD)
      */
     async getScheduledEvents(date: string): Promise<ApiResponse> {
