@@ -6,6 +6,7 @@ import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import AIPredictionCard from '@/components/ai/AIPredictionCard';
 import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
+import TopPlayersCardBasketball from '@/components/basketball/TopPlayersCardBasketball';
 
 export default function BasketballLivePage() {
     const params = useParams();
@@ -99,7 +100,20 @@ export default function BasketballLivePage() {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 w-full">
 
                     {/* Left Column: Home Players (3 cols) */}
-                    <div className="md:col-span-3 order-2 md:order-1 min-w-0">
+                    <div className="md:col-span-3 order-2 md:order-1 min-w-0 space-y-4">
+                        {/* Top Players Card - Home */}
+                        <ErrorBoundary>
+                            <TopPlayersCardBasketball
+                                title="TOP JUGADORES LOCAL"
+                                players={[
+                                    // Placeholder - will be populated from API
+                                    { name: 'Cargando...', position: '-', rating: 0 }
+                                ]}
+                                teamColor="purple"
+                            />
+                        </ErrorBoundary>
+
+                        {/* Full Player Stats */}
                         <ErrorBoundary>
                             <MatchPlayerStats
                                 eventId={parseInt(eventId)}
@@ -158,7 +172,20 @@ export default function BasketballLivePage() {
                     </div>
 
                     {/* Right Column: Away Players (3 cols) */}
-                    <div className="md:col-span-3 order-3 md:order-3 min-w-0">
+                    <div className="md:col-span-3 order-3 md:order-3 min-w-0 space-y-4">
+                        {/* Top Players Card - Away */}
+                        <ErrorBoundary>
+                            <TopPlayersCardBasketball
+                                title="TOP JUGADORES VISITANTE"
+                                players={[
+                                    // Placeholder - will be populated from API
+                                    { name: 'Cargando...', position: '-', rating: 0 }
+                                ]}
+                                teamColor="orange"
+                            />
+                        </ErrorBoundary>
+
+                        {/* Full Player Stats */}
                         <ErrorBoundary>
                             <MatchPlayerStats
                                 eventId={parseInt(eventId)}

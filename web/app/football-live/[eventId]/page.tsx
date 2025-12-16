@@ -13,6 +13,7 @@ import IncidentsTimeline from '@/components/football/IncidentsTimeline';
 import HeadToHead from '@/components/football/HeadToHead';
 import StandingsTable from '@/components/football/StandingsTable';
 import TopPerformers from '@/components/football/TopPerformers';
+import TopPlayersCard from '@/components/football/TopPlayersCard';
 import { API_URL } from '@/lib/api';
 
 export default function FootballGamePage() {
@@ -127,7 +128,24 @@ export default function FootballGamePage() {
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 w-full">
 
                         {/* COLUMNA IZQUIERDA: Jugadores Local (3 cols) */}
-                        <div className="md:col-span-3 order-2 md:order-1 min-w-0">
+                        <div className="md:col-span-3 order-2 md:order-1 min-w-0 space-y-4">
+                            {/* Top Players Card - Home */}
+                            <ErrorBoundary>
+                                {lineups && lineups.home && lineups.home.players ? (
+                                    <TopPlayersCard
+                                        title="TOP JUGADORES LOCAL"
+                                        players={lineups.home.players.map((p: any) => ({
+                                            name: p.player.name,
+                                            position: p.position || 'N/A',
+                                            rating: p.statistics?.rating || 0,
+                                            minutesPlayed: p.statistics?.minutesPlayed
+                                        }))}
+                                        teamColor="purple"
+                                    />
+                                ) : null}
+                            </ErrorBoundary>
+
+                            {/* Full Player Table */}
                             <ErrorBoundary>
                                 {lineups && lineups.home ? (
                                     <FootballPlayerStatsTable
@@ -213,7 +231,24 @@ export default function FootballGamePage() {
                         </div>
 
                         {/* COLUMNA DERECHA: Jugadores Visitante (3 cols) */}
-                        <div className="md:col-span-3 order-3 md:order-3 min-w-0">
+                        <div className="md:col-span-3 order-3 md:order-3 min-w-0 space-y-4">
+                            {/* Top Players Card - Away */}
+                            <ErrorBoundary>
+                                {lineups && lineups.away && lineups.away.players ? (
+                                    <TopPlayersCard
+                                        title="TOP JUGADORES VISITANTE"
+                                        players={lineups.away.players.map((p: any) => ({
+                                            name: p.player.name,
+                                            position: p.position || 'N/A',
+                                            rating: p.statistics?.rating || 0,
+                                            minutesPlayed: p.statistics?.minutesPlayed
+                                        }))}
+                                        teamColor="orange"
+                                    />
+                                ) : null}
+                            </ErrorBoundary>
+
+                            {/* Full Player Table */}
                             {lineups && lineups.away ? (
                                 <FootballPlayerStatsTable
                                     teamName={gameDetails.awayTeam.name}
