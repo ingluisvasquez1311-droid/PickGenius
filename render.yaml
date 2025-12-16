@@ -12,6 +12,14 @@ services:
         value: 10000
       - key: NODE_ENV
         value: production
+      - key: USE_PROXY
+        value: true
+      # Add these manually in Render Dashboard:
+      # - SCRAPER_API_KEY (get from scraperapi.com)
+      # - FOOTBALL_API_KEY
+      # - NBA_API_KEY
+      # - GEMINI_API_KEY
+      # - GROQ_API_KEY
 
   - type: web
     name: pickgenius-frontend

@@ -1,12 +1,24 @@
 const axios = require('axios');
 const memoryCache = require('../memoryCache');
 const historyService = require('../HistoryService');
+const proxyService = require('../proxyService');
 
 class SofaScoreBasketballService {
     constructor() {
         this.baseUrl = 'https://www.sofascore.com/api/v1';
-        this.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
+        this.lastRequestTime = 0;
+        this.minRequestInterval = 2000; // 2 seconds between requests
+
+        // Pool of User-Agents to rotate
+        this.userAgents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
+        ];
+
+        this.baseHeaders = {
             'Accept': '*/*',
             'Accept-Language': 'es-419,es-US;q=0.9,es;q=0.8,en;q=0.7',
             'Referer': 'https://www.sofascore.com/',
@@ -14,6 +26,29 @@ class SofaScoreBasketballService {
             'Cache-Control': 'max-age=0',
             'Connection': 'keep-alive'
         };
+    }
+
+    /**
+     * Get a random User-Agent from the pool
+     */
+    getRandomUserAgent() {
+        return this.userAgents[Math.floor(Math.random() * this.userAgents.length)];
+    }
+
+    /**
+     * Rate limiting: wait if needed before making request
+     */
+    async enforceRateLimit() {
+        const now = Date.now();
+        const timeSinceLastRequest = now - this.lastRequestTime;
+
+        if (timeSinceLastRequest < this.minRequestInterval) {
+            const waitTime = this.minRequestInterval - timeSinceLastRequest;
+            console.log(`⏳ Rate limit: waiting ${waitTime}ms...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+
+        this.lastRequestTime = Date.now();
     }
 
     /**
@@ -27,8 +62,20 @@ class SofaScoreBasketballService {
                 return { success: true, data: cachedData, fromCache: true };
             }
 
+            // Enforce rate limiting
+            await this.enforceRateLimit();
+
+            // Build request with rotated User-Agent
+            const headers = {
+                ...this.baseHeaders,
+                'User-Agent': this.getRandomUserAgent()
+            };
+
+            const url = `${this.baseUrl}${endpoint}`;
             console.log(`🌐 SofaScore Basketball API: Fetching ${endpoint}...`);
-            const response = await axios.get(`${this.baseUrl}${endpoint}`, { headers: this.headers });
+
+            // Use proxy service with retry logic
+            const response = await proxyService.makeRequestWithRetry(url, { headers }, 3);
 
             // Cache the successful response
             if (response.data) {
@@ -37,8 +84,9 @@ class SofaScoreBasketballService {
 
             return { success: true, data: response.data, fromCache: false };
         } catch (error) {
-            console.error(`❌ SofaScore Basketball API Error (${endpoint}):`, error.message);
-            return { success: false, error: error.message };
+            const statusCode = error.response?.status || 'Unknown';
+            console.error(`❌ SofaScore Basketball API Error (${endpoint}): HTTP ${statusCode}: ${error.message}`);
+            return { success: false, error: `HTTP ${statusCode}: ${error.message}` };
         }
     }
 
