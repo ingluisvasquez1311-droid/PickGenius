@@ -15,61 +15,51 @@ export default function FootballLivePage() {
         async function fetchLiveEvents() {
             try {
                 setLoading(true);
-                const response = await fetch('/api/football/live');
 
-                const data = await response.json();
+                // Fetch Live and Scheduled in parallel
+                const [liveRes, scheduledRes] = await Promise.all([
+                    fetch('/api/football/live'),
+                    fetch('/api/football/scheduled') // Defaults to today
+                ]);
 
-                if (response.ok && data.success && Array.isArray(data.data)) {
-                    // Detect data format (Sofascore or API-Sports)
-                    const events = data.data.map((item: any) => {
-                        // Sofascore Format (Native from Backend)
-                        if (item.tournament && item.homeTeam && item.awayTeam) {
-                            return {
-                                id: item.id,
-                                tournament: item.tournament,
-                                homeTeam: item.homeTeam,
-                                awayTeam: item.awayTeam,
-                                homeScore: item.homeScore || { current: 0 },
-                                awayScore: item.awayScore || { current: 0 },
-                                status: item.status,
-                                startTimestamp: item.startTimestamp
-                            };
-                        }
+                const liveData = await liveRes.json();
+                const scheduledData = await scheduledRes.json();
 
-                        // API-Sports Format (Legacy/Fallback)
+                let allEvents: any[] = [];
+
+                // Process Live Data
+                if (liveData.success && Array.isArray(liveData.data)) {
+                    allEvents = [...liveData.data];
+                }
+
+                // Process Scheduled Data
+                if (scheduledData.success && scheduledData.data && Array.isArray(scheduledData.data.events)) {
+                    const scheduledEvents = scheduledData.data.events;
+                    // Deduplicate: Don't add if already in live list
+                    const liveIds = new Set(allEvents.map(e => e.id));
+
+                    const newScheduled = scheduledEvents.filter((e: any) => !liveIds.has(e.id)).map((item: any) => {
+                        // Ensure generic structure matches LiveEvent interface fallback
                         return {
-                            id: item.fixture.id,
-                            tournament: {
-                                name: item.league.name,
-                                uniqueTournament: { name: item.league.name }
-                            },
-                            homeTeam: {
-                                id: item.teams.home.id,
-                                name: item.teams.home.name
-                            },
-                            awayTeam: {
-                                id: item.teams.away.id,
-                                name: item.teams.away.name
-                            },
-                            homeScore: {
-                                current: item.goals.home
-                            },
-                            awayScore: {
-                                current: item.goals.away
-                            },
-                            status: {
-                                type: item.fixture.status.short === 'NS' ? 'notstarted' :
-                                    item.fixture.status.short === 'FT' ? 'finished' : 'inprogress',
-                                description: item.fixture.status.long
-                            },
-                            startTimestamp: new Date(item.fixture.date).getTime() / 1000
+                            id: item.id,
+                            tournament: item.tournament,
+                            homeTeam: item.homeTeam,
+                            awayTeam: item.awayTeam,
+                            homeScore: item.homeScore || { current: 0 },
+                            awayScore: item.awayScore || { current: 0 },
+                            status: item.status,
+                            startTimestamp: item.startTimestamp
                         };
                     });
 
-                    setEvents(events);
-                } else {
-                    // API failed, use mock data
-                    console.warn('API failed, using mock data. Error:', data.error);
+                    allEvents = [...allEvents, ...newScheduled];
+                }
+
+                if (allEvents.length > 0) {
+                    setEvents(allEvents);
+                } else if (!liveData.success && !scheduledData.success) {
+                    // Both failed
+                    console.warn('API failed, using mock data.');
                     const mockEvents = [
                         {
                             id: 1001,
@@ -93,7 +83,7 @@ export default function FootballLivePage() {
                         }
                     ];
                     setEvents(mockEvents);
-                    setError('Usando datos de demostración (API key pendiente)');
+                    setError('Usando datos de demostración (Error de Conexión)');
                 }
             } catch (err: any) {
                 console.error('Fetch error:', err);

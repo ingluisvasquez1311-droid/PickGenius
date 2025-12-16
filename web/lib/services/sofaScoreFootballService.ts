@@ -138,6 +138,16 @@ class SofaScoreFootballService {
             3600 // 1 hour
         );
     }
+    /**
+     * Get scheduled events for a specific date (YYYY-MM-DD)
+     */
+    async getScheduledEvents(date: string): Promise<ApiResponse> {
+        return this.makeRequest(
+            `/sport/football/scheduled-events/${date}`,
+            `football_scheduled_${date}`,
+            300 // 5 minutes cache
+        );
+    }
 }
 
 // Export singleton instance
