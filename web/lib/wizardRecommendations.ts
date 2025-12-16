@@ -48,8 +48,8 @@ export async function getWizardPick(sport: 'nba' | 'football'): Promise<WizardPi
                             gameId: match.id.toString(),
                             homeTeam: match.homeTeam.name || match.homeTeam,
                             awayTeam: match.awayTeam.name || match.awayTeam,
-                            date: new Date(match.utcDate || match.date),
-                            sport: sport
+                            date: new Date(match.utcDate || match.date || match.startTime || Date.now()),
+                            sport: sport === 'nba' ? 'basketball' : sport as 'basketball' | 'football'
                         });
 
                         return {
