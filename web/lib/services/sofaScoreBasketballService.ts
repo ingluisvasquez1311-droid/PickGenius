@@ -15,15 +15,17 @@ class SofaScoreBasketballService {
     constructor() {
         this.baseUrl = 'https://www.sofascore.com/api/v1';
         this.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'application/json, text/plain, */*',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'Accept': '*/*',
             'Accept-Language': 'en-US,en;q=0.9',
             'Referer': 'https://www.sofascore.com/',
             'Origin': 'https://www.sofascore.com',
-            'X-Requested-With': 'XMLHttpRequest',
+            'Cache-Control': 'max-age=0',
+            'Connection': 'keep-alive',
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-origin'
+            'Sec-Fetch-Site': 'same-site', // Changed from same-origin to mimic legitimate cross-subdomain request
+            'Pragma': 'no-cache'
         };
     }
 
