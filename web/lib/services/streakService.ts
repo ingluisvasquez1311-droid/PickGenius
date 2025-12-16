@@ -1,5 +1,4 @@
-import { sofaScoreFootballService } from './sofaScoreFootballService';
-import { sofaScoreBasketballService } from './sofaScoreBasketballService';
+
 
 export interface Streak {
     id: string;
