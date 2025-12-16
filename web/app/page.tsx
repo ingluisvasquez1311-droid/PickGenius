@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import NewsSection from '@/components/home/NewsSection';
 
 interface SportStats {
   liveEvents: number;
+  featuredMatch?: any;
   loading: boolean;
 }
 
@@ -17,29 +17,68 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        // Fetch basketball events
+        // --- BASKETBALL FETCH ---
+        // 1. Try Live
         const basketballRes = await fetch('/api/basketball/live');
         const basketballData = await basketballRes.json();
+        let basketballFeatured = null;
+        let basketballCount = 0;
 
-        if (basketballData.success) {
-          const professionalEvents = basketballData.data.filter((event: any) => {
-            const tournament = event.tournament?.name?.toLowerCase() || '';
-            const uniqueTournament = event.tournament?.uniqueTournament?.name?.toLowerCase() || '';
-            return tournament.includes('nba') ||
-              uniqueTournament.includes('nba') ||
-              tournament.includes('euroleague') ||
-              tournament.includes('acb');
-          });
-          setBasketballStats({ liveEvents: professionalEvents.length, loading: false });
+        if (basketballData.success && basketballData.data) {
+          const nbaLive = basketballData.data.filter((e: any) =>
+            e.tournament?.name?.toLowerCase().includes('nba') ||
+            e.tournament?.uniqueTournament?.name?.toLowerCase().includes('nba')
+          );
+          basketballCount = nbaLive.length;
+          if (nbaLive.length > 0) basketballFeatured = nbaLive[0];
         }
 
-        // Fetch football events
+        // 2. If no live, try Scheduled (for generic display)
+        if (!basketballFeatured) {
+          try {
+            const scheduledRes = await fetch(`/api/basketball/scheduled?date=${new Date().toISOString().split('T')[0]}`);
+            const scheduledData = await scheduledRes.json();
+            if (scheduledData.success && scheduledData.data?.events) {
+              const nbaScheduled = scheduledData.data.events.filter((e: any) =>
+                e.tournament?.name?.toLowerCase().includes('nba') ||
+                e.tournament?.uniqueTournament?.name?.toLowerCase().includes('nba')
+              );
+              if (nbaScheduled.length > 0) {
+                const nextGame = nbaScheduled[0];
+                basketballFeatured = {
+                  id: nextGame.id,
+                  homeTeam: nextGame.homeTeam,
+                  awayTeam: nextGame.awayTeam,
+                  homeScore: { current: 0 },
+                  awayScore: { current: 0 },
+                  status: { description: new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), type: 'scheduled' },
+                  isScheduled: true
+                };
+              }
+            }
+          } catch (e) {
+            console.error("Error fetching scheduled basketball", e);
+          }
+        }
+
+        setBasketballStats({ liveEvents: basketballCount, featuredMatch: basketballFeatured, loading: false });
+
+
+        // --- FOOTBALL FETCH ---
         const footballRes = await fetch('/api/football/live');
         const footballData = await footballRes.json();
+        let footballFeatured = null;
+        let footballCount = 0;
 
-        if (footballData.success) {
-          setFootballStats({ liveEvents: footballData.data.length, loading: false });
+        if (footballData.success && footballData.data) {
+          footballCount = footballData.data.length;
+          if (footballData.data.length > 0) {
+            footballFeatured = footballData.data[0];
+          }
         }
+
+        setFootballStats({ liveEvents: footballCount, featuredMatch: footballFeatured, loading: false });
+
       } catch (error) {
         console.error('Error fetching stats:', error);
         setBasketballStats({ liveEvents: 0, loading: false });
@@ -99,53 +138,64 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* FLOATING STATS PREVIEW */}
+        {/* FLOATING STATS PREVIEW (REAL DATA) */}
         <div className="relative h-[400px] w-full max-w-5xl mx-auto mb-32 hidden md:block">
+
           {/* Card 1: Football - Left Floater */}
-          <div className="absolute top-10 left-0 w-80 glass-brutal rounded-2xl p-6 transform -rotate-6 animate-float z-20 hover:z-30 transition-all hover:scale-110 duration-500 cursor-default border-t-4 border-t-green-500">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center font-bold text-xs">LIV</div>
-                <span className="font-bold">Liverpool</span>
+          {footballStats.featuredMatch && (
+            <div className="absolute top-10 left-0 w-80 glass-brutal rounded-2xl p-6 transform -rotate-6 animate-float z-20 hover:z-30 transition-all hover:scale-110 duration-500 cursor-default border-t-4 border-t-green-500">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <img src={footballStats.featuredMatch.homeTeam?.logo || ''} alt="Home" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
+                  <span className="font-bold truncate max-w-[120px]">{footballStats.featuredMatch.homeTeam?.name}</span>
+                </div>
+                <span className="text-2xl font-mono font-bold">{footballStats.featuredMatch.homeScore?.current ?? 0}</span>
               </div>
-              <span className="text-2xl font-mono font-bold">2</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center font-bold text-xs">CHE</div>
-                <span className="font-bold">Chelsea</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <img src={footballStats.featuredMatch.awayTeam?.logo || ''} alt="Away" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
+                  <span className="font-bold truncate max-w-[120px]">{footballStats.featuredMatch.awayTeam?.name}</span>
+                </div>
+                <span className="text-2xl font-mono font-bold">{footballStats.featuredMatch.awayScore?.current ?? 0}</span>
               </div>
-              <span className="text-2xl font-mono font-bold">1</span>
-            </div>
-            <div className="mt-4 pt-4 border-t border-white/10">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-green-400 font-bold">IA: Gana Liverpool</span>
-                <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">85% Confianza</span>
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-green-400 font-bold animate-pulse">● EN VIVO</span>
+                  <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Min {footballStats.featuredMatch.status?.description?.replace(/[^0-9]/g, '')}'</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Card 2: Basketball - Right Floater */}
-          <div className="absolute bottom-10 right-0 w-80 glass-brutal rounded-2xl p-6 transform rotate-6 animate-float-delayed z-20 hover:z-30 transition-all hover:scale-110 duration-500 cursor-default border-t-4 border-t-orange-500">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <span className="font-bold">Lakers</span>
+          {basketballStats.featuredMatch && (
+            <div className="absolute bottom-10 right-0 w-80 glass-brutal rounded-2xl p-6 transform rotate-6 animate-float-delayed z-20 hover:z-30 transition-all hover:scale-110 duration-500 cursor-default border-t-4 border-t-orange-500">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <img src={`https://api.sofascore.app/api/v1/team/${basketballStats.featuredMatch.homeTeam.id}/image`} alt="Home" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
+                  <span className="font-bold truncate max-w-[120px]">{basketballStats.featuredMatch.homeTeam.name}</span>
+                </div>
+                <span className="text-2xl font-mono font-bold">{basketballStats.featuredMatch.homeScore?.current ?? '-'}</span>
               </div>
-              <span className="text-2xl font-mono font-bold">112</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="font-bold">Warriors</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <img src={`https://api.sofascore.app/api/v1/team/${basketballStats.featuredMatch.awayTeam.id}/image`} alt="Away" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
+                  <span className="font-bold truncate max-w-[120px]">{basketballStats.featuredMatch.awayTeam.name}</span>
+                </div>
+                <span className="text-2xl font-mono font-bold">{basketballStats.featuredMatch.awayScore?.current ?? '-'}</span>
               </div>
-              <span className="text-2xl font-mono font-bold">108</span>
-            </div>
-            <div className="mt-4 pt-4 border-t border-white/10">
-              <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden mb-2">
-                <div className="bg-orange-500 h-full w-[70%]"></div>
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden mb-2">
+                  <div className="bg-orange-500 h-full w-[60%] animate-loading-bar"></div>
+                </div>
+                <span className="text-xs text-gray-400">
+                  {basketballStats.featuredMatch.isScheduled ?
+                    `Comienza a las ${basketballStats.featuredMatch.status.description}` :
+                    `Probabilidad de victoria: ${basketballStats.featuredMatch.homeTeam.name} 60%`}
+                </span>
               </div>
-              <span className="text-xs text-gray-400">Probabilidad de victoria: Lakers 70%</span>
             </div>
-          </div>
+          )}
 
           {/* Card 3: Center Hero */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 glass-brutal rounded-2xl p-8 z-10 shadow-[0_0_100px_rgba(168,85,247,0.15)] text-center">
@@ -158,8 +208,8 @@ export default function HomePage() {
                 <div className="text-[10px] text-gray-500">Precisión</div>
               </div>
               <div className="bg-white/5 rounded p-2">
-                <div className="text-xl font-bold text-white">12k</div>
-                <div className="text-[10px] text-gray-500">Partidos</div>
+                <div className="text-xl font-bold text-white">{basketballStats.liveEvents + footballStats.liveEvents}</div>
+                <div className="text-[10px] text-gray-500">En Vivo</div>
               </div>
               <div className="bg-white/5 rounded p-2">
                 <div className="text-xl font-bold text-white">24/7</div>
