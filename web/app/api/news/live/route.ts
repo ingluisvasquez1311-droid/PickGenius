@@ -85,16 +85,21 @@ export async function GET() {
 
             } catch (err) {
                 console.error("Error processing item with AI:", err);
-                // Fallback if AI fails
+
+                // FALLBACK: Return item without AI improvement if API Key fails (401) or other error
                 return {
                     id: `err-${index}`,
                     title: item.title,
-                    summary: item.contentSnippet,
+                    summary: item.contentSnippet || item.content || "Noticias de última hora",
                     source: "ESPN",
                     url: item.link,
                     imageUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1000&auto=format&fit=crop",
-                    publishedAt: new Date().toISOString(),
-                    aiAnalysis: { sentiment: 'neutral', bettingSignal: "No analysis available", impactScore: 0 }
+                    publishedAt: item.pubDate || new Date().toISOString(),
+                    aiAnalysis: {
+                        sentiment: 'neutral',
+                        bettingSignal: "Análisis IA no disponible (Verifique API Key)",
+                        impactScore: 50
+                    }
                 };
             }
         }));
