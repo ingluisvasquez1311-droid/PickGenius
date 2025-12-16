@@ -74,10 +74,20 @@ export default function ValueBetsPage() {
 }
 
 const ValueBetCard = ({ bet, isPremium }: { bet: ValueBet; isPremium: boolean }) => {
+    const getBookmakerLogo = (name: string) => {
+        const n = name.toLowerCase();
+        if (n.includes('bet365')) return 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Bet365_Logo.svg';
+        if (n.includes('pinnacle')) return 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Pinnacle_Sports_Logo.svg';
+        if (n.includes('1xbet')) return 'https://upload.wikimedia.org/wikipedia/commons/3/3e/1xBet_Logo.svg';
+        if (n.includes('betfair')) return 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Betfair_Logo.svg';
+        if (n.includes('william')) return 'https://upload.wikimedia.org/wikipedia/commons/0/07/William_Hill_Logo.svg';
+        return '/logo-mock-bookie.png'; // Fallback
+    };
+
     return (
         <div className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden hover:border-green-500/30 transition-all duration-300">
             {/* Edge Ribbon */}
-            <div className="absolute top-0 left-0 bg-green-500 text-black text-xs font-black px-3 py-1 rounded-br-xl z-20">
+            <div className="absolute top-0 left-0 bg-green-500 text-black text-xs font-black px-3 py-1 rounded-br-xl z-20 shadow-[0_0_15px_rgba(34,197,94,0.4)]">
                 +{bet.edge.toFixed(1)}% EDGE
             </div>
 
@@ -86,15 +96,16 @@ const ValueBetCard = ({ bet, isPremium }: { bet: ValueBet; isPremium: boolean })
                 {/* Visual Side Match Info */}
                 <div className="p-6 flex-1 flex flex-col justify-center relative">
                     <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1 flex items-center gap-2">
-                        <span>{bet.sport}</span>
+                        <span>{bet.sport === 'soccer' ? 'Fútbol' : bet.sport}</span>
                         <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
                         <span>{bet.league}</span>
                     </div>
                     <div className="text-xl font-bold text-white mb-2 flex items-center gap-3">
                         {bet.homeTeam} <span className="text-gray-600 text-sm">vs</span> {bet.awayTeam}
                     </div>
-                    <div className="text-sm text-gray-400 font-mono">
-                        {new Date(bet.startTime).toLocaleString()}
+                    <div className="text-sm text-gray-400 font-mono flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                        {new Date(bet.startTime).toLocaleString('es-ES', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}
                     </div>
                 </div>
 
@@ -102,39 +113,56 @@ const ValueBetCard = ({ bet, isPremium }: { bet: ValueBet; isPremium: boolean })
                 <div className="relative p-6 md:w-[400px] bg-[#111] flex flex-col justify-center border-l border-white/5">
 
                     {!isPremium && (
-                        <div className="absolute inset-0 z-30 backdrop-blur-md bg-black/60 flex flex-col items-center justify-center p-6 text-center">
-                            <div className="mb-2 text-2xl">🔒</div>
-                            <h3 className="text-white font-bold mb-1">Pick Bloqueado</h3>
-                            <p className="text-xs text-gray-400 mb-3">Solo suscriptores Pro ven la selección exacta y la casa.</p>
-                            <button className="bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-green-500 transition-colors">
-                                Desbloquear Ahora
+                        <div className="absolute inset-0 z-30 backdrop-blur-md bg-black/60 flex flex-col items-center justify-center p-6 text-center border-l border-green-500/20">
+                            <div className="mb-2 text-3xl">🔒</div>
+                            <h3 className="text-white font-bold mb-1 tracking-tight">OPORTUNIDAD PREMIUM</h3>
+                            <p className="text-xs text-gray-400 mb-4 max-w-[200px]">
+                                Desbloquea esta apuesta de valor con <span className="text-green-400 font-bold">+{bet.edge.toFixed(1)}% de rentabilidad</span> teórica.
+                            </p>
+                            <button className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs font-bold px-6 py-2.5 rounded-full hover:scale-105 transition-transform shadow-lg shadow-green-900/20">
+                                Desbloquear Pick
                             </button>
                         </div>
                     )}
 
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <div className="text-xs text-gray-500 uppercase font-bold">Mercado</div>
-                            <div className="text-white font-bold">{bet.market}</div>
+                            <div className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">MERCADO</div>
+                            <div className="text-white font-bold text-sm">{bet.market}</div>
                         </div>
                         <div className="text-right">
-                            <div className="text-xs text-gray-500 uppercase font-bold">Cuota</div>
-                            <div className="text-3xl font-black text-green-400 tabular-nums">{bet.odds.toFixed(2)}</div>
+                            <div className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">CUOTA REAL</div>
+                            <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-green-300 to-green-600 tabular-nums">
+                                {bet.odds.toFixed(2)}
+                            </div>
                         </div>
                     </div>
 
-                    <div className="bg-[#1a1a1a] rounded-lg p-3 flex items-center justify-between mb-2">
+                    <div className="bg-[#1a1a1a] rounded-xl p-3 flex items-center justify-between mb-3 border border-white/5">
                         <div className="flex flex-col">
-                            <span className="text-xs text-gray-400 uppercase font-bold">Tu Apuesta</span>
+                            <span className="text-[10px] text-gray-400 uppercase font-bold">Tu Apuesta</span>
                             <span className="text-lg font-bold text-white tracking-tight">{bet.selection}</span>
                         </div>
-                        <img src="/logo-mock-bookie.png" alt="" className="h-6 opacity-50" />
+                        <div className="h-8 w-20 flex items-center justify-center bg-white/5 rounded px-2">
+                            {/* Logo handling */}
+                            {getBookmakerLogo(bet.bookmaker) !== '/logo-mock-bookie.png' ? (
+                                <img src={getBookmakerLogo(bet.bookmaker)} alt={bet.bookmaker} className="max-h-6 max-w-full object-contain" />
+                            ) : (
+                                <span className="text-[10px] font-bold text-gray-400 uppercase">{bet.bookmaker}</span>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-[10px] text-gray-500 font-mono">
-                        <span>Prob. Real: <span className="text-white">{bet.aiProbability}%</span></span>
-                        <span>vs</span>
-                        <span>Implícita: {bet.impliedProbability.toFixed(1)}%</span>
+                    <div className="flex items-center justify-between text-[10px] font-mono bg-black/30 rounded px-2 py-1">
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-gray-500">IA:</span>
+                            <span className="text-green-400 font-bold">{bet.aiProbability}%</span>
+                        </div>
+                        <div className="w-px h-3 bg-white/10"></div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-gray-500">Implícita:</span>
+                            <span className="text-gray-300">{bet.impliedProbability.toFixed(1)}%</span>
+                        </div>
                     </div>
                 </div>
             </div>
