@@ -187,7 +187,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
                     <div className="flex items-center gap-2">
                         <span className="text-[10px] text-gray-500 font-bold uppercase">Live Odds</span>
                         <div className="px-2 py-0.5 rounded bg-green-500/10 text-green-400 text-xs font-mono font-bold border border-green-500/20">
-                            {event.id.slice(0, 2) === '11' ? '1.85' : '2.10'}
+                            {event.id.toString().slice(0, 2) === '11' ? '1.85' : '2.10'}
                         </div>
                     </div>
                 </div>
