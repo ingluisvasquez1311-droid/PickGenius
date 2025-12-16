@@ -96,7 +96,7 @@ const ValueBetCard = ({ bet, isPremium }: { bet: ValueBet; isPremium: boolean })
                 {/* Visual Side Match Info */}
                 <div className="p-6 flex-1 flex flex-col justify-center relative">
                     <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1 flex items-center gap-2">
-                        <span>{bet.sport === 'soccer' ? 'Fútbol' : bet.sport}</span>
+                        <span>{bet.sport === 'football' ? 'Fútbol' : bet.sport === 'basketball' ? 'Baloncesto' : bet.sport}</span>
                         <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
                         <span>{bet.league}</span>
                     </div>
