@@ -225,6 +225,17 @@ class SofaScoreBasketballService {
             120 // 2 minutes cache
         );
     }
+
+    /**
+     * Get scheduled events for a specific date (YYYY-MM-DD)
+     */
+    async getScheduledEvents(date: string): Promise<ApiResponse> {
+        return this.makeRequest(
+            `/sport/basketball/scheduled-events/${date}`,
+            `basketball_scheduled_${date}`,
+            300 // 5 minutes cache
+        );
+    }
 }
 
 // Export singleton instance

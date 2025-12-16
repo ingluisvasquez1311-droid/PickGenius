@@ -11,9 +11,9 @@ const groq = new Groq({
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { eventId: string } }
+    { params }: { params: Promise<{ eventId: string }> }
 ) {
-    const eventId = params.eventId;
+    const { eventId } = await params;
 
     if (!eventId) {
         return NextResponse.json({ success: false, error: 'Event ID required' }, { status: 400 });

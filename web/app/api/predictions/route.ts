@@ -33,21 +33,27 @@ export async function POST(request: NextRequest) {
         const FOOTBALL_API_KEY = process.env.FOOTBALL_API_KEY_1 || process.env.NEXT_PUBLIC_FOOTBALL_API_KEY;
 
         if (sport === 'basketball') {
-            if (!NBA_API_KEY) throw new Error("NBA API Key missing");
-            const response = await fetch(`https://api-nba-v1.p.rapidapi.com/games?id=${gameId}`, {
-                headers: { 'x-rapidapi-key': NBA_API_KEY, 'x-rapidapi-host': 'api-nba-v1.p.rapidapi.com' }
-            });
-            const data = await response.json();
-            const game = data.response?.[0];
-            if (!game) throw new Error("Game not found in NBA API");
+            // Use our internal Sofascore Service
+            const response = await sofaScoreBasketballService.getEventDetails(gameId);
+
+            if (!response.success || !response.data) {
+                console.error("Sofascore API Error:", response.error);
+                throw new Error("Game not found in Sofascore API");
+            }
+
+            const game = response.data;
+            const homeScore = game.homeScore?.current ?? 0;
+            const awayScore = game.awayScore?.current ?? 0;
 
             matchContext = {
-                sport: 'Basketball (NBA)',
-                home: game.teams.home.name,
-                away: game.teams.visitors.name,
-                score: `${game.scores.home.points} - ${game.scores.visitors.points}`,
-                status: `${game.periods.current}Q - ${game.clock}`,
-                // Add more stats if available in this endpoint or fetch stats endpoint
+                sport: 'Basketball (Sofascore)',
+                home: game.homeTeam.name,
+                away: game.awayTeam.name,
+                score: `${homeScore} - ${awayScore}`,
+                status: game.status?.description || 'Scheduled',
+                startTime: game.startTimestamp,
+                tournament: game.tournament?.name,
+                // Add H2H or standings if needed for better AI context
             };
         } else if (sport === 'football') {
             if (!FOOTBALL_API_KEY) throw new Error("Football API Key missing");
