@@ -23,9 +23,12 @@ class SofaScoreFootballService {
             'Cache-Control': 'max-age=0',
             'Connection': 'keep-alive',
             'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors', // Changed from same-origin to mimic legitimate cross-subdomain request
+            'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-site',
-            'Pragma': 'no-cache'
+            'Pragma': 'no-cache',
+            'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"'
         };
     }
 
