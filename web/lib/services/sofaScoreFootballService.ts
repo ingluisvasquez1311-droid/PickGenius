@@ -51,17 +51,19 @@ class SofaScoreFootballService {
 
             if (useProxy) {
                 console.log(`🔒 Using ScraperAPI for: ${endpoint}`);
-                // ScraperAPI format: http://api.scraperapi.com?api_key=XXX&url=YYY
-                const apiKey = process.env.SCRAPER_API_KEY;
-                fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}&keep_headers=true`;
-                // When using proxy, we might need to adjust headers or trust ScraperAPI to rotate them
-                // ScraperAPI handles User-Agent rotation, so we can simplify headers
+                // Trim key just in case
+                const apiKey = process.env.SCRAPER_API_KEY?.trim();
+                // Use HTTPS, remove keep_headers to let ScraperAPI handle UA rotation
+                fetchUrl = `https://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
+                // When using ScraperAPI without keep_headers, we should send minimal/empty headers to fetch, 
+                // as the query params control the request.
+                fetchHeaders = {};
             } else {
                 console.log(`🌐 Direct Request (No Proxy): ${endpoint}`);
             }
 
             const response = await fetch(fetchUrl, {
-                headers: fetchHeaders, // Pass headers (ScraperAPI with keep_headers=true will forward them)
+                headers: fetchHeaders,
                 cache: 'no-store'
             });
 
