@@ -43,9 +43,22 @@ class SofaScoreBasketballService {
                 return { success: true, data: cachedData, fromCache: true };
             }
 
-            console.log(`🌐 SofaScore Basketball API: Fetching ${endpoint}...`);
-            const response = await fetch(`${this.baseUrl}${endpoint}`, {
-                headers: this.headers,
+            const targetUrl = `${this.baseUrl}${endpoint}`;
+            const useProxy = process.env.USE_PROXY === 'true' && !!process.env.SCRAPER_API_KEY;
+
+            let fetchUrl = targetUrl;
+            let fetchHeaders = this.headers;
+
+            if (useProxy) {
+                console.log(`🔒 Using ScraperAPI for: ${endpoint}`);
+                const apiKey = process.env.SCRAPER_API_KEY;
+                fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}&keep_headers=true`;
+            } else {
+                console.log(`🌐 Direct Request (No Proxy): ${endpoint}`);
+            }
+
+            const response = await fetch(fetchUrl, {
+                headers: fetchHeaders,
                 cache: 'no-store'
             });
 

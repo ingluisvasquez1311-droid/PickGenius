@@ -43,13 +43,31 @@ class SofaScoreFootballService {
                 return { success: true, data: cachedData, fromCache: true };
             }
 
-            console.log(`🌐 SofaScore Football API: Fetching ${endpoint}...`);
-            const response = await fetch(`${this.baseUrl}${endpoint}`, {
-                headers: this.headers,
+            const targetUrl = `${this.baseUrl}${endpoint}`;
+            const useProxy = process.env.USE_PROXY === 'true' && !!process.env.SCRAPER_API_KEY;
+
+            let fetchUrl = targetUrl;
+            let fetchHeaders = this.headers;
+
+            if (useProxy) {
+                console.log(`🔒 Using ScraperAPI for: ${endpoint}`);
+                // ScraperAPI format: http://api.scraperapi.com?api_key=XXX&url=YYY
+                const apiKey = process.env.SCRAPER_API_KEY;
+                fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}&keep_headers=true`;
+                // When using proxy, we might need to adjust headers or trust ScraperAPI to rotate them
+                // ScraperAPI handles User-Agent rotation, so we can simplify headers
+            } else {
+                console.log(`🌐 Direct Request (No Proxy): ${endpoint}`);
+            }
+
+            const response = await fetch(fetchUrl, {
+                headers: fetchHeaders, // Pass headers (ScraperAPI with keep_headers=true will forward them)
                 cache: 'no-store'
             });
 
             if (!response.ok) {
+                // If direct request fails (403), we can't do much if proxy is off.
+                // If proxy fails, it usually returns 500 or 403 too.
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
