@@ -7,6 +7,8 @@ import AIPredictionCard from '@/components/ai/AIPredictionCard';
 import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import TopPlayersCardBasketball from '@/components/basketball/TopPlayersCardBasketball';
+import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
+import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballService';
 
 export default function BasketballLivePage() {
     const params = useParams();
@@ -14,30 +16,52 @@ export default function BasketballLivePage() {
     const eventId = params.eventId as string;
 
     const [game, setGame] = useState<any>(null);
+    const [bestPlayers, setBestPlayers] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
+    // Modal State
+    const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
+    const [modalColor, setModalColor] = useState<'purple' | 'orange'>('purple');
+
     useEffect(() => {
-        async function fetchGameDetails() {
+        async function fetchData() {
             if (!eventId) return;
 
             try {
-                // Use our new Proxy API Route
-                const response = await fetch(`/api/basketball/match/${eventId}`);
-                if (response.ok) {
-                    const data = await response.json();
+                // 1. Fetch Game Details
+                const gameRes = await fetch(`/api/basketball/match/${eventId}`);
+                if (gameRes.ok) {
+                    const data = await gameRes.json();
                     if (data.success) {
                         setGame(data.data);
                     }
                 }
+
+                // 2. Fetch Top Players (Client-side service usage)
+                const playersRes = await sofaScoreBasketballService.getBestPlayers(eventId);
+                if (playersRes.success && playersRes.data?.bestPlayers) {
+                    setBestPlayers(playersRes.data.bestPlayers);
+                }
             } catch (error) {
-                console.error('Error fetching game details:', error);
+                console.error('Error fetching game data:', error);
             } finally {
                 setLoading(false);
             }
         }
 
-        fetchGameDetails();
+        fetchData();
     }, [eventId]);
+
+    // Handlers needed for interactions
+    const handleHomePlayerClick = (player: any) => {
+        setSelectedPlayer(player);
+        setModalColor('purple');
+    };
+
+    const handleAwayPlayerClick = (player: any) => {
+        setSelectedPlayer(player);
+        setModalColor('orange');
+    };
 
     if (loading) {
         return (
@@ -66,6 +90,14 @@ export default function BasketballLivePage() {
 
     return (
         <div className="min-h-screen bg-[#0b0b0b] pb-20">
+
+            {/* Player Detail Modal */}
+            <PlayerDetailModal
+                player={selectedPlayer}
+                isOpen={!!selectedPlayer}
+                onClose={() => setSelectedPlayer(null)}
+                teamColor={modalColor}
+            />
 
             <div className="container pt-24 md:pt-28">
                 {/* Header / Scoreboard */}
@@ -105,11 +137,9 @@ export default function BasketballLivePage() {
                         <ErrorBoundary>
                             <TopPlayersCardBasketball
                                 title="TOP JUGADORES LOCAL"
-                                players={[
-                                    // Placeholder - will be populated from API
-                                    { name: 'Cargando...', position: '-', rating: 0 }
-                                ]}
+                                players={bestPlayers?.homeTeamPlayers || []}
                                 teamColor="purple"
+                                onPlayerClick={handleHomePlayerClick}
                             />
                         </ErrorBoundary>
 
@@ -177,11 +207,9 @@ export default function BasketballLivePage() {
                         <ErrorBoundary>
                             <TopPlayersCardBasketball
                                 title="TOP JUGADORES VISITANTE"
-                                players={[
-                                    // Placeholder - will be populated from API
-                                    { name: 'Cargando...', position: '-', rating: 0 }
-                                ]}
+                                players={bestPlayers?.awayTeamPlayers || []}
                                 teamColor="orange"
+                                onPlayerClick={handleAwayPlayerClick}
                             />
                         </ErrorBoundary>
 

@@ -6,8 +6,15 @@ import { sofaScoreFootballService } from '@/lib/services/sofaScoreFootballServic
 export const maxDuration = 60; // Allow longer timeout for AI generation
 
 export async function POST(request: NextRequest) {
+    let fallbackHomeName = 'Equipo Local';
+    let fallbackAwayName = 'Equipo Visitante';
+
     try {
         const body = await request.json();
+        // Update fallbacks if body is available
+        if (body.homeTeam || body.homeTeamName) fallbackHomeName = body.homeTeam || body.homeTeamName;
+        if (body.awayTeam || body.awayTeamName) fallbackAwayName = body.awayTeam || body.awayTeamName;
+
         const { gameId, sport } = body;
 
         if (!gameId || !sport) {
@@ -95,52 +102,52 @@ export async function POST(request: NextRequest) {
 
         if (sport === 'basketball') {
             prompt = `
-            You are an expert NBA/Basketball analyst.
+            You are an expert NBA/Basketball analyst speaking SPANISH.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
             ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
 
-            RETURN JSON ONLY:
+            RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}", 
                 "confidence": 85,
-                "reasoning": "Analysis here...",
+                "reasoning": "Análisis detallado en ESPAÑOL explicando por qué ganará el equipo...",
                 "bettingTip": "${matchContext.home} -5.5",
                 "predictions": {
                     "finalScore": "110-102",
                     "totalPoints": "212",
-                    "spread": { "favorite": "${matchContext.home}", "line": -5.5, "recommendation": "Cover" },
-                    "overUnder": { "line": 215.5, "pick": "Under", "confidence": "High" },
+                    "spread": { "favorite": "${matchContext.home}", "line": -5.5, "recommendation": "Cubrir Hándicap" },
+                    "overUnder": { "line": 215.5, "pick": "Menos de", "confidence": "Alta" },
                     "topPlayers": {
-                        "homeTopScorer": { "name": "Player A", "predictedPoints": 25, "predictedRebounds": 8, "predictedAssists": 5 },
-                        "awayTopScorer": { "name": "Player B", "predictedPoints": 28, "predictedRebounds": 6, "predictedAssists": 4 }
+                        "homeTopScorer": { "name": "Jugador A", "predictedPoints": 25, "predictedRebounds": 8, "predictedAssists": 5 },
+                        "awayTopScorer": { "name": "Jugador B", "predictedPoints": 28, "predictedRebounds": 6, "predictedAssists": 4 }
                     }
                 },
-                "keyFactors": ["Factor 1", "Factor 2", "Factor 3"]
+                "keyFactors": ["Factor en Español 1", "Factor en Español 2", "Factor en Español 3"]
             }
             `;
         } else {
             prompt = `
-            You are an expert Football/Soccer analyst.
+            You are an expert Football/Soccer analyst speaking SPANISH.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
             ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
-            RETURN JSON ONLY:
+            RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
-                "reasoning": "Analysis here...",
-                "bettingTip": "Over 2.5 Goals",
+                "reasoning": "Análisis detallado en ESPAÑOL explicando la predicción...",
+                "bettingTip": "Más de 2.5 Goles",
                 "predictions": {
                     "finalScore": "2-1",
                     "totalGoals": "3",
                     "corners": { "home": 5, "away": 3, "total": 8 },
                     "shots": { "home": 12, "away": 8, "onTarget": "6" },
-                    "cards": { "yellowCards": 4, "redCards": 0, "details": "High tension match" },
-                    "offsides": { "total": 4, "details": "2 per team" }
+                    "cards": { "yellowCards": 4, "redCards": 0, "details": "Partido intenso" },
+                    "offsides": { "total": 4, "details": "2 por equipo" }
                 },
-                "keyFactors": ["Factor 1", "Factor 2", "Factor 3"]
+                "keyFactors": ["Factor Clave 1", "Factor Clave 2", "Factor Clave 3"]
             }
             `;
         }
@@ -150,35 +157,45 @@ export async function POST(request: NextRequest) {
 
         console.log('🤖 Calling Groq for prediction...');
         const completion = await groq.chat.completions.create({
-            messages: [{ role: 'user', content: prompt }],
-            model: 'llama-3.3-70b-versatile',
-            temperature: 0.5,
-            response_format: { type: 'json_object' }
+            messages: [
+                {
+                    role: "system",
+                    content: "Eres un experto analista de apuestas deportivas. Responde siempre en JSON válido y en ESPAÑOL. Sé directo, profesional y persuasivo."
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            model: "llama3-70b-8192",
+            temperature: 0.7, // Creativity balance
+            max_tokens: 1000,
+            response_format: { type: "json_object" }
         });
 
-        const rawContent = completion.choices[0]?.message?.content;
-        console.log('📦 Raw Groq response:', rawContent?.substring(0, 200));
+        const responseContent = completion.choices[0]?.message?.content;
+        console.log('📦 Raw Groq response:', responseContent?.substring(0, 200));
 
-        if (!rawContent) {
-            throw new Error('Empty response from Groq');
+        if (!responseContent) {
+            throw new Error('Empty response from AI');
         }
 
         // Try to parse the JSON
-        let predictionJson;
+        let prediction;
         try {
-            predictionJson = JSON.parse(rawContent);
-            console.log('✅ Successfully parsed prediction:', Object.keys(predictionJson));
+            prediction = JSON.parse(responseContent);
+            console.log('✅ Successfully parsed prediction:', Object.keys(prediction));
         } catch (parseError) {
-            console.error('❌ Failed to parse Groq response:', rawContent);
+            console.error('❌ Failed to parse Groq response:', responseContent);
             throw new Error('Invalid JSON from Groq: ' + parseError);
         }
 
         // Validate required fields
-        if (!predictionJson.winner || !predictionJson.confidence) {
-            console.warn('⚠️ Missing required fields in prediction:', predictionJson);
+        if (!prediction.winner || !prediction.confidence) {
+            console.warn('⚠️ Missing required fields in prediction:', prediction);
         }
 
-        return NextResponse.json(predictionJson);
+        return NextResponse.json(prediction);
 
     } catch (error: any) {
         console.error('❌ Prediction API Error:', error.message);
@@ -187,34 +204,38 @@ export async function POST(request: NextRequest) {
         // FALLBACK: Generate Realistic Mock Prediction if API fails
         console.log('⚠️ Falling back to Mock Prediction due to API error');
 
+        // Extract team names safely using predefined fallback variables
+        const hName = fallbackHomeName;
+        const aName = fallbackAwayName;
+
         const isHomeFavored = Math.random() > 0.5;
-        const winner = isHomeFavored ? body.homeTeamName || 'Local' : body.awayTeamName || 'Visitante';
-        const loser = isHomeFavored ? body.awayTeamName || 'Visitante' : body.homeTeamName || 'Local';
+        const winner = isHomeFavored ? hName : aName;
+        const loser = isHomeFavored ? aName : hName;
 
         const mockPrediction = {
             winner: winner,
             confidence: 82,
-            reasoning: `Based on recent form and head-to-head analysis (AI unavailable), ${winner} shows superior consistency. Their recent performance suggests a strong likelihood of controlling the game tempo against ${loser}.`,
-            bettingTip: isHomeFavored ? `${winner} to win` : `${winner} +0.5 Handicap`,
+            reasoning: `Basado en la forma reciente y el análisis directo (IA no disponible), ${winner} muestra una consistencia superior. Su rendimiento sugiere una alta probabilidad de controlar el ritmo contra ${loser}.`,
+            bettingTip: isHomeFavored ? `${winner} gana` : `${winner} +0.5 Hándicap`,
             predictions: {
                 finalScore: isHomeFavored ? '2-1' : '1-2',
                 totalGoals: '3',
                 corners: { home: 6, away: 4, total: 10 },
                 shots: { home: 14, away: 11, onTarget: '5' },
-                cards: { yellowCards: 3, redCards: 0, details: 'Clean match expected' },
-                offsides: { total: 4, details: 'Average' },
+                cards: { yellowCards: 3, redCards: 0, details: 'Partido limpio' },
+                offsides: { total: 4, details: 'Promedio' },
                 // Basketball specific fallbacks
-                spread: { favorite: winner, line: -4.5, recommendation: 'Cover' },
-                overUnder: { line: 215.5, pick: 'Over', confidence: 'Medium' },
+                spread: { favorite: winner, line: -4.5, recommendation: 'Cubrir' },
+                overUnder: { line: 215.5, pick: 'Más de', confidence: 'Media' },
                 topPlayers: {
-                    homeTopScorer: { name: 'Star Player (Home)', predictedPoints: 24, predictedRebounds: 8, predictedAssists: 5 },
-                    awayTopScorer: { name: 'Star Player (Away)', predictedPoints: 26, predictedRebounds: 6, predictedAssists: 4 }
+                    homeTopScorer: { name: 'Jugador Estrella (Local)', predictedPoints: 24, predictedRebounds: 8, predictedAssists: 5 },
+                    awayTopScorer: { name: 'Jugador Estrella (Visitante)', predictedPoints: 26, predictedRebounds: 6, predictedAssists: 4 }
                 }
             },
             keyFactors: [
-                "Strong recent form from the favorite",
-                "Tactical advantage in midfield/transition",
-                "Historical dominance in this matchup"
+                "Forma reciente sólida del favorito",
+                "Ventaja táctica en transición",
+                "Dominio histórico en este enfrentamiento"
             ],
             isMock: true
         };
