@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { X } from 'lucide-react'; // Ensure lucid-react is installed, if not we use unicode X
 
 interface PlayerDetailModalProps {
     player: any;
