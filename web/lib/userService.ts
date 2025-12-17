@@ -19,6 +19,7 @@ export interface UserProfile {
     favoriteTeams: string[];
     createdAt: Date;
     lastLogin: Date;
+    role: 'admin' | 'user';
 }
 
 /**
@@ -42,7 +43,9 @@ export async function createUserProfile(uid: string, email: string): Promise<Use
         predictionsLimit: 3, // Free tier: 3 predictions per day
         favoriteTeams: [],
         createdAt: serverTimestamp(),
-        lastLogin: serverTimestamp()
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp(),
+        role: 'user' // Default role
     };
 
     await setDoc(userRef, newProfile);
@@ -77,7 +80,9 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
         predictionsLimit: data.predictionsLimit || 3,
         favoriteTeams: data.favoriteTeams || [],
         createdAt: data.createdAt?.toDate() || new Date(),
-        lastLogin: data.lastLogin?.toDate() || new Date()
+        createdAt: data.createdAt?.toDate() || new Date(),
+        lastLogin: data.lastLogin?.toDate() || new Date(),
+        role: data.role || 'user'
     };
 }
 
@@ -177,8 +182,45 @@ export async function canMakePrediction(uid: string): Promise<{ canPredict: bool
 
     // Free users have daily limit
     const remaining = profile.predictionsLimit - profile.predictionsUsed;
-    return {
-        canPredict: remaining > 0,
+    canPredict: remaining > 0,
         remaining: Math.max(0, remaining)
-    };
+};
+}
+
+/**
+ * Get all users (Admin only)
+ */
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+
+export async function getAllUsers(): Promise<UserProfile[]> {
+    if (!db) return [];
+
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, orderBy('createdAt', 'desc'), limit(50)); // Limit to last 50 for performance
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            uid: data.uid,
+            email: data.email,
+            isPremium: data.isPremium || false,
+            subscriptionEnd: data.subscriptionEnd?.toDate(),
+            predictionsUsed: data.predictionsUsed || 0,
+            predictionsLimit: data.predictionsLimit || 3,
+            favoriteTeams: data.favoriteTeams || [],
+            createdAt: data.createdAt?.toDate() || new Date(),
+            lastLogin: data.lastLogin?.toDate() || new Date(),
+            role: data.role || 'user'
+        };
+    });
+}
+
+/**
+ * Set user role (Admin only)
+ */
+export async function setUserRole(uid: string, role: 'admin' | 'user'): Promise<void> {
+    if (!db) return;
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { role });
 }

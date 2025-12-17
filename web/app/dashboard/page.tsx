@@ -1,12 +1,37 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function DashboardPage() {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
+    const [history, setHistory] = useState<any[]>([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
     const trialDaysLeft = 14; // Mock logic
+
+    useEffect(() => {
+        if (user) {
+            fetchHistory();
+        }
+    }, [user]);
+
+    const fetchHistory = async () => {
+        try {
+            const res = await fetch(`/api/predictions/history?userId=${user?.uid}`);
+            const data = await res.json();
+            if (data.success) {
+                setHistory(data.history);
+            }
+        } catch (error) {
+            console.error('Error fetching history:', error);
+        } finally {
+            setIsLoadingHistory(false);
+        }
+    };
+
+    if (loading) return <div className="min-h-screen bg-[#050505] pt-24 text-white text-center">Cargando...</div>;
 
     return (
         <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 px-4">
@@ -57,54 +82,51 @@ export default function DashboardPage() {
                     {/* Stats & History */}
                     <div className="md:col-span-2 space-y-6">
 
-                        {/* Highlights */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-[#111] border border-white/10 rounded-xl p-6">
-                                <p className="text-gray-500 text-xs uppercase font-bold mb-1">Predicciones Leídas</p>
-                                <p className="text-3xl font-bold text-white">12</p>
-                            </div>
-                            <div className="bg-[#111] border border-white/10 rounded-xl p-6">
-                                <p className="text-gray-500 text-xs uppercase font-bold mb-1">Aciertos Estimados</p>
-                                <p className="text-3xl font-bold text-green-400">83%</p>
-                            </div>
-                        </div>
-
-                        {/* Recent Activity Mock */}
+                        {/* Recent Activity */}
                         <div className="bg-[#111] border border-white/10 rounded-xl p-6">
-                            <h3 className="text-lg font-bold mb-4 text-gray-200">Actividad Reciente</h3>
+                            <h3 className="text-lg font-bold mb-4 text-gray-200">Historial de Predicciones</h3>
 
-                            <div className="space-y-0">
-                                <div className="flex items-center justify-between py-3 border-b border-white/5">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-lg">🏀</span>
-                                        <div>
-                                            <p className="text-sm font-bold text-white">Lakers vs Warriors</p>
-                                            <p className="text-xs text-gray-500">Ayer</p>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded">Ganada</span>
+                            {isLoadingHistory ? (
+                                <p className="text-gray-500 text-sm">Cargando historial...</p>
+                            ) : history.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    <p>No tienes predicciones guardadas aún.</p>
+                                    <Link href="/basketball-live" className="text-purple-400 text-sm hover:underline mt-2 inline-block">
+                                        ¡Haz tu primera predicción!
+                                    </Link>
                                 </div>
-                                <div className="flex items-center justify-between py-3 border-b border-white/5">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-lg">⚽</span>
-                                        <div>
-                                            <p className="text-sm font-bold text-white">Real Madrid vs Barça</p>
-                                            <p className="text-xs text-gray-500">Hace 2 días</p>
+                            ) : (
+                                <div className="space-y-0">
+                                    {history.map((item) => (
+                                        <div key={item.id} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0 hover:bg-white/5 px-2 rounded transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-lg">
+                                                    {item.prediction.sport === 'football' ? '⚽' : '🏀'}
+                                                </span>
+                                                <div>
+                                                    <p className="text-sm font-bold text-white">
+                                                        {item.prediction.match || `Partido #${item.gameId}`}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        Pick: <span className="text-gray-300">{item.prediction.pick || item.prediction.winner}</span>
+                                                    </p>
+                                                    <p className="text-[10px] text-gray-600">
+                                                        {new Date(item.createdAt).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                                                    Pendiente
+                                                </span>
+                                                <p className="text-[10px] text-gray-500 mt-1">
+                                                    Confianza: {item.prediction.confidence || '?'}%
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <span className="text-xs bg-red-500/10 text-red-400 px-2 py-1 rounded">Perdida</span>
+                                    ))}
                                 </div>
-                                <div className="flex items-center justify-between py-3">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-lg">🏀</span>
-                                        <div>
-                                            <p className="text-sm font-bold text-white">Celtics vs Heat</p>
-                                            <p className="text-xs text-gray-500">Hace 3 días</p>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded">Ganada</span>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>

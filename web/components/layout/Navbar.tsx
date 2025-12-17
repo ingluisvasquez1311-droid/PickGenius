@@ -111,6 +111,11 @@ export default function Navbar() {
                             {!loading && (
                                 user ? (
                                     <div className="flex items-center gap-3">
+                                        {user.role === 'admin' && (
+                                            <Link href="/admin" className="text-red-400 text-xs font-bold border border-red-500/30 bg-red-500/10 px-2 py-1 rounded hover:bg-red-500/20 transition-colors">
+                                                ADMIN
+                                            </Link>
+                                        )}
                                         <Link href="/profile" className="text-sm hover:text-[var(--primary)] transition-colors flex items-center gap-2">
                                             <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 hover:border-purple-500 transition-colors">
                                                 👤
