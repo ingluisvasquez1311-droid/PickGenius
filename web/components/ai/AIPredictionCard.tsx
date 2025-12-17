@@ -104,7 +104,9 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                 <span className="text-4xl">🏆</span>
                             </div>
                             <p className="text-black/70 text-xs uppercase font-bold mb-2 mt-2">Ganador Predicho</p>
-                            <p className="text-2xl md:text-3xl font-black text-black">{prediction.winner || 'Analizando...'}</p>
+                            <p className="text-2xl md:text-3xl font-black text-black">
+                                {(!prediction.winner || prediction.winner.includes('undefined')) ? 'Analizando...' : prediction.winner}
+                            </p>
                             <div className="mt-3 flex items-center justify-center gap-2">
                                 <div className="flex-1 max-w-xs h-3 bg-black/20 rounded-full overflow-hidden">
                                     <div
@@ -177,26 +179,10 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                         {/* PREMIUM CONTENT SECTION (Exact Score, Cards, Factors) */}
                         <div className="relative mt-4">
 
-                            {/* Locked Overlay for Non-Premium */}
-                            {!user?.isPremium && (
-                                <div className="absolute inset-0 z-20 backdrop-blur-md bg-black/60 rounded-lg flex flex-col items-center justify-center text-center p-6 border border-white/10">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-full flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(251,191,36,0.4)] animate-pulse-slow">
-                                        <span className="text-2xl">👑</span>
-                                    </div>
-                                    <h3 className="text-xl font-bold text-white mb-1">Análisis VIP Bloqueado</h3>
-                                    <p className="text-gray-400 mb-4 max-w-xs text-xs">
-                                        Desbloquear Marcador Exacto, Tarjetas, Factores Clave y Picks Exclusivos.
-                                    </p>
-                                    <a
-                                        href="/pricing"
-                                        className="bg-white text-black font-bold py-2 px-6 rounded-full hover:scale-105 transition-transform text-sm shadow-lg shadow-white/10"
-                                    >
-                                        Ser Premium ($5)
-                                    </a>
-                                </div>
-                            )}
+                            {/* Locked Overlay for Non-Premium (BYPASSED FOR NOW) */}
+                            {/* {!user?.isPremium && ( ... )} */}
 
-                            <div className={!user?.isPremium ? 'opacity-10 pointer-events-none select-none filter blur-sm' : ''}>
+                            <div className=""> {/* Removed blur/opacity class */}
                                 {prediction.predictions && (
                                     <div className="space-y-3">
                                         <h4 className="text-yellow-400 text-sm font-bold uppercase tracking-wider flex items-center gap-2 mt-6 mb-2">
