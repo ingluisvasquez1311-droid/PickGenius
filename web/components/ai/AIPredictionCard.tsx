@@ -98,25 +98,25 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
 
                 {prediction && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-black/30 p-4 rounded-lg">
-                                <p className="text-purple-300 text-xs uppercase font-bold mb-1">Ganador Probable</p>
-                                <p className="text-xl font-bold text-white">{prediction.winner || 'N/A'}</p>
+                        {/* PROMINENT WINNER BADGE */}
+                        <div className="relative bg-gradient-to-r from-yellow-500 to-amber-600 rounded-2xl p-6 text-center shadow-2xl shadow-yellow-500/30 border-2 border-yellow-400">
+                            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white rounded-full p-3 shadow-lg">
+                                <span className="text-4xl">🏆</span>
                             </div>
-                            <div className="bg-black/30 p-4 rounded-lg">
-                                <p className="text-purple-300 text-xs uppercase font-bold mb-1">Confianza</p>
-                                <div className="flex items-center gap-2">
-                                    <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-green-400 rounded-full"
-                                            style={{ width: (typeof prediction.confidence === 'string' ? prediction.confidence : `${prediction.confidence}%`) }}
-                                        ></div>
-                                    </div>
-                                    <span className="text-white font-bold">
-                                        {typeof prediction.confidence === 'number' ? `${prediction.confidence}%` : prediction.confidence}
-                                    </span>
+                            <p className="text-black/70 text-xs uppercase font-bold mb-2 mt-2">Ganador Predicho</p>
+                            <p className="text-2xl md:text-3xl font-black text-black">{prediction.winner || 'Analizando...'}</p>
+                            <div className="mt-3 flex items-center justify-center gap-2">
+                                <div className="flex-1 max-w-xs h-3 bg-black/20 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-black rounded-full transition-all duration-500"
+                                        style={{ width: (typeof prediction.confidence === 'string' ? prediction.confidence : `${prediction.confidence}%`) }}
+                                    ></div>
                                 </div>
+                                <span className="text-black font-black text-xl">
+                                    {typeof prediction.confidence === 'number' ? `${prediction.confidence}%` : prediction.confidence}
+                                </span>
                             </div>
+                            <p className="text-black/60 text-xs mt-2 font-semibold">Confianza de la IA</p>
                         </div>
 
                         <div className="bg-black/30 p-4 rounded-lg">
