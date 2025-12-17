@@ -50,11 +50,15 @@ class SofaScoreBasketballService {
             let fetchHeaders = this.headers;
 
             if (useProxy) {
-                console.log(`🔒 Using ScraperAPI for: ${endpoint}`);
                 // Trim key just in case
                 const apiKey = process.env.SCRAPER_API_KEY?.trim();
-                // Use HTTPS, remove keep_headers to let ScraperAPI handle UA rotation
-                fetchUrl = `https://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
+
+                // DEBUG LOGGING (Safe)
+                console.log(`🔒 Using ScraperAPI for: ${endpoint}`);
+                console.log(`🔑 Scraper Key Status: ${apiKey ? 'Present' : 'MISSING'}, Length: ${apiKey?.length || 0}`);
+
+                // Use HTTP (safer for free tier compatibility)
+                fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
                 fetchHeaders = {};
             } else {
                 console.log(`🌐 Direct Request (No Proxy): ${endpoint}`);
