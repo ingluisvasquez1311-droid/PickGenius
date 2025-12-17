@@ -63,8 +63,8 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
     }, [event.id, sport]);
 
     // Construct Logo URLs if missing (Fallback)
-    const homeLogo = event.homeTeam.logo || `https://api.sofascore.app/api/v1/team/${event.homeTeam.id}/image`;
-    const awayLogo = event.awayTeam.logo || `https://api.sofascore.app/api/v1/team/${event.awayTeam.id}/image`;
+    const homeLogo = event.homeTeam.logo || `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/team/${event.homeTeam.id}/image`)}`;
+    const awayLogo = event.awayTeam.logo || `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/team/${event.awayTeam.id}/image`)}`;
 
     return (
         <Link
