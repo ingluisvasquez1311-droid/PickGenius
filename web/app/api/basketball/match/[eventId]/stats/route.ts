@@ -4,9 +4,9 @@ const API_URL = process.env.NEXT_PUBLIC_BACKEND_HOST || 'http://localhost:3000';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { eventId: string } }
+    context: { params: Promise<{ eventId: string }> }
 ) {
-    const eventId = params.eventId;
+    const { eventId } = await context.params;
 
     if (!eventId) {
         return NextResponse.json({ success: false, error: 'Event ID is required' }, { status: 400 });
