@@ -161,9 +161,12 @@ export default function BasketballLivePage() {
                                         <div className="text-[10px] text-gray-500 uppercase font-black">Momentum</div>
                                         <div className="text-xl font-bold text-blue-400">Alta</div>
                                     </div>
-                                    <button className="col-span-2 bg-white text-black rounded-xl font-black uppercase tracking-widest hover:bg-gray-200 transition-colors">
+                                    <Link
+                                        href={`/basketball-live/${featuredMatch.id}`}
+                                        className="col-span-2 bg-white text-black rounded-xl font-black uppercase tracking-widest hover:bg-gray-200 transition-colors py-3 text-center flex items-center justify-center gap-2"
+                                    >
                                         Ver Análisis Completo ↗
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
