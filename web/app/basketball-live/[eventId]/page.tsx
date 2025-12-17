@@ -11,6 +11,8 @@ import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
 import TeamStatsComparison from '@/components/basketball/TeamStatsComparison';
 import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballService';
 
+import TeamLogo from '@/components/ui/TeamLogo';
+
 export default function BasketballLivePage() {
     const params = useParams();
     const router = useRouter();
@@ -101,13 +103,18 @@ export default function BasketballLivePage() {
             />
 
             <div className="container pt-24 md:pt-28">
+
+                // ... inside component ...
                 {/* Header / Scoreboard */}
                 <div className="glass-card p-6 mb-6">
                     <div className="flex justify-between items-center text-center">
-                        <div className="flex-1">
-                            <h2 className="text-xl md:text-3xl font-bold mb-2">{game.homeTeam.name}</h2>
-                            <div className="text-4xl md:text-6xl font-bold font-mono">
-                                {game.homeScore?.current || 0}
+                        <div className="flex-1 flex flex-col items-center gap-3">
+                            <TeamLogo teamId={game.homeTeam.id} teamName={game.homeTeam.name} size="xl" />
+                            <div>
+                                <h2 className="text-xl md:text-3xl font-bold mb-2">{game.homeTeam.name}</h2>
+                                <div className="text-4xl md:text-6xl font-bold font-mono">
+                                    {game.homeScore?.current || 0}
+                                </div>
                             </div>
                         </div>
 
@@ -120,10 +127,13 @@ export default function BasketballLivePage() {
                             </div>
                         </div>
 
-                        <div className="flex-1">
-                            <h2 className="text-xl md:text-3xl font-bold mb-2">{game.awayTeam.name}</h2>
-                            <div className="text-4xl md:text-6xl font-bold font-mono">
-                                {game.awayScore?.current || 0}
+                        <div className="flex-1 flex flex-col items-center gap-3">
+                            <TeamLogo teamId={game.awayTeam.id} teamName={game.awayTeam.name} size="xl" />
+                            <div>
+                                <h2 className="text-xl md:text-3xl font-bold mb-2">{game.awayTeam.name}</h2>
+                                <div className="text-4xl md:text-6xl font-bold font-mono">
+                                    {game.awayScore?.current || 0}
+                                </div>
                             </div>
                         </div>
                     </div>
