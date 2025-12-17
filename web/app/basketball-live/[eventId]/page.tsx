@@ -8,6 +8,7 @@ import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import TopPlayersCardBasketball from '@/components/basketball/TopPlayersCardBasketball';
 import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
+import TeamStatsComparison from '@/components/basketball/TeamStatsComparison';
 import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballService';
 
 export default function BasketballLivePage() {
@@ -153,13 +154,22 @@ export default function BasketballLivePage() {
                         </ErrorBoundary>
                     </div>
 
-                    {/* Center Column: AI + Quarter Scores (6 cols) */}
+                    {/* Center Column: AI + Team Stats + Quarter Scores (6 cols) */}
                     <div className="md:col-span-6 order-1 md:order-2 space-y-4 min-w-0">
                         {/* AI Prediction */}
                         <ErrorBoundary>
                             <AIPredictionCard
                                 sport="basketball"
                                 eventId={eventId}
+                            />
+                        </ErrorBoundary>
+
+                        {/* Team Stats Comparison (NEW - Professional Dashboard) */}
+                        <ErrorBoundary>
+                            <TeamStatsComparison
+                                eventId={eventId}
+                                homeColor="bg-purple-500"
+                                awayColor="bg-orange-500"
                             />
                         </ErrorBoundary>
 
