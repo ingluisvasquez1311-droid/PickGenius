@@ -223,12 +223,70 @@ class SofaScoreBasketballService {
     /**
      * Get Best Players for an event
      */
+    /**
+     * Get Best Players for an event with fallback to lineups
+     */
     async getBestPlayers(eventId: string): Promise<ApiResponse> {
-        return this.makeRequest(
+        // 1. Try dedicated endpoint first
+        const bestPlayersRes = await this.makeRequest(
             `/event/${eventId}/best-players`,
             `basketball_best_players_${eventId}`,
-            120 // 2 minutes cache
+            120
         );
+
+        if (bestPlayersRes.success) {
+            return bestPlayersRes;
+        }
+
+        console.log(`⚠️ 'best-players' endpoint failed for ${eventId}. Falling back to lineups...`);
+
+        // 2. Fallback: Calculate from lineups
+        const lineupsRes = await this.getLineups(eventId);
+
+        if (!lineupsRes.success || !lineupsRes.data) {
+            return { success: false, error: 'Could not fetch lineups for fallback' };
+        }
+
+        const homePlayers = lineupsRes.data.home?.players || [];
+        const awayPlayers = lineupsRes.data.away?.players || [];
+
+        // Helper to sort players by rating
+        const sortByRating = (players: any[]) => {
+            return players
+                .filter(p => p.statistics && (p.statistics.rating || p.statistics.points))
+                .sort((a, b) => (b.statistics.rating || 0) - (a.statistics.rating || 0))
+                .slice(0, 5) // Top 5
+                .map(p => ({
+                    player: {
+                        name: p.player.name,
+                        id: p.player.id,
+                        position: p.position,
+                        slug: p.player.slug
+                    },
+                    statistics: {
+                        rating: p.statistics.rating,
+                        points: p.statistics.points,
+                        rebounds: p.statistics.rebounds,
+                        assists: p.statistics.assists
+                    },
+                    position: p.position
+                }));
+        };
+
+        const topHome = sortByRating(homePlayers);
+        const topAway = sortByRating(awayPlayers);
+
+        // Construct response in same format as best-players endpoint
+        const fallbackData = {
+            bestPlayers: {
+                bestHomeTeamPlayer: topHome[0] || null,
+                bestAwayTeamPlayer: topAway[0] || null,
+                homeTeamPlayers: topHome,
+                awayTeamPlayers: topAway
+            }
+        };
+
+        return { success: true, data: fallbackData };
     }
 
     /**
