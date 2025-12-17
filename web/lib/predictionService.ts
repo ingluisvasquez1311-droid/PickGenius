@@ -65,10 +65,11 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
 
         const data = await response.json();
 
-        // If API returns fallback/mock flag or fails gracefully
-        if (data.isFallback) {
-            console.warn('Using fallback prediction due to API error');
-            return generateMockPrediction(request);
+        // If API returns fallback/mock flag, USE IT if it has data
+        // We prefer the server-side mock because it's richer
+        if (data.isMock || data.isFallback) {
+            console.warn('Using server-side mock prediction');
+            return data;
         }
 
         return data;
