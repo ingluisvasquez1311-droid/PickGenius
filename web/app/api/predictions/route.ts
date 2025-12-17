@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
                     content: prompt
                 }
             ],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.7, // Creativity balance
             max_tokens: 1000,
             response_format: { type: "json_object" }
