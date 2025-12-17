@@ -69,15 +69,15 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
     return (
         <Link
             href={`/${sport}-live/${event.id}`}
-            className="group relative block overflow-hidden rounded-3xl bg-[#080808] border border-white/5 p-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(34,197,94,0.15)] hover:border-green-500/50"
+            className="group relative block overflow-hidden rounded-2xl sm:rounded-3xl bg-[#080808] border border-white/5 p-0 transition-all duration-300 active:scale-[0.98] sm:hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(34,197,94,0.15)] hover:border-green-500/50"
         >
             {/* Background Image / Texture */}
             <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 pointer-events-none mix-blend-overlay"></div>
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/80"></div>
 
-            {/* MVP Widget (Real Data) */}
+            {/* MVP Widget (Real Data) - Hidden on mobile */}
             {mvpData && (
-                <div className="absolute top-0 right-0 p-4 z-20">
+                <div className="hidden sm:block absolute top-0 right-0 p-4 z-20">
                     <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-2 flex items-center gap-3 transform translate-x-4 -translate-y-2 hover:translate-x-0 hover:translate-y-0 transition-transform duration-300 shadow-xl">
                         <div className="relative">
                             <img
@@ -102,12 +102,12 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
             )}
 
             {/* Content Container */}
-            <div className="relative z-10 p-6 flex flex-col h-full justify-between">
+            <div className="relative z-10 p-3 sm:p-6 flex flex-col h-full justify-between">
 
                 {/* Header: League & Status */}
-                <div className="flex items-center gap-2 mb-6">
+                <div className="flex items-center gap-2 mb-4 sm:mb-6">
                     {isLive ? (
-                        <div className="flex items-center gap-1.5 rounded bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-500 border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                        <div className="flex items-center gap-1.5 rounded bg-red-500/20 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-red-500 border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
                             <span className="relative flex h-1.5 w-1.5">
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span>
@@ -115,60 +115,60 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
                             LIVE
                         </div>
                     ) : (
-                        <div className="rounded bg-gray-700/30 px-2 py-0.5 text-[10px] font-bold text-gray-400 border border-white/10">
+                        <div className="rounded bg-gray-700/30 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-gray-400 border border-white/10">
                             {event.status.description}
                         </div>
                     )}
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 border-l border-white/10 pl-2">
+                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-600 border-l border-white/10 pl-2 truncate">
                         {event.tournament.name}
                     </span>
                 </div>
 
                 {/* Scoreboard Section */}
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-2 sm:gap-4">
 
                     {/* Home Team */}
-                    <div className="flex flex-col items-center gap-2 flex-1">
+                    <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1 min-w-0">
                         <img
                             src={homeLogo}
                             alt={event.homeTeam.name}
-                            className="h-16 w-16 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all"
+                            className="h-12 w-12 sm:h-16 sm:w-16 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all"
                             onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Anonymous_emblem.svg'; }}
                         />
-                        <span className="text-center text-sm font-bold text-gray-300 leading-tight">
+                        <span className="text-center text-xs sm:text-sm font-bold text-gray-300 leading-tight truncate w-full px-1">
                             {event.homeTeam.name}
                         </span>
                     </div>
 
                     {/* VS / Score */}
-                    <div className="flex flex-col items-center px-4 py-2 rounded-2xl bg-black/40 border border-white/5 backdrop-blur-sm min-w-[100px]">
+                    <div className="flex flex-col items-center px-2 sm:px-4 py-2 rounded-xl sm:rounded-2xl bg-black/40 border border-white/5 backdrop-blur-sm min-w-[80px] sm:min-w-[100px]">
                         {isLive || isFinished ? (
-                            <div className="flex items-center gap-3">
-                                <span className={`text-3xl font-black tabular-nums tracking-tighter ${event.homeScore?.current! > event.awayScore?.current! ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'text-gray-500'}`}>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <span className={`text-2xl sm:text-3xl font-black tabular-nums tracking-tighter ${event.homeScore?.current! > event.awayScore?.current! ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'text-gray-500'}`}>
                                     {event.homeScore?.current}
                                 </span>
-                                <span className="text-gray-700 font-bold text-xl">:</span>
-                                <span className={`text-3xl font-black tabular-nums tracking-tighter ${event.awayScore?.current! > event.homeScore?.current! ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'text-gray-500'}`}>
+                                <span className="text-gray-700 font-bold text-lg sm:text-xl">:</span>
+                                <span className={`text-2xl sm:text-3xl font-black tabular-nums tracking-tighter ${event.awayScore?.current! > event.homeScore?.current! ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'text-gray-500'}`}>
                                     {event.awayScore?.current}
                                 </span>
                             </div>
                         ) : (
-                            <span className="text-2xl font-black text-gray-600 tracking-widest">VS</span>
+                            <span className="text-xl sm:text-2xl font-black text-gray-600 tracking-widest">VS</span>
                         )}
-                        <div className="mt-1 h-0.5 w-12 bg-white/10 rounded-full overflow-hidden">
+                        <div className="mt-1 h-0.5 w-8 sm:w-12 bg-white/10 rounded-full overflow-hidden">
                             {isLive && <div className="h-full bg-green-500 w-1/2 animate-loading-bar"></div>}
                         </div>
                     </div>
 
                     {/* Away Team */}
-                    <div className="flex flex-col items-center gap-2 flex-1">
+                    <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1 min-w-0">
                         <img
                             src={awayLogo}
                             alt={event.awayTeam.name}
-                            className="h-16 w-16 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all"
+                            className="h-12 w-12 sm:h-16 sm:w-16 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all"
                             onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Anonymous_emblem.svg'; }}
                         />
-                        <span className="text-center text-sm font-bold text-gray-300 leading-tight">
+                        <span className="text-center text-xs sm:text-sm font-bold text-gray-300 leading-tight truncate w-full px-1">
                             {event.awayTeam.name}
                         </span>
                     </div>
