@@ -4,6 +4,25 @@ import path from "path";
 const nextConfig: NextConfig = {
   reactCompiler: true,
   outputFileTracingRoot: path.join(__dirname, "../"),
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.sofascore.com',
+        pathname: '/api/v1/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.sofascore.app',
+        pathname: '/api/v1/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+        pathname: '/**',
+      },
+    ],
+  },
   async rewrites() {
     return [];
   },
