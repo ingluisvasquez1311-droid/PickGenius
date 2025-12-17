@@ -20,7 +20,7 @@ export default function TeamLogo({ teamId, teamName, size = 'md', className = ''
         xl: 'w-24 h-24'
     };
 
-    const logoUrl = `https://api.sofascore.com/api/v1/team/${teamId}/image`;
+    const logoUrl = `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/team/${teamId}/image`)}`;
 
     if (error) {
         // Fallback: Show team initial in a circle

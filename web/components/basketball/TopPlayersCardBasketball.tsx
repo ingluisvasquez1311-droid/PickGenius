@@ -61,7 +61,7 @@ export default function TopPlayersCardBasketball({ title, players, teamColor = '
             <div className="divide-y divide-gray-800">
                 {topPlayers.map((player, index) => {
                     const imageUrl = player.id
-                        ? `https://api.sofascore.app/api/v1/player/${player.id}/image`
+                        ? `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/player/${player.id}/image`)}`
                         : null;
 
                     return (
