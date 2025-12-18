@@ -182,9 +182,10 @@ export async function canMakePrediction(uid: string): Promise<{ canPredict: bool
 
     // Free users have daily limit
     const remaining = profile.predictionsLimit - profile.predictionsUsed;
-    canPredict: remaining > 0,
+    return {
+        canPredict: remaining > 0,
         remaining: Math.max(0, remaining)
-};
+    };
 }
 
 /**
