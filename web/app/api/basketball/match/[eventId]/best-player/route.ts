@@ -1,12 +1,11 @@
-
 import { NextRequest, NextResponse } from 'next/server';
-import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballService';
+import { sofascoreService } from '@/lib/services/sofascoreService';
 import Groq from 'groq-sdk';
 
 export const dynamic = 'force-dynamic';
 
 const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY || 'gsk_45l2t3CJRILOERRz6fOBWGdyb3FY1VBWD3iGnlc8p1V3TVYVKXa'
+    apiKey: process.env.GROQ_API_KEY
 });
 
 export async function GET(
@@ -20,21 +19,23 @@ export async function GET(
     }
 
     try {
-        // 1. Fetch Real Stats from Sofascore
-        const result = await sofaScoreBasketballService.getBestPlayers(eventId);
+        console.log(`🤖 [Legacy AI Bridge] Analyzing Best Players for Basketball Match ${eventId}...`);
 
-        if (!result.success || !result.data || !result.data.bestPlayers) {
+        // Use the universal service which handles ScraperAPI bypass
+        const bestPlayers = await sofascoreService.getMatchBestPlayers(parseInt(eventId));
+
+        if (!bestPlayers || (!bestPlayers.bestHomeTeamPlayer && !bestPlayers.bestAwayTeamPlayer)) {
             return NextResponse.json({ success: false, error: 'No stats available' });
         }
 
-        const bestHome = result.data.bestPlayers.homeTeamPlayers?.[0]; // Top Home Player
-        const bestAway = result.data.bestPlayers.awayTeamPlayers?.[0]; // Top Away Player
+        const bestHome = bestPlayers.bestHomeTeamPlayer;
+        const bestAway = bestPlayers.bestAwayTeamPlayer;
 
-        // Determine Overall MVP (Highest Rating)
+        // Determine Overall MVP
         let mvp = bestHome;
         let mvpTeam = 'home';
 
-        if (bestAway && (!bestHome || bestAway.statistics.rating > bestHome.statistics.rating)) {
+        if (bestAway && (!bestHome || (bestAway.statistics?.rating || 0) > (bestHome.statistics?.rating || 0))) {
             mvp = bestAway;
             mvpTeam = 'away';
         }
@@ -44,15 +45,14 @@ export async function GET(
         }
 
         // 2. AI Analysis of the MVP
-        // We generate a "Brutal" one-liner about their performance
-        const statsStr = `${mvp.player.name} (${mvp.position}): ${mvp.statistics.points || 0} PTS, ${mvp.statistics.assists || 0} AST, ${mvp.statistics.rebounds || 0} REB. Rating: ${mvp.statistics.rating}.`;
+        const statsStr = `${mvp.player?.name} (${mvp.position || 'N/A'}): ${JSON.stringify(mvp.statistics || {})}. Sport: basketball.`;
 
         const completion = await groq.chat.completions.create({
             messages: [
                 {
                     role: "system",
                     content: `You are a sports commentator with a 'cyberpunk/brutal' style.
-                    Analyze the player stats.
+                    Analyze the player stats for the sport: basketball.
                     Output JSON with:
                     - shortTitle: Max 3 words (e.g. "PURE DOMINANCE", "SNIPER ALERT").
                     - impactDescription: Max 8 words description of their game style today.`
@@ -72,27 +72,27 @@ export async function GET(
             success: true,
             data: {
                 mvp: {
-                    name: mvp.player.name,
-                    slug: mvp.player.slug,
+                    name: mvp.player?.name,
+                    slug: mvp.player?.slug,
                     position: mvp.position,
-                    rating: mvp.statistics.rating,
-                    stats: {
-                        pts: mvp.statistics.points || 0,
-                        ast: mvp.statistics.assists || 0,
-                        reb: mvp.statistics.rebounds || 0
-                    },
+                    rating: mvp.statistics?.rating || 0,
+                    stats: mvp.statistics || {},
                     team: mvpTeam,
-                    imageUrl: `https://api.sofascore.app/api/v1/player/${mvp.player.id}/image`
+                    imageUrl: `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/player/${mvp.player?.id}/image`)}`
                 },
                 ai: {
                     title: aiContent.shortTitle || "ON FIRE",
-                    description: aiContent.impactDescription || "Leading the charge efficiently."
+                    description: aiContent.impactDescription || "Managing the game with pure tactical efficiency."
+                },
+                allPlayers: {
+                    home: bestPlayers.homeTeamPlayers || [],
+                    away: bestPlayers.awayTeamPlayers || []
                 }
             }
         });
 
     } catch (error: any) {
-        console.error('Error in Best Player API:', error);
+        console.error(`❌ Legacy Best Player API Error:`, error);
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }

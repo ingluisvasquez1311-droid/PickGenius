@@ -1,5 +1,5 @@
 import { memoryCache } from './memoryCache';
-import { historyService } from './historyService';
+import { sofascoreService } from './sofascoreService';
 
 interface ApiResponse<T = any> {
     success: boolean;
@@ -9,29 +9,6 @@ interface ApiResponse<T = any> {
 }
 
 class SofaScoreFootballService {
-    private baseUrl: string;
-    private headers: Record<string, string>;
-
-    constructor() {
-        this.baseUrl = 'https://www.sofascore.com/api/v1';
-        this.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': '*/*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://www.sofascore.com/',
-            'Origin': 'https://www.sofascore.com',
-            'Cache-Control': 'max-age=0',
-            'Connection': 'keep-alive',
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-site',
-            'Pragma': 'no-cache',
-            'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"'
-        };
-    }
-
     /**
      * Generic method to make requests with caching
      */
@@ -43,44 +20,15 @@ class SofaScoreFootballService {
                 return { success: true, data: cachedData, fromCache: true };
             }
 
-            const targetUrl = `${this.baseUrl}${endpoint}`;
-            const useProxy = process.env.USE_PROXY === 'true' && !!process.env.SCRAPER_API_KEY;
+            // Use the unified sofascoreService for proxying and bypass
+            const data = await sofascoreService.makeRequest<T>(endpoint);
 
-            let fetchUrl = targetUrl;
-            let fetchHeaders = this.headers;
-
-            if (useProxy) {
-                // Trim key just in case
-                const apiKey = process.env.SCRAPER_API_KEY?.trim();
-
-                // DEBUG LOGGING (Safe)
-                console.log(`🔒 Using ScraperAPI for: ${endpoint}`);
-                console.log(`🔑 Scraper Key Status: ${apiKey ? 'Present' : 'MISSING'}, Length: ${apiKey?.length || 0}`);
-
-                // Use HTTP (safer for free tier compatibility)
-                fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
-                fetchHeaders = {};
-            } else {
-                console.log(`🌐 Direct Request (No Proxy): ${endpoint}`);
+            if (!data) {
+                throw new Error(`Provider unavailable for ${endpoint}`);
             }
-
-            const response = await fetch(fetchUrl, {
-                headers: fetchHeaders,
-                cache: 'no-store'
-            });
-
-            if (!response.ok) {
-                // If direct request fails (403), we can't do much if proxy is off.
-                // If proxy fails, it usually returns 500 or 403 too.
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const data = await response.json();
 
             // Cache the successful response
-            if (data) {
-                memoryCache.set(cacheKey, data, ttlSeconds);
-            }
+            memoryCache.set(cacheKey, data, ttlSeconds);
 
             return { success: true, data, fromCache: false };
         } catch (error: any) {

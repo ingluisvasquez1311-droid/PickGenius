@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
-import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballService';
-import { sofaScoreFootballService } from '@/lib/services/sofaScoreFootballService';
+import { sofascoreService } from '@/lib/services/sofascoreService';
 
 export const maxDuration = 60; // Allow longer timeout for AI generation
 
@@ -29,70 +28,38 @@ export async function POST(request: NextRequest) {
             }, { status: 500 });
         }
 
-        // 1. Fetch real match data using our Official API services
+        // 1. Fetch real match data using our Unified Sofascore Service (Handles ScraperAPI)
         let matchContext: any = null;
-        let homeTeamName = '';
-        let awayTeamName = '';
 
-        // Determine API Keys based on sport logic below
+        // Use the universal service for all sports now
+        const game = await sofascoreService.makeRequest(`/event/${gameId}`);
 
-        const NBA_API_KEY = process.env.NBA_API_KEY || process.env.NEXT_PUBLIC_NBA_API_KEY;
-        const FOOTBALL_API_KEY = process.env.FOOTBALL_API_KEY_1 || process.env.NEXT_PUBLIC_FOOTBALL_API_KEY;
-
-        if (sport === 'basketball') {
-            // Use our internal Sofascore Service
-            const response = await sofaScoreBasketballService.getEventDetails(gameId);
-
-            if (!response.success || !response.data) {
-                console.error("Sofascore API Error:", response.error);
-                throw new Error("Game not found in Sofascore API");
-            }
-
-            const game = response.data;
-            const homeScore = game.homeScore?.current ?? 0;
-            const awayScore = game.awayScore?.current ?? 0;
-
-            matchContext = {
-                sport: 'Basketball (Sofascore)',
-                home: game.homeTeam.name,
-                away: game.awayTeam.name,
-                score: `${homeScore} - ${awayScore}`,
-                status: game.status?.description || 'Scheduled',
-                startTime: game.startTimestamp,
-                tournament: game.tournament?.name,
-                // Add H2H or standings if needed for better AI context
-            };
-        } else if (sport === 'football') {
-            // Use our internal Sofascore Service (Unified Provider)
-            const response = await sofaScoreFootballService.getEventDetails(gameId);
-
-            if (!response.success || !response.data) {
-                console.error("Sofascore Football API Error:", response.error);
-                throw new Error("Game not found in Sofascore API");
-            }
-
-            const event = response.data.event;
-
-            // Try to get detailed stats for better analysis
-            let statistics = {};
-            try {
-                const statsRes = await sofaScoreFootballService.getEventStatistics(gameId);
-                if (statsRes.success) statistics = statsRes.data;
-            } catch (ignore) { console.warn('Could not fetch stats for prediction'); }
-
-            matchContext = {
-                sport: 'Football (Sofascore)',
-                home: event.homeTeam.name,
-                away: event.awayTeam.name,
-                score: `${event.homeScore?.current ?? 0} - ${event.awayScore?.current ?? 0}`,
-                status: event.status?.description || 'Scheduled',
-                startTime: event.startTimestamp,
-                tournament: event.tournament?.name,
-                statistics: statistics
-            };
-        } else {
-            return NextResponse.json({ success: false, error: 'Sport not supported' }, { status: 400 });
+        if (!game) {
+            console.error(`❌ [Prediction API] Game ${gameId} not found in Sofascore`);
+            throw new Error("Game not found or provider blocked (403)");
         }
+
+        const event = game.event || game; // Handle different response structures
+        const homeScore = event.homeScore?.current ?? 0;
+        const awayScore = event.awayScore?.current ?? 0;
+
+        // Try to get detailed stats for better analysis
+        let statistics = {};
+        try {
+            const statsRes = await sofascoreService.makeRequest(`/event/${gameId}/statistics`);
+            if (statsRes) statistics = statsRes;
+        } catch (ignore) { console.warn('Could not fetch stats for prediction'); }
+
+        matchContext = {
+            sport: `${sport.toUpperCase()} (Unified)`,
+            home: event.homeTeam.name,
+            away: event.awayTeam.name,
+            score: `${homeScore} - ${awayScore}`,
+            status: event.status?.description || 'Scheduled',
+            startTime: event.startTimestamp,
+            tournament: event.tournament?.name,
+            statistics: statistics
+        };
 
         // Detect match status to provide appropriate analysis
         const isLive = matchContext.status && !matchContext.status.includes('Not') && matchContext.status !== '0\'';
