@@ -243,6 +243,32 @@ class SofascoreService {
             return null;
         }
     }
+    /**
+     * Obtiene eventos para un deporte específico (en vivo + programados)
+     */
+    async getEventsBySport(sport: string, date?: string): Promise<SofascoreEvent[]> {
+        const today = date || new Date().toISOString().split('T')[0];
+        try {
+            const [liveRes, scheduledRes] = await Promise.all([
+                fetch(`${BASE_URL}/sport/${sport}/events/live`),
+                fetch(`${BASE_URL}/sport/${sport}/scheduled-events/${today}`)
+            ]);
+
+            const liveData: SofascoreResponse = liveRes.ok ? await liveRes.json() : { events: [] };
+            const scheduledData: SofascoreResponse = scheduledRes.ok ? await scheduledRes.json() : { events: [] };
+
+            const allEvents = [...(liveData.events || []), ...(scheduledData.events || [])];
+
+            // Eliminar duplicados
+            return allEvents.filter((event, index, self) =>
+                index === self.findIndex(e => e.id === event.id)
+            );
+        } catch (error) {
+            console.error(`Error fetching ${sport} events:`, error);
+            return [];
+        }
+    }
 }
+
 
 export const sofascoreService = new SofascoreService();

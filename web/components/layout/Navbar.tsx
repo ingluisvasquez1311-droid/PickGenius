@@ -104,6 +104,24 @@ export default function Navbar() {
                                 <span className="hidden sm:inline">Rachas</span>
                             </Link>
 
+                            {/* Otros Deportes Dropdown */}
+                            <div className="relative group px-4 py-2 text-gray-400 hover:text-white cursor-pointer transition-all flex items-center gap-2">
+                                <span>➕</span>
+                                <span className="hidden md:inline text-sm font-medium uppercase tracking-tighter">Otros</span>
+                                <div className="absolute top-full left-0 mt-2 w-48 bg-[#111111] border border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 p-2 z-50">
+                                    <Link href="/baseball" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-xs font-bold">
+                                        <span>⚾</span> BÉISBOL (MLB)
+                                    </Link>
+                                    <Link href="/nhl" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-xs font-bold">
+                                        <span>🏒</span> HOCKEY (NHL)
+                                    </Link>
+                                    <Link href="/tennis" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-xs font-bold">
+                                        <span>🎾</span> TENIS (ATP)
+                                    </Link>
+                                </div>
+                            </div>
+
+
                         </div>
 
                         {/* Auth */}

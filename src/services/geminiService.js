@@ -89,31 +89,12 @@ class GeminiService {
         // 3. Preparar prompt
         const prompt = this.buildPrompt(history, sport, standingsContext);
 
-        // 4. Intentar con Gemini primero
-        if (this.geminiModel) {
-            try {
-                console.log('🤖 Trying Gemini AI...');
-                const result = await this.geminiModel.generateContent(prompt);
-                const response = await result.response;
-                const predictionText = response.text();
-
-                return {
-                    success: true,
-                    prediction: predictionText,
-                    timestamp: new Date(),
-                    provider: 'Gemini'
-                };
-            } catch (error) {
-                console.warn(`⚠️ Gemini failed: ${error.message}. Trying Groq...`);
-            }
-        }
-
-        // 5. Fallback a Groq (FREE & Fast!)
+        // 1. Intentar con Groq primero (FREE & Fast!)
         if (this.groq) {
             try {
-                console.log('🤖 Trying Groq AI...');
+                console.log('🤖 Trying Groq AI (Primary)...');
                 const completion = await this.groq.chat.completions.create({
-                    model: "llama-3.3-70b-versatile", // Fast and smart model
+                    model: "llama-3.3-70b-versatile",
                     messages: [
                         {
                             role: "system",
@@ -137,7 +118,26 @@ class GeminiService {
                     provider: 'Groq'
                 };
             } catch (error) {
-                console.error(`❌ Groq also failed: ${error.message}`);
+                console.warn(`⚠️ Groq failed: ${error.message}. Trying Gemini...`);
+            }
+        }
+
+        // 2. Fallback a Gemini
+        if (this.geminiModel) {
+            try {
+                console.log('🤖 Trying Gemini AI (Fallback)...');
+                const result = await this.geminiModel.generateContent(prompt);
+                const response = await result.response;
+                const predictionText = response.text();
+
+                return {
+                    success: true,
+                    prediction: predictionText,
+                    timestamp: new Date(),
+                    provider: 'Gemini'
+                };
+            } catch (error) {
+                console.warn(`⚠️ Gemini failed: ${error.message}. Trying Claude...`);
             }
         }
 

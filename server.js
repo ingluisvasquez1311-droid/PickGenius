@@ -12,6 +12,8 @@ const cacheManager = require('./src/services/cacheManager');
 const apiRateLimiter = require('./src/services/apiRateLimiter');
 const sofascoreRoutes = require('./src/routes/sofascore');
 const nbaPlayerPropsRoutes = require('./src/routes/nbaPlayerProps');
+const universalSportsRoutes = require('./src/routes/universalSports');
+
 
 
 const app = express();
@@ -167,6 +169,10 @@ app.get('/api/nba/games', async (req, res) => {
 
 // NBA Player Props Analysis
 app.use('/api/nba/players', nbaPlayerPropsRoutes);
+
+// Universal Sports API (Baseball, NHL, Tennis, etc.)
+app.use('/api/sports', universalSportsRoutes);
+
 
 
 

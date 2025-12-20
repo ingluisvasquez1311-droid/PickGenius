@@ -164,7 +164,7 @@ class NBAPlayerPropsService {
                 averages
             );
 
-            const prediction = await this.callGeminiAPI(prompt);
+            const prediction = await this.callAI(prompt);
 
             return {
                 player: playerName,
@@ -221,20 +221,45 @@ RESPONDE ÚNICAMENTE EN FORMATO JSON EN ESPAÑOL:
 `;
     }
 
-    async callGeminiAPI(prompt) {
+    async callAI(prompt) {
+        // 1. Intentar con Groq primero (Preferido por el usuario)
+        if (process.env.GROQ_API_KEY) {
+            try {
+                const { OpenAI } = require('openai');
+                const groq = new OpenAI({
+                    apiKey: process.env.GROQ_API_KEY,
+                    baseURL: 'https://api.groq.com/openai/v1'
+                });
+
+                const completion = await groq.chat.completions.create({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: "Eres un analista experto de la NBA. Responde siempre en formato JSON válido en español." },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.7
+                });
+
+                const text = completion.choices[0].message.content;
+                const jsonMatch = text.match(/\{[\s\S]*\}/);
+                if (jsonMatch) return JSON.parse(jsonMatch[0]);
+            } catch (error) {
+                console.warn(`⚠️ Groq failed in NBA Service: ${error.message}. Trying Gemini...`);
+            }
+        }
+
+        // 2. Fallback a Gemini
         try {
             const { GoogleGenerativeAI } = require('@google/generative-ai');
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             const result = await model.generateContent(prompt);
             const response = await result.response;
             const text = response.text();
 
             const jsonMatch = text.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                return JSON.parse(jsonMatch[0]);
-            }
+            if (jsonMatch) return JSON.parse(jsonMatch[0]);
 
             return {
                 prediction: 'DESCONOCIDO',
@@ -244,7 +269,7 @@ RESPONDE ÚNICAMENTE EN FORMATO JSON EN ESPAÑOL:
                 keyFactors: []
             };
         } catch (error) {
-            console.error('❌ Error llamando a Gemini:', error.message);
+            console.error('❌ All AI providers failed in NBA Service');
             throw error;
         }
     }
@@ -264,12 +289,10 @@ RESPONDE ÚNICAMENTE EN FORMATO JSON EN ESPAÑOL:
             // Lista de IDs de jugadores reales en Sofascore
             const topPlayers = [
                 { id: 15152, name: 'LeBron James' },
-                { id: 33796, name: 'Stephen Curry' },
-                { id: 24391, name: 'Kevin Durant' },
-                { id: 191316, name: 'Giannis Antetokounmpo' },
+                { id: 816960, name: 'Giannis Antetokounmpo' },
                 { id: 825121, name: 'Luka Doncic' },
                 { id: 341015, name: 'Nikola Jokic' },
-                { id: 341014, name: 'Joel Embiid' },
+                { id: 33796, name: 'Stephen Curry' },
                 { id: 835260, name: 'Jayson Tatum' }
             ];
 
