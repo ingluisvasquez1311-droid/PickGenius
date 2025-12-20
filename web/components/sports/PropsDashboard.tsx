@@ -145,6 +145,32 @@ const PropsDashboard = () => {
     const getPicks = () => props.filter(p => p.prediction && p.prediction.probability >= 70)
         .sort((a, b) => (b.prediction?.probability || 0) - (a.prediction?.probability || 0));
 
+    const getParlays = () => {
+        const topPicks = getPicks().slice(0, 10);
+        const parlays = [];
+
+        // Generar combinaciones de 2 picks (Dupletas)
+        for (let i = 0; i < topPicks.length; i++) {
+            for (let j = i + 1; j < Math.min(i + 4, topPicks.length); j++) {
+                const pick1 = topPicks[i];
+                const pick2 = topPicks[j];
+
+                // Solo si son de partidos diferentes para mayor seguridad
+                if (pick1.game.id !== pick2.game.id) {
+                    parlays.push({
+                        id: `parlay-2-${pick1.id}-${pick2.id}`,
+                        type: 'Dupleta PRO',
+                        picks: [pick1, pick2],
+                        totalProbability: Math.round((pick1.prediction.probability * pick2.prediction.probability) / 100),
+                        confidence: pick1.prediction.probability > 85 && pick2.prediction.probability > 85 ? 'Muy Alta' : 'Alta'
+                    });
+                }
+            }
+        }
+
+        return parlays.slice(0, 6); // Top 6 combinadas
+    };
+
     return (
         <div className="w-full space-y-8 animate-in fade-in duration-700">
             {/* Sport Selector Chips */}
@@ -233,6 +259,19 @@ const PropsDashboard = () => {
                             <div key={i} className="h-64 glass-card animate-pulse bg-white/5"></div>
                         ))}
                     </div>
+                ) : view === 'parlays' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {getParlays().length > 0 ? (
+                            getParlays().map(parlay => (
+                                <ParlayCard key={parlay.id} parlay={parlay} />
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center py-20 opacity-30">
+                                <div className="text-5xl mb-4">🔮</div>
+                                <p className="font-black uppercase tracking-widest text-xs">Analiza más jugadores para generar combinadas</p>
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {(view === 'all' ? filteredProps : getPicks()).map(prop => (
@@ -248,10 +287,10 @@ const PropsDashboard = () => {
             }
 
             {
-                !loading && filteredProps.length === 0 && (
+                !loading && (view === 'all' ? filteredProps : (view === 'parlays' ? getParlays() : getPicks())).length === 0 && (
                     <div className="text-center py-20 opacity-20">
                         <div className="text-6xl mb-4">📭</div>
-                        <div className="font-black uppercase tracking-[0.5em]">No se encontraron props</div>
+                        <div className="font-black uppercase tracking-[0.5em]">No hay datos disponibles</div>
                     </div>
                 )
             }
@@ -355,6 +394,66 @@ const PropCard = ({ prop, onPredict, isPredicting }: { prop: PlayerProp, onPredi
                     </button>
                 )}
             </div>
+        </div>
+    );
+};
+
+const ParlayCard = ({ parlay }: { parlay: any }) => {
+    return (
+        <div className="glass-card bg-gradient-to-br from-purple-900/40 to-black/40 border border-purple-500/20 rounded-3xl overflow-hidden relative group">
+            <div className="absolute top-0 right-0 p-4">
+                <div className="bg-purple-500 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-purple-500/20">
+                    {parlay.type}
+                </div>
+            </div>
+
+            <div className="p-8">
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 text-2xl">
+                        🎟️
+                    </div>
+                    <div>
+                        <h4 className="text-white font-black text-xs uppercase tracking-[0.2em] opacity-40 mb-1">Confianza Combinada</h4>
+                        <div className="flex items-end gap-2">
+                            <span className="text-3xl font-black text-white tracking-tighter">{parlay.totalProbability}%</span>
+                            <span className="text-purple-400 text-[10px] font-black uppercase mb-1.5 tracking-widest">{parlay.confidence}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    {parlay.picks.map((pick: any, idx: number) => (
+                        <div key={idx} className="bg-black/20 border border-white/5 rounded-2xl p-4 flex items-center gap-4 hover:border-white/10 transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-white/5 p-1 shrink-0">
+                                <img src={pick.player.image} alt={pick.player.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-white font-black text-[10px] uppercase truncate">{pick.player.name}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-[14px]">{pick.prop.icon}</span>
+                                    <span className="text-white/40 text-[9px] font-bold uppercase truncate">{pick.prop.displayName} {pick.prop.line}</span>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <span className={`text-[10px] font-black uppercase tracking-tighter ${pick.prediction.prediction === 'OVER' ? 'text-green-500' : 'text-red-500'}`}>
+                                    {pick.prediction.prediction === 'OVER' ? 'MÁS' : 'MENOS'}
+                                </span>
+                                <p className="text-[9px] text-white/20 font-bold">{pick.prediction.probability}%</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+                    <div className="text-[9px] text-white/20 font-bold uppercase tracking-widest italic">Análisis IA Finalizado</div>
+                    <button className="bg-white/5 hover:bg-white/10 text-white text-[10px] font-black px-6 py-3 rounded-xl uppercase tracking-widest transition-all">
+                        Compartir Pick
+                    </button>
+                </div>
+            </div>
+
+            {/* Shine Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.05] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none"></div>
         </div>
     );
 };
