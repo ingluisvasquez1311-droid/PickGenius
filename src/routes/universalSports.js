@@ -23,10 +23,10 @@ router.get('/:sport/top-players', async (req, res) => {
 router.post('/:sport/predict', async (req, res) => {
     try {
         const { sport } = req.params;
-        const { playerId, playerName, propType, line } = req.body;
+        const { playerId, playerName, propType, line, eventId } = req.body;
 
         const prediction = await universalPlayerPropsService.generatePrediction(
-            playerId, playerName, sport, propType, line
+            playerId, playerName, sport, propType, line, eventId
         );
 
         res.json({ success: true, data: prediction });

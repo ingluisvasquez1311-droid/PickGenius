@@ -138,13 +138,41 @@ class UniversalPlayerPropsService {
         };
     }
 
-    async generatePrediction(playerId, playerName, sport, propType, line) {
+    async generatePrediction(playerId, playerName, sport, propType, line, eventId = null) {
         try {
             const stats = await this.getPlayerStats(playerId, sport);
             const averages = this.calculateAverages(stats, sport, 10);
             if (!averages) throw new Error('Datos insuficientes');
 
-            const prompt = this.buildUniversalPrompt(playerName, sport, propType, line, averages);
+            let context = {};
+            if (sport === 'tennis') {
+                try {
+                    let targetEventId = eventId;
+
+                    // Si no hay eventId, buscamos el partido más reciente para extraer la superficie
+                    if (!targetEventId && stats.length > 0) {
+                        targetEventId = stats[0].game.id;
+                    }
+
+                    if (targetEventId) {
+                        const [h2hRes, eventRes] = await Promise.all([
+                            eventId ? generalizedSofaScoreService.getH2H(eventId) : Promise.resolve({ success: false }),
+                            generalizedSofaScoreService.getEventDetails(targetEventId)
+                        ]);
+
+                        if (h2hRes.success) context.h2h = h2hRes.data;
+                        if (eventRes.success) {
+                            // Intentar extraer superficie de los detalles del torneo
+                            context.surface = eventRes.data.event?.tournament?.uniqueTournament?.extra?.surface ||
+                                eventRes.data.event?.tournament?.category?.name || 'Desconocida';
+                        }
+                    }
+                } catch (e) {
+                    console.warn('⚠️ No se pudo obtener contexto adicional para Tenis:', e.message);
+                }
+            }
+
+            const prompt = this.buildUniversalPrompt(playerName, sport, propType, line, averages, context);
             const prediction = await this.callAI(prompt);
 
             return {
@@ -163,12 +191,29 @@ class UniversalPlayerPropsService {
         }
     }
 
-    buildUniversalPrompt(playerName, sport, propType, line, averages) {
-        const sportNames = { 'basketball': 'Baloncesto (NBA)', 'baseball': 'Béisbol (MLB)', 'nhl': 'Hockey (NHL)', 'tennis': 'Tenis (ATP/WTA)' };
+    buildUniversalPrompt(playerName, sport, propType, line, averages, context = {}) {
+        const sportNames = {
+            'basketball': 'Baloncesto (NBA)',
+            'baseball': 'Béisbol (MLB)',
+            'nhl': 'Hockey (NHL)',
+            'tennis': 'Tenis (ATP/WTA)'
+        };
+
+        let contextInfo = '';
+        if (sport === 'tennis') {
+            contextInfo = `
+CONTEXTO TENIS:
+- Superficie: ${context.surface || 'No especificada'}
+- Historial H2H reciente: ${context.h2h ? JSON.stringify(context.h2h.slice(0, 3)) : 'No disponible'}
+`;
+        }
+
         return `
 Eres un analista experto en ${sportNames[sport] || sport}. Analiza si ${playerName} superará (OVER) o no (UNDER) la línea de ${line} en ${propType} para su próximo encuentro.
 
-DATOS:
+${contextInfo}
+
+DATOS DEL JUGADOR:
 - Promedios recientes: ${JSON.stringify(averages.averages)}
 - Historial últimos partidos: ${JSON.stringify(averages.lastGames.slice(0, 5))}
 
@@ -177,7 +222,7 @@ RESPONDE ÚNICAMENTE JSON EN ESPAÑOL:
   "prediction": "OVER" o "UNDER",
   "probability": 1-100,
   "confidence": "Alta/Media/Baja",
-  "reasoning": "explicación profesional",
+  "reasoning": "explicación profesional incluyendo impacto de superficie/H2H si aplica",
   "keyFactors": ["factor 1", "factor 2"]
 }
 `;

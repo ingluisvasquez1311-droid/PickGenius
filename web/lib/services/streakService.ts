@@ -4,7 +4,7 @@ export interface Streak {
     id: string;
     teamName: string;
     teamLogo: string;
-    sport: 'football' | 'basketball';
+    sport: 'football' | 'basketball' | 'baseball' | 'nhl';
     type: 'win' | 'loss' | 'draw' | 'over_2.5_goals' | 'btts';
     count: number;
     league: string;
@@ -15,6 +15,8 @@ export interface Streak {
 
 import { sofaScoreFootballService } from './sofaScoreFootballService';
 import { sofaScoreBasketballService } from './sofaScoreBasketballService';
+import { sofaScoreBaseballService } from './sofaScoreBaseballService';
+import { sofaScoreNHLService } from './sofaScoreNHLService';
 
 const TOP_FOOTBALL_LEAGUES = [
     { name: 'Premier League', id: 17 },
@@ -31,6 +33,14 @@ const TOP_BASKETBALL_LEAGUES = [
     { name: 'Euroleague', id: 138 }
 ];
 
+const TOP_BASEBALL_LEAGUES = [
+    { name: 'MLB', id: 112 }
+];
+
+const TOP_NHL_LEAGUES = [
+    { name: 'NHL', id: 234 }
+];
+
 class StreakService {
     // Cache for streaks
     private streaksCache: Streak[] | null = null;
@@ -45,12 +55,15 @@ class StreakService {
 
         console.log('🔄 Calculating NEW Real Streaks from Sofascore...');
         try {
-            const [footballStreaks, basketballStreaks] = await Promise.all([
-                this.analyzeFootballStreaks(),
-                this.analyzeBasketballStreaks()
+            const [footballStreaks, basketballStreaks, baseballStreaks, nhlStreaks] = await Promise.all([
+                this.analyzeSportStreaks(TOP_FOOTBALL_LEAGUES, 'football'),
+                this.analyzeSportStreaks(TOP_BASKETBALL_LEAGUES, 'basketball'),
+                this.analyzeSportStreaks(TOP_BASEBALL_LEAGUES, 'baseball'),
+                this.analyzeSportStreaks(TOP_NHL_LEAGUES, 'nhl')
             ]);
 
-            this.streaksCache = [...footballStreaks, ...basketballStreaks].sort((a, b) => b.count - a.count);
+            this.streaksCache = [...footballStreaks, ...basketballStreaks, ...baseballStreaks, ...nhlStreaks]
+                .sort((a, b) => b.count - a.count);
             this.lastFetch = Date.now();
 
             return this.streaksCache;
@@ -60,20 +73,34 @@ class StreakService {
         }
     }
 
-    private async analyzeFootballStreaks(): Promise<Streak[]> {
+    private async analyzeSportStreaks(leagues: { name: string; id: number }[], sport: 'football' | 'basketball' | 'baseball' | 'nhl'): Promise<Streak[]> {
         const streaks: Streak[] = [];
 
-        // Fetch standings for all top leagues in parallel
-        const promises = TOP_FOOTBALL_LEAGUES.map(async (league) => {
+        const promises = leagues.map(async (league) => {
             try {
+                // Determine which service to use
+                let service;
+                if (sport === 'football') {
+                    service = sofaScoreFootballService;
+                } else if (sport === 'basketball') {
+                    service = sofaScoreBasketballService;
+                } else if (sport === 'baseball') {
+                    service = sofaScoreBaseballService;
+                } else if (sport === 'nhl') {
+                    service = sofaScoreNHLService;
+                } else {
+                    console.warn(`No service defined for sport: ${sport}`);
+                    return;
+                }
+
                 // 1. Get Current Season ID
-                const detailsRes = await sofaScoreFootballService.getTournamentDetails(league.id.toString());
+                const detailsRes = await service.getTournamentDetails(league.id.toString());
                 if (!detailsRes.success || !detailsRes.data.uniqueTournament?.currentSeason?.id) return;
 
                 const currentSeasonId = detailsRes.data.uniqueTournament.currentSeason.id;
 
                 // 2. Get Standings
-                const standingsRes = await sofaScoreFootballService.getStandings(league.id.toString(), currentSeasonId.toString());
+                const standingsRes = await service.getStandings(league.id.toString(), currentSeasonId.toString());
                 if (!standingsRes.success || !standingsRes.data.standings) return;
 
                 // 3. Analyze Form
@@ -81,35 +108,18 @@ class StreakService {
                 if (!totalTable || !totalTable.rows) return;
 
                 for (const row of totalTable.rows) {
-                    // Try to generate streak from Form string usually returned in specific fields or just check recent form column
-                    // Note: Sofascore API structure for form: row.form is often undefined in public feeds. 
-                    // However, sometimes it is in `row.recentForm` or just implicit in matches.
-                    // If no form field, we can't detect without crawling matches.
-                    // Let's assume for this "Polishing" step we simulate the parsing logic correctly 
-                    // AND if it fails, we fall back to a "Mock with Live Data" hybrid (using points/rank).
-
-                    // BUT: If the user manually ran curl and saw headers issues, we know access is tough.
-                    // Let's implement robust form parsing if `row.form` exists.
-
                     if (row.form && Array.isArray(row.form)) {
-                        /* 
-                           row.form might look like ["W", "W", "L", "D", "W"] 
-                           We need to reverse it to get latest first? Usually index 0 is oldest or newest?
-                           Sofascore usually: newest is last? or first?
-                           Let's count consecutive from the end.
-                        */
-                        const form = row.form; // e.g. ["W","W","W"]
+                        const form = row.form;
 
                         let winCount = 0;
                         let lossCount = 0;
 
-                        // Check for Winning Streak (from end backwards usually)
+                        // Check backwards for streak
                         for (let i = form.length - 1; i >= 0; i--) {
                             if (form[i] === 'W') winCount++;
                             else break;
                         }
 
-                        // Check for Losing Streak
                         for (let i = form.length - 1; i >= 0; i--) {
                             if (form[i] === 'L') lossCount++;
                             else break;
@@ -117,10 +127,10 @@ class StreakService {
 
                         if (winCount >= 3) {
                             streaks.push({
-                                id: `real-win-${row.team.id}`,
+                                id: `real-win-${sport}-${row.team.id}`,
                                 teamName: row.team.name,
                                 teamLogo: `https://api.sofascore.app/api/v1/team/${row.team.id}/image`,
-                                sport: 'football',
+                                sport: sport,
                                 type: 'win',
                                 count: winCount,
                                 league: league.name,
@@ -131,10 +141,10 @@ class StreakService {
 
                         if (lossCount >= 3) {
                             streaks.push({
-                                id: `real-loss-${row.team.id}`,
+                                id: `real-loss-${sport}-${row.team.id}`,
                                 teamName: row.team.name,
                                 teamLogo: `https://api.sofascore.app/api/v1/team/${row.team.id}/image`,
-                                sport: 'football',
+                                sport: sport,
                                 type: 'loss',
                                 count: lossCount,
                                 league: league.name,
@@ -145,94 +155,14 @@ class StreakService {
                     }
                 }
             } catch (e) {
-                console.error(`Error processing league ${league.name}`, e);
+                console.error(`Error processing ${sport} league ${league.name}`, e);
             }
         });
 
         await Promise.all(promises);
-
-        // FALLBACK: If real scanning returned nothing (API limitations), return the high-quality static list
-        // so the page is never empty.
-        if (streaks.length === 0) {
-            console.log('⚠️ No real streaks found (API limits?), returning Fallback High-Qual Data.');
-            return [
-                {
-                    id: 's-f-1',
-                    teamName: 'Bayer Leverkusen',
-                    teamLogo: 'https://api.sofascore.app/api/v1/team/2672/image',
-                    sport: 'football',
-                    type: 'win',
-                    count: 8,
-                    league: 'Bundesliga',
-                    lastMatch: 'vs Bayern (3-0)',
-                    confidenceScore: 9.5
-                },
-                {
-                    id: 's-f-2',
-                    teamName: 'Sheffield United',
-                    teamLogo: 'https://api.sofascore.app/api/v1/team/15/image',
-                    sport: 'football',
-                    type: 'loss',
-                    count: 6,
-                    league: 'Premier League',
-                    lastMatch: 'vs Arsenal (0-6)',
-                    confidenceScore: 9.0
-                },
-                {
-                    id: 's-f-4',
-                    teamName: 'Inter',
-                    teamLogo: 'https://api.sofascore.app/api/v1/team/2697/image',
-                    sport: 'football',
-                    type: 'win',
-                    count: 6,
-                    league: 'Serie A',
-                    lastMatch: 'vs Roma (4-2)',
-                    confidenceScore: 9.2
-                },
-                {
-                    id: 's-f-3',
-                    teamName: 'Inter Miami',
-                    teamLogo: 'https://api.sofascore.app/api/v1/team/33333/image',
-                    sport: 'football',
-                    type: 'over_2.5_goals',
-                    count: 5,
-                    league: 'MLS',
-                    lastMatch: 'vs Orlando (5-0)',
-                    confidenceScore: 8.5
-                }
-            ];
-        }
-
         return streaks;
     }
 
-    private async analyzeBasketballStreaks(): Promise<Streak[]> {
-        // Logic to fetch NBA Standings...
-        return [
-            {
-                id: 's-b-1',
-                teamName: 'Boston Celtics',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/3416/image',
-                sport: 'basketball',
-                type: 'win',
-                count: 11,
-                league: 'NBA',
-                lastMatch: 'vs Warriors (140-88)',
-                confidenceScore: 9.8
-            },
-            {
-                id: 's-b-2',
-                teamName: 'Detroit Pistons',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/3410/image',
-                sport: 'basketball',
-                type: 'loss',
-                count: 4,
-                league: 'NBA',
-                lastMatch: 'vs Magic (91-113)',
-                confidenceScore: 8.0
-            }
-        ];
-    }
 }
 
 export const streakService = new StreakService();

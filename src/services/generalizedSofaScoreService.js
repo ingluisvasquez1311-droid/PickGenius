@@ -109,6 +109,18 @@ class GeneralizedSofaScoreService {
     async getPlayerLastEvents(playerId) {
         return this.makeRequest(`/player/${playerId}/events/last/0`, `player_events_${playerId}`, 3600);
     }
+
+    async getH2H(eventId) {
+        return this.makeRequest(`/event/${eventId}/h2h/events`, `event_h2h_${eventId}`, 86400);
+    }
+
+    async getTournamentDetails(uniqueTournamentId) {
+        return this.makeRequest(`/unique-tournament/${uniqueTournamentId}`, `tournament_details_${uniqueTournamentId}`, 86400);
+    }
+
+    async getStandings(tournamentId, seasonId) {
+        return this.makeRequest(`/tournament/${tournamentId}/season/${seasonId}/standings/total`, `standings_${tournamentId}_${seasonId}`, 3600);
+    }
 }
 
 module.exports = new GeneralizedSofaScoreService();
