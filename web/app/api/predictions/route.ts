@@ -35,31 +35,43 @@ export async function POST(request: NextRequest) {
         const game = await sofascoreService.makeRequest(`/event/${gameId}`);
 
         if (!game) {
-            console.error(`❌ [Prediction API] Game ${gameId} not found in Sofascore`);
+            console.error(`❌ [Prediction API] Game ${gameId} not found or blocked (403)`);
             throw new Error("Game not found or provider blocked (403)");
         }
 
+        console.log(`✅ [Prediction API] Fetched Game:`, game.event?.name || game.name || gameId);
+
         const event = game.event || game; // Handle different response structures
+
+        if (!event.homeTeam || !event.awayTeam) {
+            console.warn(`⚠️ [Prediction API] Missing team data in event:`, JSON.stringify(event).substring(0, 200));
+        }
+
         const homeScore = event.homeScore?.current ?? 0;
         const awayScore = event.awayScore?.current ?? 0;
 
         // Try to get detailed stats for better analysis
-        let statistics = {};
+        let statistics: any = {};
         try {
             const statsRes = await sofascoreService.makeRequest(`/event/${gameId}/statistics`);
-            if (statsRes) statistics = statsRes;
+            if (statsRes) {
+                statistics = statsRes;
+                console.log(`📊 [Prediction API] Stats fetched successfully`);
+            }
         } catch (ignore) { console.warn('Could not fetch stats for prediction'); }
 
         matchContext = {
             sport: `${sport.toUpperCase()} (Unified)`,
-            home: event.homeTeam.name,
-            away: event.awayTeam.name,
+            home: event.homeTeam?.name || fallbackHomeName || 'Equipo Local',
+            away: event.awayTeam?.name || fallbackAwayName || 'Equipo Visitante',
             score: `${homeScore} - ${awayScore}`,
             status: event.status?.description || 'Scheduled',
             startTime: event.startTimestamp,
             tournament: event.tournament?.name,
             statistics: statistics
         };
+
+        console.log(`🧠 [Prediction API] Context built for ${matchContext.home} vs ${matchContext.away}`);
 
         // Detect match status to provide appropriate analysis
         const isLive = matchContext.status && !matchContext.status.includes('Not') && matchContext.status !== '0\'';

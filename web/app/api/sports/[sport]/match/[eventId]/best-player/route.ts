@@ -24,18 +24,38 @@ export async function GET(
         // 1. Fetch Real Stats from Sofascore via Universal Service
         const bestPlayers = await sofascoreService.getMatchBestPlayers(parseInt(eventId));
 
-        if (!bestPlayers || (!bestPlayers.bestHomeTeamPlayer && !bestPlayers.bestAwayTeamPlayer)) {
-            // Fallback: Try lineups if best-players endpoint returns nothing
+        let bestHome = bestPlayers?.bestHomeTeamPlayer;
+        let bestAway = bestPlayers?.bestAwayTeamPlayer;
+        let homePlayers = bestPlayers?.homeTeamPlayers || [];
+        let awayPlayers = bestPlayers?.awayTeamPlayers || [];
+
+        // FALLBACK: If best-players endpoint returns nothing, try lineups
+        if (!bestHome && !bestAway) {
+            console.log(`⚠️ [Universal AI] Best players summary missing. Falling back to lineups for ${sport} match ${eventId}...`);
             const lineups = await sofascoreService.getMatchLineups(parseInt(eventId));
-            if (!lineups) {
-                return NextResponse.json({ success: false, error: 'No stats available' });
+
+            if (lineups && (lineups.home || lineups.away)) {
+                const processTeam = (teamLineup: any) => {
+                    const allPlayers = [...(teamLineup.players || []), ...(teamLineup.bench || [])];
+                    return allPlayers
+                        .filter((p: any) => p.statistics && (p.statistics.rating > 0 || p.statistics.points > 0))
+                        .sort((a: any, b: any) => (b.statistics.rating || 0) - (a.statistics.rating || 0));
+                };
+
+                const hLineup = lineups.home ? processTeam(lineups.home) : [];
+                const aLineup = lineups.away ? processTeam(lineups.away) : [];
+
+                homePlayers = hLineup.slice(0, 5);
+                awayPlayers = aLineup.slice(0, 5);
+                bestHome = hLineup[0] || null;
+                bestAway = aLineup[0] || null;
             }
-            // Simple logic to find top player from lineups if needed could go here
-            return NextResponse.json({ success: false, error: 'No summarized best players available' });
         }
 
-        const bestHome = bestPlayers.bestHomeTeamPlayer;
-        const bestAway = bestPlayers.bestAwayTeamPlayer;
+        if (!bestHome && !bestAway) {
+            console.error(`❌ [Universal AI] No Stats Available (even in lineups) for ${sport} match ${eventId}`);
+            return NextResponse.json({ success: false, error: 'No stats available' });
+        }
 
         // Determine Overall MVP
         let mvp = bestHome;
@@ -91,8 +111,8 @@ export async function GET(
                     description: aiContent.impactDescription || "Managing the game with pure tactical efficiency."
                 },
                 allPlayers: {
-                    home: bestPlayers.homeTeamPlayers || [],
-                    away: bestPlayers.awayTeamPlayers || []
+                    home: homePlayers,
+                    away: awayPlayers
                 }
             }
         });
