@@ -18,6 +18,16 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'www.sofascore.com',
+        pathname: '/api/v1/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.weserv.nl',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'upload.wikimedia.org',
         pathname: '/**',
       },

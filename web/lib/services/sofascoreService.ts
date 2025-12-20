@@ -213,19 +213,17 @@ class SofascoreService {
             }
         });
     }
-    async getMatchBestPlayers(eventId: number): Promise<any[]> {
+    async getMatchBestPlayers(eventId: number): Promise<any> {
         try {
             const response = await fetch(`${BASE_URL}/event/${eventId}/best-players`);
             if (!response.ok) {
-                // Si falla el endpoint específico, intentamos lineups como fallback
-                // o retornamos vacío. Sofascore a veces no tiene best-players para todos los eventos.
-                return [];
+                return null;
             }
             const data = await response.json();
-            return data.bestPlayers || [];
+            return data;
         } catch (error) {
             console.error('Error fetching match best players:', error);
-            return [];
+            return null;
         }
     }
 

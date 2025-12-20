@@ -8,7 +8,7 @@ export interface PredictionRequest {
     homeTeam?: string;
     awayTeam?: string;
     date?: Date;
-    sport: 'basketball' | 'football';
+    sport: string;
 }
 
 

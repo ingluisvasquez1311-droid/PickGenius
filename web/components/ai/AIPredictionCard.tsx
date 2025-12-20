@@ -29,7 +29,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             // details are fetched server-side by the API now, so we only need ID and sport
             const result = await generatePrediction({
                 gameId: eventId,
-                sport: sport as 'basketball' | 'football'
+                sport: sport as any
             });
 
             if (result) {

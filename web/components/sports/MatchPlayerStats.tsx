@@ -22,7 +22,7 @@ interface Player {
 
 interface MatchPlayerStatsProps {
     eventId: number;
-    sport: 'football' | 'basketball';
+    sport: string; // Changed to string for universal support, or add more types
     team?: 'home' | 'away'; // Optional filter
 }
 

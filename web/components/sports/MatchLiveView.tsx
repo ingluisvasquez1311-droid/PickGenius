@@ -1,0 +1,217 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import AIPredictionCard from '@/components/ai/AIPredictionCard';
+import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
+import TopPlayersCard from '@/components/sports/TopPlayersCard';
+import TeamLogo from '@/components/ui/TeamLogo';
+
+interface MatchLiveViewProps {
+    sport: string;
+    eventId: string;
+}
+
+export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
+    const router = useRouter();
+    const [game, setGame] = useState<any>(null);
+    const [bestPlayers, setBestPlayers] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchData() {
+            if (!eventId || !sport) return;
+
+            try {
+                // 1. Fetch Game Details from Universal API
+                const gameRes = await fetch(`/api/sports/${sport}/match/${eventId}`);
+                if (gameRes.ok) {
+                    const data = await gameRes.json();
+                    if (data.success) {
+                        setGame(data.data);
+                    }
+                }
+
+                // 2. Fetch Top Players from Universal API
+                const playersRes = await fetch(`/api/sports/${sport}/match/${eventId}/best-player`);
+                if (playersRes.ok) {
+                    const data = await playersRes.json();
+                    if (data.success) {
+                        setBestPlayers(data.data);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching game data:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchData();
+    }, [eventId, sport]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#0b0b0b] pb-20">
+                <div className="container pt-24">
+                    <SkeletonLoader />
+                </div>
+            </div>
+        );
+    }
+
+    if (!game) {
+        return (
+            <div className="min-h-screen bg-[#0b0b0b] pb-20 flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-xl font-bold">Partido no encontrado</h2>
+                    <button onClick={() => router.back()} className="mt-4 bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition-colors">
+                        Volver
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const isLive = game.status?.type === 'inprogress';
+
+    return (
+        <div className="min-h-screen bg-[#0b0b0b] pb-20">
+            <div className="container pt-24 md:pt-28">
+
+                {/* Header / Scoreboard */}
+                <div className="glass-card p-6 mb-6">
+                    <div className="flex justify-between items-center text-center">
+                        <div className="flex-1 flex flex-col items-center gap-3">
+                            <TeamLogo teamId={game.homeTeam.id} teamName={game.homeTeam.name} size="xl" />
+                            <div>
+                                <h2 className="text-xl md:text-3xl font-bold mb-2">{game.homeTeam.name}</h2>
+                                <div className="text-4xl md:text-6xl font-black font-mono tracking-tighter">
+                                    {game.homeScore?.current ?? 0}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="px-4">
+                            <div className={`text-xs font-black uppercase tracking-widest mb-2 ${isLive ? 'text-red-500 animate-pulse' : 'text-gray-500'}`}>
+                                {isLive ? '• EN VIVO' : game.status?.description || 'PROGRAMADO'}
+                            </div>
+                            <div className="text-[10px] text-gray-500 font-bold">
+                                {new Date(game.startTimestamp * 1000).toLocaleString()}
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col items-center gap-3">
+                            <TeamLogo teamId={game.awayTeam.id} teamName={game.awayTeam.name} size="xl" />
+                            <div>
+                                <h2 className="text-xl md:text-3xl font-bold mb-2">{game.awayTeam.name}</h2>
+                                <div className="text-4xl md:text-6xl font-black font-mono tracking-tighter">
+                                    {game.awayScore?.current ?? 0}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3-Column Layout */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
+
+                    {/* Left Column: Home Players (3 cols) */}
+                    <div className="md:col-span-3 order-2 md:order-1 space-y-4">
+                        <ErrorBoundary>
+                            <TopPlayersCard
+                                title="TOP JUGADORES LOCAL"
+                                players={bestPlayers?.allPlayers?.home || []}
+                                sport={sport}
+                                teamColor="purple"
+                            />
+                        </ErrorBoundary>
+
+                        <ErrorBoundary>
+                            <MatchPlayerStats
+                                eventId={parseInt(eventId)}
+                                sport={sport}
+                                team="home"
+                            />
+                        </ErrorBoundary>
+                    </div>
+
+                    {/* Center Column: AI + Scoring Detail (6 cols) */}
+                    <div className="md:col-span-6 order-1 md:order-2 space-y-4">
+                        <ErrorBoundary>
+                            <AIPredictionCard
+                                sport={sport}
+                                eventId={eventId}
+                            />
+                        </ErrorBoundary>
+
+                        {/* MVP Spotlight */}
+                        {bestPlayers?.mvp && (
+                            <div className="glass-card overflow-hidden relative group">
+                                <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-black px-3 py-1 rounded-bl-lg z-10">MVP ACTUAL</div>
+                                <div className="flex p-6 gap-6 items-center">
+                                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-amber-500/10 border border-yellow-500/30 flex-shrink-0 relative overflow-hidden">
+                                        <img src={bestPlayers.mvp.imageUrl} alt={bestPlayers.mvp.name} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-yellow-500 text-[10px] font-black uppercase tracking-widest">{bestPlayers.ai?.title || 'DOMINIO PURO'}</p>
+                                        <h3 className="text-2xl font-black text-white italic tracking-tighter mb-1">{bestPlayers.mvp.name}</h3>
+                                        <p className="text-gray-400 text-xs leading-relaxed">{bestPlayers.ai?.description || 'Liderando el equipo con una eficiencia táctica superior esta jornada.'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Period Detail (Generic) */}
+                        <div className="glass-card p-6">
+                            <h3 className="text-xs font-black uppercase mb-6 border-b border-white/5 pb-2 tracking-widest text-gray-400">Desglose del Partido</h3>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5">
+                                    <span className="font-bold text-sm">{game.homeTeam.name}</span>
+                                    <div className="flex gap-4 font-mono text-lg font-black text-white">
+                                        {game.homeScore?.period1 !== undefined && <span>{game.homeScore.period1}</span>}
+                                        {game.homeScore?.period2 !== undefined && <span>{game.homeScore.period2}</span>}
+                                        {game.homeScore?.period3 !== undefined && <span>{game.homeScore.period3}</span>}
+                                        {game.homeScore?.period4 !== undefined && <span className="text-purple-400">{game.homeScore.period4}</span>}
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5">
+                                    <span className="font-bold text-sm">{game.awayTeam.name}</span>
+                                    <div className="flex gap-4 font-mono text-lg font-black text-white">
+                                        {game.awayScore?.period1 !== undefined && <span>{game.awayScore.period1}</span>}
+                                        {game.awayScore?.period2 !== undefined && <span>{game.awayScore.period2}</span>}
+                                        {game.awayScore?.period3 !== undefined && <span>{game.awayScore.period3}</span>}
+                                        {game.awayScore?.period4 !== undefined && <span className="text-orange-400">{game.awayScore.period4}</span>}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column: Away Players (3 cols) */}
+                    <div className="md:col-span-3 order-3 md:order-3 space-y-4">
+                        <ErrorBoundary>
+                            <TopPlayersCard
+                                title="TOP JUGADORES VISITANTE"
+                                players={bestPlayers?.allPlayers?.away || []}
+                                sport={sport}
+                                teamColor="orange"
+                            />
+                        </ErrorBoundary>
+
+                        <ErrorBoundary>
+                            <MatchPlayerStats
+                                eventId={parseInt(eventId)}
+                                sport={sport}
+                                team="away"
+                            />
+                        </ErrorBoundary>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    );
+}

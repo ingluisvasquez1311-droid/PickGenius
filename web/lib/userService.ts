@@ -9,6 +9,13 @@ import {
     serverTimestamp
 } from 'firebase/firestore';
 
+export interface FavoritePlayer {
+    id: number;
+    name: string;
+    sport: 'basketball' | 'baseball' | 'nhl' | 'tennis';
+    team?: string;
+}
+
 export interface UserProfile {
     uid: string;
     email: string;
@@ -17,6 +24,7 @@ export interface UserProfile {
     predictionsUsed: number;
     predictionsLimit: number;
     favoriteTeams: string[];
+    favoritePlayers: FavoritePlayer[];
     createdAt: Date;
     lastLogin: Date;
     role: 'admin' | 'user';
@@ -42,6 +50,7 @@ export async function createUserProfile(uid: string, email: string): Promise<Use
         predictionsUsed: 0,
         predictionsLimit: 3, // Free tier: 3 predictions per day
         favoriteTeams: [],
+        favoritePlayers: [],
         createdAt: serverTimestamp(),
         lastLogin: serverTimestamp(),
         role: 'user' // Default role
@@ -78,6 +87,7 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
         predictionsUsed: data.predictionsUsed || 0,
         predictionsLimit: data.predictionsLimit || 3,
         favoriteTeams: data.favoriteTeams || [],
+        favoritePlayers: data.favoritePlayers || [],
         createdAt: data.createdAt?.toDate() || new Date(),
         lastLogin: data.lastLogin?.toDate() || new Date(),
         role: data.role || 'user'
@@ -117,6 +127,30 @@ export async function removeFavoriteTeam(uid: string, teamName: string): Promise
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, {
         favoriteTeams: arrayRemove(teamName)
+    });
+}
+
+/**
+ * Add a player to user's favorites
+ */
+export async function addFavoritePlayer(uid: string, player: FavoritePlayer): Promise<void> {
+    if (!db) return;
+
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+        favoritePlayers: arrayUnion(player)
+    });
+}
+
+/**
+ * Remove a player from user's favorites
+ */
+export async function removeFavoritePlayer(uid: string, player: FavoritePlayer): Promise<void> {
+    if (!db) return;
+
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+        favoritePlayers: arrayRemove(player)
     });
 }
 
@@ -208,6 +242,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
             predictionsUsed: data.predictionsUsed || 0,
             predictionsLimit: data.predictionsLimit || 3,
             favoriteTeams: data.favoriteTeams || [],
+            favoritePlayers: data.favoritePlayers || [],
             createdAt: data.createdAt?.toDate() || new Date(),
             lastLogin: data.lastLogin?.toDate() || new Date(),
             role: data.role || 'user'

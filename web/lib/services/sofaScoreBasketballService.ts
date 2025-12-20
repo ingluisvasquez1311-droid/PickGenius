@@ -13,7 +13,9 @@ class SofaScoreBasketballService {
     private headers: Record<string, string>;
 
     constructor() {
-        this.baseUrl = 'https://www.sofascore.com/api/v1';
+        this.baseUrl = typeof window === 'undefined'
+            ? 'https://www.sofascore.com/api/v1'
+            : '/api/proxy/sofascore';
         this.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
             'Accept': '*/*',
