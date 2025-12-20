@@ -3,6 +3,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 type Sport = 'basketball' | 'baseball' | 'nhl' | 'tennis';
 
@@ -18,6 +21,7 @@ const PlayerPropsPredictor = () => {
     const [thinkingProgress, setThinkingProgress] = useState(0);
     const [thinkingMessage, setThinkingMessage] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const { user, usePrediction, checkPredictionLimit, saveToHistory, notify } = useAuth();
 
     const thinkingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -51,7 +55,7 @@ const PlayerPropsPredictor = () => {
         'tennis': [
             { value: 'aces', label: 'Aces', icon: '🎾' },
             { value: 'doubleFaults', label: 'D. Faltas', icon: '❌' },
-            { value: 'firstServePoints', label: '1st Serve', icon: '⚡' }
+            { value: 'firstServePoints', label: '1er Saque', icon: '⚡' }
         ]
     };
 
@@ -123,6 +127,19 @@ const PlayerPropsPredictor = () => {
     };
 
     const generatePrediction = async () => {
+        if (!user) {
+            setError('Debes iniciar sesión para usar la IA');
+            toast.error('Debes iniciar sesión');
+            return;
+        }
+
+        const limitCheck = await checkPredictionLimit();
+        if (!limitCheck.canPredict) {
+            setError('Has alcanzado tu límite diario de predicciones');
+            toast.error('Límite alcanzado');
+            return;
+        }
+
         if (!selectedPlayer || !line) {
             setError('Por favor selecciona un jugador y una línea');
             return;
@@ -156,9 +173,36 @@ const PlayerPropsPredictor = () => {
                 if (progress >= totalSteps) {
                     if (thinkingTimerRef.current) clearInterval(thinkingTimerRef.current);
 
-                    apiPromise.then(response => {
+                    apiPromise.then(async response => {
                         if (response.data.success) {
-                            setPrediction(response.data.data);
+                            const predictionData = response.data.data;
+                            setPrediction(predictionData);
+
+                            // Guardar en el historial
+                            await saveToHistory({
+                                playerName: selectedPlayer.name,
+                                sport: currentSport,
+                                propType: propType,
+                                line: parseFloat(line),
+                                prediction: predictionData.prediction.prediction,
+                                probability: predictionData.prediction.probability,
+                                confidence: predictionData.prediction.confidence,
+                                reasoning: predictionData.prediction.reasoning
+                            });
+
+                            // Incrementar contador
+                            await usePrediction();
+
+                            // Notificar si es un Hot Pick (Probabilidad >= 85%)
+                            if (predictionData.prediction.probability >= 85) {
+                                await notify(
+                                    '🔥 ¡HOT PICK DETECTADO!',
+                                    `${selectedPlayer.name} tiene un ${predictionData.prediction.probability}% de probabilidad en ${propType}. ¡Análisis PRO completado!`,
+                                    'success',
+                                    '/props'
+                                );
+                                toast.success('¡Hot Pick guardado en tus notificaciones!');
+                            }
                         }
                         setIsThinking(false);
                     }).catch(err => {
@@ -182,6 +226,31 @@ const PlayerPropsPredictor = () => {
 
     return (
         <div className="w-full space-y-6">
+            {/* Info de Límites */}
+            {user && (
+                <div className="flex justify-center mb-4">
+                    <div className="px-6 py-3 bg-white/[0.03] border border-white/10 rounded-2xl flex items-center gap-4 backdrop-blur-md">
+                        <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Predicciones hoy</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className={`text-sm font-black ${user.isPremium ? 'text-yellow-500' : 'text-white'}`}>
+                                {user.predictionsUsed}
+                            </span>
+                            <span className="text-gray-600 text-[10px] font-bold">/</span>
+                            <span className="text-gray-400 text-xs font-bold">
+                                {user.isPremium ? '∞' : user.predictionsLimit}
+                            </span>
+                        </div>
+                        {!user.isPremium && (
+                            <Link href="/profile" className="text-[9px] font-black text-purple-400 hover:text-purple-300 transition-colors uppercase tracking-widest border-l border-white/10 pl-4 ml-2">
+                                Subir a Premium ✨
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            )}
             {/* Header Multi-Deporte */}
             <div className="glass-card p-2 bg-black/40 border border-white/5 rounded-2xl flex gap-1">
                 {sports.map(sport => (
@@ -205,7 +274,7 @@ const PlayerPropsPredictor = () => {
             <div className="glass-card p-6 bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] border border-[rgba(255,255,255,0.1)] relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary)]/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-[var(--primary)]/20 transition-all duration-700"></div>
                 <h2 className="text-3xl font-black text-white mb-2 flex items-center gap-3">
-                    <span className="animate-pulse">{sports.find(s => s.id === currentSport)?.icon}</span> {currentSport.toUpperCase()} PRO ANALYZER
+                    <span className="animate-pulse">{sports.find(s => s.id === currentSport)?.icon}</span> {currentSport.toUpperCase()} ANALIZADOR PRO
                 </h2>
                 <p className="text-[var(--text-muted)] text-sm font-medium tracking-wide">
                     SISTEMA DE ANÁLISIS MULTI-DEPORTE • SOFASCORE • AI 2.0
@@ -334,7 +403,7 @@ const PlayerPropsPredictor = () => {
                         </div>
                     </div>
 
-                    <h4 className="text-2xl font-black text-white mb-4 uppercase tracking-[0.2em]">Ejecutando Engine Predictivo</h4>
+                    <h4 className="text-2xl font-black text-white mb-4 uppercase tracking-[0.2em]">Ejecutando Motor Predictivo</h4>
                     <p className="text-[var(--primary)] font-bold text-lg h-8 animate-pulse italic">
                         &gt; {thinkingMessage}
                     </p>
@@ -355,7 +424,7 @@ const PlayerPropsPredictor = () => {
                                     {prediction.prediction.prediction === 'OVER' ? '📈' : '📉'}
                                 </div>
                                 <div className={`text-7xl font-black mb-4 ${prediction.prediction.prediction === 'OVER' ? 'text-green-500' : 'text-red-500'}`}>
-                                    {prediction.prediction.prediction}
+                                    {prediction.prediction.prediction === 'OVER' ? 'MÁS DE' : 'MENOS DE'}
                                 </div>
                                 <div className="text-white text-2xl font-black mb-4">{prediction.line} {prediction.propType.toUpperCase()}</div>
                                 <div className="mt-6 grid grid-cols-2 gap-4 w-full">

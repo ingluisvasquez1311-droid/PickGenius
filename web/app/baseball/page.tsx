@@ -62,7 +62,7 @@ export default function BaseballPage() {
                                         awayScore={game.awayScore.current}
                                         date={new Date(game.startTimestamp * 1000).toISOString()}
                                         status={game.status.type === 'inprogress' ? 'En Vivo' : game.status.type === 'finished' ? 'Finalizado' : 'Programado'}
-                                        league="MLB"
+                                        league={`${game.tournament.category?.name || 'Internacional'}: ${game.tournament.name}`}
                                     />
                                 ))
                             ) : (

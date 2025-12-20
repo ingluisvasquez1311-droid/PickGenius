@@ -25,12 +25,8 @@ export default function HomePage() {
         let basketballCount = 0;
 
         if (basketballData.success && basketballData.data) {
-          const nbaLive = basketballData.data.filter((e: any) =>
-            e.tournament?.name?.toLowerCase().includes('nba') ||
-            e.tournament?.uniqueTournament?.name?.toLowerCase().includes('nba')
-          );
-          basketballCount = nbaLive.length;
-          if (nbaLive.length > 0) basketballFeatured = nbaLive[0];
+          basketballCount = basketballData.data.length;
+          if (basketballData.data.length > 0) basketballFeatured = basketballData.data[0];
         }
 
         // 2. If no live, try Scheduled (for generic display)
@@ -39,12 +35,8 @@ export default function HomePage() {
             const scheduledRes = await fetch(`/api/basketball/scheduled?date=${new Date().toISOString().split('T')[0]}`);
             const scheduledData = await scheduledRes.json();
             if (scheduledData.success && scheduledData.data?.events) {
-              const nbaScheduled = scheduledData.data.events.filter((e: any) =>
-                e.tournament?.name?.toLowerCase().includes('nba') ||
-                e.tournament?.uniqueTournament?.name?.toLowerCase().includes('nba')
-              );
-              if (nbaScheduled.length > 0) {
-                const nextGame = nbaScheduled[0];
+              if (scheduledData.data.events.length > 0) {
+                const nextGame = scheduledData.data.events[0];
                 basketballFeatured = {
                   id: nextGame.id,
                   homeTeam: nextGame.homeTeam,
@@ -146,14 +138,14 @@ export default function HomePage() {
             <div className="absolute top-10 left-0 w-80 glass-brutal rounded-2xl p-6 transform -rotate-6 animate-float z-20 hover:z-30 transition-all hover:scale-110 duration-500 cursor-default border-t-4 border-t-green-500">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <img src={footballStats.featuredMatch.homeTeam?.logo || ''} alt="Home" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
+                  <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${footballStats.featuredMatch.homeTeam.id}/image`)}`} alt="Home" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
                   <span className="font-bold truncate max-w-[120px]">{footballStats.featuredMatch.homeTeam?.name}</span>
                 </div>
                 <span className="text-2xl font-mono font-bold">{footballStats.featuredMatch.homeScore?.current ?? 0}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <img src={footballStats.featuredMatch.awayTeam?.logo || ''} alt="Away" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
+                  <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${footballStats.featuredMatch.awayTeam.id}/image`)}`} alt="Away" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
                   <span className="font-bold truncate max-w-[120px]">{footballStats.featuredMatch.awayTeam?.name}</span>
                 </div>
                 <span className="text-2xl font-mono font-bold">{footballStats.featuredMatch.awayScore?.current ?? 0}</span>
@@ -172,14 +164,14 @@ export default function HomePage() {
             <div className="absolute bottom-10 right-0 w-80 glass-brutal rounded-2xl p-6 transform rotate-6 animate-float-delayed z-20 hover:z-30 transition-all hover:scale-110 duration-500 cursor-default border-t-4 border-t-orange-500">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <img src={`https://api.sofascore.app/api/v1/team/${basketballStats.featuredMatch.homeTeam.id}/image`} alt="Home" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
+                  <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${basketballStats.featuredMatch.homeTeam.id}/image`)}`} alt="Home" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
                   <span className="font-bold truncate max-w-[120px]">{basketballStats.featuredMatch.homeTeam.name}</span>
                 </div>
                 <span className="text-2xl font-mono font-bold">{basketballStats.featuredMatch.homeScore?.current ?? '-'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <img src={`https://api.sofascore.app/api/v1/team/${basketballStats.featuredMatch.awayTeam.id}/image`} alt="Away" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
+                  <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${basketballStats.featuredMatch.awayTeam.id}/image`)}`} alt="Away" className="w-8 h-8 rounded-full bg-gray-800 object-contain p-1" />
                   <span className="font-bold truncate max-w-[120px]">{basketballStats.featuredMatch.awayTeam.name}</span>
                 </div>
                 <span className="text-2xl font-mono font-bold">{basketballStats.featuredMatch.awayScore?.current ?? '-'}</span>

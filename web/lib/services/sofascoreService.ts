@@ -220,6 +220,27 @@ class SofascoreService {
     }
 
     /**
+     * Obtiene los jugadores de un equipo (plantilla)
+     */
+    async getTeamPlayers(teamId: number): Promise<any> {
+        return await this.makeRequest(`/team/${teamId}/players`);
+    }
+
+    /**
+     * Obtiene los últimos eventos de un jugador
+     */
+    async getPlayerLastEvents(playerId: number): Promise<any> {
+        return await this.makeRequest(`/player/${playerId}/events/last/0`);
+    }
+
+    /**
+     * Obtiene estadísticas de un jugador para una temporada
+     */
+    async getPlayerSeasonStats(playerId: number, tournamentId: number, seasonId: number): Promise<any> {
+        return await this.makeRequest(`/player/${playerId}/unique-tournament/${tournamentId}/season/${seasonId}/statistics/overall`);
+    }
+
+    /**
      * Obtiene eventos para un deporte específico (en vivo + programados)
      */
     async getEventsBySport(sport: string, date?: string): Promise<SofascoreEvent[]> {

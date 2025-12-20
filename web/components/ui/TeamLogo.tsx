@@ -23,8 +23,8 @@ export default function TeamLogo({ teamId, teamName, size = 'md', className = ''
 
     // Lista de URLs para intentar en orden
     const sources = [
-        `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/team/${teamId}/image`)}`,
         `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${teamId}/image`)}`,
+        `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/team/${teamId}/image`)}`,
         `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/player/${teamId}/image`)}` // Para Tenis
     ];
 

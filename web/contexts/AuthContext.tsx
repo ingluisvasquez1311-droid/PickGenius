@@ -16,8 +16,18 @@ import {
     removeFavoriteTeam,
     incrementPredictionsUsed,
     canMakePrediction,
-    type UserProfile
+    savePrediction,
+    getUserPredictions,
+    type UserProfile,
+    type PredictionRecord
 } from '@/lib/userService';
+import {
+    getUserNotifications,
+    createNotification,
+    markAsRead,
+    markAllAsRead,
+    type AppNotification
+} from '@/lib/services/notificationService';
 
 interface AuthContextType {
     user: UserProfile | null;
@@ -30,6 +40,14 @@ interface AuthContextType {
     usePrediction: () => Promise<void>;
     checkPredictionLimit: () => Promise<{ canPredict: boolean; remaining: number }>;
     refreshUser: () => Promise<void>;
+    getHistory: (limit?: number) => Promise<PredictionRecord[]>;
+    saveToHistory: (prediction: Omit<PredictionRecord, 'uid' | 'timestamp'>) => Promise<void>;
+    notifications: AppNotification[];
+    unreadCount: number;
+    refreshNotifications: () => Promise<void>;
+    markRead: (id: string) => Promise<void>;
+    markAllRead: () => Promise<void>;
+    notify: (title: string, message: string, type?: AppNotification['type'], link?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,6 +55,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [notifications, setNotifications] = useState<AppNotification[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const loadUserProfile = async (uid: string, email: string) => {
         try {
@@ -139,6 +159,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const getHistory = async (limitCount?: number) => {
+        if (!user) return [];
+        return await getUserPredictions(user.uid, limitCount);
+    };
+
+    const saveToHistory = async (prediction: Omit<PredictionRecord, 'uid' | 'timestamp'>) => {
+        if (!user) return;
+        await savePrediction(user.uid, prediction);
+    };
+
+    const refreshNotifications = async () => {
+        if (!user) return;
+        const data = await getUserNotifications(user.uid);
+        setNotifications(data);
+        setUnreadCount(data.filter(n => !n.read).length);
+    };
+
+    const markRead = async (id: string) => {
+        await markAsRead(id);
+        await refreshNotifications();
+    };
+
+    const markAllRead = async () => {
+        if (!user) return;
+        await markAllAsRead(user.uid);
+        await refreshNotifications();
+    };
+
+    const notify = async (title: string, message: string, type: AppNotification['type'] = 'info', link?: string) => {
+        if (!user) return;
+        await createNotification(user.uid, { title, message, type, link });
+        await refreshNotifications();
+    };
+
+    useEffect(() => {
+        if (user) {
+            refreshNotifications();
+            // Polling opcional cada 2 min para notificaciones
+            const interval = setInterval(refreshNotifications, 120000);
+            return () => clearInterval(interval);
+        }
+    }, [user]);
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -150,7 +213,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             removeFavorite,
             usePrediction,
             checkPredictionLimit,
-            refreshUser
+            refreshUser,
+            getHistory,
+            saveToHistory,
+            notifications,
+            unreadCount,
+            refreshNotifications,
+            markRead,
+            markAllRead,
+            notify
         }}>
             {children}
         </AuthContext.Provider>

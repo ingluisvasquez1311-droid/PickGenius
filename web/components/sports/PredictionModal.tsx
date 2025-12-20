@@ -20,15 +20,21 @@ interface PredictionModalProps {
 export default function PredictionModal({ isOpen, onClose, gameInfo }: PredictionModalProps) {
     const [loading, setLoading] = useState(false);
     const [prediction, setPrediction] = useState<PredictionResult | null>(null);
-    const { user, usePrediction, checkPredictionLimit } = useAuth();
+    const { user, usePrediction, checkPredictionLimit, saveToHistory, notify } = useAuth();
 
     if (!isOpen) return null;
 
     const handleGeneratePrediction = async () => {
-        // if (!user) {
-        //     alert('Debes iniciar sesión para ver predicciones');
-        //     return;
-        // }
+        if (!user) {
+            alert('Debes iniciar sesión para ver predicciones');
+            return;
+        }
+
+        const limitCheck = await checkPredictionLimit();
+        if (!limitCheck.canPredict) {
+            alert('Has alcanzado tu límite diario de predicciones');
+            return;
+        }
 
         setLoading(true);
         try {
@@ -43,8 +49,29 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
             const result = await generatePrediction(request);
             setPrediction(result);
 
+            // Guardar en el historial
+            await saveToHistory({
+                playerName: `${gameInfo.homeTeam} vs ${gameInfo.awayTeam}`,
+                sport: gameInfo.sport || 'Fútbol',
+                propType: 'Ganador',
+                line: 0,
+                prediction: result.winner,
+                probability: result.confidence,
+                confidence: result.confidence > 75 ? 'Alta' : 'Media',
+                reasoning: result.bettingTip
+            });
+
             // Increment user's prediction count
             await usePrediction();
+
+            // Notificar si es un Hot Pick (Confianza >= 80)
+            if (result.confidence >= 80) {
+                await notify(
+                    '🎯 ¡PICK DE ALTA CONFIANZA!',
+                    `La IA detectó un pick con ${result.confidence}% de confianza para el partido ${gameInfo.homeTeam} vs ${gameInfo.awayTeam}.`,
+                    'success'
+                );
+            }
         } catch (error) {
             console.error('Error generating prediction:', error);
             alert('Error al generar predicción. Inténtalo de nuevo.');
@@ -81,15 +108,13 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                             Nuestro modelo de IA analizará miles de datos históricos para darte la mejor predicción
                         </p>
 
-                        {/* Limit display hidden for testing
                         {user && !user.isPremium && (
                             <div className="bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg p-4 mb-6">
                                 <p className="text-sm text-[var(--text-muted)]">
-                                    Predicciones restantes hoy: <span className="text-[var(--primary)] font-bold">{user.predictionsLimit - user.predictionsUsed}/{user.predictionsLimit}</span>
+                                    Predicciones restantes hoy: <span className="text-[var(--primary)] font-bold">{Math.max(0, user.predictionsLimit - user.predictionsUsed)}/{user.predictionsLimit}</span>
                                 </p>
                             </div>
                         )}
-                        */}
 
                         <button
                             onClick={handleGeneratePrediction}

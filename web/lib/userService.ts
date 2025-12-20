@@ -30,6 +30,20 @@ export interface UserProfile {
     role: 'admin' | 'user';
 }
 
+export interface PredictionRecord {
+    id?: string;
+    uid: string;
+    playerName: string;
+    sport: string;
+    propType: string;
+    line: number;
+    prediction: string;
+    probability: number;
+    confidence: string;
+    reasoning: string;
+    timestamp: any;
+}
+
 /**
  * Create a new user profile in Firestore
  */
@@ -257,4 +271,44 @@ export async function setUserRole(uid: string, role: 'admin' | 'user'): Promise<
     if (!db) return;
     const userRef = doc(db, 'users', uid);
     await updateDoc(userRef, { role });
+}
+
+/**
+ * Save an AI prediction to history
+ */
+import { addDoc } from 'firebase/firestore';
+
+export async function savePrediction(uid: string, prediction: Omit<PredictionRecord, 'uid' | 'timestamp'>): Promise<void> {
+    if (!db) return;
+
+    const predictionsRef = collection(db, 'predictions');
+    await addDoc(predictionsRef, {
+        ...prediction,
+        uid,
+        timestamp: serverTimestamp()
+    });
+}
+
+/**
+ * Get user's prediction history
+ */
+import { where } from 'firebase/firestore';
+
+export async function getUserPredictions(uid: string, limitCount: number = 20): Promise<PredictionRecord[]> {
+    if (!db) return [];
+
+    const predictionsRef = collection(db, 'predictions');
+    const q = query(
+        predictionsRef,
+        where('uid', '==', uid),
+        orderBy('timestamp', 'desc'),
+        limit(limitCount)
+    );
+
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data() as PredictionRecord,
+        timestamp: (doc.data() as any).timestamp?.toDate() || new Date()
+    }));
 }

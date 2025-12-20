@@ -10,11 +10,48 @@ export async function GET(request: NextRequest) {
 
         const response = await sofaScoreBasketballService.getScheduledEvents(date);
 
-        if (!response.success) {
+        if (!response.success || !response.data) {
             return NextResponse.json(response, { status: 500 });
         }
 
-        return NextResponse.json(response);
+        const events = response.data.events || [];
+        const transformedData = events.map((game: any) => ({
+            id: game.id,
+            tournament: {
+                name: game.tournament?.name || 'Unknown League',
+                uniqueTournament: {
+                    name: game.tournament?.uniqueTournament?.name || game.tournament?.name || 'Unknown'
+                },
+                category: {
+                    name: game.tournament?.category?.name || 'International',
+                    flag: game.tournament?.category?.flag || '',
+                    id: game.tournament?.category?.id
+                }
+            },
+            homeTeam: {
+                id: game.homeTeam?.id,
+                name: game.homeTeam?.name || 'Home Team',
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.homeTeam?.id}/image`)}`
+            },
+            awayTeam: {
+                id: game.awayTeam?.id,
+                name: game.awayTeam?.name || 'Away Team',
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.awayTeam?.id}/image`)}`
+            },
+            status: {
+                type: 'notstarted',
+                description: new Date(game.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                code: game.status?.code
+            },
+            startTimestamp: game.startTimestamp
+        }));
+
+        return NextResponse.json({
+            success: true,
+            data: {
+                events: transformedData
+            }
+        });
     } catch (error: any) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }

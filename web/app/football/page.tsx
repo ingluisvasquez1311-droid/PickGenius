@@ -43,11 +43,14 @@ export default function FootballPage() {
 
         // Group matches by league/tournament name
         const grouped = matches.reduce((acc, match) => {
+          const countryName = match.tournament.category?.name || 'Internacional';
           const leagueName = match.tournament.uniqueTournament?.name || match.tournament.name;
-          if (!acc[leagueName]) {
-            acc[leagueName] = [];
+          const displayKey = `${countryName}: ${leagueName}`;
+
+          if (!acc[displayKey]) {
+            acc[displayKey] = [];
           }
-          acc[leagueName].push(match);
+          acc[displayKey].push(match);
           return acc;
         }, {} as Record<string, FootballMatch[]>);
 

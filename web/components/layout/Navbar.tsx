@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
+import NotificationCenter from './NotificationCenter';
 
 export default function Navbar() {
     const { user, signOut, loading } = useAuth();
@@ -103,6 +104,17 @@ export default function Navbar() {
                                 <span>🔥</span>
                                 <span className="hidden sm:inline">Rachas</span>
                             </Link>
+                            <Link
+                                href="/props"
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2
+                                    ${isActive('/props')
+                                        ? 'bg-purple-600/20 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                <span>🎯</span>
+                                <span className="hidden sm:inline">Props</span>
+                            </Link>
 
                             {/* Otros Deportes Dropdown */}
                             <div className="relative group px-4 py-2 text-gray-400 hover:text-white cursor-pointer transition-all flex items-center gap-2">
@@ -134,6 +146,7 @@ export default function Navbar() {
                                                 ADMIN
                                             </Link>
                                         )}
+                                        <NotificationCenter />
                                         <Link href="/profile" className="text-sm hover:text-[var(--primary)] transition-colors flex items-center gap-2">
                                             <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 hover:border-purple-500 transition-colors">
                                                 👤

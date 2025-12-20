@@ -63,7 +63,7 @@ export default function TennisPage() {
                                         awayScore={game.awayScore.current}
                                         date={new Date(game.startTimestamp * 1000).toISOString()}
                                         status={game.status.type === 'inprogress' ? 'En Vivo' : game.status.type === 'finished' ? 'Finalizado' : 'Programado'}
-                                        league="Tennis"
+                                        league={`${game.tournament.category?.name || 'International'}: ${game.tournament.name}`}
                                     />
                                 ))
                             ) : (

@@ -27,32 +27,12 @@ export default function BasketballLivePage() {
 
                 // Process Live Events
                 if (liveData.success && liveData.data) {
-                    const nbaLive = liveData.data.filter((e: any) =>
-                        e.tournament?.name?.toLowerCase().includes('nba') ||
-                        e.tournament?.uniqueTournament?.name?.toLowerCase().includes('nba')
-                    );
-                    setLiveEvents(nbaLive);
+                    setLiveEvents(liveData.data);
                 }
 
                 // Process Scheduled Events
                 if (scheduledData.success && scheduledData.data && scheduledData.data.events) {
-                    const nbaScheduled = scheduledData.data.events.filter((e: any) =>
-                        e.tournament?.name?.toLowerCase().includes('nba') ||
-                        e.tournament?.uniqueTournament?.name?.toLowerCase().includes('nba')
-                    ).map((item: any) => ({
-                        id: item.id,
-                        tournament: item.tournament,
-                        homeTeam: item.homeTeam,
-                        awayTeam: item.awayTeam,
-                        homeScore: { current: 0 },
-                        awayScore: { current: 0 },
-                        status: {
-                            type: 'notstarted',
-                            description: new Date(item.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                        },
-                        startTimestamp: item.startTimestamp
-                    }));
-                    setScheduledEvents(nbaScheduled);
+                    setScheduledEvents(scheduledData.data.events);
                 }
 
             } catch (err: any) {
@@ -81,7 +61,7 @@ export default function BasketballLivePage() {
                         NBA<span className="text-green-500">.LIVE</span>
                     </h1>
                     <p className="text-gray-400 text-xs font-mono mt-1 tracking-widest uppercase">
-                        Real-time Data • AI Powered • High Frequency
+                        Datos en Tiempo Real • IA Activada • Alta Frecuencia
                     </p>
                 </div>
                 <div className="flex gap-4 mt-4 md:mt-0">
@@ -127,7 +107,7 @@ export default function BasketballLivePage() {
                                 <div className="flex items-center justify-around my-8">
                                     {/* Home */}
                                     <div className="text-center group-hover:scale-105 transition-transform duration-300">
-                                        <img src={`https://api.sofascore.app/api/v1/team/${featuredMatch.homeTeam.id}/image`} className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" alt="Home" />
+                                        <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${featuredMatch.homeTeam.id}/image`)}`} className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" alt="Home" />
                                         <h2 className="text-2xl md:text-4xl font-black mt-4 tracking-tighter">{featuredMatch.homeTeam.name}</h2>
                                     </div>
 
@@ -146,7 +126,7 @@ export default function BasketballLivePage() {
 
                                     {/* Away */}
                                     <div className="text-center group-hover:scale-105 transition-transform duration-300">
-                                        <img src={`https://api.sofascore.app/api/v1/team/${featuredMatch.awayTeam.id}/image`} className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" alt="Away" />
+                                        <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${featuredMatch.awayTeam.id}/image`)}`} className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" alt="Away" />
                                         <h2 className="text-2xl md:text-4xl font-black mt-4 tracking-tighter">{featuredMatch.awayTeam.name}</h2>
                                     </div>
                                 </div>
@@ -155,7 +135,7 @@ export default function BasketballLivePage() {
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                     <div className="bg-white/5 rounded-xl p-3 border border-white/5 backdrop-blur-sm">
                                         <div className="text-[10px] text-gray-500 uppercase font-black">Probabilidad IA</div>
-                                        <div className="text-xl font-bold text-green-400">76% Home</div>
+                                        <div className="text-xl font-bold text-green-400">76% Local</div>
                                     </div>
                                     <div className="bg-white/5 rounded-xl p-3 border border-white/5 backdrop-blur-sm">
                                         <div className="text-[10px] text-gray-500 uppercase font-black">Momentum</div>
@@ -188,8 +168,11 @@ export default function BasketballLivePage() {
                                                 {event.status.description}
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-sm">{event.homeTeam.name}</span>
-                                                <span className="font-bold text-sm text-gray-500">{event.awayTeam.name}</span>
+                                                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-tighter truncate w-32">
+                                                    {event.tournament.category?.name ? `${event.tournament.category.name}: ` : ''}{event.tournament.name}
+                                                </span>
+                                                <span className="font-bold text-sm truncate w-32">{event.homeTeam.name}</span>
+                                                <span className="font-bold text-sm text-gray-400 truncate w-32">{event.awayTeam.name}</span>
                                             </div>
                                         </div>
                                         <div className="text-xs font-black text-gray-600 group-hover:text-green-500 transition-colors">Odds &gt;</div>
@@ -203,7 +186,7 @@ export default function BasketballLivePage() {
 
                         {/* Quick Action Ad */}
                         <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-[2rem] p-6 text-center transform hover:scale-[1.02] transition-transform cursor-pointer">
-                            <div className="text-xs font-black uppercase tracking-widest opacity-75">Premium Feature</div>
+                            <div className="text-xs font-black uppercase tracking-widest opacity-75">Función Premium</div>
                             <div className="text-2xl font-black italic">🔓 DESBLOQUEAR VALUE BETS</div>
                         </div>
                     </div>

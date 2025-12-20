@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import TeamLogo from './ui/TeamLogo';
 
 interface LiveEvent {
     id: string;
@@ -27,6 +28,9 @@ interface LiveEvent {
     };
     tournament: {
         name: string;
+        category?: {
+            name: string;
+        };
     };
     startTimestamp?: number;
 }
@@ -62,9 +66,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
         return () => clearTimeout(timer);
     }, [event.id, sport]);
 
-    // Construct Logo URLs if missing (Fallback)
-    const homeLogo = event.homeTeam.logo || `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/team/${event.homeTeam.id}/image`)}`;
-    const awayLogo = event.awayTeam.logo || `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/team/${event.awayTeam.id}/image`)}`;
+    // Use TeamLogo component instead of manual img tags with fallback
 
     return (
         <Link
@@ -112,7 +114,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span>
                             </span>
-                            LIVE
+                            EN VIVO
                         </div>
                     ) : (
                         <div className="rounded bg-gray-700/30 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-gray-400 border border-white/10">
@@ -120,7 +122,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
                         </div>
                     )}
                     <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-600 border-l border-white/10 pl-2 truncate">
-                        {event.tournament.name}
+                        {event.tournament.category?.name ? `${event.tournament.category.name}: ` : ''}{event.tournament.name}
                     </span>
                 </div>
 
@@ -129,12 +131,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
 
                     {/* Home Team */}
                     <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                        <img
-                            src={homeLogo}
-                            alt={event.homeTeam.name}
-                            className="h-12 w-12 sm:h-16 sm:w-16 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all"
-                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Anonymous_emblem.svg'; }}
-                        />
+                        <TeamLogo teamId={event.homeTeam.id} teamName={event.homeTeam.name} size="lg" className="drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all" />
                         <span className="text-center text-xs sm:text-sm font-bold text-gray-300 leading-tight truncate w-full px-1">
                             {event.homeTeam.name}
                         </span>
@@ -162,12 +159,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
 
                     {/* Away Team */}
                     <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                        <img
-                            src={awayLogo}
-                            alt={event.awayTeam.name}
-                            className="h-12 w-12 sm:h-16 sm:w-16 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all"
-                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Anonymous_emblem.svg'; }}
-                        />
+                        <TeamLogo teamId={event.awayTeam.id} teamName={event.awayTeam.name} size="lg" className="drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all" />
                         <span className="text-center text-xs sm:text-sm font-bold text-gray-300 leading-tight truncate w-full px-1">
                             {event.awayTeam.name}
                         </span>
@@ -180,12 +172,12 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
                     <div className="flex items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></div>
                         <span className="text-[10px] uppercase font-bold text-green-500">
-                            {sport === 'basketball' ? 'Q4 Momentum' : 'Possession'}
+                            {sport === 'basketball' ? 'Q4 Momentum' : 'Posesión'}
                         </span>
                     </div>
                     {/* Fake Live Odds Animation */}
                     <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-500 font-bold uppercase">Live Odds</span>
+                        <span className="text-[10px] text-gray-500 font-bold uppercase">Cuotas en Vivo</span>
                         <div className="px-2 py-0.5 rounded bg-green-500/10 text-green-400 text-xs font-mono font-bold border border-green-500/20">
                             {event.id.toString().slice(0, 2) === '11' ? '1.85' : '2.10'}
                         </div>
@@ -232,14 +224,37 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
         );
     }
 
+    // Group events by category and tournament
+    const groupedEvents = events.reduce((acc, event) => {
+        const countryName = event.tournament.category?.name || 'Internacional';
+        const leagueName = event.tournament.name;
+        const key = `${countryName}: ${leagueName}`;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(event);
+        return acc;
+    }, {} as Record<string, LiveEvent[]>);
+
     return (
-        <div>
-            <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {events.map((event) => (
-                    <EventCard key={event.id} event={event} sport={sport} />
-                ))}
-            </div>
+        <div className="space-y-8">
+            {title && <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>}
+
+            {Object.entries(groupedEvents).map(([leagueKey, leagueEvents]) => (
+                <div key={leagueKey} className="space-y-4">
+                    <div className="flex items-center gap-3 border-l-4 border-green-500 pl-4 py-1 bg-white/5 rounded-r-lg">
+                        <h3 className="text-lg font-bold text-white uppercase tracking-tight">
+                            {leagueKey}
+                        </h3>
+                        <span className="text-xs font-bold bg-green-500/20 text-green-500 px-2 py-0.5 rounded-full border border-green-500/30">
+                            {leagueEvents.length}
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {leagueEvents.map((event) => (
+                            <EventCard key={event.id} event={event} sport={sport} />
+                        ))}
+                    </div>
+                </div>
+            ))}
         </div>
     );
 }

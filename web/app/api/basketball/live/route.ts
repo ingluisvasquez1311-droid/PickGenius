@@ -31,12 +31,12 @@ export async function GET(request: NextRequest) {
             homeTeam: {
                 id: game.homeTeam?.id,
                 name: game.homeTeam?.name || 'Home Team',
-                logo: `https://api.sofascore.app/api/v1/team/${game.homeTeam?.id}/image`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.homeTeam?.id}/image`)}`
             },
             awayTeam: {
                 id: game.awayTeam?.id,
                 name: game.awayTeam?.name || 'Away Team',
-                logo: `https://api.sofascore.app/api/v1/team/${game.awayTeam?.id}/image`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.awayTeam?.id}/image`)}`
             },
             homeScore: {
                 current: game.homeScore?.current || 0,
@@ -53,6 +53,11 @@ export async function GET(request: NextRequest) {
                 period2: game.awayScore?.period2,
                 period3: game.awayScore?.period3,
                 period4: game.awayScore?.period4
+            },
+            category: {
+                name: game.tournament?.category?.name || 'International',
+                flag: game.tournament?.category?.flag || '',
+                id: game.tournament?.category?.id
             },
             status: {
                 type: 'inprogress', // Sofascore live events are generally in progress

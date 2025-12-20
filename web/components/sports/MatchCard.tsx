@@ -54,6 +54,17 @@ export default function MatchCard({
             className="glass-card hover:bg-[rgba(255,255,255,0.08)] transition-colors duration-200 mb-2 fade-in cursor-pointer"
             onClick={handleCardClick}
         >
+            {/* League Header */}
+            <div className="px-3 py-1.5 border-b border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)] flex items-center justify-between">
+                <span className="text-[10px] font-bold text-[var(--primary)] uppercase tracking-wider truncate">
+                    {league}
+                </span>
+                {sport && (
+                    <span className="text-[9px] text-[var(--text-muted)] uppercase font-medium">
+                        {sport}
+                    </span>
+                )}
+            </div>
             <div className="flex items-center p-3 gap-4">
 
                 {/* Time / Status Column */}
