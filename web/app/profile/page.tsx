@@ -10,6 +10,7 @@ export default function ProfilePage() {
     const { user, loading, getHistory, signOut } = useAuth();
     const [history, setHistory] = useState<PredictionRecord[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(true);
+    const [isRedirectingStripe, setIsRedirectingStripe] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -33,6 +34,32 @@ export default function ProfilePage() {
         }
         if (user) fetchHistory();
     }, [user, getHistory]);
+
+    const handleUpgrade = async () => {
+        if (!user) return;
+        setIsRedirectingStripe(true);
+        try {
+            const response = await fetch('/api/stripe/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.uid,
+                    email: user.email,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                console.error('No se pudo obtener la URL de pago');
+                setIsRedirectingStripe(false);
+            }
+        } catch (error) {
+            console.error('Error al iniciar checkout:', error);
+            setIsRedirectingStripe(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -88,9 +115,13 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
                                 {!user.isPremium && (
-                                    <Link href="/pricing" className="block w-full text-center py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-black uppercase text-xs rounded-2xl hover:scale-[1.02] transition-transform shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                                        DESBLOQUEAR PREMIUM 💎
-                                    </Link>
+                                    <button
+                                        onClick={handleUpgrade}
+                                        disabled={isRedirectingStripe}
+                                        className="block w-full text-center py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-black uppercase text-xs rounded-2xl hover:scale-[1.02] transition-transform shadow-[0_0_20px_rgba(168,85,247,0.3)] disabled:opacity-50 disabled:scale-100"
+                                    >
+                                        {isRedirectingStripe ? 'CARGANDO...' : 'DESBLOQUEAR PREMIUM 💎'}
+                                    </button>
                                 )}
                             </div>
                         </div>

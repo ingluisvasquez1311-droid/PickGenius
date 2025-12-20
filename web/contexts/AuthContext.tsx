@@ -59,21 +59,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [unreadCount, setUnreadCount] = useState(0);
 
     const loadUserProfile = async (uid: string, email: string) => {
+        console.log(`👤 [Auth] Loading profile for ${uid}...`);
         try {
             // Try to get existing profile
             let profile = await getUserProfile(uid);
 
             // If profile doesn't exist, create it
             if (!profile) {
+                console.log('👤 [Auth] Creating new profile...');
                 profile = await createUserProfile(uid, email);
             } else {
                 // Update last login
+                console.log('👤 [Auth] Profile found, updating last login...');
                 await updateLastLogin(uid);
             }
 
+            console.log('👤 [Auth] Profile loaded successfully:', profile.role);
             setUser(profile);
         } catch (error) {
-            console.error('Error loading user profile:', error);
+            console.error('❌ [Auth] Error loading user profile:', error);
             // Fallback to basic user data
             setUser({
                 uid,

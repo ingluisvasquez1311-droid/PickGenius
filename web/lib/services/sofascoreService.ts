@@ -227,6 +227,13 @@ class SofascoreService {
     }
 
     /**
+     * Obtiene estadísticas detalladas de un jugador en un partido específico
+     */
+    async getPlayerEventStatistics(playerId: number, eventId: number): Promise<any> {
+        return await this.makeRequest(`/event/${eventId}/player/${playerId}/statistics`);
+    }
+
+    /**
      * Obtiene los últimos eventos de un jugador
      */
     async getPlayerLastEvents(playerId: number): Promise<any> {

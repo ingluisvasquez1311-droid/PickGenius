@@ -93,10 +93,13 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
     }
 
     const data = userSnap.data();
+    const role = data.role || 'user';
+
     return {
         uid: data.uid,
         email: data.email,
-        isPremium: data.isPremium || false,
+        // Admins are always premium
+        isPremium: data.isPremium || role === 'admin',
         subscriptionEnd: data.subscriptionEnd?.toDate(),
         predictionsUsed: data.predictionsUsed || 0,
         predictionsLimit: data.predictionsLimit || 3,
@@ -104,7 +107,7 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
         favoritePlayers: data.favoritePlayers || [],
         createdAt: data.createdAt?.toDate() || new Date(),
         lastLogin: data.lastLogin?.toDate() || new Date(),
-        role: data.role || 'user'
+        role: role
     };
 }
 
@@ -221,8 +224,8 @@ export async function canMakePrediction(uid: string): Promise<{ canPredict: bool
         return { canPredict: false, remaining: 0 };
     }
 
-    // Premium users have unlimited predictions
-    if (profile.isPremium) {
+    // Premium users and Admins have unlimited predictions
+    if (profile.isPremium || profile.role === 'admin') {
         return { canPredict: true, remaining: -1 };
     }
 

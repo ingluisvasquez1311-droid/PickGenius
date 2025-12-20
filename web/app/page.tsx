@@ -14,6 +14,7 @@ interface SportStats {
 export default function HomePage() {
   const [basketballStats, setBasketballStats] = useState<SportStats>({ liveEvents: 0, loading: true });
   const [footballStats, setFootballStats] = useState<SportStats>({ liveEvents: 0, loading: true });
+  const [isRedirectingStripe, setIsRedirectingStripe] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -81,6 +82,35 @@ export default function HomePage() {
     const interval = setInterval(fetchStats, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleUpgrade = async () => {
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+    setIsRedirectingStripe(true);
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.uid,
+          email: user.email,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('No se pudo obtener la URL de pago');
+        setIsRedirectingStripe(false);
+      }
+    } catch (error) {
+      console.error('Error al iniciar checkout:', error);
+      setIsRedirectingStripe(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-purple-500/30 overflow-x-hidden">
@@ -277,7 +307,13 @@ export default function HomePage() {
                 <li className="flex items-center gap-3 text-sm font-bold">✅ Alertas Hot Picks Prioritarias</li>
                 <li className="flex items-center gap-3 text-sm font-bold">✅ Soporte 24/7 de Expertos</li>
               </ul>
-              <Link href="/profile" className="w-full py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest text-center hover:scale-105 transition-transform">Obtener Premium ✨</Link>
+              <button
+                onClick={handleUpgrade}
+                disabled={isRedirectingStripe}
+                className="w-full py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest text-center hover:scale-105 transition-transform disabled:opacity-50"
+              >
+                {isRedirectingStripe ? 'CARGANDO...' : 'Obtener Premium ✨'}
+              </button>
             </div>
           </div>
         </section>

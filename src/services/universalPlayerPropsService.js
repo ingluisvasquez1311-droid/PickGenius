@@ -53,11 +53,23 @@ class UniversalPlayerPropsService {
 
             const recentEvents = eventsRes.data.events.slice(0, gamesCount);
             const statsPromises = recentEvents.map(async (event) => {
-                const statsRes = await generalizedSofaScoreService.getEventLineups(event.id);
-                if (statsRes.success && statsRes.data) {
+                // 1. Intentar con el endpoint de estadísticas de jugador directo (Más preciso)
+                const playerStatsRes = await generalizedSofaScoreService.getPlayerEventStatistics(playerId, event.id);
+                if (playerStatsRes.success && playerStatsRes.data && playerStatsRes.data.statistics) {
+                    return {
+                        game: { id: event.id, date: new Date(event.startTimestamp * 1000).toISOString() },
+                        team: event.homeTeam.id == playerStatsRes.data.teamId ? event.homeTeam.name : event.awayTeam.name,
+                        opponent: event.homeTeam.id == playerStatsRes.data.teamId ? event.awayTeam.name : event.homeTeam.name,
+                        ...playerStatsRes.data.statistics
+                    };
+                }
+
+                // 2. Fallback a lineups si el anterior falla (Para juegos antiguos o sin detalle de jugador)
+                const lineupsRes = await generalizedSofaScoreService.getEventLineups(event.id);
+                if (lineupsRes.success && lineupsRes.data) {
                     const allPlayers = [
-                        ...(statsRes.data.home?.players || []),
-                        ...(statsRes.data.away?.players || [])
+                        ...(lineupsRes.data.home?.players || []),
+                        ...(lineupsRes.data.away?.players || [])
                     ];
                     const playerStats = allPlayers.find(p => p.player.id == playerId);
                     if (playerStats && playerStats.statistics) {
@@ -199,33 +211,35 @@ class UniversalPlayerPropsService {
             'tennis': 'Tenis (ATP/WTA)'
         };
 
-        let contextInfo = '';
-        if (sport === 'tennis') {
-            contextInfo = `
-CONTEXTO TENIS:
-- Superficie: ${context.surface || 'No especificada'}
-- Historial H2H reciente: ${context.h2h ? JSON.stringify(context.h2h.slice(0, 3)) : 'No disponible'}
-`;
-        }
+        const recentGames = JSON.stringify(averages.lastGames.slice(0, 6));
 
         return `
-Eres un analista experto en ${sportNames[sport] || sport}. Analiza si ${playerName} superará (OVER) o no (UNDER) la línea de ${line} en ${propType} para su próximo encuentro.
+        Actúa como un experto analista de apuestas profesional (Sharp Bettor) especializado en ${sportNames[sport] || sport}.
+        Tu objetivo es predecir si el jugador ${playerName} superará (OVER) o no llegará (UNDER) a la línea de ${line} en el mercado de ${propType}.
+        
+        DATOS REALES DE RENDIMIENTO (Game Log Reciente):
+        ${recentGames}
+        
+        RESUMEN ESTADÍSTICO (Promedios):
+        ${JSON.stringify(averages.averages)}
+        
+        ${context.surface ? `CONTEXTO ADICIONAL: Juegan en superficie de ${context.surface}` : ''}
 
-${contextInfo}
+        INSTRUCCIONES DE ANÁLISIS:
+        1. Compara el rendimiento en los últimos 3-5 juegos con su promedio general. ¿Hay una racha clara?
+        2. Analiza la volatilidad: ¿Es un jugador consistente o tiene picos extremos?
+        3. Prioriza el rendimiento RECIENTE sobre el histórico lejano.
+        4. Si es Tenis o Béisbol, considera el impacto del contexto (superficie/pitcher) si se proporcionó.
 
-DATOS DEL JUGADOR:
-- Promedios recientes: ${JSON.stringify(averages.averages)}
-- Historial últimos partidos: ${JSON.stringify(averages.lastGames.slice(0, 5))}
-
-RESPONDE ÚNICAMENTE JSON EN ESPAÑOL:
-{
-  "prediction": "OVER" o "UNDER",
-  "probability": 1-100,
-  "confidence": "Alta/Media/Baja",
-  "reasoning": "explicación profesional incluyendo impacto de superficie/H2H si aplica",
-  "keyFactors": ["factor 1", "factor 2"]
-}
-`;
+        Responde ÚNICAMENTE en JSON con este esquema en español:
+        {
+          "prediction": "OVER" | "UNDER",
+          "probability": número del 1 al 100 (basado en la desviación estándar de sus números),
+          "confidence": "Alta" | "Media" | "Baja",
+          "reasoning": "Explicación técnica de 3 líneas citando promedios específicos y su racha actual",
+          "keyFactors": ["factor 1 - tendencia", "factor 2 - consistencia", "factor 3 - matchup"]
+        }
+        `;
     }
 
     async callAI(prompt) {

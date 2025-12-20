@@ -18,6 +18,20 @@ router.get('/:sport/top-players', async (req, res) => {
 });
 
 /**
+ * @route   GET /api/sports/:sport/player/:playerId/stats
+ */
+router.get('/:sport/player/:playerId/stats', async (req, res) => {
+    try {
+        const { sport, playerId } = req.params;
+        const stats = await universalPlayerPropsService.getPlayerStats(playerId, sport);
+        const averages = universalPlayerPropsService.calculateAverages(stats, sport, 10);
+        res.json({ success: true, data: { stats, averages } });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
  * @route   POST /api/sports/:sport/predict
  */
 router.post('/:sport/predict', async (req, res) => {

@@ -110,6 +110,10 @@ class GeneralizedSofaScoreService {
         return this.makeRequest(`/player/${playerId}/events/last/0`, `player_events_${playerId}`, 3600);
     }
 
+    async getPlayerEventStatistics(playerId, eventId) {
+        return this.makeRequest(`/event/${eventId}/player/${playerId}/statistics`, `player_match_stats_${playerId}_${eventId}`, 86400);
+    }
+
     async getH2H(eventId) {
         return this.makeRequest(`/event/${eventId}/h2h/events`, `event_h2h_${eventId}`, 86400);
     }

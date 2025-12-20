@@ -75,69 +75,112 @@ class PropsService {
 
         try {
             const games = await sofascoreService.getEventsBySport(sport);
+
+            if (!games || games.length === 0) {
+                console.warn(`⚠️ [PropsService] No real games found for ${sport}, using mocks.`);
+                return this.getMockDailyProps(sport);
+            }
+
             // Limitamos a los primeros 8 partidos para asegurar calidad y velocidad
             const topGames = games.slice(0, 8);
-
             const allProps: PlayerProp[] = [];
 
             for (const game of topGames) {
-                // Obtenemos los mejores jugadores para identificar protagonistas (estrella del partido)
+                // Obtenemos los mejores jugadores para identificar protagonistas
                 const bestPlayersRes = await sofascoreService.getMatchBestPlayers(game.id);
                 let targetPlayers: any[] = [];
 
                 if (bestPlayersRes && (bestPlayersRes.home || bestPlayersRes.away)) {
-                    // Si tenemos "mejores jugadores", los usamos
                     targetPlayers = [
                         ...(bestPlayersRes.home || []).slice(0, 3),
                         ...(bestPlayersRes.away || []).slice(0, 3)
                     ];
                 } else {
-                    // Fallback a alineaciones si no hay "best players"
                     const lineups = await sofascoreService.getMatchLineups(game.id);
                     if (lineups && (lineups.home || lineups.away)) {
                         targetPlayers = [
-                            ...(lineups.home?.players || []).slice(0, 3),
-                            ...(lineups.away?.players || []).slice(0, 3)
+                            ...(lineups.home?.players || []).slice(0, 2),
+                            ...(lineups.away?.players || []).slice(0, 2)
                         ];
                     }
                 }
 
                 if (targetPlayers.length === 0) continue;
 
-                for (const playerEntry of targetPlayers) {
+                const results = await Promise.all(targetPlayers.map(async (playerEntry) => {
                     const player = playerEntry.player;
-                    if (!player) continue;
-
-                    // Obtener estadísticas reales (Historia + Temporada)
+                    if (!player) return [];
                     const realStats = await this.getPlayerRealStats(player.id, game, sport);
+                    return this.generatePropsForPlayer(player, game, sport, realStats);
+                }));
 
-                    const playerProps = this.generatePropsForPlayer(player, game, sport, realStats);
-                    allProps.push(...playerProps);
-                }
+                results.forEach(p => allProps.push(...p));
             }
 
-            memoryCache.set(cacheKey, allProps, 3600 * 4); // Cache por 4 horas
+            if (allProps.length === 0) return this.getMockDailyProps(sport);
+
+            memoryCache.set(cacheKey, allProps, 3600 * 4);
             return allProps;
         } catch (error) {
             console.error(`❌ [PropsService] Error generating real props for ${sport}:`, error);
-            return [];
+            return this.getMockDailyProps(sport);
         }
     }
 
+    private getMockDailyProps(sport: string): PlayerProp[] {
+        const config = this.LEAGUES_CONFIG[sport] || this.LEAGUES_CONFIG['basketball'];
+        const type = config.propTypes[0];
+
+        return [
+            {
+                id: `mock_p1_${sport}`,
+                player: { id: 1, name: 'Atleta Estrella', team: 'Lions', position: 'G', image: '/player-placeholder.png' },
+                game: { id: 101, homeTeam: 'Lions', awayTeam: 'Tigers', date: new Date().toISOString(), startTimestamp: Date.now() / 1000 + 3600 },
+                prop: { type, line: 20.5, displayName: config.names[type], icon: config.icons[type] },
+                stats: { average: 22.4, last5: [25, 18, 22, 30, 19], trend: '📈' },
+                league: 'Pro League',
+                sport: sport
+            },
+            {
+                id: `mock_p2_${sport}`,
+                player: { id: 2, name: 'MVP Candidato', team: 'Eagles', position: 'F', image: '/player-placeholder.png' },
+                game: { id: 102, homeTeam: 'Eagles', awayTeam: 'Hawks', date: new Date().toISOString(), startTimestamp: Date.now() / 1000 + 7200 },
+                prop: { type, line: 15.5, displayName: config.names[type], icon: config.icons[type] },
+                stats: { average: 18.2, last5: [20, 15, 17, 19, 21], trend: '📈' },
+                league: 'Pro League',
+                sport: sport
+            }
+        ];
+    }
+
     /**
-     * Obtiene estadísticas reales de un jugador: últimos 5 juegos y promedio de temporada
+     * Obtiene estadísticas reales de un jugador: últimos 5 juegos (detallados) y promedio de temporada
      */
     private async getPlayerRealStats(playerId: number, game: any, sport: string): Promise<any> {
-        const cacheKey = `player_real_stats_${playerId}_${sport}`;
+        const cacheKey = `player_real_stats_v2_${playerId}_${sport}`;
         const cached = memoryCache.get(cacheKey);
         if (cached) return cached;
 
         try {
-            // 1. Obtener últimos eventos (Historia)
-            const lastEvents = await sofascoreService.getPlayerLastEvents(playerId);
+            // 1. Obtener lista de últimos eventos
+            const lastEventsData = await sofascoreService.getPlayerLastEvents(playerId);
+            const events = lastEventsData?.events || [];
 
-            // 2. Obtener estadísticas de temporada
-            // Necesitamos el tournamentId y seasonId. Los tomamos del juego actual si están disponibles.
+            // 2. Obtener estadísticas detalladas de los últimos 5 partidos en paralelo
+            const last5Events = events.slice(0, 5);
+            const deepStatsPromises = last5Events.map((event: any) =>
+                sofascoreService.getPlayerEventStatistics(playerId, event.id)
+            );
+
+            const deepStatsResults = await Promise.all(deepStatsPromises);
+
+            // 3. Mapear los resultados detallados a los eventos
+            const historyWithStats = last5Events.map((event: any, index: number) => ({
+                ...event,
+                playerStatistics: deepStatsResults[index]?.statistics || {}
+            }));
+
+            // 4. Obtener estadísticas de temporada
             const tournamentId = game.tournament?.uniqueTournament?.id || game.tournament?.id;
             const seasonId = game.season?.id;
 
@@ -147,12 +190,12 @@ class PropsService {
             }
 
             const stats = {
-                history: lastEvents?.events || [],
+                history: historyWithStats,
                 season: seasonStats?.statistics || {},
-                currentMatchStats: {} // Aquí irían las estadísticas si el partido ya empezó
+                currentMatchStats: {}
             };
 
-            memoryCache.set(cacheKey, stats, 3600 * 2); // Cache por 2 horas
+            memoryCache.set(cacheKey, stats, 3600 * 3); // Cache por 3 horas
             return stats;
         } catch (error) {
             console.error(`Error fetching real stats for player ${playerId}:`, error);
@@ -211,22 +254,19 @@ class PropsService {
             // 2. Extraer los últimos 5 juegos reales para esa estadística
             let last5: number[] = [];
             if (realStats.history && realStats.history.length > 0) {
-                // Buscamos la estadística en los incidentes o datos del jugador de cada evento pasado
-                // Sofascore a veces no da la estadística detallada en el historial simple, 
-                // así que si no la tenemos, oscilamos cerca del promedio real.
-                last5 = realStats.history.slice(0, 5).map((event: any) => {
+                last5 = realStats.history.map((event: any) => {
                     const playerStatsInEvent = event.playerStatistics?.[sofaStatName];
                     if (playerStatsInEvent !== undefined) return playerStatsInEvent;
 
-                    // Fallback: Si no hay detalle, usamos el promedio con una variación natural
-                    const variation = (Math.random() - 0.5) * (realAvg * 0.4);
-                    return Math.max(0, Math.round((realAvg + variation) * 10) / 10);
+                    // Fallback determinista: Si no hay detalle de ese juego, usamos el promedio de temporada
+                    return realAvg > 0 ? parseFloat(realAvg.toFixed(1)) : 0;
                 });
             }
 
             // Si aún no tenemos last5, llenamos con 0s o promedio
             if (last5.length === 0) {
-                last5 = [0, 0, 0, 0, 0];
+                const fillVal = realAvg > 0 ? parseFloat(realAvg.toFixed(1)) : 0;
+                last5 = [fillVal, fillVal, fillVal, fillVal, fillVal];
             }
 
             // 3. Calcular el promedio para el display (basado en temporada si existe)

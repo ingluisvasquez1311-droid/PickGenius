@@ -3,18 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { valueBetsService, ValueBet } from '@/lib/services/valueBetsService';
 import Navbar from '@/components/layout/Navbar';
-
-// TODO: Replace with real Auth Context
-const useMockAuth = () => {
-    // Toggle this to test Free vs Premium View
-    const [isPremium, setIsPremium] = useState(false);
-    return { isPremium, toggle: () => setIsPremium(!isPremium) };
-};
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ValueBetsPage() {
     const [bets, setBets] = useState<ValueBet[]>([]);
     const [loading, setLoading] = useState(true);
-    const { isPremium, toggle } = useMockAuth();
+    const { user, loading: authLoading } = useAuth();
+    const isPremium = user?.isPremium || false;
 
     useEffect(() => {
         const loadBets = async () => {
@@ -45,11 +40,6 @@ export default function ValueBetsPage() {
                     <p className="text-gray-400 max-w-xl mx-auto text-lg">
                         Nuestro algoritmo detecta discrepancias matemáticas donde las casas de apuestas <span className="text-white font-bold">se equivocan</span>.
                     </p>
-
-                    {/* Auth Toggle (Dev Only) */}
-                    <button onClick={toggle} className="mt-8 text-[10px] text-gray-600 border border-gray-800 px-2 py-1 rounded hover:bg-white/5">
-                        [DEV: Toggle Premium is {isPremium ? 'ON' : 'OFF'}]
-                    </button>
                 </div>
             </header>
 
