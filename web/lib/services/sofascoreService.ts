@@ -84,128 +84,122 @@ export interface SofascoreResponse {
  * Servicio para obtener datos de Sofascore API
  */
 class SofascoreService {
+    private headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.sofascore.com/',
+        'Accept': 'application/json, text/plain, */*'
+    };
+
+    /**
+     * Método genérico para realizar peticiones con bypass de ScraperAPI si está configurado
+     */
+    async makeRequest<T = any>(endpoint: string): Promise<T | null> {
+        try {
+            const targetUrl = endpoint.startsWith('http') ? endpoint : `https://www.sofascore.com/api/v1${endpoint}`;
+            const useProxy = process.env.USE_PROXY === 'true' && !!process.env.SCRAPER_API_KEY;
+
+            let fetchUrl = targetUrl;
+            let fetchHeaders: any = this.headers;
+
+            // Only use ScraperAPI on the server side
+            if (useProxy && typeof window === 'undefined') {
+                const apiKey = process.env.SCRAPER_API_KEY?.trim();
+                console.log(`🔒 [Service Proxy] Using ScraperAPI for: ${endpoint}`);
+                fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
+                fetchHeaders = {};
+            } else if (typeof window !== 'undefined') {
+                // If on client, use our internal proxy
+                fetchUrl = `/api/proxy/sofascore${endpoint}`;
+            }
+
+            const response = await fetch(fetchUrl, {
+                headers: fetchHeaders,
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                console.error(`❌ SofaScore Request Error (${endpoint}): ${response.status}`);
+                return null;
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error(`❌ SofaScore Fetch Exception (${endpoint}):`, error);
+            return null;
+        }
+    }
+
     /**
      * Obtiene partidos de fútbol en vivo
      */
     async getLiveFootballMatches(): Promise<SofascoreEvent[]> {
-        try {
-            const response = await fetch(`${BASE_URL}/sport/football/events/live`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data: SofascoreResponse = await response.json();
-            return data.events || [];
-        } catch (error) {
-            console.error('Error fetching live football matches:', error);
-            return [];
-        }
+        const data = await this.makeRequest<SofascoreResponse>('/sport/football/events/live');
+        return data?.events || [];
     }
 
     /**
      * Obtiene partidos de fútbol programados para una fecha
-     * @param date - Fecha en formato YYYY-MM-DD
      */
     async getScheduledFootballMatches(date: string): Promise<SofascoreEvent[]> {
-        try {
-            const response = await fetch(`${BASE_URL}/sport/football/scheduled-events/${date}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data: SofascoreResponse = await response.json();
-            return data.events || [];
-        } catch (error) {
-            console.error('Error fetching scheduled football matches:', error);
-            return [];
-        }
+        const data = await this.makeRequest<SofascoreResponse>(`/sport/football/scheduled-events/${date}`);
+        return data?.events || [];
     }
 
     /**
      * Obtiene todos los partidos de fútbol (en vivo + programados)
-     * @param date - Fecha en formato YYYY-MM-DD (default: hoy)
      */
     async getAllFootballMatches(date?: string): Promise<SofascoreEvent[]> {
         const today = date || new Date().toISOString().split('T')[0];
-
         const [liveMatches, scheduledMatches] = await Promise.all([
             this.getLiveFootballMatches(),
             this.getScheduledFootballMatches(today)
         ]);
 
-        // Combinar y eliminar duplicados por ID
-        const allMatches = [...liveMatches, ...scheduledMatches];
-        const uniqueMatches = allMatches.filter((match, index, self) =>
+        const allMatches = [...(liveMatches || []), ...(scheduledMatches || [])];
+        return allMatches.filter((match, index, self) =>
             index === self.findIndex(m => m.id === match.id)
         );
-
-        return uniqueMatches;
     }
 
     /**
      * Obtiene partidos de baloncesto en vivo
      */
     async getLiveBasketballGames(): Promise<SofascoreEvent[]> {
-        try {
-            const response = await fetch(`${BASE_URL}/sport/basketball/events/live`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data: SofascoreResponse = await response.json();
-            return data.events || [];
-        } catch (error) {
-            console.error('Error fetching live basketball games:', error);
-            return [];
-        }
+        const data = await this.makeRequest<SofascoreResponse>('/sport/basketball/events/live');
+        return data?.events || [];
     }
 
     /**
      * Obtiene partidos de baloncesto programados para una fecha
-     * @param date - Fecha en formato YYYY-MM-DD
      */
     async getScheduledBasketballGames(date: string): Promise<SofascoreEvent[]> {
-        try {
-            const response = await fetch(`${BASE_URL}/sport/basketball/scheduled-events/${date}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data: SofascoreResponse = await response.json();
-            return data.events || [];
-        } catch (error) {
-            console.error('Error fetching scheduled basketball games:', error);
-            return [];
-        }
+        const data = await this.makeRequest<SofascoreResponse>(`/sport/basketball/scheduled-events/${date}`);
+        return data?.events || [];
     }
 
     /**
      * Obtiene todos los partidos de baloncesto (en vivo + programados)
-     * @param date - Fecha en formato YYYY-MM-DD (default: hoy)
      */
     async getAllBasketballGames(date?: string): Promise<SofascoreEvent[]> {
         const today = date || new Date().toISOString().split('T')[0];
-
         const [liveGames, scheduledGames] = await Promise.all([
             this.getLiveBasketballGames(),
             this.getScheduledBasketballGames(today)
         ]);
 
-        // Combinar y eliminar duplicados por ID
-        const allGames = [...liveGames, ...scheduledGames];
-        const uniqueGames = allGames.filter((game, index, self) =>
+        const allGames = [...(liveGames || []), ...(scheduledGames || [])];
+        return allGames.filter((game, index, self) =>
             index === self.findIndex(g => g.id === game.id)
         );
-
-        return uniqueGames;
     }
 
     /**
      * Filtra partidos de baloncesto por liga
-     * @param games - Lista de partidos
-     * @param league - 'NBA' o 'Euroleague'
      */
     filterBasketballByLeague(games: SofascoreEvent[], league: 'NBA' | 'Euroleague'): SofascoreEvent[] {
         return games.filter(game => {
             const tournamentName = game.tournament.name.toLowerCase();
             const uniqueTournamentName = game.tournament.uniqueTournament?.name.toLowerCase() || '';
-
             if (league === 'NBA') {
                 return tournamentName.includes('nba') || uniqueTournamentName.includes('nba');
             } else {
@@ -213,60 +207,33 @@ class SofascoreService {
             }
         });
     }
+
     async getMatchBestPlayers(eventId: number): Promise<any> {
-        try {
-            const response = await fetch(`${BASE_URL}/event/${eventId}/best-players`);
-            if (!response.ok) {
-                return null;
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error fetching match best players:', error);
-            return null;
-        }
+        return await this.makeRequest(`/event/${eventId}/best-players`);
     }
 
     /**
      * Obtiene alineaciones y estadísticas de jugadores del partido
      */
     async getMatchLineups(eventId: number): Promise<any> {
-        try {
-            const response = await fetch(`${BASE_URL}/event/${eventId}/lineups`);
-            if (!response.ok) return null;
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error fetching lineups:', error);
-            return null;
-        }
+        return await this.makeRequest(`/event/${eventId}/lineups`);
     }
+
     /**
      * Obtiene eventos para un deporte específico (en vivo + programados)
      */
     async getEventsBySport(sport: string, date?: string): Promise<SofascoreEvent[]> {
         const today = date || new Date().toISOString().split('T')[0];
-        try {
-            const [liveRes, scheduledRes] = await Promise.all([
-                fetch(`${BASE_URL}/sport/${sport}/events/live`),
-                fetch(`${BASE_URL}/sport/${sport}/scheduled-events/${today}`)
-            ]);
+        const [liveData, scheduledData] = await Promise.all([
+            this.makeRequest<SofascoreResponse>(`/sport/${sport}/events/live`),
+            this.makeRequest<SofascoreResponse>(`/sport/${sport}/scheduled-events/${today}`)
+        ]);
 
-            const liveData: SofascoreResponse = liveRes.ok ? await liveRes.json() : { events: [] };
-            const scheduledData: SofascoreResponse = scheduledRes.ok ? await scheduledRes.json() : { events: [] };
-
-            const allEvents = [...(liveData.events || []), ...(scheduledData.events || [])];
-
-            // Eliminar duplicados
-            return allEvents.filter((event, index, self) =>
-                index === self.findIndex(e => e.id === event.id)
-            );
-        } catch (error) {
-            console.error(`Error fetching ${sport} events:`, error);
-            return [];
-        }
+        const allEvents = [...(liveData?.events || []), ...(scheduledData?.events || [])];
+        return allEvents.filter((event, index, self) =>
+            index === self.findIndex(e => e.id === event.id)
+        );
     }
 }
-
 
 export const sofascoreService = new SofascoreService();

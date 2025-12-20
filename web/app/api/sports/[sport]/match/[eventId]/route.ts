@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sofascoreService } from '@/lib/services/sofascoreService';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-const BASE_URL = 'https://www.sofascore.com/api/v1';
 
 export async function GET(
     request: NextRequest,
@@ -18,21 +17,13 @@ export async function GET(
     try {
         console.log(`🌐 [Universal API] Fetching ${sport} Match Details for ID ${eventId}...`);
 
-        // Fetch details from Sofascore (Server-side avoids CORS)
-        const response = await fetch(`${BASE_URL}/event/${eventId}`, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Referer': 'https://www.sofascore.com/',
-                'Accept': 'application/json'
-            }
-        });
+        // Fetch details from Sofascore Service (Handles ScraperAPI proxy)
+        const data = await sofascoreService.makeRequest(`/event/${eventId}`);
 
-        if (!response.ok) {
-            console.error(`❌ Sofascore Error (${sport}): ${response.status}`);
-            return NextResponse.json({ success: false, error: 'Provider unavailable' }, { status: response.status });
+        if (!data) {
+            console.error(`❌ Sofascore Error (${sport}): Provider unavailable or 403`);
+            return NextResponse.json({ success: false, error: 'Provider unavailable' }, { status: 503 });
         }
-
-        const data = await response.json();
 
         return NextResponse.json({
             success: true,
