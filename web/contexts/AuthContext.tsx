@@ -63,7 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 predictionsLimit: 3,
                 favoriteTeams: [],
                 createdAt: new Date(),
-                lastLogin: new Date()
+                lastLogin: new Date(),
+                role: 'user'
             });
         }
     };
