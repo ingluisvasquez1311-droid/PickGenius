@@ -1,9 +1,9 @@
-import React from 'react';
 import { useBettingSlip } from '@/contexts/BettingSlipContext';
+import TeamLogo from '@/components/ui/TeamLogo';
 
 interface MatchCardProps {
-    homeTeam: string;
-    awayTeam: string;
+    homeTeam: { name: string; id: number };
+    awayTeam: { name: string; id: number };
     date: string;
     league: string;
     homeScore?: number | null;
@@ -57,11 +57,9 @@ export default function MatchCard({
                     {/* Home Team */}
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                            <div className="w-6 h-6 rounded-full bg-[rgba(255,255,255,0.1)] flex items-center justify-center text-[10px] font-bold">
-                                {homeTeam.substring(0, 1)}
-                            </div>
+                            <TeamLogo teamId={homeTeam.id} teamName={homeTeam.name} size="sm" />
                             <span className={`font-medium ${homeScore && awayScore && homeScore > awayScore ? 'text-white' : 'text-[var(--text-secondary)]'}`}>
-                                {homeTeam}
+                                {homeTeam.name}
                             </span>
                         </div>
                         <span className="font-mono font-bold">{homeScore ?? '-'}</span>
@@ -70,11 +68,9 @@ export default function MatchCard({
                     {/* Away Team */}
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                            <div className="w-6 h-6 rounded-full bg-[rgba(255,255,255,0.1)] flex items-center justify-center text-[10px] font-bold">
-                                {awayTeam.substring(0, 1)}
-                            </div>
+                            <TeamLogo teamId={awayTeam.id} teamName={awayTeam.name} size="sm" />
                             <span className={`font-medium ${homeScore && awayScore && awayScore > homeScore ? 'text-white' : 'text-[var(--text-secondary)]'}`}>
-                                {awayTeam}
+                                {awayTeam.name}
                             </span>
                         </div>
                         <span className="font-mono font-bold">{awayScore ?? '-'}</span>
@@ -105,10 +101,10 @@ export default function MatchCard({
                             onClick={(e) => {
                                 e.stopPropagation();
                                 addToSlip({
-                                    matchId: homeTeam + awayTeam + date, // Simple ID generation
+                                    matchId: homeTeam.name + awayTeam.name + date, // Simple ID generation
                                     selection: prediction.pick,
                                     odds: parseFloat(prediction.odds?.replace(/[^0-9.]/g, '') || '1.90'), // Parse odds or default
-                                    matchLabel: `${homeTeam} vs ${awayTeam}`,
+                                    matchLabel: `${homeTeam.name} vs ${awayTeam.name}`,
                                     market: 'Match Winner'
                                 });
                             }}

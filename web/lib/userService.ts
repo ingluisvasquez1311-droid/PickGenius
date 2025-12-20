@@ -43,7 +43,6 @@ export async function createUserProfile(uid: string, email: string): Promise<Use
         predictionsLimit: 3, // Free tier: 3 predictions per day
         favoriteTeams: [],
         createdAt: serverTimestamp(),
-        createdAt: serverTimestamp(),
         lastLogin: serverTimestamp(),
         role: 'user' // Default role
     };
@@ -79,7 +78,6 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
         predictionsUsed: data.predictionsUsed || 0,
         predictionsLimit: data.predictionsLimit || 3,
         favoriteTeams: data.favoriteTeams || [],
-        createdAt: data.createdAt?.toDate() || new Date(),
         createdAt: data.createdAt?.toDate() || new Date(),
         lastLogin: data.lastLogin?.toDate() || new Date(),
         role: data.role || 'user'

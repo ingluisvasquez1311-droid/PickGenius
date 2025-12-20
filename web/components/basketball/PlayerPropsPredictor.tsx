@@ -55,18 +55,48 @@ const PlayerPropsPredictor = () => {
         ]
     };
 
-    const thinkingMessages = [
-        "Iniciando escaneo de SofaScore...",
-        "Recuperando registros históricos del jugador...",
-        "Analizando rendimiento en los últimos encuentros...",
-        "Evaluando fatiga y condiciones competitivas...",
-        "Cruzando datos con el rival y su eficiencia...",
-        "Procesando algoritmos de probabilidad bayesiana...",
-        "Simulando 10,000 escenarios del partido...",
-        "Consultando modelos de IA especializados...",
-        "Compilando factores clave de éxito...",
-        "Finalizando reporte profesional dePickGenius..."
-    ];
+    const thinkingMessagesBySport: Record<Sport, string[]> = {
+        'basketball': [
+            "Escaneando rotación defensiva de la NBA...",
+            "Analizando eficiencia en el 'Paint'...",
+            "Calculando probabilidad de triple doble...",
+            "Evaluando emparejamientos individuales...",
+            "Analizando fatiga por 'back-to-back'...",
+            "Consultando modelos de IA especializados...",
+            "Simulando 10,000 finales de posesión...",
+            "Finalizando reporte NBA..."
+        ],
+        'baseball': [
+            "Analizando ERA del pitcher abridor...",
+            "Evaluando condiciones del viento en el estadio...",
+            "Calculando probabilidad de Home Run...",
+            "Analizando historial vs pitcheo rival...",
+            "Escaneando métricas de Sabermetrics...",
+            "Simulando entradas finales y bullpen...",
+            "Consultando modelos Diamond IA...",
+            "Finalizando reporte MLB..."
+        ],
+        'nhl': [
+            "Evaluando efectividad del Power Play...",
+            "Analizando porcentaje de paradas del goalie...",
+            "Calculando tiempo en hielo (TOI)...",
+            "Escaneando historial de 'Puck Line'...",
+            "Analizando agresividad en el primer periodo...",
+            "Simulando face-offs críticos...",
+            "Consultando modelos Ice IA...",
+            "Finalizando reporte NHL..."
+        ],
+        'tennis': [
+            "Analizando efectividad del primer servicio...",
+            "Evaluando rendimiento en esta superficie...",
+            "Calculando resistencia en juegos largos...",
+            "Escaneando historial de H2H directo...",
+            "Analizando puntos de quiebre salvados...",
+            "Simulando trayectoria del set definitivo...",
+            "Consultando modelos Ace IA...",
+            "Finalizando reporte Tenis..."
+        ]
+    };
 
     useEffect(() => {
         loadTopPlayers();
@@ -119,8 +149,9 @@ const PlayerPropsPredictor = () => {
                 const percentage = Math.floor((progress / totalSteps) * 100);
                 setThinkingProgress(percentage);
 
-                const messageIndex = Math.min(Math.floor(progress / 6), thinkingMessages.length - 1);
-                setThinkingMessage(thinkingMessages[messageIndex]);
+                const currentMessages = thinkingMessagesBySport[currentSport];
+                const messageIndex = Math.min(Math.floor(progress / (totalSteps / currentMessages.length)), currentMessages.length - 1);
+                setThinkingMessage(currentMessages[messageIndex]);
 
                 if (progress >= totalSteps) {
                     if (thinkingTimerRef.current) clearInterval(thinkingTimerRef.current);

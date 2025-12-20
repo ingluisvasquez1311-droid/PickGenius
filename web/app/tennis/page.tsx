@@ -55,8 +55,8 @@ export default function TennisPage() {
                                 games.map(game => (
                                     <MatchCard
                                         key={game.id}
-                                        homeTeam={game.homeTeam.name}
-                                        awayTeam={game.awayTeam.name}
+                                        homeTeam={{ name: game.homeTeam.name, id: game.homeTeam.id }}
+                                        awayTeam={{ name: game.awayTeam.name, id: game.awayTeam.id }}
                                         homeScore={game.homeScore.current}
                                         awayScore={game.awayScore.current}
                                         date={new Date(game.startTimestamp * 1000).toISOString()}
