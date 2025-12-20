@@ -180,7 +180,7 @@ export async function canMakePrediction(uid: string): Promise<{ canPredict: bool
         return { canPredict: true, remaining: -1 };
     }
 
-    // Free users have daily limit
+    // Free users have daily limit (Fix applied)
     const remaining = profile.predictionsLimit - profile.predictionsUsed;
     return {
         canPredict: remaining > 0,

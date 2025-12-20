@@ -11,6 +11,8 @@ const footballApiService = require('./src/services/football/footballApiService')
 const cacheManager = require('./src/services/cacheManager');
 const apiRateLimiter = require('./src/services/apiRateLimiter');
 const sofascoreRoutes = require('./src/routes/sofascore');
+const nbaPlayerPropsRoutes = require('./src/routes/nbaPlayerProps');
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -162,6 +164,11 @@ app.get('/api/nba/games', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
+// NBA Player Props Analysis
+app.use('/api/nba/players', nbaPlayerPropsRoutes);
+
+
 
 // Manual NBA sync
 app.post('/api/sync', async (req, res) => {

@@ -10,6 +10,8 @@ import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import { sofascoreService, type SofascoreEvent } from '@/lib/services/sofascoreService';
 import { useAuth } from '@/contexts/AuthContext';
 import PredictionModal from '@/components/sports/PredictionModal';
+import PlayerPropsPredictor from '@/components/basketball/PlayerPropsPredictor';
+
 
 type League = 'NBA' | 'Euroleague' | 'All';
 type StatusFilter = 'all' | 'live' | 'upcoming' | 'finished';
@@ -244,7 +246,11 @@ export default function BasketballPage() {
                     {/* SIDEBAR COLUMN (Widgets) - Spans 4 cols */}
                     <div className="lg:col-span-4 flex flex-col gap-6">
 
+                        {/* NBA Player Props Analysis */}
+                        <PlayerPropsPredictor />
+
                         {/* Wizard's Corner */}
+
                         <div className="glass-card p-1 border border-[var(--secondary)]">
                             <div className="bg-[var(--secondary)] text-white text-center py-2 font-bold uppercase text-sm tracking-wider mb-1 rounded-t">
                                 🧙‍♂️ Zona del Mago
