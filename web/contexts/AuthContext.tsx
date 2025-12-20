@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 predictionsUsed: 0,
                 predictionsLimit: 3,
                 favoriteTeams: [],
+                favoritePlayers: [],
                 createdAt: new Date(),
                 lastLogin: new Date(),
                 role: 'user'
