@@ -257,6 +257,8 @@ export default function FootballPage() {
                               className="cursor-pointer transition-all duration-200 hover:bg-[rgba(255,255,255,0.02)] rounded-xl"
                             >
                               <MatchCard
+                                eventId={match.id}
+                                sport="football"
                                 homeTeam={{ name: match.homeTeam.name, id: match.homeTeam.id }}
                                 awayTeam={{ name: match.awayTeam.name, id: match.awayTeam.id }}
                                 date={new Date(match.startTimestamp * 1000).toISOString()}

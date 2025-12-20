@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useBettingSlip } from '@/contexts/BettingSlipContext';
 import TeamLogo from '@/components/ui/TeamLogo';
 
@@ -14,6 +16,8 @@ interface MatchCardProps {
         odds?: string;
         confidence?: number;
     };
+    eventId?: number;
+    sport?: string;
     onFavoriteToggle?: () => void;
     isFavorite?: boolean;
     onPredict?: (e: React.MouseEvent) => void;
@@ -28,16 +32,28 @@ export default function MatchCard({
     awayScore,
     status = 'Programado',
     prediction,
+    eventId,
+    sport,
     onFavoriteToggle,
     isFavorite,
     onPredict
 }: MatchCardProps) {
+    const router = useRouter();
     const { addToSlip } = useBettingSlip();
     const isLive = status === 'En Vivo';
     const time = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    const handleCardClick = () => {
+        if (eventId && sport) {
+            router.push(`/match/${sport}/${eventId}`);
+        }
+    };
+
     return (
-        <div className="glass-card hover:bg-[rgba(255,255,255,0.08)] transition-colors duration-200 mb-2 fade-in">
+        <div
+            className="glass-card hover:bg-[rgba(255,255,255,0.08)] transition-colors duration-200 mb-2 fade-in cursor-pointer"
+            onClick={handleCardClick}
+        >
             <div className="flex items-center p-3 gap-4">
 
                 {/* Time / Status Column */}

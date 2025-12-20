@@ -220,8 +220,10 @@ export default function BasketballPage() {
                                 </>
                             ) : filteredGames.length > 0 ? (
                                 filteredGames.map((game) => (
-                                    <div key={game.id} onClick={() => handleMatchClick(game.id)} className="cursor-pointer">
+                                    <div key={game.id} className="cursor-pointer">
                                         <MatchCard
+                                            eventId={game.id}
+                                            sport="basketball"
                                             homeTeam={{ name: game.homeTeam.name, id: game.homeTeam.id }}
                                             awayTeam={{ name: game.awayTeam.name, id: game.awayTeam.id }}
                                             homeScore={game.homeScore.current}
@@ -231,7 +233,10 @@ export default function BasketballPage() {
                                             league={game.tournament.uniqueTournament?.name || game.tournament.name}
                                             isFavorite={false}
                                             onFavoriteToggle={() => handleFavoriteToggle(game.homeTeam.name, false)}
-                                            onPredict={() => handlePredictionClick(game)}
+                                            onPredict={(e) => {
+                                                e.stopPropagation();
+                                                handlePredictionClick(game);
+                                            }}
                                         />
                                     </div>
                                 ))

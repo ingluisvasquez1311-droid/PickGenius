@@ -54,6 +54,8 @@ export default function NHLPage() {
                                 games.map(game => (
                                     <MatchCard
                                         key={game.id}
+                                        eventId={game.id}
+                                        sport="nhl"
                                         homeTeam={{ name: game.homeTeam.name, id: game.homeTeam.id }}
                                         awayTeam={{ name: game.awayTeam.name, id: game.awayTeam.id }}
                                         homeScore={game.homeScore.current}

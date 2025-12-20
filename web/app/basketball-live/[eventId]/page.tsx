@@ -6,7 +6,7 @@ import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import AIPredictionCard from '@/components/ai/AIPredictionCard';
 import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
-import TopPlayersCardBasketball from '@/components/basketball/TopPlayersCardBasketball';
+import TopPlayersCard from '@/components/sports/TopPlayersCard';
 import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
 import TeamStatsComparison from '@/components/basketball/TeamStatsComparison';
 import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballService';
@@ -146,9 +146,10 @@ export default function BasketballLivePage() {
                     <div className="md:col-span-3 order-2 md:order-1 min-w-0 space-y-4">
                         {/* Top Players Card - Home */}
                         <ErrorBoundary>
-                            <TopPlayersCardBasketball
+                            <TopPlayersCard
                                 title="TOP JUGADORES LOCAL"
                                 players={bestPlayers?.homeTeamPlayers || []}
+                                sport="basketball"
                                 teamColor="purple"
                                 onPlayerClick={handleHomePlayerClick}
                             />
@@ -225,9 +226,10 @@ export default function BasketballLivePage() {
                     <div className="md:col-span-3 order-3 md:order-3 min-w-0 space-y-4">
                         {/* Top Players Card - Away */}
                         <ErrorBoundary>
-                            <TopPlayersCardBasketball
+                            <TopPlayersCard
                                 title="TOP JUGADORES VISITANTE"
                                 players={bestPlayers?.awayTeamPlayers || []}
+                                sport="basketball"
                                 teamColor="orange"
                                 onPlayerClick={handleAwayPlayerClick}
                             />
