@@ -1,15 +1,18 @@
+# Google Cloud Run Optimized Dockerfile
 FROM node:18-alpine
 
 WORKDIR /app
 
+# Install production dependencies only
 COPY package*.json ./
 RUN npm ci --only=production
 
+# Copy source code
 COPY . .
 
-EXPOSE 3000
+# Cloud Run defaults to port 8080
+ENV PORT=8080
+EXPOSE 8080
 
-CMD ["npm", "start"]
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+# Start command
+CMD ["node", "server.js"]
