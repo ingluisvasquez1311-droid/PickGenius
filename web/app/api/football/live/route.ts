@@ -16,10 +16,25 @@ export async function GET(request: NextRequest) {
         }
 
         const events = result.data.events || [];
-        console.log(`📊 Found ${events.length} live football events`);
+        console.log(`📊 Found ${events.length} live football events from Sofascore`);
+
+        // Filter out finished matches that are older than 2 hours
+        const now = Date.now() / 1000; // Current time in seconds
+        const twoHoursAgo = now - (2 * 60 * 60); // 2 hours ago in seconds
+
+        const recentEvents = events.filter((game: any) => {
+            // Keep all non-finished events
+            if (game.status?.type !== 'finished') {
+                return true;
+            }
+            // For finished events, only keep if they finished within last 2 hours
+            return game.startTimestamp > twoHoursAgo;
+        });
+
+        console.log(`✅ Filtered to ${recentEvents.length} recent events (removed old finished matches)`);
 
         // Transform to match frontend expectations
-        const transformedData = events.map((game: any) => ({
+        const transformedData = recentEvents.map((game: any) => ({
             id: game.id,
             tournament: {
                 name: game.tournament?.name || 'Unknown League',
@@ -57,7 +72,7 @@ export async function GET(request: NextRequest) {
                 id: game.tournament?.category?.id
             },
             status: {
-                type: 'inprogress',
+                type: game.status?.type || 'inprogress', // Use actual status from Sofascore
                 description: game.status?.description || 'Live',
                 code: game.status?.code
             },
