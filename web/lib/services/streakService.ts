@@ -84,7 +84,7 @@ class StreakService {
             {
                 id: 'm-streak-1',
                 teamName: 'Manchester City',
-                teamLogo: 'https://api.sportsdata.app/api/v1/team/17/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/17/image',
                 sport: 'football',
                 type: 'win',
                 count: 8,
@@ -95,7 +95,7 @@ class StreakService {
             {
                 id: 'm-streak-2',
                 teamName: 'Boston Celtics',
-                teamLogo: 'https://api.sportsdata.app/api/v1/team/3422/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3422/image',
                 sport: 'basketball',
                 type: 'win',
                 count: 6,
@@ -106,7 +106,7 @@ class StreakService {
             {
                 id: 'm-streak-3',
                 teamName: 'Bayer Leverkusen',
-                teamLogo: 'https://api.sportsdata.app/api/v1/team/2681/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/2681/image',
                 sport: 'football',
                 type: 'win',
                 count: 12,
@@ -117,7 +117,7 @@ class StreakService {
             {
                 id: 'm-streak-4',
                 teamName: 'Real Madrid',
-                teamLogo: 'https://api.sportsdata.app/api/v1/team/2829/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/2829/image',
                 sport: 'football',
                 type: 'win',
                 count: 4,
@@ -128,7 +128,7 @@ class StreakService {
             {
                 id: 'm-streak-5',
                 teamName: 'Golden State Warriors',
-                teamLogo: 'https://api.sportsdata.app/api/v1/team/3428/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3428/image',
                 sport: 'basketball',
                 type: 'win',
                 count: 5,
@@ -139,7 +139,7 @@ class StreakService {
             {
                 id: 'm-streak-6',
                 teamName: 'Liverpool',
-                teamLogo: 'https://api.sportsdata.app/api/v1/team/44/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/44/image',
                 sport: 'football',
                 type: 'win',
                 count: 7,
@@ -206,7 +206,7 @@ class StreakService {
                             streaks.push({
                                 id: `real-win-${sport}-${row.team.id}`,
                                 teamName: row.team.name,
-                                teamLogo: `https://api.sportsdata.app/api/v1/team/${row.team.id}/image`,
+                                teamLogo: `https://api.sofascore.app/api/v1/team/${row.team.id}/image`,
                                 sport: sport,
                                 type: 'win',
                                 count: winCount,
@@ -220,7 +220,7 @@ class StreakService {
                             streaks.push({
                                 id: `real-loss-${sport}-${row.team.id}`,
                                 teamName: row.team.name,
-                                teamLogo: `https://api.sportsdata.app/api/v1/team/${row.team.id}/image`,
+                                teamLogo: `https://api.sofascore.app/api/v1/team/${row.team.id}/image`,
                                 sport: sport,
                                 type: 'loss',
                                 count: lossCount,

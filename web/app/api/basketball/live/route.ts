@@ -31,12 +31,12 @@ export async function GET(request: NextRequest) {
             homeTeam: {
                 id: game.homeTeam?.id,
                 name: game.homeTeam?.name || 'Home Team',
-                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${game.homeTeam?.id}/image`)}`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.homeTeam?.id}/image`)}`
             },
             awayTeam: {
                 id: game.awayTeam?.id,
                 name: game.awayTeam?.name || 'Away Team',
-                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${game.awayTeam?.id}/image`)}`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.awayTeam?.id}/image`)}`
             },
             homeScore: {
                 current: game.homeScore?.current || 0,

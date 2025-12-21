@@ -2,7 +2,7 @@
 // Si estamos en el servidor, usamos la API directa.
 // Si estamos en el cliente, usamos nuestro Proxy para evitar CORS.
 const BASE_URL = typeof window === 'undefined'
-    ? 'https://www.sportsdata.com/api/v1'
+    ? 'https://www.sofascore.com/api/v1'
     : '/api/proxy/sportsdata';
 
 export interface SportsDataTeam {
@@ -86,7 +86,7 @@ export interface SportsDataResponse {
 class SportsDataService {
     private headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://www.sportsdata.com/',
+        'Referer': 'https://www.sofascore.com/',
         'Accept': 'application/json, text/plain, */*'
     };
 
@@ -95,7 +95,7 @@ class SportsDataService {
      */
     async makeRequest<T = any>(endpoint: string): Promise<T | null> {
         try {
-            const targetUrl = endpoint.startsWith('http') ? endpoint : `https://www.sportsdata.com/api/v1${endpoint}`;
+            const targetUrl = endpoint.startsWith('http') ? endpoint : `https://www.sofascore.com/api/v1${endpoint}`;
             const useProxy = process.env.USE_PROXY === 'true' && !!process.env.SCRAPER_API_KEY;
 
             let fetchUrl = targetUrl;

@@ -105,7 +105,7 @@ export default function BasketballPredictionPremium({ eventId, homeTeam, awayTea
                                         <div className="flex items-center gap-4">
                                             <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-blue-400">
                                                 <Image
-                                                    src={`https://api.sportsdata.com/api/v1/player/${prediction.predictions.topPlayers.homeTopScorer.playerId || 12345}/image`}
+                                                    src={`https://api.sofascore.com/api/v1/player/${prediction.predictions.topPlayers.homeTopScorer.playerId || 12345}/image`}
                                                     alt={prediction.predictions.topPlayers.homeTopScorer.name}
                                                     fill
                                                     className="object-cover"
@@ -142,7 +142,7 @@ export default function BasketballPredictionPremium({ eventId, homeTeam, awayTea
                                         <div className="flex items-center gap-4">
                                             <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-red-400">
                                                 <Image
-                                                    src={`https://api.sportsdata.com/api/v1/player/${prediction.predictions.topPlayers.awayTopScorer.playerId || 12346}/image`}
+                                                    src={`https://api.sofascore.com/api/v1/player/${prediction.predictions.topPlayers.awayTopScorer.playerId || 12346}/image`}
                                                     alt={prediction.predictions.topPlayers.awayTopScorer.name}
                                                     fill
                                                     className="object-cover"

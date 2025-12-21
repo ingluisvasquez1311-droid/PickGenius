@@ -248,14 +248,14 @@ export default function HomePage() {
                       <div className="text-gray-500 font-bold text-[10px] uppercase tracking-widest mb-4">{footballStats.featuredMatch.tournament.name}</div>
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex-1">
-                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${footballStats.featuredMatch.homeTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
+                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${footballStats.featuredMatch.homeTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
                           <div className="text-xs font-black uppercase truncate">{footballStats.featuredMatch.homeTeam.shortName}</div>
                         </div>
                         <div className="text-5xl font-black tracking-tighter italic">
                           {footballStats.featuredMatch.homeScore.current} - {footballStats.featuredMatch.awayScore.current}
                         </div>
                         <div className="flex-1">
-                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${footballStats.featuredMatch.awayTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
+                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${footballStats.featuredMatch.awayTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
                           <div className="text-xs font-black uppercase truncate">{footballStats.featuredMatch.awayTeam.shortName}</div>
                         </div>
                       </div>

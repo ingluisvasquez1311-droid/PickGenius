@@ -285,7 +285,7 @@ class PropsService {
                     name: player.name,
                     team: game.homeTeam.id === player.teamId ? game.homeTeam.name : game.awayTeam.name,
                     position: player.position,
-                    image: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/player/${player.id}/image`)}`
+                    image: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/player/${player.id}/image`)}`
                 },
                 game: {
                     id: game.id,

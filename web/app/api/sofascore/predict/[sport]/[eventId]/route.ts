@@ -10,8 +10,8 @@ export async function GET(
 
         // 1. Obtener datos del partido desde SportsData
         const [eventResponse, statsResponse] = await Promise.all([
-            fetch(`https://www.sportsdata.com/api/v1/event/${eventId}`),
-            fetch(`https://www.sportsdata.com/api/v1/event/${eventId}/statistics`)
+            fetch(`https://www.sofascore.com/api/v1/event/${eventId}`),
+            fetch(`https://www.sofascore.com/api/v1/event/${eventId}/statistics`)
         ]);
 
         if (!eventResponse.ok || !statsResponse.ok) {

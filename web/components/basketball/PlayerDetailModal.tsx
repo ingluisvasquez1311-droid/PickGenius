@@ -21,7 +21,7 @@ export default function PlayerDetailModal({ player, isOpen, onClose, teamColor =
     const pRating = player.rating || player.player?.rating;
 
     const imageUrl = pId
-        ? `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sportsdata.app/api/v1/player/${pId}/image`)}`
+        ? `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/player/${pId}/image`)}`
         : null;
 
     const borderColor = teamColor === 'orange' ? 'border-orange-500' : 'border-purple-500';

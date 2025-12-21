@@ -104,7 +104,7 @@ export async function GET(
                     rating: mvp.statistics?.rating || 0,
                     stats: mvp.statistics || {},
                     team: mvpTeam,
-                    imageUrl: `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sportsdata.app/api/v1/player/${mvp.player?.id}/image`)}`
+                    imageUrl: `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/player/${mvp.player?.id}/image`)}`
                 },
                 ai: {
                     title: aiContent.shortTitle || "ON FIRE",
