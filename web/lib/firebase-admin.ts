@@ -2,17 +2,27 @@ import admin from 'firebase-admin';
 
 if (!admin.apps.length) {
     try {
-        admin.initializeApp({
-            credential: admin.credential.cert({
-                projectId: process.env.FIREBASE_PROJECT_ID,
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-            }),
-        });
+        const projectId = process.env.FIREBASE_PROJECT_ID;
+        const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+        if (projectId && clientEmail && privateKey) {
+            admin.initializeApp({
+                credential: admin.credential.cert({
+                    projectId,
+                    clientEmail,
+                    privateKey,
+                }),
+            });
+            console.log('[Firebase Admin] Initialized successfully');
+        } else {
+            console.warn('[Firebase Admin] Missing environment variables. Skipping initialization (expected during build).');
+        }
     } catch (error) {
-        console.error('Firebase admin initialization error', error);
+        console.error('[Firebase Admin] Initialization error:', error);
     }
 }
 
-export const adminDb = admin.firestore();
+// Lazy-initialized Firestore export
+export const adminDb = admin.apps.length ? admin.firestore() : null as unknown as admin.firestore.Firestore;
 export { admin };
