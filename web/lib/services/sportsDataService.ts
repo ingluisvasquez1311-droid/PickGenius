@@ -112,8 +112,9 @@ class SportsDataService {
 
             if (isServer && scraperKey && useProxy) {
                 // Priority 1: Direct ScraperAPI from Vercel (if keys are provided in Vercel Dashboard)
-                fetchUrl = `http://api.scraperapi.com?api_key=${scraperKey.trim()}&url=${encodeURIComponent(targetUrl)}&render=false&country_code=us`;
-                fetchHeaders = {}; // Reset headers for ScraperAPI to avoid conflicts
+                // Use https and keep headers just in case target is sensitive (though ScraperAPI usually handles it)
+                fetchUrl = `https://api.scraperapi.com?api_key=${scraperKey.trim()}&url=${encodeURIComponent(targetUrl)}&render=false&country_code=us`;
+
                 if (!process.env.NEXT_PHASE) {
                     console.log(`🔒 [SportsData] Direct ScraperAPI: ${cleanEndpoint}`);
                 }

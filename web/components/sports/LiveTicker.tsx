@@ -23,22 +23,26 @@ export default function LiveTicker() {
 
         if (footballData.success && Array.isArray(footballData.data)) {
           items = [...items, ...footballData.data.slice(0, 5).map((e: any) => ({
+            id: e.id,
             sport: '⚽',
+            sportSlug: 'football',
             home: e.homeTeam.name,
             away: e.awayTeam.name,
             score: `${e.homeScore.current}-${e.awayScore.current}`,
-            time: e.time?.currentPeriodStart ? `${Math.floor((Date.now() / 1000 - e.time.currentPeriodStart) / 60)}'` : 'LIVE',
+            time: e.status?.description || 'LIVE',
             isLive: true
           }))];
         }
 
         if (basketballData.success && Array.isArray(basketballData.data)) {
           items = [...items, ...basketballData.data.slice(0, 5).map((e: any) => ({
+            id: e.id,
             sport: '🏀',
+            sportSlug: 'basketball',
             home: e.homeTeam.name,
             away: e.awayTeam.name,
             score: `${e.homeScore.current}-${e.awayScore.current}`,
-            time: e.status?.description || 'Q4',
+            time: e.status?.description || 'LIVE',
             isLive: true
           }))];
         }
@@ -61,7 +65,11 @@ export default function LiveTicker() {
     <div className="w-full bg-[#050505]/80 backdrop-blur-md border-b border-white/10 overflow-hidden py-2 fixed top-16 z-40">
       <div className="flex whitespace-nowrap animate-scroll hover:pause">
         {tickerItems.map((item, i) => (
-          <div key={i} className="flex items-center gap-4 mx-6 text-xs md:text-sm">
+          <Link
+            key={i}
+            href={`/match/${item.sportSlug}/${item.id}`}
+            className="flex items-center gap-4 mx-6 text-xs md:text-sm hover:bg-white/5 px-3 py-1 rounded-lg transition-colors cursor-pointer"
+          >
             <span className="font-bold text-red-500 animate-pulse flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
               {item.time}
@@ -70,7 +78,7 @@ export default function LiveTicker() {
               {item.sport} {item.home} <span className="text-white font-bold">{item.score}</span> {item.away}
             </span>
             <div className="w-px h-3 bg-white/20 ml-2"></div>
-          </div>
+          </Link>
         ))}
       </div>
       <style jsx>{`
