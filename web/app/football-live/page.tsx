@@ -16,14 +16,19 @@ export default function FootballLivePage() {
             try {
                 setLoading(true);
 
+                const today = new Date().toISOString().split('T')[0];
+                const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
                 // Fetch Live and Scheduled in parallel
-                const [liveRes, scheduledRes] = await Promise.all([
+                const [liveRes, scheduledTodayRes, scheduledTomorrowRes] = await Promise.all([
                     fetch('/api/football/live'),
-                    fetch('/api/football/scheduled') // Defaults to today
+                    fetch(`/api/football/scheduled?date=${today}`),
+                    fetch(`/api/football/scheduled?date=${tomorrow}`)
                 ]);
 
                 const liveData = await liveRes.json();
-                const scheduledData = await scheduledRes.json();
+                const scheduledTodayData = await scheduledTodayRes.json();
+                const scheduledTomorrowData = await scheduledTomorrowRes.json();
 
                 let allEvents: any[] = [];
 
@@ -57,7 +62,7 @@ export default function FootballLivePage() {
 
                 if (allEvents.length > 0) {
                     setEvents(allEvents);
-                } else if (!liveData.success && !scheduledData.success) {
+                } else if (!liveData.success && !scheduledTodayData.success) {
                     // Both failed
                     console.warn('API failed, using mock data.');
                     const mockEvents = [
