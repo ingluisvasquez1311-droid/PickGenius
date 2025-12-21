@@ -99,7 +99,7 @@ class SportsDataService {
             // Try different env var names as fallback
             const apiUrl = process.env.NEXT_PUBLIC_API_URL ||
                 process.env.NEXT_PUBLIC_BACKEND_HOST ||
-                (isServer ? "https://pickgenius-api.onrender.com" : ""); // Hardcoded fallback for production bridge
+                (isServer ? "https://pickgenius-backend.onrender.com" : ""); // Use -backend subdomain
 
             let fetchUrl: string;
             let fetchHeaders: any = { ...this.headers };
