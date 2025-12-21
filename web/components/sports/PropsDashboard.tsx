@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,6 +54,67 @@ const PropsDashboard = () => {
     const [isPredicting, setIsPredicting] = useState<string | null>(null);
     const { user, usePrediction, checkPredictionLimit, saveToHistory, notify } = useAuth();
 
+    const [thinkingProgress, setThinkingProgress] = useState(0);
+    const [thinkingMessage, setThinkingMessage] = useState('');
+    const thinkingTimerRef = useRef<any>(null);
+
+    const thinkingMessagesBySport: any = {
+        'basketball': [
+            "Escaneando rotación defensiva de la NBA...",
+            "Analizando eficiencia en el 'Paint'...",
+            "Calculando probabilidad de triple doble...",
+            "Evaluando emparejamientos individuales...",
+            "Consultando modelos de IA especializados...",
+            "Simulando 10,000 finales de posesión...",
+            "Finalizando reporte NBA..."
+        ],
+        'baseball': [
+            "Analizando ERA del pitcher abridor...",
+            "Evaluando condiciones del viento...",
+            "Calculando probabilidad de Home Run...",
+            "Analizando historial vs pitcheo rival...",
+            "Escaneando métricas Sabermetrics...",
+            "Consultando modelos Diamond IA...",
+            "Finalizando reporte MLB..."
+        ],
+        'nhl': [
+            "Evaluando efectividad del Power Play...",
+            "Analizando porcentaje de paradas del goalie...",
+            "Calculando tiempo en hielo (TOI)...",
+            "Escaneando historial de 'Puck Line'...",
+            "Simulando face-offs críticos...",
+            "Consultando modelos Ice IA...",
+            "Finalizando reporte NHL..."
+        ],
+        'tennis': [
+            "Analizando efectividad del primer servicio...",
+            "Evaluando rendimiento en esta superficie...",
+            "Calculando resistencia en juegos largos...",
+            "Escaneando historial de H2H directo...",
+            "Simulando trayectoria del set definitivo...",
+            "Consultando modelos Ace IA...",
+            "Finalizando reporte Tenis..."
+        ],
+        'football': [
+            "Analizando efectividad de cara a puerta...",
+            "Evaluando xG proyectado...",
+            "Calculando probabilidad de asistencia...",
+            "Escaneando defensas rivales...",
+            "Simulando transiciones ofensivas...",
+            "Consultando modelos Goal IA...",
+            "Finalizando reporte Fútbol..."
+        ],
+        'american-football': [
+            "Analizando yardas por pase proyectadas...",
+            "Evaluando probabilidad de Touchdown...",
+            "Calculando protección de la O-Line...",
+            "Escaneando debilidades de la secundaria...",
+            "Simulando posesiones en Red Zone...",
+            "Consultando modelos NFL IA...",
+            "Finalizando reporte NFL..."
+        ]
+    };
+
     const sports = [
         { id: 'basketball', name: 'NBA', icon: '🏀', color: 'blue' },
         { id: 'football', name: 'Fútbol', icon: '⚽', color: 'green' },
@@ -65,6 +126,9 @@ const PropsDashboard = () => {
 
     useEffect(() => {
         loadProps();
+        return () => {
+            if (thinkingTimerRef.current) clearInterval(thinkingTimerRef.current);
+        };
     }, [sport]);
 
     const loadProps = async () => {
@@ -97,47 +161,72 @@ const PropsDashboard = () => {
         }
 
         setIsPredicting(prop.id);
+        setThinkingProgress(0);
 
         try {
-            const res = await axios.post('/api/props/predict', prop);
-            if (res.data.success) {
-                const predictionData = res.data.data;
-                setProps(prev => prev.map(p =>
-                    p.id === prop.id ? { ...p, prediction: predictionData } : p
-                ));
+            const apiPromise = axios.post('/api/props/predict', prop);
 
-                // Guardar en el historial
-                await saveToHistory({
-                    playerName: prop.player.name,
-                    sport: prop.sport,
-                    propType: prop.prop.type,
-                    line: prop.prop.line,
-                    prediction: predictionData.prediction,
-                    probability: predictionData.probability,
-                    confidence: predictionData.confidence,
-                    reasoning: predictionData.reasoning
-                });
+            let progress = 0;
+            const totalSteps = 600; // 60 segundos
 
-                // Incrementar contador de uso
-                await usePrediction();
+            thinkingTimerRef.current = setInterval(() => {
+                progress += 1;
+                const percentage = Math.floor((progress / totalSteps) * 100);
+                setThinkingProgress(Math.min(99, percentage));
 
-                // Notificar si es un Hot Pick (Probabilidad >= 85%)
-                if (predictionData.probability >= 85) {
-                    await notify(
-                        '🔥 ¡HOT PICK DETECTADO!',
-                        `${prop.player.name} tiene un ${predictionData.probability}% de probabilidad en ${prop.prop.displayName}. ¡No te lo pierdas!`,
-                        'success',
-                        '/props'
-                    );
-                    toast.success('¡Hot Pick guardado en tus notificaciones!');
-                } else {
-                    toast.success('Análisis completado');
+                const currentMessages = thinkingMessagesBySport[prop.sport] || thinkingMessagesBySport['basketball'];
+                const messageIndex = Math.min(Math.floor(progress / (totalSteps / currentMessages.length)), currentMessages.length - 1);
+                setThinkingMessage(currentMessages[messageIndex]);
+
+                if (progress >= totalSteps) {
+                    if (thinkingTimerRef.current) clearInterval(thinkingTimerRef.current);
+
+                    apiPromise.then(async res => {
+                        if (res.data.success) {
+                            setThinkingProgress(100);
+                            const predictionData = res.data.data;
+                            setProps(prev => prev.map(p =>
+                                p.id === prop.id ? { ...p, prediction: predictionData } : p
+                            ));
+
+                            // Guardar en el historial
+                            await saveToHistory({
+                                playerName: prop.player.name,
+                                sport: prop.sport,
+                                propType: prop.prop.type,
+                                line: prop.prop.line,
+                                prediction: predictionData.prediction,
+                                probability: predictionData.probability,
+                                confidence: predictionData.confidence,
+                                reasoning: predictionData.reasoning
+                            });
+
+                            // Incrementar contador de uso
+                            await usePrediction();
+
+                            // Notificar si es un Hot Pick (Probabilidad >= 85%)
+                            if (predictionData.probability >= 85) {
+                                await notify(
+                                    '🔥 ¡HOT PICK DETECTADO!',
+                                    `${prop.player.name} tiene un ${predictionData.probability}% de probabilidad en ${prop.prop.displayName}. ¡No te lo pierdas!`,
+                                    'success',
+                                    '/props'
+                                );
+                                toast.success('¡Hot Pick guardado!');
+                            }
+                        }
+                        setIsPredicting(null);
+                    }).catch(err => {
+                        console.error('Error predicting:', err);
+                        toast.error('Error al generar la predicción');
+                        setIsPredicting(null);
+                    });
                 }
-            }
+            }, 100);
+
         } catch (error) {
             console.error('Error predicting:', error);
             toast.error('Error al generar la predicción');
-        } finally {
             setIsPredicting(null);
         }
     };
@@ -350,6 +439,8 @@ const PropsDashboard = () => {
                                 group={group}
                                 onPredict={handlePredict}
                                 isPredicting={isPredicting}
+                                thinkingProgress={thinkingProgress}
+                                thinkingMessage={thinkingMessage}
                             />
                         ))}
                     </div>
@@ -393,7 +484,19 @@ const Sparkline = ({ data, color = "#a855f7" }: { data: number[], color?: string
     );
 };
 
-const PlayerGroup = ({ group, onPredict, isPredicting }: { group: { player: any, game: any, props: PlayerProp[] }, onPredict: (prop: PlayerProp) => void, isPredicting: string | null }) => {
+const PlayerGroup = ({
+    group,
+    onPredict,
+    isPredicting,
+    thinkingProgress,
+    thinkingMessage
+}: {
+    group: { player: any, game: any, props: PlayerProp[] },
+    onPredict: (prop: PlayerProp) => void,
+    isPredicting: string | null,
+    thinkingProgress: number,
+    thinkingMessage: string
+}) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
@@ -470,13 +573,17 @@ const PlayerGroup = ({ group, onPredict, isPredicting }: { group: { player: any,
                                 </div>
 
                                 {prop.prediction ? (
-                                    <div className={`p-4 rounded-2xl border-2 relative overflow-hidden group/pred ${prop.prediction.prediction === 'OVER' ? 'border-green-500/30 bg-green-500/5' : 'border-red-500/30 bg-red-500/5'}`}>
-                                        <div className={`absolute top-0 right-0 w-16 h-16 blur-2xl opacity-20 -mr-8 -mt-8 ${prop.prediction.prediction === 'OVER' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                    <div className={`p-4 rounded-2xl border-2 relative overflow-hidden group/pred ${['OVER', 'HOME', 'YES'].includes(prop.prediction.prediction) ? 'border-green-500/30 bg-green-500/5' : 'border-red-500/30 bg-red-500/5'}`}>
+                                        <div className={`absolute top-0 right-0 w-16 h-16 blur-2xl opacity-20 -mr-8 -mt-8 ${['OVER', 'HOME', 'YES'].includes(prop.prediction.prediction) ? 'bg-green-500' : 'bg-red-500'}`}></div>
                                         <div className="flex justify-between items-center mb-1 relative z-10">
-                                            <span className={`text-[10px] font-black tracking-tighter ${prop.prediction.prediction === 'OVER' ? 'text-green-500' : 'text-red-500'}`}>{prop.prediction.prediction === 'OVER' ? 'MÁS DE' : 'MENOS DE'}</span>
+                                            <span className={`text-[10px] font-black tracking-tighter uppercase ${['OVER', 'HOME', 'YES'].includes(prop.prediction.prediction) ? 'text-green-500' : 'text-red-500'}`}>
+                                                {prop.prediction.prediction === 'OVER' ? 'MÁS DE' :
+                                                    prop.prediction.prediction === 'UNDER' ? 'MENOS DE' :
+                                                        prop.prediction.prediction}
+                                            </span>
                                             <div className="flex items-center gap-1">
                                                 <div className="w-12 h-1 bg-white/10 rounded-full overflow-hidden">
-                                                    <div className={`h-full opacity-60 ${prop.prediction.prediction === 'OVER' ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${prop.prediction.probability}%` }}></div>
+                                                    <div className={`h-full opacity-60 ${['OVER', 'HOME', 'YES'].includes(prop.prediction.prediction) ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${prop.prediction.probability}%` }}></div>
                                                 </div>
                                                 <span className="text-[10px] font-black text-white">{prop.prediction.probability}%</span>
                                             </div>
@@ -487,9 +594,20 @@ const PlayerGroup = ({ group, onPredict, isPredicting }: { group: { player: any,
                                     <button
                                         onClick={() => onPredict(prop)}
                                         disabled={!!isPredicting}
-                                        className={`w-full py-3 rounded-2xl font-black text-[9px] tracking-widest transition-all ${isPredicting === prop.id ? 'bg-white/5 text-white/20' : 'bg-white text-black hover:scale-105'}`}
+                                        className={`w-full py-4 rounded-2xl font-black text-[9px] tracking-widest transition-all relative overflow-hidden ${isPredicting === prop.id ? 'bg-white/5 text-white/40 border border-white/10' : 'bg-white text-black hover:scale-105'}`}
                                     >
-                                        {isPredicting === prop.id ? 'ANALIZANDO...' : '🤖 IA ANALYZE'}
+                                        {isPredicting === prop.id ? (
+                                            <>
+                                                <div
+                                                    className="absolute inset-y-0 left-0 bg-purple-500/20 transition-all duration-300"
+                                                    style={{ width: `${thinkingProgress}%` }}
+                                                ></div>
+                                                <div className="relative z-10 flex flex-col items-center">
+                                                    <span className="animate-pulse">{thinkingProgress}% ANALIZANDO...</span>
+                                                    <span className="text-[7px] text-white/40 lowercase italic mt-0.5 truncate max-w-full px-2">{thinkingMessage}</span>
+                                                </div>
+                                            </>
+                                        ) : '🤖 IA ANALYZE'}
                                     </button>
                                 )}
                             </div>

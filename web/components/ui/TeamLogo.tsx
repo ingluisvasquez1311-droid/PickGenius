@@ -12,7 +12,6 @@ interface TeamLogoProps {
 
 export default function TeamLogo({ teamId, teamName, size = 'md', className = '' }: TeamLogoProps) {
     const [error, setError] = useState(false);
-    const [retryCount, setRetryCount] = useState(0);
 
     const sizeClasses = {
         sm: 'w-8 h-8',
@@ -21,30 +20,16 @@ export default function TeamLogo({ teamId, teamName, size = 'md', className = ''
         xl: 'w-24 h-24'
     };
 
-    // Lista de URLs para intentar en orden
-    const sources = [
-        `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${teamId}/image`)}`,
-        `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/team/${teamId}/image`)}`,
-        `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/player/${teamId}/image`)}` // Para Tenis
-    ];
+    // Use our internal proxy endpoint
+    const imgSrc = `/api/proxy/team-logo/${teamId}`;
 
-    const [imgSrc, setImgSrc] = useState(sources[0]);
-
-    // Resetear cuando cambie el ID
+    // Reset error when teamId changes
     useEffect(() => {
-        setImgSrc(sources[0]);
-        setRetryCount(0);
         setError(false);
     }, [teamId]);
 
     const handleImageError = () => {
-        if (retryCount < sources.length - 1) {
-            const nextIndex = retryCount + 1;
-            setImgSrc(sources[nextIndex]);
-            setRetryCount(nextIndex);
-        } else {
-            setError(true);
-        }
+        setError(true);
     };
 
     if (error) {
@@ -52,9 +37,9 @@ export default function TeamLogo({ teamId, teamName, size = 'md', className = ''
         const initial = teamName ? teamName.charAt(0).toUpperCase() : '?';
         return (
             <div
-                className={`${sizeClasses[size]} ${className} rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center border-2 border-gray-600`}
+                className={`${sizeClasses[size]} ${className} rounded-full bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center border-2 border-purple-400/30 shadow-lg`}
             >
-                <span className="text-white font-bold text-lg">{initial}</span>
+                <span className="text-white font-black text-lg">{initial}</span>
             </div>
         );
     }

@@ -77,33 +77,36 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
             { value: 'points', label: 'Puntos', icon: '🏀' },
             { value: 'assists', label: 'Asistencias', icon: '🤝' },
             { value: 'rebounds', label: 'Rebotes', icon: '💪' },
-            { value: 'steals', label: 'Robos', icon: '🔒' }
+            { value: 'winner', label: 'Ganador (ML)', icon: '🏆' },
+            { value: 'totalPoints', label: 'Total Puntos', icon: '📊' }
         ],
         'baseball': [
             { value: 'hits', label: 'Hits', icon: '⚾' },
             { value: 'homeRuns', label: 'Home Runs', icon: '🚀' },
-            { value: 'rbis', label: 'RBIs', icon: '🏃' },
-            { value: 'strikeouts', label: 'Strikeouts', icon: '🔥' }
+            { value: 'strikeouts', label: 'Strikeouts', icon: '🔥' },
+            { value: 'winner', label: 'Ganador (ML)', icon: '🏆' }
         ],
         'nhl': [
             { value: 'goals', label: 'Goles', icon: '🏒' },
-            { value: 'assists', label: 'Asistencias', icon: '🤝' },
-            { value: 'shots', label: 'Tiros', icon: '🎯' }
+            { value: 'shots', label: 'Tiros', icon: '🎯' },
+            { value: 'winner', label: 'Ganador (ML)', icon: '🏆' },
+            { value: 'totalGoals', label: 'Total Goles', icon: '📊' }
         ],
         'tennis': [
             { value: 'aces', label: 'Aces', icon: '🎾' },
-            { value: 'doubleFaults', label: 'D. Faltas', icon: '❌' },
-            { value: 'firstServePoints', label: '1er Saque', icon: '⚡' }
+            { value: 'winner', label: 'Ganador (ML)', icon: '🏆' },
+            { value: 'gameWinner', label: 'Ganador Juego', icon: '🎮' }
         ],
         'football': [
             { value: 'goals', label: 'Goles', icon: '⚽' },
             { value: 'assists', label: 'Asistencias', icon: '🤝' },
-            { value: 'shotsOnTarget', label: 'Tiros Arco', icon: '🎯' }
+            { value: 'winner', label: 'Ganador (ML)', icon: '🏆' },
+            { value: 'totalGoals', label: 'Total Goles', icon: '📊' }
         ],
         'american-football': [
             { value: 'touchdowns', label: 'Touchdowns', icon: '🏈' },
             { value: 'passingYards', label: 'Yardas Aire', icon: '🎯' },
-            { value: 'rushingYards', label: 'Yardas Tierra', icon: '🏃' }
+            { value: 'winner', label: 'Ganador (ML)', icon: '🏆' }
         ]
     };
 
@@ -273,7 +276,7 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
             }, { timeout: 30000 });
 
             let progress = 0;
-            const totalSteps = 45; // Reducido un poco para mejor UX
+            const totalSteps = 600; // ~60 segundos para permitir lectura y dar sensación de análisis profundo
 
             thinkingTimerRef.current = setInterval(() => {
                 progress += 1;
@@ -322,7 +325,7 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
                         setIsThinking(false);
                     });
                 }
-            }, 100); // 100ms para que se sienta más dinámico
+            }, 100); // 100ms * 600 steps = 60 segundos
 
         } catch (err: any) {
             setError('Error en el proceso: ' + err.message);
@@ -556,8 +559,10 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
                     <div className={`h-2 ${prediction.prediction.prediction === 'OVER' ? 'bg-green-500' : 'bg-red-500'}`}></div>
                     <div className="p-8">
                         <div className="text-center mb-8">
-                            <div className={`text-6xl font-black italic tracking-tighter mb-2 ${prediction.prediction.prediction === 'OVER' ? 'text-green-500' : 'text-red-500'}`}>
-                                {prediction.prediction.prediction === 'OVER' ? 'MÁS DE' : 'MENOS DE'}
+                            <div className={`text-6xl font-black italic tracking-tighter mb-2 ${['OVER', 'HOME', 'YES'].includes(prediction.prediction.prediction) ? 'text-green-500' : 'text-red-500'}`}>
+                                {prediction.prediction.prediction === 'OVER' ? 'MÁS DE' :
+                                    prediction.prediction.prediction === 'UNDER' ? 'MENOS DE' :
+                                        prediction.prediction.prediction}
                             </div>
                             <div className="text-3xl font-black text-white">{prediction.line} <span className="text-gray-500 uppercase opacity-60 italic">{prediction.propType}</span></div>
                         </div>

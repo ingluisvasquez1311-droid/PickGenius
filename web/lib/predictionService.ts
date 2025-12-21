@@ -46,6 +46,10 @@ export interface PredictionResult {
 
 export async function generatePrediction(request: PredictionRequest): Promise<PredictionResult> {
     try {
+        // Create an AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 seconds
+
         const response = await fetch('/api/predictions', {
             method: 'POST',
             headers: {
@@ -56,11 +60,16 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
                 sport: request.sport,
                 homeTeam: request.homeTeam,
                 awayTeam: request.awayTeam
-            })
+            }),
+            signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
+
         if (!response.ok) {
-            throw new Error('Failed to generate prediction');
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Prediction API error:', errorData);
+            throw new Error(errorData.error || 'Failed to generate prediction');
         }
 
         const data = await response.json();
@@ -73,8 +82,16 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
         }
 
         return data;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error generating prediction:', error);
+        
+        // Check if it's a timeout error
+        if (error.name === 'AbortError') {
+            console.error('Prediction request timed out after 90 seconds');
+            throw new Error('El análisis está tomando más tiempo del esperado. Por favor, intenta de nuevo.');
+        }
+        
+        // Return mock prediction as fallback
         return generateMockPrediction(request);
     }
 }

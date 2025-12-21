@@ -244,6 +244,11 @@ class SportsDataService {
      * Obtiene estadísticas de un jugador para una temporada
      */
     async getPlayerSeasonStats(playerId: number, tournamentId: number, seasonId: number): Promise<any> {
+        // Primero intentamos regularSeason que es más común en ligas como NBA
+        const res = await this.makeRequest(`/player/${playerId}/unique-tournament/${tournamentId}/season/${seasonId}/statistics/regularSeason`);
+        if (res && res.statistics) return res;
+
+        // Fallback a overall
         return await this.makeRequest(`/player/${playerId}/unique-tournament/${tournamentId}/season/${seasonId}/statistics/overall`);
     }
 

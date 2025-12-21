@@ -42,34 +42,34 @@ export interface PlayerProp {
 class PropsService {
     private LEAGUES_CONFIG: any = {
         basketball: {
-            propTypes: ['points', 'assists', 'rebounds', 'steals', 'blocks', 'threes'],
-            icons: { points: '🏀', assists: '🤝', rebounds: '💪', steals: '🔒', blocks: '🛡️', threes: '🎯' },
-            names: { points: 'Puntos', assists: 'Asistencias', rebounds: 'Rebotes', steals: 'Robos', blocks: 'Bloqueos', threes: 'Triples' }
+            propTypes: ['points', 'assists', 'rebounds', 'steals', 'blocks', 'threes', 'winner', 'totalPoints'],
+            icons: { points: '🏀', assists: '🤝', rebounds: '💪', steals: '🔒', blocks: '🛡️', threes: '🎯', winner: '🏆', totalPoints: '📊' },
+            names: { points: 'Puntos', assists: 'Asistencias', rebounds: 'Rebotes', steals: 'Robos', blocks: 'Bloqueos', threes: 'Triples', winner: 'Ganador (ML)', totalPoints: 'Total Puntos' }
         },
         football: {
-            propTypes: ['goals', 'assists', 'shotsOnTarget', 'passes', 'tackles'],
-            icons: { goals: '⚽', assists: '🤝', shotsOnTarget: '🎯', passes: '👟', tackles: '🛡️' },
-            names: { goals: 'Goles', assists: 'Asistencias', shotsOnTarget: 'Tiros al Arco', passes: 'Pases', tackles: 'Tackles' }
+            propTypes: ['goals', 'assists', 'shotsOnTarget', 'passes', 'tackles', 'winner', 'totalGoals'],
+            icons: { goals: '⚽', assists: '🤝', shotsOnTarget: '🎯', passes: '👟', tackles: '🛡️', winner: '🏆', totalGoals: '📊' },
+            names: { goals: 'Goles', assists: 'Asistencias', shotsOnTarget: 'Tiros al Arco', passes: 'Pases', tackles: 'Tackles', winner: 'Ganador (ML)', totalGoals: 'Total Goles' }
         },
         baseball: {
-            propTypes: ['hits', 'homeRuns', 'rbis', 'strikeouts'],
-            icons: { hits: '⚾', homeRuns: '🚀', rbis: '🏃', strikeouts: '🔥' },
-            names: { hits: 'Hits', homeRuns: 'Home Runs', rbis: 'RBIs', strikeouts: 'Strikeouts' }
+            propTypes: ['hits', 'homeRuns', 'rbis', 'strikeouts', 'runsScored', 'winner', 'totalRuns'],
+            icons: { hits: '⚾', homeRuns: '🚀', rbis: '🏃', strikeouts: '🔥', runsScored: '🏃‍♂️', winner: '🏆', totalRuns: '📊' },
+            names: { hits: 'Hits', homeRuns: 'Home Runs', rbis: 'RBIs', strikeouts: 'Strikeouts', runsScored: 'Carreras Anotadas', winner: 'Ganador (ML)', totalRuns: 'Total Carreras' }
         },
         nhl: {
-            propTypes: ['goals', 'assists', 'shots', 'points'],
-            icons: { goals: '🏒', assists: '🤝', shots: '🎯', points: '📊' },
-            names: { goals: 'Goles', assists: 'Asistencias', shots: 'Tiros', points: 'Puntos' }
+            propTypes: ['goals', 'assists', 'shots', 'points', 'winner', 'totalGoals'],
+            icons: { goals: '🏒', assists: '🤝', shots: '🎯', points: '📊', winner: '🏆', totalGoals: '⚽' },
+            names: { goals: 'Goles', assists: 'Asistencias', shots: 'Tiros', points: 'Puntos', winner: 'Ganador (ML)', totalGoals: 'Total Goles' }
         },
         tennis: {
-            propTypes: ['aces', 'doubleFaults', 'firstServePoints'],
-            icons: { aces: '🎾', doubleFaults: '❌', firstServePoints: '⚡' },
-            names: { aces: 'Aces', doubleFaults: 'Doble Faltas', firstServePoints: 'Puntos 1er Saque' }
+            propTypes: ['aces', 'doubleFaults', 'firstServePoints', 'winner', 'gameWinner', 'setWinner'],
+            icons: { aces: '🎾', doubleFaults: '❌', firstServePoints: '⚡', winner: '🏆', gameWinner: '🎮', setWinner: '🎾' },
+            names: { aces: 'Aces', doubleFaults: 'Doble Faltas', firstServePoints: 'Puntos 1er Saque', winner: 'Ganador (ML)', gameWinner: 'Ganador Juego', setWinner: 'Ganador Set' }
         },
         'american-football': {
-            propTypes: ['touchdowns', 'passingYards', 'rushingYards', 'receptions'],
-            icons: { touchdowns: '🏈', passingYards: '🎯', rushingYards: '🏃', receptions: '🤲' },
-            names: { touchdowns: 'Touchdowns', passingYards: 'Yardas Aire', rushingYards: 'Yardas Tierra', receptions: 'Recepciones' }
+            propTypes: ['touchdowns', 'passingYards', 'rushingYards', 'receptions', 'winner', 'totalPoints'],
+            icons: { touchdowns: '🏈', passingYards: '🎯', rushingYards: '🏃', receptions: '🤲', winner: '🏆', totalPoints: '📊' },
+            names: { touchdowns: 'Touchdowns', passingYards: 'Yardas Aire', rushingYards: 'Yardas Tierra', receptions: 'Recepciones', winner: 'Ganador (ML)', totalPoints: 'Total Puntos' }
         }
     };
 
@@ -86,7 +86,7 @@ class PropsService {
         try {
             // Mapping for UI slugs to Sofascore slugs
             const slugMapping: any = {
-                'nhl': 'hockey',
+                'nhl': 'icehockey',
                 'american-football': 'american-football',
                 'baseball': 'baseball',
                 'tennis': 'tennis'
@@ -153,26 +153,32 @@ class PropsService {
         const mockData: any = {
             basketball: [
                 { name: 'LeBron James', team: 'Lakers', pos: 'F', line: 25.5, avg: 24.8 },
+                { name: 'Ganador Partido', team: 'Lakers', pos: 'Game', line: 'MONEYLINE', type: 'winner', avg: 0.65 },
                 { name: 'Stephen Curry', team: 'Warriors', pos: 'G', line: 4.5, type: 'threes', avg: 4.8 }
             ],
             football: [
                 { name: 'Erling Haaland', team: 'Man City', pos: 'ST', line: 1.5, type: 'goals', avg: 1.2 },
+                { name: 'Ganador Directo', team: 'Real Madrid', pos: 'Game', line: 'MONEYLINE', type: 'winner', avg: 0.55 },
                 { name: 'Kevin De Bruyne', team: 'Man City', pos: 'MF', line: 0.5, type: 'assists', avg: 0.8 }
             ],
             'american-football': [
                 { name: 'Patrick Mahomes', team: 'Chiefs', pos: 'QB', line: 280.5, type: 'passingYards', avg: 295.2 },
+                { name: 'Ganador NFL', team: 'Chiefs', pos: 'Game', line: 'MONEYLINE', type: 'winner', avg: 0.70 },
                 { name: 'Travis Kelce', team: 'Chiefs', pos: 'TE', line: 0.5, type: 'touchdowns', avg: 0.7 }
             ],
             nhl: [
                 { name: 'Connor McDavid', team: 'Oilers', pos: 'C', line: 1.5, type: 'points', avg: 1.8 },
+                { name: 'Ganador Hockey', team: 'Oilers', pos: 'Game', line: 'MONEYLINE', type: 'winner', avg: 0.60 },
                 { name: 'Auston Matthews', team: 'Maple Leafs', pos: 'LW', line: 0.5, type: 'goals', avg: 0.9 }
             ],
             baseball: [
                 { name: 'Shohei Ohtani', team: 'Dodgers', pos: 'DH', line: 1.5, type: 'hits', avg: 1.4 },
+                { name: 'Ganador MLB', team: 'Yankees', pos: 'Game', line: 'MONEYLINE', type: 'winner', avg: 0.52 },
                 { name: 'Aaron Judge', team: 'Yankees', pos: 'CF', line: 0.5, type: 'homeRuns', avg: 0.4 }
             ],
             tennis: [
                 { name: 'Carlos Alcaraz', team: 'ATP', pos: 'N/A', line: 8.5, type: 'aces', avg: 7.2 },
+                { name: 'Ganador Tenis', team: 'Alcaraz', pos: 'Game', line: 'MONEYLINE', type: 'winner', avg: 0.85 },
                 { name: 'Jannik Sinner', team: 'ATP', pos: 'N/A', line: 6.5, type: 'aces', avg: 6.8 }
             ]
         };
@@ -319,7 +325,14 @@ class PropsService {
             const average = realAvg > 0 ? realAvg : (last5.reduce((a, b) => a + b, 0) / last5.length);
 
             // 4. Determinar la línea (Market Line)
-            const line = Math.round(average * 2) / 2 || 0.5;
+            let line: any = Math.round(average * 2) / 2 || 0.5;
+
+            // Ajuste para mercados de Ganador (ML)
+            if (type === 'winner') {
+                line = 'MONEYLINE';
+            } else if (type === 'gameWinner') {
+                line = 'GAME ML';
+            }
 
             // 5. Tendencia
             const trend = last5[0] >= average ? '📈' : '📉';
@@ -331,7 +344,7 @@ class PropsService {
                     name: player.name,
                     team: sport === 'tennis' ? player.name : (game.homeTeam.id === player.teamId ? game.homeTeam.name : game.awayTeam.name),
                     position: player.position,
-                    image: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/player/${player.id}/image`)}`
+                    image: `/api/proxy/player-image/${player.id}`
                 },
                 game: {
                     id: game.id,
@@ -390,34 +403,35 @@ class PropsService {
         const newsContext = await this.fetchNewsContext(`${prop.player.name} ${prop.player.team}`);
 
         const prompt = `
-        Actúa como un experto analista de apuestas deportivas profesional (Sharp Bettor).
-        Analiza el siguiente "Player Prop" basado en DATOS REALES y CONTEXTO DE ÚLTIMA HORA:
+        Actúa como un experto analista de apuestas deportivas profesional (Sharp Bettor / Whale Handicapper).
+        Analiza el siguiente mercado basado en DATOS REALES y CONTEXTO DE ÚLTIMA HORA:
         
-        JUGADOR: ${prop.player.name} (${prop.player.team})
-        PARTIDO: ${prop.game.homeTeam} vs ${prop.game.awayTeam}
+        ${prop.prop.type === 'winner' || prop.prop.type.startsWith('total') ?
+                `MERCADO DE JUEGO: ${prop.prop.displayName}
+             EQUIPOS: ${prop.game.homeTeam} vs ${prop.game.awayTeam}` :
+                `PLAYER PROP: ${prop.player.name} (${prop.player.team})
+             ESTADÍSTICAS: Promedio ${prop.stats.average}, Últimos 5: ${prop.stats.last5.join(', ')}`
+            }
+        
         DEPORTE: ${prop.sport.toUpperCase()}
-        MERCADO: ${prop.prop.displayName}
-        LÍNEA DE APUESTA: ${prop.prop.line}
+        TIPO DE APUESTA: ${prop.prop.displayName}
+        LÍNEA/CUALIDAD: ${prop.prop.line}
         
-        ESTADÍSTICAS REALES (SportsData):
-        Promedio de Temporada: ${prop.stats.average}
-        Rendimiento Últimos 5 juegos: ${prop.stats.last5.join(', ')}
-        Tendencia Actual: ${prop.stats.trend === '📈' ? 'A la alza' : 'A la baja'}
-        
-        NOTICIAS Y CONTEXTO (Google News):
+        CONTEXTO DE NOTICIAS (Google News):
         ${newsContext}
         
-        Instrucciones:
-        1. Evalúa si el jugador superará (OVER) o no llegará (UNDER) a la línea de apuesta.
-        2. IMPORTANTE: Si las noticias mencionan lesiones, descansos de compañeros clave o cambios en la alineación, dales prioridad en el análisis.
-        3. Considera la consistencia en los últimos 5 juegos comparada con el promedio.
+        INSTRUCCIONES DE ANÁLISIS:
+        1. Para Player Props: Evalúa OVER/UNDER basándote en matchups defensivos y noticias de lesiones.
+        2. Para Ganador (ML): Analiza localía, rachas recientes y bajas críticas.
+        3. Para Totals: Evalúa el ritmo de juego (Pace) y eficiencia ofensiva/defensiva.
+        4. Sé sumamente crítico y objetivo. Si hay dudas, baja el porcentaje de probabilidad.
         
         Responde exclusivamente en formato JSON:
         {
-            "prediction": "OVER" o "UNDER",
+            "prediction": "OVER", "UNDER", "HOME", "AWAY", "DRAW", "YES" o "NO" (según el mercado),
             "probability": número del 1 al 100,
             "confidence": "Baja", "Media" o "Alta",
-            "reasoning": "Resumen profesional de exacto 3 líneas en español. Menciona noticias si son relevantes.",
+            "reasoning": "Resumen profesional de 3-4 líneas en español. Usa terminología de apuestas (Handicap, ML, Value, Sharp). Menciona noticias si son clave.",
             "keyFactors": ["factor estadístico/noticia 1", "factor táctico/noticia 2", "factor de racha 3"]
         }
         `;

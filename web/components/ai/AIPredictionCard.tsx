@@ -91,8 +91,20 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                 </div>
 
                 {error && (
-                    <div className="bg-red-500/20 text-red-200 p-3 rounded-lg mb-4 text-sm">
-                        {error}
+                    <div className="bg-red-500/20 text-red-200 p-4 rounded-lg mb-4 border border-red-500/30">
+                        <div className="flex items-start gap-3">
+                            <span className="text-2xl">⚠️</span>
+                            <div className="flex-1">
+                                <p className="font-bold text-sm mb-1">Error en el Análisis</p>
+                                <p className="text-xs opacity-90">{error}</p>
+                                <button
+                                    onClick={handlePredict}
+                                    className="mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-lg transition-colors"
+                                >
+                                    Reintentar Análisis
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
