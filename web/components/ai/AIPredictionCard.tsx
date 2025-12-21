@@ -23,7 +23,19 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
         try {
             setLoading(true);
             setError(null);
-            const toastId = toast.loading('Analizando estadísticas del partido...');
+
+            const toastId = toast.loading('PickGenius AI accediendo al servidor de datos...', {
+                description: 'Procesando historial H2H y momentum actual...'
+            });
+
+            // Simulate steps for a more "pro" feeling
+            setTimeout(() => {
+                toast.loading('Analizando alineaciones y desgaste físico...', { id: toastId });
+            }, 1000);
+
+            setTimeout(() => {
+                toast.loading('Calculando probabilidades con red neuronal...', { id: toastId });
+            }, 2500);
 
             const result = await generatePrediction({
                 gameId: eventId.toString(),
@@ -32,7 +44,11 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
 
             if (result) {
                 setPrediction(result);
-                toast.success('¡Predicción generada con éxito!', { id: toastId });
+                toast.success('¡Análisis Estratégico Finalizado!', {
+                    id: toastId,
+                    description: `Veredicto: ${result.winner || 'Listo'} con ${result.confidence}% de acierto.`,
+                    duration: 5000
+                });
 
                 // Notificar si la confianza es alta (>= 75)
                 const confidenceVal = typeof result.confidence === 'number'
@@ -48,21 +64,21 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                     );
 
                     confetti({
-                        particleCount: 100,
-                        spread: 70,
+                        particleCount: 150,
+                        spread: 80,
                         origin: { y: 0.6 },
-                        colors: ['#a855f7', '#06b6d4', '#ffffff']
+                        colors: ['#a855f7', '#06b6d4', '#ffffff', '#fbbf24']
                     });
                 }
 
             } else {
                 setError('No se pudo generar la predicción');
-                toast.error('No se pudo generar la predicción', { id: toastId });
+                toast.error('Fallo en la conexión neuronal', { id: toastId });
             }
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Error al generar predicción');
-            toast.error(err.message || 'Error al generar predicción');
+            toast.error('Error crítico en el motor de IA');
         } finally {
             setLoading(false);
         }

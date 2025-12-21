@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMatchDetails, useMatchBestPlayers } from '@/hooks/useMatchData';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
@@ -11,6 +11,7 @@ import TopPlayersCard from '@/components/sports/TopPlayersCard';
 import TeamLogo from '@/components/ui/TeamLogo';
 import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
 import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
+import { toast } from 'sonner';
 
 interface MatchLiveViewProps {
     sport: string;
@@ -26,6 +27,16 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
     // Derived state
     const loading = gameLoading;
     const isLive = game?.status?.type === 'inprogress';
+
+    useEffect(() => {
+        if (isLive && game) {
+            toast('🤖 Análisis en Vivo Activado', {
+                description: `PickGenius AI está monitoreando el ${game.homeTeam.name} vs ${game.awayTeam.name} en tiempo real.`,
+                icon: '⚡',
+                duration: 5000,
+            });
+        }
+    }, [isLive, game?.id]);
 
     if (loading) {
         return (
