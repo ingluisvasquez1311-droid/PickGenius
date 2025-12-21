@@ -213,6 +213,13 @@ class SportsDataService {
     }
 
     /**
+     * Obtiene estadísticas generales del partido (posesión, tiros, etc.)
+     */
+    async getMatchStatistics(eventId: number): Promise<any> {
+        return await this.makeRequest(`/event/${eventId}/statistics`);
+    }
+
+    /**
      * Obtiene alineaciones y estadísticas de jugadores del partido
      */
     async getMatchLineups(eventId: number): Promise<any> {

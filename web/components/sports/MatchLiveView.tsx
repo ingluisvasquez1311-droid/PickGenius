@@ -124,7 +124,7 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                         </ErrorBoundary>
 
                         <ErrorBoundary>
-                            <MatchStatsSummary match={game} />
+                            <MatchStatsSummary match={game} sport={sport} eventId={eventId} />
                         </ErrorBoundary>
 
                         {/* MVP Spotlight */}

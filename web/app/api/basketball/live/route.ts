@@ -60,10 +60,11 @@ export async function GET(request: NextRequest) {
                 id: game.tournament?.category?.id
             },
             status: {
-                type: 'inprogress', // Sofascore live events are generally in progress
-                description: getDescription(game),
+                type: 'inprogress',
+                description: game.status?.description || 'Live',
                 code: game.status?.code
             },
+            roundInfo: game.roundInfo,
             startTimestamp: game.startTimestamp
         }));
 

@@ -41,13 +41,15 @@ export async function GET(request: NextRequest) {
                 current: game.homeScore?.current || 0,
                 display: game.homeScore?.display || 0,
                 period1: game.homeScore?.period1,
-                period2: game.homeScore?.period2
+                period2: game.homeScore?.period2,
+                redCards: game.homeScore?.redCards ?? game.homeTeam?.redCards ?? 0
             },
             awayScore: {
                 current: game.awayScore?.current || 0,
                 display: game.awayScore?.display || 0,
                 period1: game.awayScore?.period1,
-                period2: game.awayScore?.period2
+                period2: game.awayScore?.period2,
+                redCards: game.awayScore?.redCards ?? game.awayTeam?.redCards ?? 0
             },
             category: {
                 name: game.tournament?.category?.name || 'International',
@@ -59,6 +61,7 @@ export async function GET(request: NextRequest) {
                 description: game.status?.description || 'Live',
                 code: game.status?.code
             },
+            roundInfo: game.roundInfo,
             startTimestamp: game.startTimestamp
         }));
 

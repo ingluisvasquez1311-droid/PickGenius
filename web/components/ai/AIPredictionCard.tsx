@@ -14,7 +14,7 @@ interface AIPredictionCardProps {
 }
 
 export default function AIPredictionCard({ eventId, sport }: AIPredictionCardProps) {
-    const { user } = useAuth();
+    const { user, notify } = useAuth();
     const [prediction, setPrediction] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -25,8 +25,6 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             setError(null);
             const toastId = toast.loading('Analizando estadísticas del partido...');
 
-            // Use the centralized prediction service
-            // details are fetched server-side by the API now, so we only need ID and sport
             const result = await generatePrediction({
                 gameId: eventId.toString(),
                 sport: sport as any
@@ -36,16 +34,24 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                 setPrediction(result);
                 toast.success('¡Predicción generada con éxito!', { id: toastId });
 
-                // Trigger Confetti if confidence is high
-                if (result.confidence && (
-                    (typeof result.confidence === 'number' && result.confidence >= 75) ||
-                    (typeof result.confidence === 'string' && parseInt(result.confidence) >= 75)
-                )) {
+                // Notificar si la confianza es alta (>= 75)
+                const confidenceVal = typeof result.confidence === 'number'
+                    ? result.confidence
+                    : parseInt(result.confidence || '0');
+
+                if (confidenceVal >= 75) {
+                    await notify(
+                        '🏆 PICK TOP DETECTADO',
+                        `Nueva predicción para ${sport}: ${result.winner || 'Análisis listo'} con ${confidenceVal}% de confianza.`,
+                        'success',
+                        `/match/${sport}/${eventId}`
+                    );
+
                     confetti({
                         particleCount: 100,
                         spread: 70,
                         origin: { y: 0.6 },
-                        colors: ['#a855f7', '#06b6d4', '#ffffff'] // Brand colors
+                        colors: ['#a855f7', '#06b6d4', '#ffffff']
                     });
                 }
 
@@ -152,7 +158,9 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                 <div className="grid grid-cols-2 gap-3">
                                     {/* Total Goals */}
                                     <div className="bg-gradient-to-br from-green-900/40 to-green-800/20 p-3 rounded-lg border border-green-500/20">
-                                        <p className="text-green-300 text-[10px] uppercase font-bold mb-1">Total Goles</p>
+                                        <p className="text-green-300 text-[10px] uppercase font-bold mb-1">
+                                            {sport === 'basketball' ? 'Total Puntos' : 'Total Goles'}
+                                        </p>
                                         <p className="text-white font-bold text-lg">{prediction.predictions.totalGoals || '-'}</p>
                                     </div>
 

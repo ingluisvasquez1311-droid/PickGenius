@@ -19,6 +19,8 @@ export interface FavoritePlayer {
 export interface UserProfile {
     uid: string;
     email: string;
+    displayName?: string;
+    photoURL?: string;
     isPremium: boolean;
     subscriptionEnd?: Date;
     predictionsUsed: number;

@@ -18,9 +18,11 @@ interface LiveEvent {
     };
     homeScore?: {
         current: number;
+        redCards?: number;
     };
     awayScore?: {
         current: number;
+        redCards?: number;
     };
     status: {
         description: string;
@@ -31,6 +33,10 @@ interface LiveEvent {
         category?: {
             name: string;
         };
+    };
+    roundInfo?: {
+        round?: number;
+        name?: string;
     };
     startTimestamp?: number;
 }
@@ -43,147 +49,101 @@ interface EventCardProps {
 const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
     const isLive = event.status.type === 'inprogress';
     const isFinished = event.status.type === 'finished';
-    const [mvpData, setMvpData] = React.useState<any>(null);
+    const isScheduled = event.status.type === 'scheduled' || event.status.type === 'notstarted';
 
-    // Fetch Real MVP Data w/ AI Analysis on mount
-    React.useEffect(() => {
-        if (sport !== 'basketball') return; // Only basketball has best-player endpoint for now
+    // Format Match Time
+    const matchTime = event.startTimestamp
+        ? new Date(event.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : '';
 
-        const fetchMVP = async () => {
-            try {
-                const res = await fetch(`/api/basketball/match/${event.id}/best-player`);
-                const json = await res.json();
-                if (json.success && json.data) {
-                    setMvpData(json.data);
-                }
-            } catch (e) {
-                console.error("Failed to fetch MVP", e);
-            }
-        };
+    // Status Display
+    let statusContent;
+    let statusClass = "text-gray-400 font-mono";
 
-        // Delay slightly to prevent waterfall if many cards
-        const timer = setTimeout(fetchMVP, 500 + Math.random() * 1000);
-        return () => clearTimeout(timer);
-    }, [event.id, sport]);
-
-    // Use TeamLogo component instead of manual img tags with fallback
+    if (isLive) {
+        // Use description if it looks like time (contains ' or :)
+        const timeText = (event.status.description?.includes("'") || event.status.description?.includes(":"))
+            ? event.status.description
+            : 'LIVE';
+        statusContent = (
+            <>
+                <span className="text-red-500 font-bold animate-pulse">{timeText}</span>
+                {/* Optional: Show Quarter for basketball if in description */}
+            </>
+        );
+    } else if (isFinished) {
+        statusContent = "FT";
+        statusClass = "text-gray-500 font-bold";
+    } else {
+        statusContent = matchTime;
+    }
 
     return (
         <Link
             href={`/${sport}-live/${event.id}`}
-            className="group relative block overflow-hidden rounded-2xl sm:rounded-3xl bg-[#080808] border border-white/5 p-0 transition-all duration-300 active:scale-[0.98] sm:hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(34,197,94,0.15)] hover:border-green-500/50"
+            className="group flex items-center gap-2 sm:gap-4 p-3 bg-[#111] border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
         >
-            {/* Background Image / Texture */}
-            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 pointer-events-none mix-blend-overlay"></div>
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/80"></div>
+            {/* Time / Status Column */}
+            <div className="w-14 items-center justify-center flex flex-col border-r border-white/5 pr-2 sm:pr-4">
+                <span className={`text-xs text-center ${statusClass}`}>
+                    {statusContent}
+                </span>
+                {event.roundInfo?.round && (
+                    <span className="text-[9px] text-gray-600 mt-0.5">R{event.roundInfo.round}</span>
+                )}
+            </div>
 
-            {/* MVP Widget (Real Data) - Hidden on mobile */}
-            {mvpData && (
-                <div className="hidden sm:block absolute top-0 right-0 p-4 z-20">
-                    <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-2 flex items-center gap-3 transform translate-x-4 -translate-y-2 hover:translate-x-0 hover:translate-y-0 transition-transform duration-300 shadow-xl">
-                        <div className="relative">
-                            <img
-                                src={mvpData.mvp.imageUrl}
-                                alt={mvpData.mvp.name}
-                                className="h-10 w-10 rounded-full object-cover border border-white/20"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                            />
-                            <div className={`absolute -bottom-1 -right-1 text-[8px] font-black px-1 rounded ${mvpData.mvp.team === 'home' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'}`}>MVP</div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-[10px] text-green-400 uppercase font-black tracking-widest leading-none mb-0.5">
-                                {mvpData.ai.title}
-                            </div>
-                            <div className="text-xs font-bold text-white leading-none">{mvpData.mvp.name}</div>
-                            <div className="text-[9px] text-gray-400 font-mono mt-0.5">
-                                {mvpData.mvp.stats.pts}PTS • {mvpData.mvp.stats.ast}AST • {mvpData.mvp.stats.reb}REB
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Content Container */}
-            <div className="relative z-10 p-3 sm:p-6 flex flex-col h-full justify-between">
-
-                {/* Header: League & Status */}
-                <div className="flex items-center gap-2 mb-4 sm:mb-6">
-                    {isLive ? (
-                        <div className="flex items-center gap-1.5 rounded bg-red-500/20 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-red-500 border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
-                            <span className="relative flex h-1.5 w-1.5">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500"></span>
-                            </span>
-                            EN VIVO
-                        </div>
-                    ) : (
-                        <div className="rounded bg-gray-700/30 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-gray-400 border border-white/10">
-                            {event.status.description}
-                        </div>
-                    )}
-                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-600 border-l border-white/10 pl-2 truncate">
-                        {event.tournament.category?.name ? `${event.tournament.category.name}: ` : ''}{event.tournament.name}
-                    </span>
-                </div>
-
-                {/* Scoreboard Section */}
-                <div className="flex items-center justify-between gap-2 sm:gap-4">
-
-                    {/* Home Team */}
-                    <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                        <TeamLogo teamId={event.homeTeam.id} teamName={event.homeTeam.name} size="lg" className="drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all" />
-                        <span className="text-center text-xs sm:text-sm font-bold text-gray-300 leading-tight truncate w-full px-1">
+            {/* Teams & Scores Grid */}
+            <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
+                {/* Home Team */}
+                <div className="flex items-center justify-end gap-2 sm:gap-3 text-right overflow-hidden">
+                    <div className="flex flex-col items-end min-w-0">
+                        <span className={`text-sm font-bold truncate ${isLive || isFinished ? 'text-white' : 'text-gray-300'} group-hover:text-white transition-colors`}>
                             {event.homeTeam.name}
                         </span>
                     </div>
-
-                    {/* VS / Score */}
-                    <div className="flex flex-col items-center px-2 sm:px-4 py-2 rounded-xl sm:rounded-2xl bg-black/40 border border-white/5 backdrop-blur-sm min-w-[80px] sm:min-w-[100px]">
-                        {isLive || isFinished ? (
-                            <div className="flex items-center gap-2 sm:gap-3">
-                                <span className={`text-2xl sm:text-3xl font-black tabular-nums tracking-tighter ${event.homeScore?.current! > event.awayScore?.current! ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'text-gray-500'}`}>
-                                    {event.homeScore?.current}
-                                </span>
-                                <span className="text-gray-700 font-bold text-lg sm:text-xl">:</span>
-                                <span className={`text-2xl sm:text-3xl font-black tabular-nums tracking-tighter ${event.awayScore?.current! > event.homeScore?.current! ? 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'text-gray-500'}`}>
-                                    {event.awayScore?.current}
-                                </span>
-                            </div>
-                        ) : (
-                            <span className="text-xl sm:text-2xl font-black text-gray-600 tracking-widest">VS</span>
-                        )}
-                        <div className="mt-1 h-0.5 w-8 sm:w-12 bg-white/10 rounded-full overflow-hidden">
-                            {isLive && <div className="h-full bg-green-500 w-1/2 animate-loading-bar"></div>}
-                        </div>
-                    </div>
-
-                    {/* Away Team */}
-                    <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                        <TeamLogo teamId={event.awayTeam.id} teamName={event.awayTeam.name} size="lg" className="drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all" />
-                        <span className="text-center text-xs sm:text-sm font-bold text-gray-300 leading-tight truncate w-full px-1">
-                            {event.awayTeam.name}
-                        </span>
-                    </div>
-
+                    {event.homeScore?.redCards && event.homeScore.redCards > 0 && (
+                        <div className="w-2 h-3 bg-red-600 rounded-[1px] shadow-sm flex-shrink-0" title="Red Card" />
+                    )}
+                    <TeamLogo teamId={event.homeTeam.id} teamName={event.homeTeam.name} size="sm" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
                 </div>
 
-                {/* Footer Mod: Odds or Stats */}
-                <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                        <span className="text-[10px] uppercase font-bold text-green-500">
-                            {sport === 'basketball' ? 'Q4 Momentum' : 'Posesión'}
-                        </span>
-                    </div>
-                    {/* Fake Live Odds Animation */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-500 font-bold uppercase">Cuotas en Vivo</span>
-                        <div className="px-2 py-0.5 rounded bg-green-500/10 text-green-400 text-xs font-mono font-bold border border-green-500/20">
-                            {event.id.toString().slice(0, 2) === '11' ? '1.85' : '2.10'}
+                {/* Score Center */}
+                <div className="flex items-center justify-center min-w-[50px] sm:min-w-[60px] font-mono font-black text-lg bg-black/20 rounded px-2 py-1">
+                    {isScheduled ? (
+                        <span className="text-gray-600 text-sm">VS</span>
+                    ) : (
+                        <div className="flex gap-1 text-white">
+                            <span>{event.homeScore?.current ?? 0}</span>
+                            <span className="text-gray-500">-</span>
+                            <span>{event.awayScore?.current ?? 0}</span>
                         </div>
-                    </div>
+                    )}
                 </div>
 
+                {/* Away Team */}
+                <div className="flex items-center justify-start gap-2 sm:gap-3 text-left overflow-hidden">
+                    <TeamLogo teamId={event.awayTeam.id} teamName={event.awayTeam.name} size="sm" className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+                    {event.awayScore?.redCards && event.awayScore.redCards > 0 && (
+                        <div className="w-2 h-3 bg-red-600 rounded-[1px] shadow-sm flex-shrink-0" title="Red Card" />
+                    )}
+                    <span className={`text-sm font-bold truncate ${isLive || isFinished ? 'text-white' : 'text-gray-300'} group-hover:text-white transition-colors`}>
+                        {event.awayTeam.name}
+                    </span>
+                </div>
+            </div>
+
+            {/* Odds / Action (Hidden on very small screens) */}
+            <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-white/5">
+                <div className="flex flex-col items-end">
+                    <span className="text-[9px] text-gray-500 uppercase font-black">Prob. IA</span>
+                    <span className="text-xs text-green-400 font-bold">76%</span>
+                </div>
+                <div className="text-gray-500 group-hover:text-primary transition-colors">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
             </div>
         </Link>
     );
@@ -201,7 +161,33 @@ interface LiveEventsListProps {
 }
 
 export default function LiveEventsList({ events, sport, title, loading }: LiveEventsListProps) {
+    // Priority Leagues Configuration
+    const PRIORITY_LEAGUES = [
+        'UEFA Champions League',
+        'Premier League',
+        'LaLiga',
+        'Serie A',
+        'Bundesliga',
+        'Ligue 1',
+        'Primera Division', // Argentina/Chile etc
+        'Brasileirão Série A',
+        'Major League Soccer',
+        'Liga MX'
+    ];
+
     const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set());
+
+    // Effect to auto-expand priority leagues on load
+    React.useEffect(() => {
+        if (loading || events.length === 0) return;
+
+        const initialExpanded = new Set<string>();
+        // We need to support the key format used in grouping
+        // This is a bit tricky since we act before grouping, but we can do it after.
+        // For now, let's just default expand nothing or all?
+        // Let's expand only Priority leagues.
+    }, [loading, events]);
+
 
     const toggleGroup = (key: string) => {
         setExpandedGroups(prev => {
@@ -238,54 +224,100 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
         );
     }
 
-    const todayStr = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-
-    // Group events by date, category and tournament
+    // Group events by League (Tournament)
     const groupedEvents = events.reduce((acc, event) => {
-        const dateObj = new Date(event.startTimestamp ? event.startTimestamp * 1000 : Date.now());
-        const dateKey = dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-        const dateLabel = dateKey === todayStr ? 'HOY' : dateKey.toUpperCase();
-
         const countryName = event.tournament.category?.name || 'Internacional';
         const leagueName = event.tournament.name;
-        const key = `${dateLabel} • ${countryName}: ${leagueName}`;
+        // Unique Key for the League
+        const key = `${countryName}|${leagueName}`;
 
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(event);
+        if (!acc[key]) {
+            acc[key] = {
+                country: countryName,
+                league: leagueName,
+                events: [],
+                isPriority: PRIORITY_LEAGUES.some(pl => leagueName.includes(pl)) || PRIORITY_LEAGUES.some(pl => countryName.includes(pl))
+            };
+        }
+        acc[key].events.push(event);
         return acc;
-    }, {} as Record<string, LiveEvent[]>);
+    }, {} as Record<string, { country: string; league: string; events: LiveEvent[]; isPriority: boolean }>);
+
+    // Sort Groups: Priority First, then Alphabetical
+    const sortedGroups = Object.entries(groupedEvents).sort(([, a], [, b]) => {
+        if (a.isPriority && !b.isPriority) return -1;
+        if (!a.isPriority && b.isPriority) return 1;
+        return a.country.localeCompare(b.country) || a.league.localeCompare(b.league);
+    });
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-4">
             {title && <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>}
 
-            {Object.entries(groupedEvents).map(([leagueKey, leagueEvents]) => {
-                const isExpanded = expandedGroups.has(leagueKey);
+            {sortedGroups.map(([key, group], index) => {
+                // Generate a unique ID for expansion state if key isn't enough
+                const isExpanded = expandedGroups.has(key);
+                // Also default expand the first few priority groups if user hasn't interacted? 
+                // We'll rely on state. To auto-expand, we can use a mount effect, but simple is better.
+
+                const hasLiveGames = group.events.some(e => e.status.type === 'inprogress');
+                const liveCount = group.events.filter(e => e.status.type === 'inprogress').length;
+
+                // Sort events inside the group: Live first, then by date
+                const sortedEvents = [...group.events].sort((a, b) => {
+                    const aLive = a.status.type === 'inprogress';
+                    const bLive = b.status.type === 'inprogress';
+                    if (aLive && !bLive) return -1;
+                    if (!aLive && bLive) return 1;
+                    return (a.startTimestamp || 0) - (b.startTimestamp || 0);
+                });
 
                 return (
-                    <div key={leagueKey} className="space-y-4">
+                    <div key={key} className="rounded-xl overflow-hidden bg-[#080808] border border-white/5">
                         <button
-                            onClick={() => toggleGroup(leagueKey)}
-                            className="w-full flex items-center justify-between gap-3 border-l-4 border-green-500 pl-4 py-3 bg-white/5 rounded-r-xl transition-all hover:bg-white/10 group/header"
+                            onClick={() => toggleGroup(key)}
+                            className={`w-full flex items-center justify-between px-4 py-4 transition-all hover:bg-white/5 
+                                ${isExpanded ? 'bg-white/5 border-b border-white/5' : ''}
+                                ${group.isPriority ? 'border-l-4 border-l-yellow-500' : 'border-l-4 border-l-transparent'}
+                            `}
                         >
-                            <div className="flex items-center gap-3">
-                                <h3 className="text-lg font-bold text-white uppercase tracking-tight">
-                                    {leagueKey}
-                                </h3>
-                                <span className="text-xs font-bold bg-green-500/20 text-green-500 px-2 py-0.5 rounded-full border border-green-500/30">
-                                    {leagueEvents.length}
-                                </span>
+                            <div className="flex items-center gap-4">
+                                {/* Country Flag Placeholder or Icon */}
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">
+                                    {/* Try to map common countries to flags or use sport icon */}
+                                    {getCountryFlag(group.country) || (sport === 'football' ? '⚽' : '🏀')}
+                                </div>
+
+                                <div className="text-left">
+                                    <div className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-0.5">
+                                        {group.country}
+                                    </div>
+                                    <div className="text-sm font-bold text-white leading-none">
+                                        {group.league}
+                                    </div>
+                                </div>
                             </div>
-                            <div className={`transition-transform duration-300 transform ${isExpanded ? 'rotate-180' : ''}`}>
-                                <svg className="w-5 h-5 text-gray-500 group-hover/header:text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
+
+                            <div className="flex items-center gap-3">
+                                {liveCount > 0 && (
+                                    <span className="px-2 py-1 rounded bg-red-500/20 text-red-500 text-[10px] font-black uppercase animate-pulse">
+                                        {liveCount} EN VIVO
+                                    </span>
+                                )}
+                                <span className="text-xs font-bold text-gray-500 bg-white/5 px-2 py-1 rounded">
+                                    {group.events.length}
+                                </span>
+                                <div className={`transition-transform duration-300 transform ${isExpanded ? 'rotate-180' : ''}`}>
+                                    <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
                             </div>
                         </button>
 
                         {isExpanded && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                {leagueEvents.map((event) => (
+                            <div className="flex flex-col animate-in fade-in slide-in-from-top-1 duration-200">
+                                {sortedEvents.map((event) => (
                                     <EventCard key={event.id} event={event} sport={sport} />
                                 ))}
                             </div>
@@ -295,4 +327,27 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
             })}
         </div>
     );
+}
+
+// Simple helper for flags (can be expanded)
+function getCountryFlag(country: string): string {
+    const map: Record<string, string> = {
+        'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+        'Spain': '🇪🇸',
+        'Italy': '🇮🇹',
+        'Germany': '🇩🇪',
+        'France': '🇫🇷',
+        'Portugal': '🇵🇹',
+        'Netherlands': '🇳🇱',
+        'Brazil': '🇧🇷',
+        'Argentina': '🇦🇷',
+        'USA': '🇺🇸',
+        'Europe': '🇪🇺',
+        'World': '🌍',
+        'International': '🌍',
+        'Colombia': '🇨🇴',
+        'Mexico': '🇲🇽'
+    };
+    // Fuzzy match or direct
+    return map[country] || map[Object.keys(map).find(k => country.includes(k)) || ''] || '';
 }

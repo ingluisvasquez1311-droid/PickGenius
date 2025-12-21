@@ -59,3 +59,23 @@ export function useMatchBestPlayers(sport: string, eventId: string) {
         staleTime: 60000, // Players stats update less frequently
     });
 }
+
+async function fetchMatchStatistics(sport: string, eventId: string) {
+    const res = await fetch(`/api/sports/${sport}/match/${eventId}/statistics`);
+    if (!res.ok) throw new Error('Failed to fetch stats');
+    const data = await res.json();
+    return data.data;
+}
+
+export function useMatchStatistics(sport: string, eventId: string) {
+    return useQuery({
+        queryKey: ['match-stats', sport, eventId],
+        queryFn: () => fetchMatchStatistics(sport, eventId),
+        enabled: !!sport && !!eventId,
+        refetchInterval: (query) => {
+            const status = query.state.data?.status?.type;
+            return status === 'inprogress' ? 30000 : false;
+        },
+        staleTime: 20000,
+    });
+}

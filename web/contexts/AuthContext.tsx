@@ -8,6 +8,7 @@ import {
     onAuthStateChanged
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { type User } from 'firebase/auth';
 import {
     createUserProfile,
     getUserProfile,
@@ -58,7 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const loadUserProfile = async (uid: string, email: string) => {
+    // ... (AuthContext definition)
+
+    const loadUserProfile = async (firebaseUser: User) => {
+        const uid = firebaseUser.uid;
+        const email = firebaseUser.email!;
+
         console.log(`👤 [Auth] Loading profile for ${uid}...`);
         try {
             // Try to get existing profile
@@ -75,13 +81,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             console.log('👤 [Auth] Profile loaded successfully:', profile.role);
-            setUser(profile);
+            // Merge Firebase Auth profile data not stored in Firestore
+            setUser({
+                ...profile,
+                displayName: firebaseUser.displayName || undefined,
+                photoURL: firebaseUser.photoURL || undefined
+            });
         } catch (error) {
             console.error('❌ [Auth] Error loading user profile:', error);
             // Fallback to basic user data
             setUser({
                 uid,
                 email,
+                displayName: firebaseUser.displayName || undefined,
+                photoURL: firebaseUser.photoURL || undefined,
                 isPremium: false,
                 predictionsUsed: 0,
                 predictionsLimit: 3,
@@ -103,7 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                await loadUserProfile(firebaseUser.uid, firebaseUser.email!);
+                await loadUserProfile(firebaseUser);
             } else {
                 setUser(null);
             }
@@ -193,8 +206,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const notify = async (title: string, message: string, type: AppNotification['type'] = 'info', link?: string) => {
         if (!user) return;
-        await createNotification(user.uid, { title, message, type, link });
-        await refreshNotifications();
+        try {
+            await createNotification(user.uid, { title, message, type, link });
+
+            // Optimistic update for better UX
+            const newNotif: AppNotification = {
+                id: Math.random().toString(36).substr(2, 9),
+                uid: user.uid,
+                title,
+                message,
+                type,
+                link,
+                read: false,
+                timestamp: new Date()
+            };
+
+            setNotifications(prev => [newNotif, ...prev]);
+            setUnreadCount(prev => prev + 1);
+
+            // Still refresh from server to get the real ID and server timestamp
+            await refreshNotifications();
+        } catch (error) {
+            console.error('❌ [Auth] Error creating notification:', error);
+        }
     };
 
     useEffect(() => {

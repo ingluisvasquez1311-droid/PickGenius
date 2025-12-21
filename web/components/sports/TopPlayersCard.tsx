@@ -174,7 +174,7 @@ export default function TopPlayersCard({ title, players, sport, teamColor = 'pur
                 <p className="text-gray-600 text-[10px]">Análisis en vivo</p>
                 <div className="flex gap-1">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    <p className="text-gray-600 text-[10px]">Real-time</p>
+                    <p className="text-gray-600 text-[10px]">Tiempo real</p>
                 </div>
             </div>
         </div>

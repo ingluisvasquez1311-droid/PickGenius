@@ -49,12 +49,11 @@ export async function getUserNotifications(uid: string, limitCount: number = 50)
     const q = query(
         notificationsRef,
         where('uid', '==', uid),
-        orderBy('timestamp', 'desc'),
         limit(limitCount)
     );
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
+    const notifications = querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
             id: doc.id,
@@ -67,6 +66,8 @@ export async function getUserNotifications(uid: string, limitCount: number = 50)
             link: data.link
         };
     });
+
+    return notifications.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 }
 
 /**

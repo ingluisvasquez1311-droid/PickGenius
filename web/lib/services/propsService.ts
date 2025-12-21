@@ -301,7 +301,12 @@ class PropsService {
             const sofaStatName = sportMapping[type] || type;
 
             // 1. Obtener el promedio real de temporada o usar fallback inteligente
-            const realAvg = realStats.season[sofaStatName] || 0;
+            const seasonStats = realStats.season || {};
+            const appearances = seasonStats.appearances || seasonStats.matches || 1;
+            const totalValue = seasonStats[sofaStatName] || 0;
+
+            // Sofascore devuelve totales en season stats, así que calculamos el promedio
+            const realAvg = appearances > 0 ? (totalValue / appearances) : 0;
 
             // 2. Extraer los últimos 5 juegos reales para esa estadística
             let last5: number[] = [];

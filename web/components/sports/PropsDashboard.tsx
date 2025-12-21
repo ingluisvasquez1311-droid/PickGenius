@@ -204,15 +204,15 @@ const PropsDashboard = () => {
                             // Incrementar contador de uso
                             await usePrediction();
 
-                            // Notificar si es un Hot Pick (Probabilidad >= 85%)
-                            if (predictionData.probability >= 85) {
+                            // Notificar si es un Hot Pick (Probabilidad >= 75%)
+                            if (predictionData.probability >= 75) {
                                 await notify(
-                                    '🔥 ¡HOT PICK DETECTADO!',
-                                    `${prop.player.name} tiene un ${predictionData.probability}% de probabilidad en ${prop.prop.displayName}. ¡No te lo pierdas!`,
-                                    'success',
+                                    predictionData.probability >= 85 ? '🔥 ¡HOT PICK DETECTADO!' : '🎯 RECOMENDACIÓN IA',
+                                    `${prop.player.name} tiene un ${predictionData.probability}% de probabilidad en ${prop.prop.displayName}.`,
+                                    predictionData.probability >= 85 ? 'success' : 'info',
                                     '/props'
                                 );
-                                toast.success('¡Hot Pick guardado!');
+                                toast.success(predictionData.probability >= 85 ? '¡Hot Pick guardado!' : 'Predicción analizada');
                             }
                         }
                         setIsPredicting(null);
@@ -560,7 +560,7 @@ const PlayerGroup = ({
                                 <div className="grid grid-cols-2 gap-2 mb-4 text-center">
                                     <div className="bg-black/40 p-2 rounded-xl border border-white/5 group/stat">
                                         <div className="text-[7px] text-gray-500 font-black uppercase mb-1">PROMEDIO</div>
-                                        <div className="text-xs font-black text-white">{prop.stats.average}</div>
+                                        <div className="text-xs font-black text-white">{prop.stats.average.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</div>
                                     </div>
                                     <div className="bg-black/40 p-2 rounded-xl border border-white/5 group/stat">
                                         <div className="text-[7px] text-gray-500 font-black uppercase mb-1">TENDENCIA</div>
@@ -661,7 +661,7 @@ const PropCard = ({ prop, onPredict, isPredicting }: { prop: PlayerProp, onPredi
             <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-black/20 rounded-xl p-3 border border-white/5">
                     <div className="text-[8px] text-white/30 font-black uppercase mb-1">Promedio</div>
-                    <div className="text-xl font-black text-white">{prop.stats.average}</div>
+                    <div className="text-xl font-black text-white">{prop.stats.average.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</div>
                 </div>
                 <div className="bg-black/20 rounded-xl p-3 border border-white/5">
                     <div className="text-[8px] text-white/30 font-black uppercase mb-1">Tendencia</div>
