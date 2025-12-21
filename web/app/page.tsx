@@ -295,14 +295,17 @@ export default function HomePage() {
                       <div className="text-gray-500 font-bold text-[10px] uppercase tracking-widest mb-4">{footballStats.featuredMatch.tournament.name}</div>
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex-1">
-                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${footballStats.featuredMatch.homeTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
-                          <div className="text-xs font-black uppercase truncate">{footballStats.featuredMatch.homeTeam.shortName}</div>
+                          <img src={`/api/proxy/team-logo/${footballStats.featuredMatch.homeTeam.id}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
+                          <h3 className="font-bold text-lg">{footballStats.featuredMatch.homeTeam.name}</h3>
                         </div>
-                        <div className="text-5xl font-black tracking-tighter italic">
-                          {footballStats.featuredMatch.homeScore.current} - {footballStats.featuredMatch.awayScore.current}
+                        <div className="flex flex-col items-center">
+                          <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">VS</div>
+                          <div className="mt-2 px-3 py-1 bg-white/10 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md border border-white/5">
+                            {new Date(footballStats.featuredMatch.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${footballStats.featuredMatch.awayTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
+                        <div className="text-center">
+                          <img src={`/api/proxy/team-logo/${footballStats.featuredMatch.awayTeam.id}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
                           <div className="text-xs font-black uppercase truncate">{footballStats.featuredMatch.awayTeam.shortName}</div>
                         </div>
                       </div>

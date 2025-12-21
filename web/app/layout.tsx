@@ -2,6 +2,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ToastProvider from "@/components/ui/ToastProvider";
 import LiveTicker from "@/components/sports/LiveTicker";
+import ChristmasWrapper from "@/components/layout/ChristmasWrapper";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -66,6 +67,7 @@ export default function RootLayout({
         <AuthProvider>
           <BettingSlipProvider>
             <Navbar />
+            <ChristmasWrapper />
             <LiveTicker />
             <main className="pt-24 min-h-screen">
               {children}

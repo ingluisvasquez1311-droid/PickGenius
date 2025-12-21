@@ -53,8 +53,9 @@ export default function Navbar() {
                                 className="rounded-lg"
                                 priority
                             />
-                            <span className="text-lg font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent hidden sm:block">
+                            <span className="text-lg font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent hidden sm:block relative">
                                 PickGenius
+                                <span className="absolute -top-3 -right-6 text-[8px] bg-red-600 text-white px-1 rounded animate-pulse font-mono tracking-widest border border-red-400">XMAS</span>
                             </span>
                         </Link>
 
