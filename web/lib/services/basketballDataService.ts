@@ -25,7 +25,15 @@ class BasketballDataService {
             const data = await sportsDataService.makeRequest<T>(endpoint);
 
             if (!data) {
-                throw new Error(`Provider unavailable for ${endpoint}`);
+                const isServer = typeof window === 'undefined';
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                const scraperKey = process.env.SCRAPER_API_KEY;
+                const useProxy = process.env.USE_PROXY;
+
+                // More detailed error message for debugging
+                const errorMsg = `[BASKETBALL] makeRequest returned null for ${endpoint}. ENV CHECK: isServer=${isServer}, hasApiUrl=${!!apiUrl}, apiUrl=${apiUrl}, hasScraperKey=${!!scraperKey}, useProxy=${useProxy}`;
+                console.error(`❌ ${errorMsg}`);
+                throw new Error(errorMsg);
             }
 
             // Cache the successful response
