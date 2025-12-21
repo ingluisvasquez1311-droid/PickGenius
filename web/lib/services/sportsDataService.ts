@@ -96,40 +96,45 @@ class SportsDataService {
     async makeRequest<T = any>(endpoint: string): Promise<T | null> {
         try {
             const isServer = typeof window === 'undefined';
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            // Try different env var names as fallback
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL ||
+                process.env.NEXT_PUBLIC_BACKEND_HOST ||
+                (isServer ? "https://pickgenius-api.onrender.com" : ""); // Hardcoded fallback for production bridge
 
             let fetchUrl: string;
             let fetchHeaders: any = { ...this.headers };
 
             // Determine the final URL with robust construction
-            if (isServer && apiUrl) {
+            const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
+            if (isServer && apiUrl && apiUrl.startsWith('http')) {
                 const cleanApiUrl = apiUrl.trim().replace(/\/$/, "");
-                const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 
                 // Route through our Render bridge
                 fetchUrl = `${cleanApiUrl}/api/sofascore/proxy${cleanEndpoint}`;
 
                 if (!process.env.NEXT_PHASE) {
-                    console.log(`� [SportsData] Proxy Tunnel: ${fetchUrl}`);
+                    console.log(`📡 [SportsData PROXY] Tunneling: ${fetchUrl}`);
                 }
             } else {
                 // Client side (browser) or local dev without apiUrl
-                const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-
                 if (!isServer) {
-                    // Use local Next.js API route as gateway (which we will also update to bridge to Render)
+                    // Use local Next.js API route as gateway
                     fetchUrl = `/api/proxy/sportsdata${cleanEndpoint}`;
                 } else {
                     // Fallback to direct Sofascore (standard for local/dev)
                     fetchUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
+                    if (!process.env.NEXT_PHASE) {
+                        console.log(`📡 [SportsData DIRECT] Using Sofascore: ${fetchUrl}`);
+                    }
                 }
             }
 
             const response = await fetch(fetchUrl, {
                 headers: fetchHeaders,
                 cache: 'no-store',
-                // Wait up to 15s for the bridge/Render to wake up
-                signal: AbortSignal.timeout(15000)
+                // Wait up to 25s for the bridge/Render to wake up (Render Free Tier can be slow)
+                signal: AbortSignal.timeout(25000)
             });
 
             if (!response.ok) {

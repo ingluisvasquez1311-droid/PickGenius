@@ -24,7 +24,11 @@ class FootballDataService {
             const data = await sportsDataService.makeRequest<T>(endpoint);
 
             if (!data) {
-                throw new Error(`Provider unavailable for ${endpoint}`);
+                const isServer = typeof window === 'undefined';
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                const errorMsg = `Provider unavailable for ${endpoint} (Server=${isServer}, HasAPI=${!!apiUrl})`;
+                console.warn(`⚠️ [FootballDataService] ${errorMsg}`);
+                throw new Error(errorMsg);
             }
 
             // Cache the successful response
