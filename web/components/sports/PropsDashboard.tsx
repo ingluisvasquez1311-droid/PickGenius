@@ -344,7 +344,7 @@ const PlayerGroup = ({ group, onPredict, isPredicting }: { group: { player: any,
                     <div className="w-20 h-20 rounded-[2rem] bg-black/40 border border-white/10 p-1 shrink-0 overflow-hidden shadow-2xl relative group-hover:scale-110 transition-transform duration-500">
                         <img src={group.player.image} alt={group.player.name} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2">
-                            <div className="w-6 h-6"><TeamLogo teamId={group.game.homeTeam === group.player.team ? group.game.homeTeamId : group.game.awayTeamId} /></div>
+                            <div className="w-6 h-6"><TeamLogo teamId={group.game.homeTeam === group.player.team ? group.game.homeTeamId : group.game.awayTeamId} teamName={group.player.team} size="sm" /></div>
                         </div>
                     </div>
                     <div>
