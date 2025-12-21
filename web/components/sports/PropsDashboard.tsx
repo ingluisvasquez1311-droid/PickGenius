@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
+import TeamLogo from '@/components/ui/TeamLogo';
 
 interface PlayerProp {
     id: string;
@@ -20,6 +22,8 @@ interface PlayerProp {
         id: number;
         homeTeam: string;
         awayTeam: string;
+        homeTeamId: number;
+        awayTeamId: number;
         date: string;
         startTimestamp: number;
     };
@@ -305,6 +309,27 @@ const PropsDashboard = () => {
     );
 };
 
+const Sparkline = ({ data, color = "#a855f7" }: { data: number[], color?: string }) => {
+    const chartData = data.map((val, i) => ({ val, i }));
+    return (
+        <div className="h-10 w-full opacity-60">
+            <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                    <YAxis domain={['dataMin - 5', 'dataMax + 5']} hide />
+                    <Line
+                        type="monotone"
+                        dataKey="val"
+                        stroke={color}
+                        strokeWidth={3}
+                        dot={false}
+                        animationDuration={2000}
+                    />
+                </LineChart>
+            </ResponsiveContainer>
+        </div>
+    );
+};
+
 const PlayerGroup = ({ group, onPredict, isPredicting }: { group: { player: any, game: any, props: PlayerProp[] }, onPredict: (prop: PlayerProp) => void, isPredicting: string | null }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -316,14 +341,23 @@ const PlayerGroup = ({ group, onPredict, isPredicting }: { group: { player: any,
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-[2rem] bg-black/40 border border-white/10 p-1 shrink-0 overflow-hidden shadow-2xl">
+                    <div className="w-20 h-20 rounded-[2rem] bg-black/40 border border-white/10 p-1 shrink-0 overflow-hidden shadow-2xl relative group-hover:scale-110 transition-transform duration-500">
                         <img src={group.player.image} alt={group.player.name} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2">
+                            <div className="w-6 h-6"><TeamLogo teamId={group.game.homeTeam === group.player.team ? group.game.homeTeamId : group.game.awayTeamId} /></div>
+                        </div>
                     </div>
                     <div>
-                        <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase mb-1">{group.player.name}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase mb-0">{group.player.name}</h3>
+                            <div className="flex items-center -space-x-2">
+                                <div className="w-6 h-6 rounded-full border border-white/10 bg-black/50 overflow-hidden" title={group.game.homeTeam}><TeamLogo teamId={group.game.homeTeamId} teamName={group.game.homeTeam} size="sm" /></div>
+                                <div className="w-6 h-6 rounded-full border border-white/10 bg-black/50 overflow-hidden" title={group.game.awayTeam}><TeamLogo teamId={group.game.awayTeamId} teamName={group.game.awayTeam} size="sm" /></div>
+                            </div>
+                        </div>
                         <div className="flex items-center gap-3">
                             <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">{group.player.team}</span>
-                            <span className="text-[10px] font-bold text-white/20 uppercase">vs {group.game.homeTeam === group.player.team ? group.game.awayTeam : group.game.homeTeam}</span>
+                            <span className="text-[10px] font-bold text-white/30 uppercase">VS {group.game.homeTeam === group.player.team ? group.game.awayTeam : group.game.homeTeam}</span>
                         </div>
                     </div>
                 </div>
@@ -352,24 +386,34 @@ const PlayerGroup = ({ group, onPredict, isPredicting }: { group: { player: any,
                                     <div className="text-2xl font-black text-white italic">{prop.prop.line}</div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2 mb-6 text-center">
-                                    <div className="bg-black/40 p-2 rounded-xl border border-white/5">
-                                        <div className="text-[7px] text-gray-500 font-black uppercase">AVG</div>
+                                <div className="grid grid-cols-2 gap-2 mb-4 text-center">
+                                    <div className="bg-black/40 p-2 rounded-xl border border-white/5 group/stat">
+                                        <div className="text-[7px] text-gray-500 font-black uppercase mb-1">PROMEDIO</div>
                                         <div className="text-xs font-black text-white">{prop.stats.average}</div>
                                     </div>
-                                    <div className="bg-black/40 p-2 rounded-xl border border-white/5">
-                                        <div className="text-[7px] text-gray-500 font-black uppercase">Trend</div>
+                                    <div className="bg-black/40 p-2 rounded-xl border border-white/5 group/stat">
+                                        <div className="text-[7px] text-gray-500 font-black uppercase mb-1">TENDENCIA</div>
                                         <div className="text-xs font-black text-white">{prop.stats.trend}</div>
                                     </div>
                                 </div>
 
+                                <div className="mb-6 px-1">
+                                    <Sparkline data={prop.stats.last5} color={prop.stats.trend === '📈' ? '#10b981' : '#ef4444'} />
+                                </div>
+
                                 {prop.prediction ? (
-                                    <div className={`p-4 rounded-2xl border-2 ${prop.prediction.prediction === 'OVER' ? 'border-green-500/30 bg-green-500/5' : 'border-red-500/30 bg-red-500/5'}`}>
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className={`text-[10px] font-black ${prop.prediction.prediction === 'OVER' ? 'text-green-500' : 'text-red-500'}`}>{prop.prediction.prediction}</span>
-                                            <span className="text-[10px] font-black text-white">{prop.prediction.probability}%</span>
+                                    <div className={`p-4 rounded-2xl border-2 relative overflow-hidden group/pred ${prop.prediction.prediction === 'OVER' ? 'border-green-500/30 bg-green-500/5' : 'border-red-500/30 bg-red-500/5'}`}>
+                                        <div className={`absolute top-0 right-0 w-16 h-16 blur-2xl opacity-20 -mr-8 -mt-8 ${prop.prediction.prediction === 'OVER' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                        <div className="flex justify-between items-center mb-1 relative z-10">
+                                            <span className={`text-[10px] font-black tracking-tighter ${prop.prediction.prediction === 'OVER' ? 'text-green-500' : 'text-red-500'}`}>{prop.prediction.prediction === 'OVER' ? 'MÁS DE' : 'MENOS DE'}</span>
+                                            <div className="flex items-center gap-1">
+                                                <div className="w-12 h-1 bg-white/10 rounded-full overflow-hidden">
+                                                    <div className={`h-full opacity-60 ${prop.prediction.prediction === 'OVER' ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${prop.prediction.probability}%` }}></div>
+                                                </div>
+                                                <span className="text-[10px] font-black text-white">{prop.prediction.probability}%</span>
+                                            </div>
                                         </div>
-                                        <p className="text-[9px] text-white/40 italic line-clamp-1">"{prop.prediction.reasoning}"</p>
+                                        <p className="text-[9px] text-white/40 italic line-clamp-1 relative z-10">"{prop.prediction.reasoning}"</p>
                                     </div>
                                 ) : (
                                     <button

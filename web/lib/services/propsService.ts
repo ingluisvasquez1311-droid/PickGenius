@@ -15,6 +15,8 @@ export interface PlayerProp {
         id: number;
         homeTeam: string;
         awayTeam: string;
+        homeTeamId: number;
+        awayTeamId: number;
         date: string;
         startTimestamp: number;
     };
@@ -135,7 +137,7 @@ class PropsService {
             {
                 id: `mock_p1_${sport}`,
                 player: { id: 1, name: 'Atleta Estrella', team: 'Lions', position: 'G', image: '/player-placeholder.png' },
-                game: { id: 101, homeTeam: 'Lions', awayTeam: 'Tigers', date: new Date().toISOString(), startTimestamp: Date.now() / 1000 + 3600 },
+                game: { id: 101, homeTeam: 'Lions', awayTeam: 'Tigers', homeTeamId: 1, awayTeamId: 2, date: new Date().toISOString(), startTimestamp: Date.now() / 1000 + 3600 },
                 prop: { type, line: 20.5, displayName: config.names[type], icon: config.icons[type] },
                 stats: { average: 22.4, last5: [25, 18, 22, 30, 19], trend: '📈' },
                 league: 'Pro League',
@@ -144,7 +146,7 @@ class PropsService {
             {
                 id: `mock_p2_${sport}`,
                 player: { id: 2, name: 'MVP Candidato', team: 'Eagles', position: 'F', image: '/player-placeholder.png' },
-                game: { id: 102, homeTeam: 'Eagles', awayTeam: 'Hawks', date: new Date().toISOString(), startTimestamp: Date.now() / 1000 + 7200 },
+                game: { id: 102, homeTeam: 'Eagles', awayTeam: 'Hawks', homeTeamId: 3, awayTeamId: 4, date: new Date().toISOString(), startTimestamp: Date.now() / 1000 + 7200 },
                 prop: { type, line: 15.5, displayName: config.names[type], icon: config.icons[type] },
                 stats: { average: 18.2, last5: [20, 15, 17, 19, 21], trend: '📈' },
                 league: 'Pro League',
@@ -291,6 +293,8 @@ class PropsService {
                     id: game.id,
                     homeTeam: game.homeTeam.name,
                     awayTeam: game.awayTeam.name,
+                    homeTeamId: game.homeTeam.id,
+                    awayTeamId: game.awayTeam.id,
                     date: new Date(game.startTimestamp * 1000).toISOString(),
                     startTimestamp: game.startTimestamp
                 },
