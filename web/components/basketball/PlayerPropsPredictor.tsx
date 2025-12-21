@@ -7,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import PlayerPredictionShowcase from '@/components/ai/PlayerPredictionShowcase';
+import { LineChart, Line, ResponsiveContainer, YAxis, Tooltip } from 'recharts';
+import { TrendingUp, Activity, Zap, Brain, Target, Star, ChevronRight } from 'lucide-react';
 
 type Sport = 'basketball' | 'baseball' | 'nhl' | 'tennis' | 'american-football' | 'football';
 
@@ -29,16 +31,13 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
     const [thinkingProgress, setThinkingProgress] = useState(0);
     const [thinkingMessage, setThinkingMessage] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const [showShowcase, setShowShowcase] = useState(false);
     const { user, usePrediction, checkPredictionLimit, saveToHistory, notify } = useAuth();
 
     const thinkingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Configuración dinámica de API (Movido arriba para uso en hooks)
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
     const BACKEND_HOST = process.env.NEXT_PUBLIC_BACKEND_HOST;
-    const API_BASE = API_URL
-        || (BACKEND_HOST ? `https://${BACKEND_HOST}` : 'http://localhost:3001');
+    const API_BASE = API_URL || (BACKEND_HOST ? `https://${BACKEND_HOST}` : 'http://localhost:3001');
 
     useEffect(() => {
         async function fetchPlayerStats() {
@@ -62,8 +61,6 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
 
         fetchPlayerStats();
     }, [selectedPlayer, currentSport, API_BASE]);
-
-    console.log('[API Config]', { API_BASE, hasApiUrl: !!API_URL, hasHost: !!BACKEND_HOST });
 
     const sports = [
         { id: 'basketball', label: 'NBA', icon: '🏀' },
@@ -113,64 +110,12 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
     };
 
     const thinkingMessagesBySport: Record<Sport, string[]> = {
-        'basketball': [
-            "Escaneando rotación defensiva de la NBA...",
-            "Analizando eficiencia en el 'Paint'...",
-            "Calculando probabilidad de triple doble...",
-            "Evaluando emparejamientos individuales...",
-            "Analizando fatiga por 'back-to-back'...",
-            "Consultando modelos de IA especializados...",
-            "Simulando 10,000 finales de posesión...",
-            "Finalizando reporte NBA..."
-        ],
-        'baseball': [
-            "Analizando ERA del pitcher abridor...",
-            "Evaluando condiciones del viento en el estadio...",
-            "Calculando probabilidad de Home Run...",
-            "Analizando historial vs pitcheo rival...",
-            "Escaneando métricas de Sabermetrics...",
-            "Simulando entradas finales y bullpen...",
-            "Consultando modelos Diamond IA...",
-            "Finalizando reporte MLB..."
-        ],
-        'nhl': [
-            "Evaluando efectividad del Power Play...",
-            "Analizando porcentaje de paradas del goalie...",
-            "Calculando tiempo en hielo (TOI)...",
-            "Escaneando historial de 'Puck Line'...",
-            "Analizando agresividad en el primer periodo...",
-            "Simulando face-offs críticos...",
-            "Consultando modelos Ice IA...",
-            "Finalizando reporte NHL..."
-        ],
-        'tennis': [
-            "Analizando efectividad del primer servicio...",
-            "Evaluando rendimiento en esta superficie...",
-            "Calculando resistencia en juegos largos...",
-            "Escaneando historial de H2H directo...",
-            "Analizando puntos de quiebre salvados...",
-            "Simulando trayectoria del set definitivo...",
-            "Consultando modelos Ace IA...",
-            "Finalizando reporte Tenis..."
-        ],
-        'football': [
-            "Analizando efectividad de cara a puerta...",
-            "Evaluando xG proyectado del delantero...",
-            "Calculando probabilidad de asistencia...",
-            "Escaneando defensas rivales...",
-            "Simulando transiciones ofensivas...",
-            "Consultando modelos Goal IA...",
-            "Finalizando reporte Fútbol..."
-        ],
-        'american-football': [
-            "Analizando yardas por pase proyectadas...",
-            "Evaluando probabilidad de Touchdown...",
-            "Calculando protección de la O-Line...",
-            "Escaneando debilidades de la secundaria...",
-            "Simulando posesiones en Red Zone...",
-            "Consultando modelos Touchdown IA...",
-            "Finalizando reporte NFL..."
-        ]
+        'basketball': ["Escaneando rotación defensiva...", "Analizando eficiencia...", "Calculando probabilidad...", "Simulando finales...", "Finalizando reporte NBA..."],
+        'baseball': ["Analizando ERA...", "Evaluando viento...", "Calculando HR...", "Finalizando reporte MLB..."],
+        'nhl': ["Evaluando Power Play...", "Analizando paradas...", "Calculando TOI...", "Finalizando reporte NHL..."],
+        'tennis': ["Analizando servicio...", "Evaluando superficie...", "Calculando resistencia...", "Finalizando reporte Tenis..."],
+        'football': ["Analizando xG...", "Evaluando asistencias...", "Finalizando reporte Fútbol..."],
+        'american-football': ["Analizando yardas...", "Evaluando TD...", "Finalizando reporte NFL..."]
     };
 
     useEffect(() => {
@@ -185,29 +130,17 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
         try {
             setLoading(true);
             setTopPlayers([]);
-
-            // Intenta usar la URL configurada, de lo contrario asume que puede estar en la misma infraestructura
-            const endpoint = `${API_BASE}/api/sports/${currentSport}/top-players`;
-            console.log(`📡 Conectando con Analizador ${currentSport}: ${endpoint}`);
-
-            const response = await axios.get(endpoint, { timeout: 8000 });
-            const data = response.data;
-            if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
-                setTopPlayers(data.data);
+            const response = await axios.get(`${API_BASE}/api/sports/${currentSport}/top-players`, { timeout: 8000 });
+            if (response.data && response.data.success && response.data.data.length > 0) {
+                setTopPlayers(response.data.data);
             } else {
-                // Return high quality mocks if real data is empty
                 setTopPlayers(getMockTopPlayers(currentSport));
             }
             setError(null);
         } catch (err: any) {
-            console.error('Error Analizador, using mocks:', err);
             setTopPlayers(getMockTopPlayers(currentSport));
-            // Only show toast error if it's a real connection error, not just waking up
-            if (err.code !== 'ECONNABORTED') {
-                setError('Motor de IA en espera. Usando datos de respaldo.');
-            }
-        }
-        finally {
+            if (err.code !== 'ECONNABORTED') setError('Motor de IA en espera. Usando datos de respaldo.');
+        } finally {
             setLoading(false);
         }
     };
@@ -217,52 +150,22 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
             'basketball': [
                 { id: 15152, name: 'LeBron James', averages: { points: 25.4, rebounds: 7.3, assists: 8.1 } },
                 { id: 825121, name: 'Luka Doncic', averages: { points: 33.9, rebounds: 9.2, assists: 9.8 } },
-                { id: 341015, name: 'Nikola Jokic', averages: { points: 26.4, rebounds: 12.4, assists: 9.0 } },
-                { id: 33796, name: 'Stephen Curry', averages: { points: 26.4, rebounds: 4.5, assists: 5.1 } }
+                { id: 341015, name: 'Nikola Jokic', averages: { points: 26.4, rebounds: 12.4, assists: 9.0 } }
             ],
-            'baseball': [
-                { id: 832962, name: 'Shohei Ohtani', averages: { hits: 1.2, homeRuns: 0.4, rbis: 0.8 } },
-                { id: 792742, name: 'Aaron Judge', averages: { hits: 1.1, homeRuns: 0.5, rbis: 0.9 } },
-                { id: 834571, name: 'Juan Soto', averages: { hits: 1.3, homeRuns: 0.3, rbis: 0.7 } }
-            ],
-            'nhl': [
-                { id: 792817, name: 'Connor McDavid', averages: { goals: 0.8, assists: 1.5, shots: 4.2 } },
-                { id: 341018, name: 'Nathan MacKinnon', averages: { goals: 0.7, assists: 1.2, shots: 4.8 } }
-            ],
-            'tennis': [
-                { id: 14882, name: 'Novak Djokovic', averages: { aces: 6.5, doubleFaults: 2.1, firstServePoints: 78 } },
-                { id: 1042571, name: 'Carlos Alcaraz', averages: { aces: 4.2, doubleFaults: 1.8, firstServePoints: 72 } }
-            ],
-            'football': [
-                { id: 825123, name: 'Erling Haaland', averages: { goals: 1.1, assists: 0.2, shotsOnTarget: 2.5 } },
-                { id: 125121, name: 'Kylian Mbappé', averages: { goals: 0.9, assists: 0.4, shotsOnTarget: 2.1 } }
-            ],
-            'american-football': [
-                { id: 792821, name: 'Patrick Mahomes', averages: { touchdowns: 2.4, passingYards: 285.5, rushingYards: 25.2 } },
-                { id: 825124, name: 'Christian McCaffrey', averages: { touchdowns: 1.2, rushingYards: 95.2, passingYards: 0 } }
-            ]
+            'baseball': [{ id: 832962, name: 'Shohei Ohtani', averages: { hits: 1.2, homeRuns: 0.4 } }],
+            'nhl': [{ id: 792817, name: 'Connor McDavid', averages: { goals: 0.8, assists: 1.5 } }],
+            'tennis': [{ id: 14882, name: 'Novak Djokovic', averages: { aces: 6.5 } }],
+            'football': [{ id: 825123, name: 'Erling Haaland', averages: { goals: 1.1 } }],
+            'american-football': [{ id: 792821, name: 'Patrick Mahomes', averages: { touchdowns: 2.4 } }]
         };
         return mocks[sport] || mocks['basketball'];
     };
 
     const generatePrediction = async () => {
-        if (!user) {
-            setError('Debes iniciar sesión para usar la IA');
-            toast.error('Debes iniciar sesión');
-            return;
-        }
-
+        if (!user) { toast.error('Debes iniciar sesión'); return; }
         const limitCheck = await checkPredictionLimit();
-        if (!limitCheck.canPredict) {
-            setError('Has alcanzado tu límite diario de predicciones');
-            toast.error('Límite alcanzado. ¡Pásate a Premium!');
-            return;
-        }
-
-        if (!selectedPlayer || !line) {
-            setError('Por favor selecciona un jugador y una línea');
-            return;
-        }
+        if (!limitCheck.canPredict) { toast.error('Límite alcanzado. ¡Premium!'); return; }
+        if (!selectedPlayer || !line) { setError('Falta selección'); return; }
 
         try {
             setIsThinking(true);
@@ -278,320 +181,148 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
             }, { timeout: 30000 });
 
             let progress = 0;
-            const totalSteps = 600; // ~60 segundos para permitir lectura y dar sensación de análisis profundo
-
             thinkingTimerRef.current = setInterval(() => {
                 progress += 1;
-                const percentage = Math.floor((progress / totalSteps) * 100);
+                const percentage = Math.floor((progress / 300) * 100);
                 setThinkingProgress(Math.min(99, percentage));
+                const msgs = thinkingMessagesBySport[currentSport];
+                setThinkingMessage(msgs[Math.min(Math.floor(progress / (300 / msgs.length)), msgs.length - 1)]);
 
-                const currentMessages = thinkingMessagesBySport[currentSport];
-                const messageIndex = Math.min(Math.floor(progress / (totalSteps / currentMessages.length)), currentMessages.length - 1);
-                setThinkingMessage(currentMessages[messageIndex]);
-
-                if (progress >= totalSteps) {
-                    if (thinkingTimerRef.current) clearInterval(thinkingTimerRef.current);
-
+                if (progress >= 300) {
+                    clearInterval(thinkingTimerRef.current!);
                     apiPromise.then(async response => {
                         if (response.data.success) {
                             setThinkingProgress(100);
-                            const predictionData = response.data.data;
-                            setPrediction(predictionData);
-
-                            await saveToHistory({
-                                playerName: selectedPlayer.name,
-                                sport: currentSport,
-                                propType: propType,
-                                line: parseFloat(line),
-                                prediction: predictionData.prediction.prediction,
-                                probability: predictionData.prediction.probability,
-                                confidence: predictionData.prediction.confidence,
-                                reasoning: predictionData.prediction.reasoning
-                            });
-
+                            const data = response.data.data;
+                            setPrediction(data);
+                            await saveToHistory({ ...data.prediction, playerName: selectedPlayer.name, sport: currentSport, propType, line: parseFloat(line) });
                             await usePrediction();
-
-                            if (predictionData.prediction.probability >= 85) {
-                                await notify(
-                                    '🔥 ¡HOT PICK DETECTADO!',
-                                    `${selectedPlayer.name} tiene un ${predictionData.prediction.probability}% de probabilidad. ¡Análisis Premium completado!`,
-                                    'success',
-                                    '/profile'
-                                );
-                                toast.success('¡Hot Pick guardado!');
-                            }
                         }
                         setIsThinking(false);
-                    }).catch(err => {
-                        setError('Error en el análisis IA. Reintenta en unos segundos.');
-                        setIsThinking(false);
-                    });
+                    }).catch(() => { setError('Error IA'); setIsThinking(false); });
                 }
-            }, 100); // 100ms * 600 steps = 60 segundos
-
-        } catch (err: any) {
-            setError('Error en el proceso: ' + err.message);
-            setIsThinking(false);
-        }
+            }, 100);
+        } catch (err: any) { setError(err.message); setIsThinking(false); }
     };
 
-    const getConfidenceColor = (conf: string) => {
-        if (conf === 'Alta') return 'text-green-400';
-        if (conf === 'Media') return 'text-yellow-400';
-        return 'text-red-400';
-    };
+    const sparklineData = playerStats?.averages?.lastGames?.slice(0, 10).map((g: any, i: number) => ({
+        value: currentSport === 'basketball' ? g.points : currentSport === 'baseball' ? g.hits : g.goals || 0,
+        index: i
+    })).reverse() || [];
 
     return (
         <div className="w-full space-y-8">
-            {/* Header: Estado y Límites */}
-            <div className="flex flex-col gap-4">
-                <div className="glass-card p-6 bg-gradient-to-br from-purple-900/40 to-black border border-white/10 rounded-[2rem] relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-purple-500/20 transition-all duration-700"></div>
-                    <div className="relative z-10 flex justify-between items-center">
-                        <div>
-                            <h2 className="text-2xl font-black italic tracking-tighter text-white uppercase">
-                                {sports.find(s => s.id === currentSport)?.icon} {currentSport === 'basketball' ? 'BASKETBALL' : currentSport === 'baseball' ? 'BEISBOL' : currentSport === 'nhl' ? 'HOCKEY' : 'TENIS'} <span className="text-purple-500">ANALIZADOR PRO</span>
-                            </h2>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">SISTEMA DE ANÁLISIS PROFESIONAL • AI 2.5 • DATOS EN VIVO</p>
-                        </div>
-                        {user && (
-                            <div className="text-right">
-                                <div className="text-[9px] font-black text-gray-400 uppercase mb-1">Análisis Hoy</div>
-                                <div className="text-xl font-black italic">
-                                    <span className={user.isPremium ? 'text-yellow-500' : 'text-white'}>{user.predictionsUsed}</span>
-                                    <span className="text-gray-600 mx-1">/</span>
-                                    <span className="text-gray-400">{user.isPremium ? '∞' : user.predictionsLimit}</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+            {/* Header */}
+            <div className="glass-card p-6 bg-gradient-to-br from-purple-900/40 to-black border border-white/10 rounded-[2rem] flex justify-between items-center group relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-purple-500/20 transition-all duration-700"></div>
+                <div className="relative z-10">
+                    <h2 className="text-2xl font-black italic tracking-tighter uppercase">{sports.find(s => s.id === currentSport)?.icon} {currentSport.toUpperCase()} <span className="text-purple-500">ANALIZADOR</span></h2>
+                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mt-1">SISTEMA ELITE • AI 2.5</p>
                 </div>
-
-                {!user?.isPremium && (
-                    <Link href="/profile" className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-2xl text-center text-[9px] font-black text-yellow-500 uppercase tracking-[0.2em] hover:bg-yellow-500/20 transition-all">
-                        ⚡ Desbloquea Análisis Ilimitados
-                    </Link>
+                {user && (
+                    <div className="text-right relative z-10">
+                        <div className="text-[9px] font-black text-gray-400 uppercase">Consultas</div>
+                        <div className="text-xl font-black italic">{user.predictionsUsed} <span className="text-gray-600">/</span> <span className="text-purple-500">{user.predictionsLimit}</span></div>
+                    </div>
                 )}
             </div>
 
-            {error && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-5 rounded-3xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
-                    <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center text-xl shrink-0">⚠️</div>
-                    <p className="text-xs font-bold leading-relaxed">{error}</p>
-                </div>
-            )}
+            {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-3xl text-xs font-black uppercase tracking-widest">{error}</div>}
 
-            {/* Selector de Deporte - Hidden if fixedSport is provided */}
+            {/* Sport Selector */}
             {!fixedSport && (
                 <div className="flex bg-white/5 p-1.5 rounded-2xl gap-1">
-                    {sports.map(sport => (
-                        <button
-                            key={sport.id}
-                            onClick={() => {
-                                setCurrentSport(sport.id as Sport);
-                                setSelectedPlayer(null);
-                                setPrediction(null);
-                            }}
-                            className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-all ${currentSport === sport.id
-                                ? 'bg-white text-black font-black shadow-lg scale-105'
-                                : 'text-gray-500 hover:text-white hover:bg-white/5'
-                                }`}
-                        >
-                            <span className="text-xl mb-1">{sport.icon}</span>
-                            <span className="text-[9px] font-black uppercase tracking-tighter">{sport.id === 'basketball' ? 'NBA' : sport.id === 'baseball' ? 'MLB' : sport.id.toUpperCase()}</span>
+                    {sports.map(s => (
+                        <button key={s.id} onClick={() => { setCurrentSport(s.id as Sport); setSelectedPlayer(null); setPrediction(null); }} className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-all ${currentSport === s.id ? 'bg-white text-black font-black scale-105' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}>
+                            <span className="text-xl">{s.icon}</span>
+                            <span className="text-[9px] font-black uppercase tracking-tighter">{s.label}</span>
                         </button>
                     ))}
                 </div>
             )}
 
-            {/* Selección de Jugadores */}
+            {/* Player Selection */}
             <div className="space-y-4">
-                <div className="flex justify-between items-end px-2">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Seleccionar Atleta</h3>
-                    {loading && <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>}
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10">
-                    {topPlayers.map((player) => (
-                        <button
-                            key={player.id}
-                            onClick={() => setSelectedPlayer(player)}
-                            className={`p-4 rounded-3xl border transition-all text-left relative overflow-hidden group ${selectedPlayer?.id === player.id
-                                ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_15px_rgba(168,85,247,0.2)]'
-                                : 'border-white/5 bg-white/2 hover:border-white/20'
-                                }`}
-                        >
-                            <div className={`font-black uppercase text-xs truncate ${selectedPlayer?.id === player.id ? 'text-white' : 'text-gray-300'}`}>
-                                {player.name}
-                            </div>
-                            <div className="text-[9px] text-gray-500 font-bold mt-1 uppercase">
-                                {player.averages ? `${Object.entries(player.averages)[0][1]} AVG` : `ID: ${player.id}`}
-                            </div>
-                            {selectedPlayer?.id === player.id && (
-                                <div className="absolute top-2 right-2 w-2 h-2 bg-purple-500 rounded-full animate-ping"></div>
-                            )}
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 px-2">Seleccionar Atleta</h3>
+                <div className="grid grid-cols-2 gap-3 max-h-[250px] overflow-y-auto pr-2 scrollbar-thin">
+                    {topPlayers.map(p => (
+                        <button key={p.id} onClick={() => setSelectedPlayer(p)} className={`p-4 rounded-3xl border transition-all text-left relative overflow-hidden group ${selectedPlayer?.id === p.id ? 'border-purple-500 bg-purple-500/10' : 'border-white/5 bg-white/2 hover:border-white/10'}`}>
+                            <div className={`font-black uppercase text-xs truncate ${selectedPlayer?.id === p.id ? 'text-white' : 'text-gray-400'}`}>{p.name}</div>
+                            {selectedPlayer?.id === p.id && <div className="absolute top-2 right-2 w-2 h-2 bg-purple-500 rounded-full animate-ping"></div>}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Game Log / Recent Performance */}
+            {/* UPGRADED TREND CHART SECTION */}
             {selectedPlayer && (
                 <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                    <div className="glass-card p-5 border border-white/5 bg-white/[0.02] rounded-[2rem] space-y-4">
+                    <div className="glass-card p-6 border border-white/5 bg-white/[0.02] rounded-[2.5rem] space-y-6">
                         <div className="flex justify-between items-center px-1">
-                            <h4 className="text-[9px] font-black text-white/40 uppercase tracking-widest">Rendimiento Reciente</h4>
-                            {loadingStats && <div className="w-3 h-3 border border-purple-500 border-t-transparent rounded-full animate-spin"></div>}
+                            <div className="flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4 text-purple-500" />
+                                <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Tendencia de Rendimiento</h4>
+                            </div>
+                            {loadingStats && <Activity className="w-3 h-3 text-purple-500 animate-spin" />}
                         </div>
 
                         {playerStats ? (
-                            <div className="space-y-2">
-                                <div className="grid grid-cols-4 text-[8px] font-black text-gray-600 uppercase tracking-tighter px-2">
-                                    <div className="col-span-1">OPONENTE</div>
-                                    <div>{currentSport === 'basketball' ? 'PTS' : currentSport === 'baseball' ? 'HITS' : currentSport === 'tennis' ? 'ACES' : 'GOALS'}</div>
-                                    <div>{currentSport === 'basketball' ? 'AST' : currentSport === 'baseball' ? 'RBI' : currentSport === 'tennis' ? 'DF' : 'ASSIST'}</div>
-                                    <div className="text-right">RESULT</div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                <div className="h-24 w-full relative group">
+                                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-purple-500/10 to-transparent rounded-b-2xl"></div>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <LineChart data={sparklineData}>
+                                            <Line type="monotone" dataKey="value" stroke="#a855f7" strokeWidth={3} dot={{ fill: '#a855f7', r: 2 }} activeDot={{ r: 4 }} />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute top-0 right-0 text-[8px] font-black text-gray-600 uppercase">Últimos 10 Juegos</div>
                                 </div>
-                                <div className="space-y-1">
-                                    {(playerStats.averages?.lastGames || []).slice(0, 4).map((game: any, i: number) => (
-                                        <div key={i} className="grid grid-cols-4 items-center bg-white/[0.03] p-2 rounded-xl border border-white/5 text-[10px]">
-                                            <div className="font-black text-gray-400 truncate pr-2 uppercase italic">{game.opponent?.split(' ')[0] || 'OPP'}</div>
-                                            <div className="font-bold text-white">{currentSport === 'basketball' ? game.points : currentSport === 'baseball' ? game.hits : currentSport === 'tennis' ? game.aces : game.goals}</div>
-                                            <div className="font-bold text-white/60">{currentSport === 'basketball' ? game.assists : currentSport === 'baseball' ? game.rbis : currentSport === 'tennis' ? game.doubleFaults : game.assists}</div>
-                                            <div className="text-right">
-                                                <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold ${i % 2 === 0 ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
-                                                    {i % 2 === 0 ? 'W' : 'L'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="pt-2 flex justify-around border-t border-white/5 mt-2">
-                                    {Object.entries(playerStats.averages?.averages || {}).slice(0, 3).map(([key, val]: any) => (
-                                        <div key={key} className="text-center">
-                                            <div className="text-[7px] font-black text-gray-500 uppercase">{key}</div>
-                                            <div className="text-sm font-black text-purple-400 italic">{val}</div>
+                                <div className="grid grid-cols-3 gap-4 border-l border-white/5 pl-8">
+                                    {Object.entries(playerStats.averages?.averages || {}).slice(0, 3).map(([k, v]: any) => (
+                                        <div key={k}>
+                                            <div className="text-[8px] font-black text-gray-500 uppercase mb-1">{k}</div>
+                                            <div className="text-lg font-black text-white italic tracking-tighter">{v}</div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                        ) : !loadingStats && selectedPlayer && (
-                            <div className="text-center py-4 space-y-2">
-                                <p className="text-[10px] text-gray-500 italic">Sincronizando últimas estadísticas...</p>
-                                <div className="flex justify-center gap-1">
-                                    {[1, 2, 3, 4, 5].map(i => (
-                                        <div key={i} className="w-1.5 h-1.5 bg-purple-500/20 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.1}s` }}></div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        ) : !loadingStats && <div className="h-24 flex items-center justify-center"><Activity className="w-6 h-6 text-purple-500/20 animate-pulse" /></div>}
                     </div>
                 </div>
             )}
 
-            {/* Configuración del Análisis */}
+            {/* CONFIGURATION & ACTION */}
             {selectedPlayer && (
-                <div className="glass-card p-6 border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent rounded-[2.5rem] space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                    <div className="space-y-4">
-                        <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest px-2">Mercado a Predecir</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {propTypesBySport[currentSport].map(type => (
-                                <button
-                                    key={type.value}
-                                    onClick={() => setPropType(type.value)}
-                                    className={`py-3 px-4 rounded-2xl border transition-all flex items-center gap-3 ${propType === type.value
-                                        ? 'border-purple-500 bg-purple-500/20 text-white'
-                                        : 'border-white/5 text-gray-500 hover:border-white/10'
-                                        }`}
-                                >
-                                    <span className="text-lg">{type.icon}</span>
-                                    <span className="text-[10px] font-black uppercase tracking-tighter">{type.label}</span>
-                                </button>
-                            ))}
-                        </div>
+                <div className="glass-card p-6 border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent rounded-[2.5rem] space-y-6">
+                    <div className="grid grid-cols-2 gap-2">
+                        {propTypesBySport[currentSport].map(type => (
+                            <button key={type.value} onClick={() => setPropType(type.value)} className={`py-3 px-4 rounded-2xl border transition-all flex items-center gap-3 ${propType === type.value ? 'border-purple-500 bg-purple-500/20 text-white' : 'border-white/5 text-gray-500 hover:border-white/10'}`}>
+                                <span className="text-lg">{type.icon}</span>
+                                <span className="text-[10px] font-black uppercase tracking-tighter">{type.label}</span>
+                            </button>
+                        ))}
                     </div>
-
-                    <div className="space-y-4">
-                        <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest px-2">Línea de la Casa</label>
-                        <div className="relative">
-                            <input
-                                type="number"
-                                step="0.5"
-                                value={line}
-                                onChange={(e) => setLine(e.target.value)}
-                                placeholder="0.5"
-                                className="w-full bg-black/40 border border-white/10 rounded-3xl p-6 text-4xl font-black text-white focus:border-purple-500 transition-all outline-none"
-                            />
-                            <div className="absolute right-6 top-1/2 -translate-y-1/2 bg-purple-500 text-black font-black text-[10px] px-3 py-1 rounded-full uppercase italic">
-                                {propType}
-                            </div>
-                        </div>
+                    <div className="relative">
+                        <input type="number" step="0.5" value={line} onChange={(e) => setLine(e.target.value)} placeholder="Línea de la Casa" className="w-full bg-black/40 border border-white/10 rounded-3xl p-6 text-4xl font-black text-white focus:border-purple-500 transition-all outline-none" />
+                        <div className="absolute right-6 top-1/2 -translate-y-1/2 bg-purple-500 text-black font-black text-[10px] px-3 py-1 rounded-full uppercase italic">{propType}</div>
                     </div>
-
-                    <button
-                        onClick={generatePrediction}
-                        disabled={isThinking || !line}
-                        className={`w-full py-6 rounded-[2rem] font-black uppercase italic tracking-widest text-lg transition-all ${isThinking || !line
-                            ? 'bg-neutral-800 text-neutral-600'
-                            : 'bg-white text-black hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-white/5'
-                            }`}
-                    >
-                        {isThinking ? 'Procesando...' : 'Lanzar Análisis IA ☄️'}
+                    <button onClick={generatePrediction} disabled={isThinking || !line} className={`w-full py-6 rounded-[2rem] font-black uppercase italic tracking-widest text-lg transition-all ${isThinking || !line ? 'bg-neutral-800 text-neutral-600' : 'bg-white text-black hover:scale-[1.02] shadow-2xl'}`}>
+                        {isThinking ? 'Analizando...' : 'Lanzar Análisis IA ☄️'}
                     </button>
                 </div>
             )}
 
-            {/* Loading IA Brutalista */}
-            {isThinking && (
-                <div className="glass-card p-10 border border-purple-500/50 bg-black/80 backdrop-blur-3xl rounded-[3rem] text-center animate-pulse">
-                    <div className="relative w-24 h-24 mx-auto mb-8">
-                        <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
-                            <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray={251.2} strokeDashoffset={251.2 - (251.2 * thinkingProgress) / 100} className="text-purple-500 transition-all duration-300" />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center font-black text-2xl text-white italic">{thinkingProgress}%</div>
-                    </div>
-                    <p className="text-sm font-black text-purple-400 uppercase tracking-[0.2em] italic">&gt; {thinkingMessage}</p>
-                </div>
-            )}
-
-            {/* Resultado de Predicción */}
+            {/* PREDICTION RESULT (Simplified for Elite UI) */}
             {prediction && (
-                <div className="glass-card overflow-hidden rounded-[3rem] border border-white/10 bg-gradient-to-br from-white/[0.03] to-black animate-in zoom-in-95 duration-700">
-                    <div className={`h-2 ${prediction.prediction.prediction === 'OVER' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                    <div className="p-8">
-                        <div className="text-center mb-8">
-                            <div className={`text-6xl font-black italic tracking-tighter mb-2 ${['OVER', 'HOME', 'YES'].includes(prediction.prediction.prediction) ? 'text-green-500' : 'text-red-500'}`}>
-                                {prediction.prediction.prediction === 'OVER' ? 'MÁS DE' :
-                                    prediction.prediction.prediction === 'UNDER' ? 'MENOS DE' :
-                                        prediction.prediction.prediction}
-                            </div>
-                            <div className="text-3xl font-black text-white">{prediction.line} <span className="text-gray-500 uppercase opacity-60 italic">{prediction.propType}</span></div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 mb-8">
-                            <div className="bg-white/5 p-4 rounded-2xl border border-white/5 text-center">
-                                <div className="text-[9px] text-gray-500 font-bold uppercase mb-1">Certeza</div>
-                                <div className="text-3xl font-black text-white">{prediction.prediction.probability}%</div>
-                            </div>
-                            <div className="bg-white/5 p-4 rounded-2xl border border-white/5 text-center">
-                                <div className="text-[9px] text-gray-500 font-bold uppercase mb-1">Confianza</div>
-                                <div className={`text-xl font-black uppercase italic ${getConfidenceColor(prediction.prediction.confidence)}`}>{prediction.prediction.confidence}</div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white/5 p-6 rounded-[2rem] border border-white/5 mb-8">
-                            <h4 className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-3 italic">Análisis Estratégico</h4>
-                            <p className="text-xs text-gray-300 leading-relaxed font-medium italic">"{prediction.prediction.reasoning}"</p>
-                        </div>
-
-                        <div className="space-y-2">
-                            {prediction.prediction.keyFactors?.slice(0, 3).map((factor: string, i: number) => (
-                                <div key={i} className="flex items-center gap-3 text-[10px] font-bold text-gray-400 uppercase tracking-tight">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500/40"></span>
-                                    {factor}
-                                </div>
-                            ))}
+                <div className="glass-card rounded-[3rem] border border-white/10 bg-gradient-to-br from-white/[0.03] to-black overflow-hidden animate-in zoom-in-95 duration-700">
+                    <div className={`h-2 ${['OVER', 'HOME', 'YES'].includes(prediction.prediction.prediction) ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+                    <div className="p-8 text-center">
+                        <div className={`text-6xl font-black italic tracking-tighter mb-2 ${['OVER', 'HOME', 'YES'].includes(prediction.prediction.prediction) ? 'text-emerald-500' : 'text-red-500'}`}>{prediction.prediction.prediction}</div>
+                        <div className="text-xl font-black text-white">{prediction.line} <span className="text-gray-500 uppercase opacity-60 italic">{prediction.propType}</span></div>
+                        <div className="mt-6 p-6 bg-white/5 rounded-[2rem] border border-white/5 text-xs text-gray-300 italic">"{prediction.prediction.reasoning}"</div>
+                        <div className="mt-4 flex justify-center gap-4">
+                            <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-black text-emerald-400 uppercase tracking-widest">{prediction.prediction.probability}% Certeza</div>
+                            <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full text-[10px] font-black text-purple-400 uppercase tracking-widest">{prediction.prediction.confidence} Confianza</div>
                         </div>
                     </div>
                 </div>

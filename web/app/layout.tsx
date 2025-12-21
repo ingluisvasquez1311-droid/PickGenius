@@ -4,6 +4,7 @@ import ToastProvider from "@/components/ui/ToastProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import LiveTicker from "@/components/sports/LiveTicker";
 import ChristmasWrapper from "@/components/layout/ChristmasWrapper";
+import PageTransition from "@/components/providers/PageTransition";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -72,7 +73,9 @@ export default function RootLayout({
               <ChristmasWrapper />
               <LiveTicker />
               <main className="pt-24 min-h-screen">
-                {children}
+                <PageTransition>
+                  {children}
+                </PageTransition>
               </main>
               <Footer />
               <ToastProvider />

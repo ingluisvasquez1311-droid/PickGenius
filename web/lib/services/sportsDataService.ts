@@ -95,21 +95,38 @@ class SportsDataService {
      */
     async makeRequest<T = any>(endpoint: string): Promise<T | null> {
         try {
-            const targetUrl = endpoint.startsWith('http') ? endpoint : `https://www.sofascore.com/api/v1${endpoint}`;
-            const useProxy = process.env.USE_PROXY === 'true' && !!process.env.SCRAPER_API_KEY;
+            const isServer = typeof window === 'undefined';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-            let fetchUrl = targetUrl;
+            let fetchUrl: string;
             let fetchHeaders: any = this.headers;
 
-            // Only use ScraperAPI on the server side
-            if (useProxy && typeof window === 'undefined') {
-                const apiKey = process.env.SCRAPER_API_KEY?.trim();
-                console.log(`🔒 [Service Proxy] Fetching data: ${endpoint}`);
-                fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
-                fetchHeaders = {};
-            } else if (typeof window !== 'undefined') {
-                // If on client, use our internal proxy
-                fetchUrl = `/api/proxy/sportsdata${endpoint}`;
+            // Log configuration on server for debugging
+            if (isServer && !process.env.NEXT_PHASE) {
+                console.log(`📡 [SportsData] Target: ${endpoint} | API_URL: ${apiUrl || 'MISSING'}`);
+            }
+
+            if (isServer && apiUrl) {
+                // In production Vercel (Server Side), hit the Render Proxy to bypass IP blocks
+                // The Render backend is not blocked by Sofascore or uses its own scraper proxy
+                fetchUrl = `${apiUrl}/api/sofascore/proxy${endpoint}`;
+                console.log(`🔒 [SportsData] Proxying through Render: ${endpoint}`);
+            } else {
+                // Client side or dev without backend config
+                const targetUrl = endpoint.startsWith('http') ? endpoint : `https://www.sofascore.com/api/v1${endpoint}`;
+                const useProxy = process.env.USE_PROXY === 'true' && !!process.env.SCRAPER_API_KEY;
+
+                fetchUrl = targetUrl;
+
+                // Only use ScraperAPI on the server side if explicitly configured
+                if (useProxy && isServer) {
+                    const apiKey = process.env.SCRAPER_API_KEY?.trim();
+                    fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
+                    fetchHeaders = {};
+                } else if (!isServer) {
+                    // If on client, use our internal Next.js proxy (/api/proxy/sportsdata)
+                    fetchUrl = `/api/proxy/sportsdata${endpoint}`;
+                }
             }
 
             const response = await fetch(fetchUrl, {
@@ -118,7 +135,7 @@ class SportsDataService {
             });
 
             if (!response.ok) {
-                console.error(`❌ Request Error (${endpoint}): ${response.status}`);
+                console.error(`❌ Request Error (${endpoint}): ${response.status} from ${fetchUrl}`);
                 return null;
             }
 

@@ -337,4 +337,30 @@ router.get('/predict/:sport/:eventId', async (req, res) => {
     }
 });
 
+/**
+ * Generic Proxy for any Sofascore endpoint
+ * Used by the frontend to bypass IP blocks in production
+ */
+router.get('/proxy/*', async (req, res) => {
+    try {
+        const path = req.params[0]; // Gets the part after /proxy/
+        const query = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
+        const targetEndpoint = `/${path}${query}`;
+
+        console.log(`🌐 [Backend Proxy] Forwarding: ${targetEndpoint}`);
+
+        const result = await sofaScoreFootballService.makeRequest(targetEndpoint, `proxy_${path.replace(/\//g, '_')}`, 60);
+
+        if (result.success) {
+            res.json(result.data);
+        } else {
+            console.error(`❌ [Backend Proxy] Error for ${targetEndpoint}:`, result.error);
+            res.status(500).json({ success: false, error: result.error });
+        }
+    } catch (error) {
+        console.error(`❌ [Backend Proxy] Exception for ${req.url}:`, error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 module.exports = router;

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import NotificationCenter from './NotificationCenter';
 
 export default function Navbar() {
@@ -13,16 +14,14 @@ export default function Navbar() {
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
 
-    const isActive = (path: string) => pathname.startsWith(path);
+    const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
 
     useEffect(() => {
         const controlNavbar = () => {
             if (typeof window !== 'undefined') {
                 if (window.scrollY > lastScrollY && window.scrollY > 100) {
-                    // Scroll Down -> Hide
                     setIsVisible(false);
                 } else {
-                    // Scroll Up -> Show
                     setIsVisible(true);
                 }
                 setLastScrollY(window.scrollY);
@@ -30,137 +29,112 @@ export default function Navbar() {
         };
 
         window.addEventListener('scroll', controlNavbar);
-        return () => {
-            window.removeEventListener('scroll', controlNavbar);
-        };
+        return () => window.removeEventListener('scroll', controlNavbar);
     }, [lastScrollY]);
+
+    const navLinks = [
+        { href: '/basketball-live', label: 'Baloncesto', icon: '🏀', color: 'bg-orange-600', textColor: 'text-orange-400' },
+        { href: '/football-live', label: 'Fútbol', icon: '⚽', color: 'bg-green-600', textColor: 'text-green-400' },
+        { href: '/value-bets', label: 'Value Bets', icon: '💎', color: 'bg-emerald-600', textColor: 'text-emerald-400' },
+        { href: '/streaks', label: 'Rachas', icon: '🔥', color: 'bg-orange-600', textColor: 'text-orange-400' },
+        { href: '/props', label: 'Props', icon: '🎯', color: 'bg-purple-600', textColor: 'text-purple-400' },
+    ];
 
     return (
         <nav
-            className={`fixed left-0 right-0 z-50 transition-all duration-500 ease-in-out transform ${isVisible ? 'translate-y-4 opacity-100' : '-translate-y-full opacity-0'
+            className={`fixed left-0 right-0 z-50 transition-all duration-700 ease-in-out transform ${isVisible ? 'translate-y-4 opacity-100' : '-translate-y-full opacity-0'
                 }`}
         >
             <div className="container mx-auto px-4">
-                <div className="mx-auto max-w-5xl bg-[#111111]/80 backdrop-blur-xl border border-white/10 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.5)] px-6">
-                    <div className="flex justify-between items-center h-16">
+                <div className="mx-auto max-w-6xl bg-[#0a0a0a]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-8 relative overflow-hidden group">
+                    {/* Inner highlight border */}
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+
+                    <div className="flex justify-between items-center h-20">
                         {/* Logo */}
-                        <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <Link href="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
                             <Image
                                 src="/logo.png"
                                 alt="PickGenius Logo"
-                                width={32}
-                                height={32}
-                                className="rounded-lg"
+                                width={36}
+                                height={36}
+                                className="rounded-xl drop-shadow-[0_0_10px_rgba(168,85,247,0.3)]"
                                 priority
                             />
-                            <span className="text-lg font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent hidden sm:block relative">
-                                PickGenius
-                                <span className="absolute -top-3 -right-6 text-[8px] bg-red-600 text-white px-1 rounded animate-pulse font-mono tracking-widest border border-red-400">XMAS</span>
+                            <span className="text-xl font-black italic tracking-tighter uppercase text-white group-hover:text-purple-400 transition-colors">
+                                PICK<span className="text-purple-500">GENIUS</span>
                             </span>
                         </Link>
 
                         {/* Navigation Links */}
-                        <div className="flex items-center gap-1 md:gap-4">
-                            <Link
-                                href="/basketball-live"
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2
-                                    ${isActive('/basketball-live')
-                                        ? 'bg-blue-600/20 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                <span>🏀</span>
-                                <span className="hidden sm:inline">Baloncesto</span>
-                            </Link>
-                            <Link
-                                href="/football-live"
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2
-                                    ${isActive('/football-live')
-                                        ? 'bg-green-600/20 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                <span>⚽</span>
-                                <span className="hidden sm:inline">Fútbol</span>
-                            </Link>
-                            <Link
-                                href="/value-bets"
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2
-                                    ${isActive('/value-bets')
-                                        ? 'bg-emerald-600/20 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.3)]'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                <span>💎</span>
-                                <span className="hidden sm:inline">Value Bets</span>
-                            </Link>
-                            <Link
-                                href="/streaks"
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2
-                                    ${isActive('/streaks')
-                                        ? 'bg-orange-600/20 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.3)]'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                <span>🔥</span>
-                                <span className="hidden sm:inline">Rachas</span>
-                            </Link>
-                            <Link
-                                href="/props"
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2
-                                    ${isActive('/props')
-                                        ? 'bg-purple-600/20 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                <span>🎯</span>
-                                <span className="hidden sm:inline">Props</span>
-                            </Link>
+                        <div className="hidden lg:flex items-center gap-2">
+                            {navLinks.map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className={`relative px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2
+                                        ${isActive(link.href)
+                                            ? `${link.textColor} bg-white/5 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]`
+                                            : 'text-gray-500 hover:text-white hover:bg-white/5'
+                                        }`}
+                                >
+                                    <span>{link.icon}</span>
+                                    <span>{link.label}</span>
+                                    {isActive(link.href) && (
+                                        <motion.div
+                                            layoutId="nav-active"
+                                            className={`absolute inset-0 border border-white/20 rounded-full z-[-1] ${link.color}/5`}
+                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                </Link>
+                            ))}
 
                             {/* Otros Deportes Dropdown */}
-                            <div className="relative group px-4 py-2 text-gray-400 hover:text-white cursor-pointer transition-all flex items-center gap-2">
-                                <span>➕</span>
-                                <span className="hidden md:inline text-sm font-medium uppercase tracking-tighter">Otros</span>
-                                <div className="absolute top-full left-0 mt-2 w-48 bg-[#111111] border border-white/10 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 p-2 z-50">
-                                    <Link href="/american-football" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-xs font-bold">
-                                        <span>🏈</span> NFL (FÚTBOL AM.)
-                                    </Link>
-                                    <Link href="/baseball" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-xs font-bold">
-                                        <span>⚾</span> BÉISBOL (MLB)
-                                    </Link>
-                                    <Link href="/nhl" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-xs font-bold">
-                                        <span>🏒</span> HOCKEY (NHL)
-                                    </Link>
-                                    <Link href="/tennis" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-xs font-bold">
-                                        <span>🎾</span> TENIS (ATP)
-                                    </Link>
+                            <div className="relative group/dropdown px-5 py-2.5 text-gray-500 hover:text-white cursor-pointer transition-all flex items-center gap-2">
+                                <span className="text-sm">➕</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest">Otros</span>
+                                <div className="absolute top-full left-0 mt-4 w-56 bg-[#0c0c0c]/95 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-300 p-3 z-50">
+                                    {[
+                                        { href: '/american-football', label: 'NFL (FÚTBOL AM.)', icon: '🏈' },
+                                        { href: '/baseball', label: 'BÉISBOL (MLB)', icon: '⚾' },
+                                        { href: '/nhl', label: 'HOCKEY (NHL)', icon: '🏒' },
+                                        { href: '/tennis', label: 'TENIS (ATP)', icon: '🎾' },
+                                    ].map((sub) => (
+                                        <Link
+                                            key={sub.href}
+                                            href={sub.href}
+                                            className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-[10px] font-black uppercase tracking-widest group/item"
+                                        >
+                                            <span className="text-lg group-hover/item:scale-125 transition-transform">{sub.icon}</span>
+                                            <span className="group-hover/item:translate-x-1 transition-transform">{sub.label}</span>
+                                        </Link>
+                                    ))}
                                 </div>
                             </div>
-
-
                         </div>
 
-                        {/* Auth */}
+                        {/* Auth & Mobile Mini */}
                         <div className="flex items-center gap-4">
                             {!loading && (
                                 user ? (
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-4">
                                         {user.role === 'admin' && (
-                                            <Link href="/admin" className="text-red-400 text-xs font-bold border border-red-500/30 bg-red-500/10 px-2 py-1 rounded hover:bg-red-500/20 transition-colors">
+                                            <Link href="/admin" className="text-[9px] font-black tracking-widest border border-red-500/50 bg-red-500/10 px-3 py-1.5 rounded-full text-red-500 hover:bg-red-500 hover:text-white transition-all">
                                                 ADMIN
                                             </Link>
                                         )}
                                         <NotificationCenter />
-                                        <Link href="/profile" className="text-sm hover:text-[var(--primary)] transition-colors flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 hover:border-purple-500 transition-colors">
-                                                👤
+                                        <Link href="/profile" className="relative group">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center border-2 border-white/10 group-hover:border-purple-400 transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+                                                <span className="text-sm">👤</span>
                                             </div>
                                         </Link>
                                     </div>
                                 ) : (
                                     <div className="flex gap-2">
-                                        <Link href="/auth/register" className="btn-primary text-xs md:text-sm px-5 py-2 rounded-full font-bold shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] transition-all">
-                                            Unirse
+                                        <Link href="/auth/register" className="relative overflow-hidden px-8 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.2)]">
+                                            UNIRSE
                                         </Link>
                                     </div>
                                 )
