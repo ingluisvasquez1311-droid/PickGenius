@@ -8,17 +8,17 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'api.sofascore.com',
+        hostname: 'api.sportsdata.com',
         pathname: '/api/v1/**',
       },
       {
         protocol: 'https',
-        hostname: 'api.sofascore.app',
+        hostname: 'api.sportsdata.app',
         pathname: '/api/v1/**',
       },
       {
         protocol: 'https',
-        hostname: 'www.sofascore.com',
+        hostname: 'www.sportsdata.com',
         pathname: '/api/v1/**',
       },
       {

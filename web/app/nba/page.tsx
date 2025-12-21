@@ -7,7 +7,7 @@ import PredictionCard from '@/components/sports/PredictionCard';
 import StatWidget from '@/components/sports/StatWidget';
 import PlayerStatsTable from '@/components/sports/PlayerStatsTable';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { sofascoreService, type SofascoreEvent } from '@/lib/services/sofascoreService';
+import { sportsDataService, type SportsDataEvent } from '@/lib/services/sportsDataService';
 import { useAuth } from '@/contexts/AuthContext';
 import PredictionModal from '@/components/sports/PredictionModal';
 import PlayerPropsPredictor from '@/components/basketball/PlayerPropsPredictor';
@@ -15,7 +15,7 @@ import PlayerPropsPredictor from '@/components/basketball/PlayerPropsPredictor';
 
 type League = 'NBA' | 'Euroleague' | 'All';
 type StatusFilter = 'all' | 'live' | 'upcoming' | 'finished';
-type BasketballGame = SofascoreEvent;
+type BasketballGame = SportsDataEvent;
 
 export default function BasketballPage() {
     const router = useRouter();
@@ -38,12 +38,12 @@ export default function BasketballPage() {
         async function fetchGames() {
             setLoading(true);
             try {
-                const allGames = await sofascoreService.getAllBasketballGames();
+                const allGames = await sportsDataService.getAllBasketballGames();
 
                 // Filter by selected league
                 let filteredGames = allGames;
                 if (selectedLeague !== 'All') {
-                    filteredGames = sofascoreService.filterBasketballByLeague(allGames, selectedLeague);
+                    filteredGames = sportsDataService.filterBasketballByLeague(allGames, selectedLeague);
                 }
 
                 setGames(filteredGames);
@@ -252,7 +252,7 @@ export default function BasketballPage() {
                     <div className="lg:col-span-4 flex flex-col gap-6">
 
                         {/* NBA Player Props Analysis */}
-                        <PlayerPropsPredictor />
+                        <PlayerPropsPredictor fixedSport="basketball" />
 
                         {/* Wizard's Corner */}
 

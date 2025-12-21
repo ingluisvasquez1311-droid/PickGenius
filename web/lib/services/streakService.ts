@@ -13,10 +13,10 @@ export interface Streak {
     confidenceScore: number;
 }
 
-import { sofaScoreFootballService } from './sofaScoreFootballService';
-import { sofaScoreBasketballService } from './sofaScoreBasketballService';
-import { sofaScoreBaseballService } from './sofaScoreBaseballService';
-import { sofaScoreNHLService } from './sofaScoreNHLService';
+import { footballDataService } from './footballDataService';
+import { basketballDataService } from './basketballDataService';
+import { baseballDataService } from './baseballDataService';
+import { nhlDataService } from './nhlDataService';
 
 const TOP_FOOTBALL_LEAGUES = [
     { name: 'Premier League', id: 17 },
@@ -53,7 +53,7 @@ class StreakService {
             return this.streaksCache;
         }
 
-        console.log('🔄 Calculating NEW Real Streaks from Sofascore...');
+        console.log('🔄 Calculating NEW Real Streaks from SportsData...');
         try {
             // Priority: Football and Basketball (Main drivers)
             const [footballStreaks, basketballStreaks] = await Promise.all([
@@ -84,7 +84,7 @@ class StreakService {
             {
                 id: 'm-streak-1',
                 teamName: 'Manchester City',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/17/image',
+                teamLogo: 'https://api.sportsdata.app/api/v1/team/17/image',
                 sport: 'football',
                 type: 'win',
                 count: 8,
@@ -95,7 +95,7 @@ class StreakService {
             {
                 id: 'm-streak-2',
                 teamName: 'Boston Celtics',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/3422/image',
+                teamLogo: 'https://api.sportsdata.app/api/v1/team/3422/image',
                 sport: 'basketball',
                 type: 'win',
                 count: 6,
@@ -106,7 +106,7 @@ class StreakService {
             {
                 id: 'm-streak-3',
                 teamName: 'Bayer Leverkusen',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/2681/image',
+                teamLogo: 'https://api.sportsdata.app/api/v1/team/2681/image',
                 sport: 'football',
                 type: 'win',
                 count: 12,
@@ -117,7 +117,7 @@ class StreakService {
             {
                 id: 'm-streak-4',
                 teamName: 'Real Madrid',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/2829/image',
+                teamLogo: 'https://api.sportsdata.app/api/v1/team/2829/image',
                 sport: 'football',
                 type: 'win',
                 count: 4,
@@ -128,7 +128,7 @@ class StreakService {
             {
                 id: 'm-streak-5',
                 teamName: 'Golden State Warriors',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/3428/image',
+                teamLogo: 'https://api.sportsdata.app/api/v1/team/3428/image',
                 sport: 'basketball',
                 type: 'win',
                 count: 5,
@@ -139,7 +139,7 @@ class StreakService {
             {
                 id: 'm-streak-6',
                 teamName: 'Liverpool',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/44/image',
+                teamLogo: 'https://api.sportsdata.app/api/v1/team/44/image',
                 sport: 'football',
                 type: 'win',
                 count: 7,
@@ -158,13 +158,13 @@ class StreakService {
                 // Determine which service to use
                 let service;
                 if (sport === 'football') {
-                    service = sofaScoreFootballService;
+                    service = footballDataService;
                 } else if (sport === 'basketball') {
-                    service = sofaScoreBasketballService;
+                    service = basketballDataService;
                 } else if (sport === 'baseball') {
-                    service = sofaScoreBaseballService;
+                    service = baseballDataService;
                 } else if (sport === 'nhl') {
-                    service = sofaScoreNHLService;
+                    service = nhlDataService;
                 } else {
                     console.warn(`No service defined for sport: ${sport}`);
                     return;
@@ -206,7 +206,7 @@ class StreakService {
                             streaks.push({
                                 id: `real-win-${sport}-${row.team.id}`,
                                 teamName: row.team.name,
-                                teamLogo: `https://api.sofascore.app/api/v1/team/${row.team.id}/image`,
+                                teamLogo: `https://api.sportsdata.app/api/v1/team/${row.team.id}/image`,
                                 sport: sport,
                                 type: 'win',
                                 count: winCount,
@@ -220,7 +220,7 @@ class StreakService {
                             streaks.push({
                                 id: `real-loss-${sport}-${row.team.id}`,
                                 teamName: row.team.name,
-                                teamLogo: `https://api.sofascore.app/api/v1/team/${row.team.id}/image`,
+                                teamLogo: `https://api.sportsdata.app/api/v1/team/${row.team.id}/image`,
                                 sport: sport,
                                 type: 'loss',
                                 count: lossCount,

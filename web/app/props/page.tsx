@@ -19,7 +19,7 @@ export default function PropsPage() {
                             PANEL DE <span className="bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">PROPS</span> DE JUGADORES
                         </h1>
                         <p className="text-white/40 max-w-2xl mx-auto font-medium text-sm md:text-base">
-                            Análisis masivo de mercados de jugadores impulsado por Inteligencia Artificial de última generación y datos en tiempo real de SofaScore.
+                            Análisis masivo de mercados de jugadores impulsado por Inteligencia Artificial de última generación y datos en tiempo real de SportsData.
                         </p>
                     </div>
 

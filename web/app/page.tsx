@@ -141,7 +141,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed font-medium">
-            PickGenius utiliza modelos de IA avanzados y estadísticas reales de <span className="text-white">Sofascore</span> para entregarte las predicciones más precisas del mercado.
+            PickGenius utiliza modelos de IA avanzados y estadísticas reales de <span className="text-white">expertos deportivos</span> para entregarte las predicciones más precisas del mercado.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -202,7 +202,7 @@ export default function HomePage() {
             <div className="glass-card p-10 bg-white/[0.03] border border-white/10 rounded-3xl hover:bg-white/[0.06] transition-all duration-500 group">
               <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-blue-500/10">📊</div>
               <h3 className="text-2xl font-black mb-4 uppercase tracking-tighter">Datos 100% Reales</h3>
-              <p className="text-gray-400 leading-relaxed">Conexión directa con los servidores de Sofascore. Recibe actualizaciones al segundo de promedios, lesiones y estados de forma.</p>
+              <p className="text-gray-400 leading-relaxed">Conexión directa con nuestros sistemas de datos. Recibe actualizaciones al segundo de promedios, lesiones y estados de forma.</p>
             </div>
             <div className="glass-card p-10 bg-white/[0.03] border border-white/10 rounded-3xl hover:bg-white/[0.06] transition-all duration-500 group">
               <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center text-3xl mb-8 group-hover:scale-110 transition-transform duration-500 shadow-xl shadow-orange-500/10">🎟️</div>
@@ -248,14 +248,14 @@ export default function HomePage() {
                       <div className="text-gray-500 font-bold text-[10px] uppercase tracking-widest mb-4">{footballStats.featuredMatch.tournament.name}</div>
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex-1">
-                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${footballStats.featuredMatch.homeTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
+                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${footballStats.featuredMatch.homeTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
                           <div className="text-xs font-black uppercase truncate">{footballStats.featuredMatch.homeTeam.shortName}</div>
                         </div>
                         <div className="text-5xl font-black tracking-tighter italic">
                           {footballStats.featuredMatch.homeScore.current} - {footballStats.featuredMatch.awayScore.current}
                         </div>
                         <div className="flex-1">
-                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${footballStats.featuredMatch.awayTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
+                          <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${footballStats.featuredMatch.awayTeam.id}/image`)}`} className="w-16 h-16 mx-auto mb-3 object-contain" alt="" />
                           <div className="text-xs font-black uppercase truncate">{footballStats.featuredMatch.awayTeam.shortName}</div>
                         </div>
                       </div>
@@ -300,7 +300,7 @@ export default function HomePage() {
                 <h3 className="text-2xl font-black uppercase tracking-tight">PREMIUM</h3>
                 <span className="bg-white text-black text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">BEST VALUE</span>
               </div>
-              <div className="text-4xl font-black mb-8 italic">$9.99 <span className="text-sm font-normal opacity-60">/mes</span></div>
+              <div className="text-4xl font-black mb-8 italic">$5 <span className="text-sm font-normal opacity-60">/mes</span></div>
               <ul className="space-y-4 mb-10 flex-1">
                 <li className="flex items-center gap-3 text-sm font-bold">✅ Predicciones de IA ILIMITADAS</li>
                 <li className="flex items-center gap-3 text-sm font-bold">✅ Acceso Pro a Combinadas</li>

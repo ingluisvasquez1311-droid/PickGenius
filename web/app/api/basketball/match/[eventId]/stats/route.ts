@@ -13,7 +13,7 @@ export async function GET(
     }
 
     try {
-        const response = await fetch(`${API_URL}/api/sofascore/basketball/game/${eventId}/stats`);
+        const response = await fetch(`${API_URL}/api/proxy/sportsdata/basketball/game/${eventId}/stats`);
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error) {

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'edge'; // Optional: Use edge runtime for speed if supported, or remove. Sticking to default Node for now is safer for stability.
 // Actually, let's keep it standard Node.js runtime for broad compatibility on Render.
 
-const BASE_URL = 'https://www.sofascore.com/api/v1';
+const BASE_URL = 'https://www.sportsdata.com/api/v1';
 
 export async function GET(
     request: NextRequest,
@@ -20,7 +20,7 @@ export async function GET(
         let fetchUrl = targetUrl;
         let fetchHeaders: any = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Referer': 'https://www.sofascore.com/',
+            'Referer': 'https://www.sportsdata.com/',
             'Accept': 'application/json, text/plain, */*'
         };
 

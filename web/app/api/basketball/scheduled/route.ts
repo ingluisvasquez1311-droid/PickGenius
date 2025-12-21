@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballService';
+import { basketballDataService } from '@/lib/services/basketballDataService';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const date = searchParams.get('date') || new Date().toISOString().split('T')[0]; // Default to today
 
-        const response = await sofaScoreBasketballService.getScheduledEvents(date);
+        const response = await basketballDataService.getScheduledEvents(date);
 
         if (!response.success || !response.data) {
             return NextResponse.json(response, { status: 500 });
@@ -31,12 +31,12 @@ export async function GET(request: NextRequest) {
             homeTeam: {
                 id: game.homeTeam?.id,
                 name: game.homeTeam?.name || 'Home Team',
-                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.homeTeam?.id}/image`)}`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${game.homeTeam?.id}/image`)}`
             },
             awayTeam: {
                 id: game.awayTeam?.id,
                 name: game.awayTeam?.name || 'Away Team',
-                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.awayTeam?.id}/image`)}`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${game.awayTeam?.id}/image`)}`
             },
             status: {
                 type: 'notstarted',

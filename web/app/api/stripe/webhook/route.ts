@@ -61,10 +61,3 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true });
 }
-
-// Config to disable body parsing for Stripe raw signatures
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-};

@@ -74,7 +74,13 @@ export default function NewsSection() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {news.map((item) => (
-                        <div key={item.id} className="group relative bg-[#111] border border-white/10 rounded-xl overflow-hidden hover:border-green-500/30 transition-all hover:shadow-[0_0_30px_rgba(34,197,94,0.05)]">
+                        <a
+                            key={item.id}
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative bg-[#111] border border-white/10 rounded-xl overflow-hidden hover:border-green-500/30 transition-all hover:shadow-[0_0_30px_rgba(34,197,94,0.05)] cursor-pointer block"
+                        >
                             {/* Image Overlay */}
                             <div className="h-40 relative overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-t from-[#111] to-transparent z-10"></div>
@@ -111,7 +117,7 @@ export default function NewsSection() {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </a>
                     ))}
                 </div>
             </div>

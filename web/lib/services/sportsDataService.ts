@@ -2,10 +2,10 @@
 // Si estamos en el servidor, usamos la API directa.
 // Si estamos en el cliente, usamos nuestro Proxy para evitar CORS.
 const BASE_URL = typeof window === 'undefined'
-    ? 'https://www.sofascore.com/api/v1'
-    : '/api/proxy/sofascore';
+    ? 'https://www.sportsdata.com/api/v1'
+    : '/api/proxy/sportsdata';
 
-export interface SofascoreTeam {
+export interface SportsDataTeam {
     id: number;
     name: string;
     shortName: string;
@@ -18,7 +18,7 @@ export interface SofascoreTeam {
     };
 }
 
-export interface SofascoreEvent {
+export interface SportsDataEvent {
     id: number;
     slug: string;
     tournament: {
@@ -47,8 +47,8 @@ export interface SofascoreEvent {
         name: string;
         year: string;
     };
-    homeTeam: SofascoreTeam;
-    awayTeam: SofascoreTeam;
+    homeTeam: SportsDataTeam;
+    awayTeam: SportsDataTeam;
     homeScore: {
         current: number;
         display: number;
@@ -76,26 +76,26 @@ export interface SofascoreEvent {
     };
 }
 
-export interface SofascoreResponse {
-    events: SofascoreEvent[];
+export interface SportsDataResponse {
+    events: SportsDataEvent[];
 }
 
 /**
- * Servicio para obtener datos de Sofascore API
+ * Servicio para obtener datos deportivos
  */
-class SofascoreService {
+class SportsDataService {
     private headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://www.sofascore.com/',
+        'Referer': 'https://www.sportsdata.com/',
         'Accept': 'application/json, text/plain, */*'
     };
 
     /**
-     * Método genérico para realizar peticiones con bypass de ScraperAPI si está configurado
+     * Método genérico para realizar peticiones
      */
     async makeRequest<T = any>(endpoint: string): Promise<T | null> {
         try {
-            const targetUrl = endpoint.startsWith('http') ? endpoint : `https://www.sofascore.com/api/v1${endpoint}`;
+            const targetUrl = endpoint.startsWith('http') ? endpoint : `https://www.sportsdata.com/api/v1${endpoint}`;
             const useProxy = process.env.USE_PROXY === 'true' && !!process.env.SCRAPER_API_KEY;
 
             let fetchUrl = targetUrl;
@@ -104,12 +104,12 @@ class SofascoreService {
             // Only use ScraperAPI on the server side
             if (useProxy && typeof window === 'undefined') {
                 const apiKey = process.env.SCRAPER_API_KEY?.trim();
-                console.log(`🔒 [Service Proxy] Using ScraperAPI for: ${endpoint}`);
+                console.log(`🔒 [Service Proxy] Fetching data: ${endpoint}`);
                 fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
                 fetchHeaders = {};
             } else if (typeof window !== 'undefined') {
                 // If on client, use our internal proxy
-                fetchUrl = `/api/proxy/sofascore${endpoint}`;
+                fetchUrl = `/api/proxy/sportsdata${endpoint}`;
             }
 
             const response = await fetch(fetchUrl, {
@@ -118,13 +118,13 @@ class SofascoreService {
             });
 
             if (!response.ok) {
-                console.error(`❌ SofaScore Request Error (${endpoint}): ${response.status}`);
+                console.error(`❌ Request Error (${endpoint}): ${response.status}`);
                 return null;
             }
 
             return await response.json();
         } catch (error) {
-            console.error(`❌ SofaScore Fetch Exception (${endpoint}):`, error);
+            console.error(`❌ Fetch Exception (${endpoint}):`, error);
             return null;
         }
     }
@@ -132,23 +132,23 @@ class SofascoreService {
     /**
      * Obtiene partidos de fútbol en vivo
      */
-    async getLiveFootballMatches(): Promise<SofascoreEvent[]> {
-        const data = await this.makeRequest<SofascoreResponse>('/sport/football/events/live');
+    async getLiveFootballMatches(): Promise<SportsDataEvent[]> {
+        const data = await this.makeRequest<SportsDataResponse>('/sport/football/events/live');
         return data?.events || [];
     }
 
     /**
      * Obtiene partidos de fútbol programados para una fecha
      */
-    async getScheduledFootballMatches(date: string): Promise<SofascoreEvent[]> {
-        const data = await this.makeRequest<SofascoreResponse>(`/sport/football/scheduled-events/${date}`);
+    async getScheduledFootballMatches(date: string): Promise<SportsDataEvent[]> {
+        const data = await this.makeRequest<SportsDataResponse>(`/sport/football/scheduled-events/${date}`);
         return data?.events || [];
     }
 
     /**
      * Obtiene todos los partidos de fútbol (en vivo + programados)
      */
-    async getAllFootballMatches(date?: string): Promise<SofascoreEvent[]> {
+    async getAllFootballMatches(date?: string): Promise<SportsDataEvent[]> {
         const today = date || new Date().toISOString().split('T')[0];
         const [liveMatches, scheduledMatches] = await Promise.all([
             this.getLiveFootballMatches(),
@@ -164,23 +164,23 @@ class SofascoreService {
     /**
      * Obtiene partidos de baloncesto en vivo
      */
-    async getLiveBasketballGames(): Promise<SofascoreEvent[]> {
-        const data = await this.makeRequest<SofascoreResponse>('/sport/basketball/events/live');
+    async getLiveBasketballGames(): Promise<SportsDataEvent[]> {
+        const data = await this.makeRequest<SportsDataResponse>('/sport/basketball/events/live');
         return data?.events || [];
     }
 
     /**
      * Obtiene partidos de baloncesto programados para una fecha
      */
-    async getScheduledBasketballGames(date: string): Promise<SofascoreEvent[]> {
-        const data = await this.makeRequest<SofascoreResponse>(`/sport/basketball/scheduled-events/${date}`);
+    async getScheduledBasketballGames(date: string): Promise<SportsDataEvent[]> {
+        const data = await this.makeRequest<SportsDataResponse>(`/sport/basketball/scheduled-events/${date}`);
         return data?.events || [];
     }
 
     /**
      * Obtiene todos los partidos de baloncesto (en vivo + programados)
      */
-    async getAllBasketballGames(date?: string): Promise<SofascoreEvent[]> {
+    async getAllBasketballGames(date?: string): Promise<SportsDataEvent[]> {
         const today = date || new Date().toISOString().split('T')[0];
         const [liveGames, scheduledGames] = await Promise.all([
             this.getLiveBasketballGames(),
@@ -196,7 +196,7 @@ class SofascoreService {
     /**
      * Filtra partidos de baloncesto por liga
      */
-    filterBasketballByLeague(games: SofascoreEvent[], league: 'NBA' | 'Euroleague'): SofascoreEvent[] {
+    filterBasketballByLeague(games: SportsDataEvent[], league: 'NBA' | 'Euroleague'): SportsDataEvent[] {
         return games.filter(game => {
             const tournamentName = game.tournament.name.toLowerCase();
             const uniqueTournamentName = game.tournament.uniqueTournament?.name.toLowerCase() || '';
@@ -250,11 +250,11 @@ class SofascoreService {
     /**
      * Obtiene eventos para un deporte específico (en vivo + programados)
      */
-    async getEventsBySport(sport: string, date?: string): Promise<SofascoreEvent[]> {
+    async getEventsBySport(sport: string, date?: string): Promise<SportsDataEvent[]> {
         const today = date || new Date().toISOString().split('T')[0];
         const [liveData, scheduledData] = await Promise.all([
-            this.makeRequest<SofascoreResponse>(`/sport/${sport}/events/live`),
-            this.makeRequest<SofascoreResponse>(`/sport/${sport}/scheduled-events/${today}`)
+            this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/live`),
+            this.makeRequest<SportsDataResponse>(`/sport/${sport}/scheduled-events/${today}`)
         ]);
 
         const allEvents = [...(liveData?.events || []), ...(scheduledData?.events || [])];
@@ -264,4 +264,4 @@ class SofascoreService {
     }
 }
 
-export const sofascoreService = new SofascoreService();
+export const sportsDataService = new SportsDataService();

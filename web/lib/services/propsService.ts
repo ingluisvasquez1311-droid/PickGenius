@@ -1,4 +1,4 @@
-import { sofascoreService } from './sofascoreService';
+import { sportsDataService } from './sportsDataService';
 import { memoryCache } from './memoryCache';
 import Groq from 'groq-sdk';
 
@@ -74,7 +74,7 @@ class PropsService {
         console.log(`🔄 [PropsService] Generating REAL daily props for ${sport}...`);
 
         try {
-            const games = await sofascoreService.getEventsBySport(sport);
+            const games = await sportsDataService.getEventsBySport(sport);
 
             if (!games || games.length === 0) {
                 console.warn(`⚠️ [PropsService] No real games found for ${sport}, using mocks.`);
@@ -87,7 +87,7 @@ class PropsService {
 
             for (const game of topGames) {
                 // Obtenemos los mejores jugadores para identificar protagonistas
-                const bestPlayersRes = await sofascoreService.getMatchBestPlayers(game.id);
+                const bestPlayersRes = await sportsDataService.getMatchBestPlayers(game.id);
                 let targetPlayers: any[] = [];
 
                 if (bestPlayersRes && (bestPlayersRes.home || bestPlayersRes.away)) {
@@ -96,7 +96,7 @@ class PropsService {
                         ...(bestPlayersRes.away || []).slice(0, 3)
                     ];
                 } else {
-                    const lineups = await sofascoreService.getMatchLineups(game.id);
+                    const lineups = await sportsDataService.getMatchLineups(game.id);
                     if (lineups && (lineups.home || lineups.away)) {
                         targetPlayers = [
                             ...(lineups.home?.players || []).slice(0, 2),
@@ -163,13 +163,13 @@ class PropsService {
 
         try {
             // 1. Obtener lista de últimos eventos
-            const lastEventsData = await sofascoreService.getPlayerLastEvents(playerId);
+            const lastEventsData = await sportsDataService.getPlayerLastEvents(playerId);
             const events = lastEventsData?.events || [];
 
             // 2. Obtener estadísticas detalladas de los últimos 5 partidos en paralelo
             const last5Events = events.slice(0, 5);
             const deepStatsPromises = last5Events.map((event: any) =>
-                sofascoreService.getPlayerEventStatistics(playerId, event.id)
+                sportsDataService.getPlayerEventStatistics(playerId, event.id)
             );
 
             const deepStatsResults = await Promise.all(deepStatsPromises);
@@ -186,7 +186,7 @@ class PropsService {
 
             let seasonStats = null;
             if (tournamentId && seasonId) {
-                seasonStats = await sofascoreService.getPlayerSeasonStats(playerId, tournamentId, seasonId);
+                seasonStats = await sportsDataService.getPlayerSeasonStats(playerId, tournamentId, seasonId);
             }
 
             const stats = {
@@ -207,7 +207,7 @@ class PropsService {
         const config = this.LEAGUES_CONFIG[sport] || this.LEAGUES_CONFIG['basketball'];
         const props: PlayerProp[] = [];
 
-        // Mapeo de nombres de estadísticas reales de Sofascore
+        // Mapeo de nombres de estadísticas reales de SportsData
         const statMapping: any = {
             basketball: {
                 points: 'points',
@@ -285,7 +285,7 @@ class PropsService {
                     name: player.name,
                     team: game.homeTeam.id === player.teamId ? game.homeTeam.name : game.awayTeam.name,
                     position: player.position,
-                    image: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/player/${player.id}/image`)}`
+                    image: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/player/${player.id}/image`)}`
                 },
                 game: {
                     id: game.id,
@@ -332,7 +332,7 @@ class PropsService {
         MERCADO: ${prop.prop.displayName}
         LÍNEA DE APUESTA: ${prop.prop.line}
         
-        ESTADÍSTICAS REALES (Sofascore Data):
+        ESTADÍSTICAS REALES (SportsData):
         Promedio de Temporada: ${prop.stats.average}
         Rendimiento Últimos 5 juegos (del más reciente al antiguo): ${prop.stats.last5.join(', ')}
         Tendencia Actual: ${prop.stats.trend === '📈' ? 'A la alza' : 'A la baja'}

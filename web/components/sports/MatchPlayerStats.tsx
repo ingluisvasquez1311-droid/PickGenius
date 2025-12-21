@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { sofascoreService } from '@/lib/services/sofascoreService';
+import { sportsDataService } from '@/lib/services/sportsDataService';
 
 interface Player {
     player: {
@@ -35,7 +35,7 @@ export default function MatchPlayerStats({ eventId, sport, team }: MatchPlayerSt
             setLoading(true);
             try {
                 // Try to get best players first (easier API if available)
-                const bestPlayers = await sofascoreService.getMatchBestPlayers(eventId);
+                const bestPlayers = await sportsDataService.getMatchBestPlayers(eventId);
 
                 if (bestPlayers && bestPlayers.length > 0) {
                     // Normalize best players data structure if needed
@@ -43,7 +43,7 @@ export default function MatchPlayerStats({ eventId, sport, team }: MatchPlayerSt
                 }
 
                 // Fallback to lineups to get all players and sort by rating
-                const lineups = await sofascoreService.getMatchLineups(eventId);
+                const lineups = await sportsDataService.getMatchLineups(eventId);
 
                 if (lineups) {
                     const processTeam = (teamLineup: any) => {

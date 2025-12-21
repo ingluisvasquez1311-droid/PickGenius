@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sofaScoreFootballService } from '@/lib/services/sofaScoreFootballService';
+import { footballDataService } from '@/lib/services/footballDataService';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
     try {
-        console.log('⚽ Fetching Football live games from Sofascore...');
+        console.log('⚽ Fetching Football live games from SportsData...');
 
-        const result = await sofaScoreFootballService.getLiveEvents();
+        const result = await footballDataService.getLiveEvents();
 
         if (!result.success || !result.data) {
             // Fallback or error
-            throw new Error(result.error || 'Failed to fetch from Sofascore');
+            throw new Error(result.error || 'Failed to fetch from SportsData');
         }
 
         const events = result.data.events || [];
@@ -30,12 +30,12 @@ export async function GET(request: NextRequest) {
             homeTeam: {
                 id: game.homeTeam?.id,
                 name: game.homeTeam?.name || 'Home Team',
-                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.homeTeam?.id}/image`)}`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${game.homeTeam?.id}/image`)}`
             },
             awayTeam: {
                 id: game.awayTeam?.id,
                 name: game.awayTeam?.name || 'Away Team',
-                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.awayTeam?.id}/image`)}`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${game.awayTeam?.id}/image`)}`
             },
             homeScore: {
                 current: game.homeScore?.current || 0,

@@ -51,7 +51,7 @@ export default function TeamStatsComparison({ eventId, homeColor = 'bg-purple-50
     }
 
     // Find "ALL" period or sum up (Usually 'ALL' is 1st or just implied if we only calculate from total?)
-    // Actually Sofascore structure usually returns Period stats. Let's look for "ALL" or "Total".
+    // Actually SportsData structure usually returns Period stats. Let's look for "ALL" or "Total".
     // If not found, we use the last period available which usually contains accumulated? No.
     // Let's assume period[0] is ALL for now or we take the one with most data. 
     // In our parser service we just map all periods. 
@@ -115,7 +115,7 @@ export default function TeamStatsComparison({ eventId, homeColor = 'bg-purple-50
         'Assists' // Usually in 'other' or 'scoring'
     ];
 
-    // Map specific keys we want to show. The names must match Sofascore API names exactly.
+    // Map specific keys we want to show. The names must match SportsData API names exactly.
     // Common names: "Field goals", "3-pointers", "Free throws", "Rebounds", "Assists", "Turnovers"
 
     const displayStats = Object.values(totalStats).filter(s =>

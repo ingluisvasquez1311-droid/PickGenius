@@ -273,13 +273,20 @@ const PropsDashboard = () => {
                         )}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {(view === 'all' ? filteredProps : getPicks()).map(prop => (
-                            <PropCard
-                                key={prop.id}
-                                prop={prop}
-                                onPredict={() => handlePredict(prop)}
-                                isPredicting={isPredicting === prop.id}
+                    <div className="space-y-12">
+                        {Object.values(
+                            (view === 'all' ? filteredProps : getPicks()).reduce((acc, prop) => {
+                                const playerId = prop.player.id;
+                                if (!acc[playerId]) acc[playerId] = { player: prop.player, game: prop.game, props: [] };
+                                acc[playerId].props.push(prop);
+                                return acc;
+                            }, {} as Record<number, { player: any, game: any, props: PlayerProp[] }>)
+                        ).map(group => (
+                            <PlayerGroup
+                                key={group.player.id}
+                                group={group}
+                                onPredict={handlePredict}
+                                isPredicting={isPredicting}
                             />
                         ))}
                     </div>
@@ -298,7 +305,92 @@ const PropsDashboard = () => {
     );
 };
 
+const PlayerGroup = ({ group, onPredict, isPredicting }: { group: { player: any, game: any, props: PlayerProp[] }, onPredict: (prop: PlayerProp) => void, isPredicting: string | null }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <div className="glass-card bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden transition-all hover:border-white/10">
+            {/* Player Header - Always Visible */}
+            <div
+                className="p-8 flex items-center justify-between cursor-pointer"
+                onClick={() => setIsExpanded(!isExpanded)}
+            >
+                <div className="flex items-center gap-6">
+                    <div className="w-20 h-20 rounded-[2rem] bg-black/40 border border-white/10 p-1 shrink-0 overflow-hidden shadow-2xl">
+                        <img src={group.player.image} alt={group.player.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                        <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase mb-1">{group.player.name}</h3>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">{group.player.team}</span>
+                            <span className="text-[10px] font-bold text-white/20 uppercase">vs {group.game.homeTeam === group.player.team ? group.game.awayTeam : group.game.homeTeam}</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-center gap-6">
+                    <div className="text-right">
+                        <div className="text-[10px] font-black text-gray-500 uppercase mb-1">Mercados Disponibles</div>
+                        <div className="text-xl font-black text-white">{group.props.length} <span className="text-xs text-purple-400">PROPS</span></div>
+                    </div>
+                    <div className={`w-12 h-12 rounded-full border border-white/10 flex items-center justify-center transition-transform duration-500 ${isExpanded ? 'rotate-180 bg-white text-black' : 'bg-white/5'}`}>
+                        {isExpanded ? '↑' : '↓'}
+                    </div>
+                </div>
+            </div>
+
+            {/* Markets Content - Conditional */}
+            {isExpanded && (
+                <div className="p-8 pt-0 border-t border-white/5 bg-black/20 animate-in slide-in-from-top-4 duration-500">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
+                        {group.props.map(prop => (
+                            <div key={prop.id} className="bg-white/5 border border-white/5 rounded-3xl p-5 hover:bg-white/[0.08] transition-all">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xl">{prop.prop.icon}</span>
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{prop.prop.displayName}</span>
+                                    </div>
+                                    <div className="text-2xl font-black text-white italic">{prop.prop.line}</div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2 mb-6 text-center">
+                                    <div className="bg-black/40 p-2 rounded-xl border border-white/5">
+                                        <div className="text-[7px] text-gray-500 font-black uppercase">AVG</div>
+                                        <div className="text-xs font-black text-white">{prop.stats.average}</div>
+                                    </div>
+                                    <div className="bg-black/40 p-2 rounded-xl border border-white/5">
+                                        <div className="text-[7px] text-gray-500 font-black uppercase">Trend</div>
+                                        <div className="text-xs font-black text-white">{prop.stats.trend}</div>
+                                    </div>
+                                </div>
+
+                                {prop.prediction ? (
+                                    <div className={`p-4 rounded-2xl border-2 ${prop.prediction.prediction === 'OVER' ? 'border-green-500/30 bg-green-500/5' : 'border-red-500/30 bg-red-500/5'}`}>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className={`text-[10px] font-black ${prop.prediction.prediction === 'OVER' ? 'text-green-500' : 'text-red-500'}`}>{prop.prediction.prediction}</span>
+                                            <span className="text-[10px] font-black text-white">{prop.prediction.probability}%</span>
+                                        </div>
+                                        <p className="text-[9px] text-white/40 italic line-clamp-1">"{prop.prediction.reasoning}"</p>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => onPredict(prop)}
+                                        disabled={!!isPredicting}
+                                        className={`w-full py-3 rounded-2xl font-black text-[9px] tracking-widest transition-all ${isPredicting === prop.id ? 'bg-white/5 text-white/20' : 'bg-white text-black hover:scale-105'}`}
+                                    >
+                                        {isPredicting === prop.id ? 'ANALIZANDO...' : '🤖 IA ANALYZE'}
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const PropCard = ({ prop, onPredict, isPredicting }: { prop: PlayerProp, onPredict: () => void, isPredicting: boolean }) => {
+
     return (
         <div className="glass-card p-6 bg-white/5 hover:bg-white/[0.08] border border-white/5 transition-all duration-500 group relative flex flex-col items-stretch h-full overflow-hidden">
             {/* Background Image Blur */}

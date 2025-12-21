@@ -1,6 +1,6 @@
 import { memoryCache } from './memoryCache';
 import { historyService } from './historyService';
-import { sofascoreService } from './sofascoreService';
+import { sportsDataService } from './sportsDataService';
 
 interface ApiResponse<T = any> {
     success: boolean;
@@ -9,7 +9,7 @@ interface ApiResponse<T = any> {
     fromCache?: boolean;
 }
 
-class SofaScoreBasketballService {
+class BasketballDataService {
     /**
      * Generic method to make requests with caching
      */
@@ -21,8 +21,8 @@ class SofaScoreBasketballService {
                 return { success: true, data: cachedData, fromCache: true };
             }
 
-            // Use the unified sofascoreService for proxying and bypass
-            const data = await sofascoreService.makeRequest<T>(endpoint);
+            // Use the unified sportsDataService for proxying and bypass
+            const data = await sportsDataService.makeRequest<T>(endpoint);
 
             if (!data) {
                 throw new Error(`Provider unavailable for ${endpoint}`);
@@ -33,7 +33,7 @@ class SofaScoreBasketballService {
 
             return { success: true, data, fromCache: false };
         } catch (error: any) {
-            console.error(`❌ SofaScore Basketball API Error (${endpoint}):`, error.message);
+            console.error(`❌ Basketball API Error (${endpoint}):`, error.message);
             return { success: false, error: error.message };
         }
     }
@@ -284,4 +284,4 @@ class SofaScoreBasketballService {
 }
 
 // Export singleton instance
-export const sofaScoreBasketballService = new SofaScoreBasketballService();
+export const basketballDataService = new BasketballDataService();

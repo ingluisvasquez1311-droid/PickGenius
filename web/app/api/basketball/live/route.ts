@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sofaScoreBasketballService } from '@/lib/services/sofaScoreBasketballService';
+import { basketballDataService } from '@/lib/services/basketballDataService';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
     try {
-        console.log('🏀 Fetching Basketball live games from SofaScore...');
+        console.log('🏀 Fetching Basketball live games from SportsData...');
 
         // Fetch using our service which handles headers and caching
-        const result = await sofaScoreBasketballService.getLiveEvents();
+        const result = await basketballDataService.getLiveEvents();
 
         if (!result.success || !result.data) {
-            throw new Error(result.error || 'Failed to fetch from Sofascore');
+            throw new Error(result.error || 'Failed to fetch from SportsData');
         }
 
         const events = result.data.events || [];
@@ -31,12 +31,12 @@ export async function GET(request: NextRequest) {
             homeTeam: {
                 id: game.homeTeam?.id,
                 name: game.homeTeam?.name || 'Home Team',
-                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.homeTeam?.id}/image`)}`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${game.homeTeam?.id}/image`)}`
             },
             awayTeam: {
                 id: game.awayTeam?.id,
                 name: game.awayTeam?.name || 'Away Team',
-                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${game.awayTeam?.id}/image`)}`
+                logo: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${game.awayTeam?.id}/image`)}`
             },
             homeScore: {
                 current: game.homeScore?.current || 0,

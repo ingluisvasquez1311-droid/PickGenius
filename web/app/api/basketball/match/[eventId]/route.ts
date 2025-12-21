@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sofascoreService } from '@/lib/services/sofascoreService';
+import { sportsDataService } from '@/lib/services/sportsDataService';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         console.log(`🏀 [Legacy Bridge] Fetching Basketball Match Details for ID ${eventId}...`);
 
         // Use the universal service which handles ScraperAPI bypass
-        const data = await sofascoreService.makeRequest(`/event/${eventId}`);
+        const data = await sportsDataService.makeRequest(`/event/${eventId}`);
 
         if (!data) {
             console.error(`❌ Legacy Sofascore API Error: Match ${eventId} not found or 403`);

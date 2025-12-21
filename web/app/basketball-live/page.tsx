@@ -107,7 +107,7 @@ export default function BasketballLivePage() {
                                 <div className="flex items-center justify-around my-8">
                                     {/* Home */}
                                     <div className="text-center group-hover:scale-105 transition-transform duration-300">
-                                        <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${featuredMatch.homeTeam.id}/image`)}`} className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" alt="Home" />
+                                        <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${featuredMatch.homeTeam.id}/image`)}`} className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" alt="Home" />
                                         <h2 className="text-2xl md:text-4xl font-black mt-4 tracking-tighter">{featuredMatch.homeTeam.name}</h2>
                                     </div>
 
@@ -126,7 +126,7 @@ export default function BasketballLivePage() {
 
                                     {/* Away */}
                                     <div className="text-center group-hover:scale-105 transition-transform duration-300">
-                                        <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/team/${featuredMatch.awayTeam.id}/image`)}`} className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" alt="Away" />
+                                        <img src={`https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sportsdata.com/api/v1/team/${featuredMatch.awayTeam.id}/image`)}`} className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" alt="Away" />
                                         <h2 className="text-2xl md:text-4xl font-black mt-4 tracking-tighter">{featuredMatch.awayTeam.name}</h2>
                                     </div>
                                 </div>

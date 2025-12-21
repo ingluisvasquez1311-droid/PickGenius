@@ -7,11 +7,11 @@ import StatWidget from '@/components/sports/StatWidget';
 
 import PredictionModal from '@/components/sports/PredictionModal';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { sofascoreService, type SofascoreEvent } from '@/lib/services/sofascoreService';
+import { sportsDataService, type SportsDataEvent } from '@/lib/services/sportsDataService';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Type alias for compatibility
-type FootballMatch = SofascoreEvent;
+type FootballMatch = SportsDataEvent;
 
 export default function FootballPage() {
   const [matchesByLeague, setMatchesByLeague] = useState<Record<string, FootballMatch[]>>({});
@@ -39,7 +39,7 @@ export default function FootballPage() {
     async function fetchMatches() {
       setLoading(true);
       try {
-        const matches = await sofascoreService.getAllFootballMatches();
+        const matches = await sportsDataService.getAllFootballMatches();
 
         // Group matches by league/tournament name
         const grouped = matches.reduce((acc, match) => {

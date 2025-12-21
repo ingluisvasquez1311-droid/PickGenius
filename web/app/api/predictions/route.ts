@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
-import { sofascoreService } from '@/lib/services/sofascoreService';
+import { sportsDataService } from '@/lib/services/sportsDataService';
 
 export const maxDuration = 60; // Allow longer timeout for AI generation
 
@@ -28,11 +28,11 @@ export async function POST(request: NextRequest) {
             }, { status: 500 });
         }
 
-        // 1. Fetch real match data using our Unified Sofascore Service (Handles ScraperAPI)
+        // 1. Fetch real match data using our Unified SportsData Service (Handles ScraperAPI)
         let matchContext: any = null;
 
         // Use the universal service for all sports now
-        const game = await sofascoreService.makeRequest(`/event/${gameId}`);
+        const game = await sportsDataService.makeRequest(`/event/${gameId}`);
 
         if (!game) {
             console.error(`❌ [Prediction API] Game ${gameId} not found or blocked (403)`);
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         // Try to get detailed stats for better analysis
         let statistics: any = {};
         try {
-            const statsRes = await sofascoreService.makeRequest(`/event/${gameId}/statistics`);
+            const statsRes = await sportsDataService.makeRequest(`/event/${gameId}/statistics`);
             if (statsRes) {
                 statistics = statsRes;
                 console.log(`📊 [Prediction API] Stats fetched successfully`);

@@ -11,10 +11,11 @@ type Sport = 'basketball' | 'baseball' | 'nhl' | 'tennis';
 
 interface PlayerPropsPredictorProps {
     defaultSport?: Sport;
+    fixedSport?: Sport;
 }
 
-const PlayerPropsPredictor = ({ defaultSport = 'basketball' }: PlayerPropsPredictorProps) => {
-    const [currentSport, setCurrentSport] = useState<Sport>(defaultSport);
+const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: PlayerPropsPredictorProps) => {
+    const [currentSport, setCurrentSport] = useState<Sport>(fixedSport || defaultSport);
     const [topPlayers, setTopPlayers] = useState<any[]>([]);
     const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
     const [playerStats, setPlayerStats] = useState<any>(null);
@@ -160,12 +161,12 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball' }: PlayerPropsPredic
                 setTopPlayers(data.data);
             } else {
                 // Return high quality mocks if real data is empty
-                setTopPlayers(this.getMockTopPlayers(currentSport));
+                setTopPlayers(getMockTopPlayers(currentSport));
             }
             setError(null);
         } catch (err: any) {
             console.error('Error Analizador, using mocks:', err);
-            setTopPlayers(this.getMockTopPlayers(currentSport));
+            setTopPlayers(getMockTopPlayers(currentSport));
             // Only show toast error if it's a real connection error, not just waking up
             if (err.code !== 'ECONNABORTED') {
                 setError('Motor de IA en espera. Usando datos de respaldo.');
@@ -306,9 +307,9 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball' }: PlayerPropsPredic
                     <div className="relative z-10 flex justify-between items-center">
                         <div>
                             <h2 className="text-2xl font-black italic tracking-tighter text-white uppercase">
-                                {sports.find(s => s.id === currentSport)?.icon} {currentSport} <span className="text-purple-500">PRO</span>
+                                {sports.find(s => s.id === currentSport)?.icon} {currentSport === 'basketball' ? 'BASKETBALL' : currentSport === 'baseball' ? 'BEISBOL' : currentSport === 'nhl' ? 'HOCKEY' : 'TENIS'} <span className="text-purple-500">ANALIZADOR PRO</span>
                             </h2>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">AI ENGINE V2.5 • LIVE SYNC</p>
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">SISTEMA DE ANÁLISIS PROFESIONAL • AI 2.5 • DATOS EN VIVO</p>
                         </div>
                         {user && (
                             <div className="text-right">
@@ -337,26 +338,28 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball' }: PlayerPropsPredic
                 </div>
             )}
 
-            {/* Selector de Deporte */}
-            <div className="flex bg-white/5 p-1.5 rounded-2xl gap-1">
-                {sports.map(sport => (
-                    <button
-                        key={sport.id}
-                        onClick={() => {
-                            setCurrentSport(sport.id as Sport);
-                            setSelectedPlayer(null);
-                            setPrediction(null);
-                        }}
-                        className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-all ${currentSport === sport.id
-                            ? 'bg-white text-black font-black shadow-lg scale-105'
-                            : 'text-gray-500 hover:text-white hover:bg-white/5'
-                            }`}
-                    >
-                        <span className="text-xl mb-1">{sport.icon}</span>
-                        <span className="text-[9px] font-black uppercase tracking-tighter">{sport.id === 'basketball' ? 'NBA' : sport.id === 'baseball' ? 'MLB' : sport.id.toUpperCase()}</span>
-                    </button>
-                ))}
-            </div>
+            {/* Selector de Deporte - Hidden if fixedSport is provided */}
+            {!fixedSport && (
+                <div className="flex bg-white/5 p-1.5 rounded-2xl gap-1">
+                    {sports.map(sport => (
+                        <button
+                            key={sport.id}
+                            onClick={() => {
+                                setCurrentSport(sport.id as Sport);
+                                setSelectedPlayer(null);
+                                setPrediction(null);
+                            }}
+                            className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-all ${currentSport === sport.id
+                                ? 'bg-white text-black font-black shadow-lg scale-105'
+                                : 'text-gray-500 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <span className="text-xl mb-1">{sport.icon}</span>
+                            <span className="text-[9px] font-black uppercase tracking-tighter">{sport.id === 'basketball' ? 'NBA' : sport.id === 'baseball' ? 'MLB' : sport.id.toUpperCase()}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {/* Selección de Jugadores */}
             <div className="space-y-4">

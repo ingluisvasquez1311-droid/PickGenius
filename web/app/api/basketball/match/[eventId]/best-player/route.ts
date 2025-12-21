@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sofascoreService } from '@/lib/services/sofascoreService';
+import { sportsDataService } from '@/lib/services/sportsDataService';
 import Groq from 'groq-sdk';
 
 export const dynamic = 'force-dynamic';
@@ -22,7 +22,7 @@ export async function GET(
         console.log(`🤖 [Legacy AI Bridge] Analyzing Best Players for Basketball Match ${eventId}...`);
 
         // Use the universal service which handles ScraperAPI bypass
-        const bestPlayers = await sofascoreService.getMatchBestPlayers(parseInt(eventId));
+        const bestPlayers = await sportsDataService.getMatchBestPlayers(parseInt(eventId));
 
         if (!bestPlayers || (!bestPlayers.bestHomeTeamPlayer && !bestPlayers.bestAwayTeamPlayer)) {
             return NextResponse.json({ success: false, error: 'No stats available' });

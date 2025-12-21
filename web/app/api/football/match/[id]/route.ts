@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sofaScoreFootballService } from '@/lib/services/sofaScoreFootballService';
+import { footballDataService } from '@/lib/services/footballDataService';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,10 +15,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
         // Parallel fetch for all details
         const [detailsRes, statsRes, lineupsRes, incidentsRes] = await Promise.all([
-            sofaScoreFootballService.getEventDetails(id),
-            sofaScoreFootballService.getEventStatistics(id),
-            sofaScoreFootballService.getLineups(id),
-            sofaScoreFootballService.getIncidents(id)
+            footballDataService.getEventDetails(id),
+            footballDataService.getEventStatistics(id),
+            footballDataService.getLineups(id),
+            footballDataService.getIncidents(id)
         ]);
 
         if (!detailsRes.success || !detailsRes.data) {

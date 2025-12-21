@@ -1,4 +1,5 @@
 import { memoryCache } from './memoryCache';
+import { sportsDataService } from './sportsDataService';
 
 interface ApiResponse<T = any> {
     success: boolean;
@@ -7,10 +8,10 @@ interface ApiResponse<T = any> {
     fromCache?: boolean;
 }
 
-class SofaScoreBaseballService {
+class NHLDataService {
     private baseUrl: string = typeof window === 'undefined'
-        ? 'https://www.sofascore.com/api/v1'
-        : '/api/proxy/sofascore';
+        ? 'https://www.sportsdata.com/api/v1'
+        : '/api/proxy/sportsdata';
     private headers: Record<string, string> = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     };
@@ -27,18 +28,18 @@ class SofaScoreBaseballService {
             memoryCache.set(cacheKey, data, ttlSeconds);
             return { success: true, data, fromCache: false };
         } catch (error: any) {
-            console.error(`❌ SofaScore Baseball Error (${endpoint}):`, error.message);
+            console.error(`❌ NHL Data Error (${endpoint}):`, error.message);
             return { success: false, error: error.message };
         }
     }
 
     async getTournamentDetails(id: string) {
-        return this.makeRequest(`/unique-tournament/${id}`, `baseball_tournament_${id}`, 86400);
+        return this.makeRequest(`/unique-tournament/${id}`, `nhl_tournament_${id}`, 86400);
     }
 
     async getStandings(tournamentId: string, seasonId: string) {
-        return this.makeRequest(`/tournament/${tournamentId}/season/${seasonId}/standings/total`, `baseball_standings_${tournamentId}_${seasonId}`, 3600);
+        return this.makeRequest(`/tournament/${tournamentId}/season/${seasonId}/standings/total`, `nhl_standings_${tournamentId}_${seasonId}`, 3600);
     }
 }
 
-export const sofaScoreBaseballService = new SofaScoreBaseballService();
+export const nhlDataService = new NHLDataService();

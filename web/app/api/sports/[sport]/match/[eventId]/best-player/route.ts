@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sofascoreService } from '@/lib/services/sofascoreService';
+import { sportsDataService } from '@/lib/services/sportsDataService';
 import Groq from 'groq-sdk';
 
 export const dynamic = 'force-dynamic';
@@ -21,8 +21,8 @@ export async function GET(
     try {
         console.log(`🤖 [Universal AI] Analyzing Best Players for ${sport} match ${eventId}...`);
 
-        // 1. Fetch Real Stats from Sofascore via Universal Service
-        const bestPlayers = await sofascoreService.getMatchBestPlayers(parseInt(eventId));
+        // 1. Fetch Real Stats from SportsData via Universal Service
+        const bestPlayers = await sportsDataService.getMatchBestPlayers(parseInt(eventId));
 
         let bestHome = bestPlayers?.bestHomeTeamPlayer;
         let bestAway = bestPlayers?.bestAwayTeamPlayer;
@@ -32,7 +32,7 @@ export async function GET(
         // FALLBACK: If best-players endpoint returns nothing, try lineups
         if (!bestHome && !bestAway) {
             console.log(`⚠️ [Universal AI] Best players summary missing. Falling back to lineups for ${sport} match ${eventId}...`);
-            const lineups = await sofascoreService.getMatchLineups(parseInt(eventId));
+            const lineups = await sportsDataService.getMatchLineups(parseInt(eventId));
 
             if (lineups && (lineups.home || lineups.away)) {
                 const processTeam = (teamLineup: any) => {
@@ -104,7 +104,7 @@ export async function GET(
                     rating: mvp.statistics?.rating || 0,
                     stats: mvp.statistics || {},
                     team: mvpTeam,
-                    imageUrl: `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/player/${mvp.player?.id}/image`)}`
+                    imageUrl: `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sportsdata.app/api/v1/player/${mvp.player?.id}/image`)}`
                 },
                 ai: {
                     title: aiContent.shortTitle || "ON FIRE",

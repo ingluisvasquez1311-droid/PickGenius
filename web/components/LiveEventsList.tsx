@@ -201,6 +201,20 @@ interface LiveEventsListProps {
 }
 
 export default function LiveEventsList({ events, sport, title, loading }: LiveEventsListProps) {
+    const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set());
+
+    const toggleGroup = (key: string) => {
+        setExpandedGroups(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) {
+                next.delete(key);
+            } else {
+                next.add(key);
+            }
+            return next;
+        });
+    };
+
     if (loading) {
         return (
             <div>
@@ -238,23 +252,40 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
         <div className="space-y-8">
             {title && <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>}
 
-            {Object.entries(groupedEvents).map(([leagueKey, leagueEvents]) => (
-                <div key={leagueKey} className="space-y-4">
-                    <div className="flex items-center gap-3 border-l-4 border-green-500 pl-4 py-1 bg-white/5 rounded-r-lg">
-                        <h3 className="text-lg font-bold text-white uppercase tracking-tight">
-                            {leagueKey}
-                        </h3>
-                        <span className="text-xs font-bold bg-green-500/20 text-green-500 px-2 py-0.5 rounded-full border border-green-500/30">
-                            {leagueEvents.length}
-                        </span>
+            {Object.entries(groupedEvents).map(([leagueKey, leagueEvents]) => {
+                const isExpanded = expandedGroups.has(leagueKey);
+
+                return (
+                    <div key={leagueKey} className="space-y-4">
+                        <button
+                            onClick={() => toggleGroup(leagueKey)}
+                            className="w-full flex items-center justify-between gap-3 border-l-4 border-green-500 pl-4 py-3 bg-white/5 rounded-r-xl transition-all hover:bg-white/10 group/header"
+                        >
+                            <div className="flex items-center gap-3">
+                                <h3 className="text-lg font-bold text-white uppercase tracking-tight">
+                                    {leagueKey}
+                                </h3>
+                                <span className="text-xs font-bold bg-green-500/20 text-green-500 px-2 py-0.5 rounded-full border border-green-500/30">
+                                    {leagueEvents.length}
+                                </span>
+                            </div>
+                            <div className={`transition-transform duration-300 transform ${isExpanded ? 'rotate-180' : ''}`}>
+                                <svg className="w-5 h-5 text-gray-500 group-hover/header:text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </button>
+
+                        {isExpanded && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                {leagueEvents.map((event) => (
+                                    <EventCard key={event.id} event={event} sport={sport} />
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {leagueEvents.map((event) => (
-                            <EventCard key={event.id} event={event} sport={sport} />
-                        ))}
-                    </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }

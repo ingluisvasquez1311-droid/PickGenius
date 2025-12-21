@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sofascoreService } from '@/lib/services/sofascoreService';
+import { sportsDataService } from '@/lib/services/sportsDataService';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -17,11 +17,11 @@ export async function GET(
     try {
         console.log(`🌐 [Universal API] Fetching ${sport} Match Details for ID ${eventId}...`);
 
-        // Fetch details from Sofascore Service (Handles ScraperAPI proxy)
-        const data = await sofascoreService.makeRequest(`/event/${eventId}`);
+        // Fetch details from SportsData Service (Handles ScraperAPI proxy)
+        const data = await sportsDataService.makeRequest(`/event/${eventId}`);
 
         if (!data) {
-            console.error(`❌ Sofascore Error (${sport}): Provider unavailable or 403`);
+            console.error(`❌ SportsData Error (${sport}): Provider unavailable or 403`);
             return NextResponse.json({ success: false, error: 'Provider unavailable' }, { status: 503 });
         }
 

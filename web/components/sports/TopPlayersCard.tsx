@@ -108,7 +108,7 @@ export default function TopPlayersCard({ title, players, sport, teamColor = 'pur
                 {topPlayers.map((player, index) => {
                     const pData = player.player || player;
                     const imageUrl = pData.id
-                        ? `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sofascore.app/api/v1/player/${pData.id}/image`)}`
+                        ? `https://images.weserv.nl/?url=${encodeURIComponent(`https://api.sportsdata.app/api/v1/player/${pData.id}/image`)}`
                         : null;
 
                     return (

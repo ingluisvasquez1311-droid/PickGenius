@@ -3,13 +3,14 @@
 
 import React, { useEffect, useState } from 'react';
 import MatchCard from '@/components/sports/MatchCard';
+import GroupedMatchesList from '@/components/sports/GroupedMatchesList';
 import StatWidget from '@/components/sports/StatWidget';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { sofascoreService, type SofascoreEvent } from '@/lib/services/sofascoreService';
+import { sportsDataService, type SportsDataEvent } from '@/lib/services/sportsDataService';
 import PlayerPropsPredictor from '@/components/basketball/PlayerPropsPredictor';
 
 export default function TennisPage() {
-    const [games, setGames] = useState<SofascoreEvent[]>([]);
+    const [games, setGames] = useState<SportsDataEvent[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -17,7 +18,7 @@ export default function TennisPage() {
             setLoading(true);
             try {
                 // SofaScore uses 'tennis' for both ATP and WTA
-                const allGames = await sofascoreService.getEventsBySport('tennis');
+                const allGames = await sportsDataService.getEventsBySport('tennis');
                 setGames(allGames);
             } catch (error) {
                 console.error('Error fetching tennis matches:', error);
@@ -78,22 +79,7 @@ export default function TennisPage() {
                             {loading ? (
                                 <SkeletonLoader />
                             ) : games.length > 0 ? (
-                                <div className="grid grid-cols-1 gap-4">
-                                    {games.map(game => (
-                                        <MatchCard
-                                            key={game.id}
-                                            eventId={game.id}
-                                            sport="tennis"
-                                            homeTeam={{ name: game.homeTeam.name, id: game.homeTeam.id }}
-                                            awayTeam={{ name: game.awayTeam.name, id: game.awayTeam.id }}
-                                            homeScore={game.homeScore.current}
-                                            awayScore={game.awayScore.current}
-                                            date={new Date(game.startTimestamp * 1000).toISOString()}
-                                            status={game.status.type === 'inprogress' ? 'En Vivo' : game.status.type === 'finished' ? 'Finalizado' : 'Programado'}
-                                            league={`${game.tournament.category?.name || 'International'}: ${game.tournament.name}`}
-                                        />
-                                    ))}
-                                </div>
+                                <GroupedMatchesList games={games} sport="tennis" />
                             ) : (
                                 <div className="glass-card p-24 text-center border-dashed border-2 border-white/5 rounded-[3rem] bg-white/[0.01]">
                                     <div className="text-7xl mb-6 opacity-10">🎾</div>
@@ -106,7 +92,7 @@ export default function TennisPage() {
 
                     <div className="lg:col-span-4">
                         <div className="sticky top-24">
-                            <PlayerPropsPredictor defaultSport="tennis" />
+                            <PlayerPropsPredictor fixedSport="tennis" />
                         </div>
                     </div>
                 </div>
