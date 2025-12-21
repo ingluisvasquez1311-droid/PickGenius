@@ -8,6 +8,7 @@ import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import TopPlayersCard from '@/components/sports/TopPlayersCard';
 import TeamLogo from '@/components/ui/TeamLogo';
+import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
 
 interface MatchLiveViewProps {
     sport: string;
@@ -19,6 +20,7 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
     const [game, setGame] = useState<any>(null);
     const [bestPlayers, setBestPlayers] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -126,6 +128,7 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                 players={bestPlayers?.allPlayers?.home || []}
                                 sport={sport}
                                 teamColor="purple"
+                                onPlayerClick={setSelectedPlayer}
                             />
                         </ErrorBoundary>
 
@@ -198,6 +201,7 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                 players={bestPlayers?.allPlayers?.away || []}
                                 sport={sport}
                                 teamColor="orange"
+                                onPlayerClick={setSelectedPlayer}
                             />
                         </ErrorBoundary>
 
@@ -212,6 +216,15 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
 
                 </div>
             </div>
+
+            {selectedPlayer && (
+                <PlayerDetailModal
+                    isOpen={!!selectedPlayer}
+                    onClose={() => setSelectedPlayer(null)}
+                    player={selectedPlayer}
+                    teamColor="purple"
+                />
+            )}
         </div>
     );
 }

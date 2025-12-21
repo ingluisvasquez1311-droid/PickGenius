@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { API_URL } from '@/lib/api';
 
 interface AIPredictionCardProps {
-    eventId: string;
+    eventId: string | number;
     sport: string;
 }
 
@@ -28,7 +28,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             // Use the centralized prediction service
             // details are fetched server-side by the API now, so we only need ID and sport
             const result = await generatePrediction({
-                gameId: eventId,
+                gameId: eventId.toString(),
                 sport: sport as any
             });
 
@@ -204,8 +204,12 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                         {/* Exact Score & Cards */}
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 p-3 rounded-lg border border-blue-500/20 relative overflow-hidden">
-                                                <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-bl">EXACTO</div>
-                                                <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">Marcador Exacto</p>
+                                                <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-bl">
+                                                    {sport === 'basketball' ? 'ESTIMADO' : 'EXACTO'}
+                                                </div>
+                                                <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">
+                                                    {sport === 'basketball' ? 'Total Puntos' : 'Marcador Exacto'}
+                                                </p>
                                                 <p className="text-white font-bold text-xl">{prediction.predictions.finalScore || '-'}</p>
                                             </div>
 

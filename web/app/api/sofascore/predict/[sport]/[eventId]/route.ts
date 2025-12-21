@@ -109,10 +109,10 @@ Responde SOLO con un JSON en este formato exacto (sin bloques de código markdow
   "confidence": "X%",
   "reasoning": "Análisis breve basado en las estadísticas reales (máximo 180 caracteres)",
   "details": {
-    "goals_points": "Predicción marcador final (ej: 2-1)",
+    "goals_points": "${sport === 'basketball' ? 'Rango estimado de puntos totales (ej: 210-220) o Spread' : 'Predicción marcador final (ej: 2-1)'}",
     "corners_rebounds": "Solo corners si es fútbol o rebotes si es basket (ej: 8-5)",
     "cards_fouls": "Tarjetas amarillas/rojas o faltas",
-    "shots_accuracy": "Tiros totales y al arco (ej: 15 tiros, 7 al arco)"
+    "shots_accuracy": "${sport === 'basketball' ? 'Menciona 1-2 jugadores clave y sus proyecciones' : 'Tiros totales y al arco (ej: 15 tiros, 7 al arco)'}"
   },
   "bettingTip": "Recomendación específica (ej: ${matchContext.homeTeam} ML @ 1.85)"
 }`;

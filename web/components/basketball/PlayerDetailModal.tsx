@@ -28,6 +28,16 @@ export default function PlayerDetailModal({ player, isOpen, onClose, teamColor =
     const bgColor = teamColor === 'orange' ? 'bg-orange-500/20' : 'bg-purple-500/20';
     const textColor = teamColor === 'orange' ? 'text-orange-400' : 'text-purple-400';
 
+    // Normalize stats object
+    const stats = player.statistics || player;
+
+    // Safely extract values with fallbacks
+    const points = stats.points ?? stats.pts ?? 0;
+    const rebounds = stats.rebounds ?? stats.reb ?? 0;
+    const assists = stats.assists ?? stats.ast ?? 0;
+    const rating = player.rating || player.player?.rating || stats.rating || '-';
+    const minutes = stats.minutesPlayed ?? stats.min ?? '-';
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
             <div className="relative w-full max-w-md bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
@@ -79,15 +89,15 @@ export default function PlayerDetailModal({ player, isOpen, onClose, teamColor =
                     <div className="grid grid-cols-3 gap-4 w-full mb-6">
                         <div className="bg-gray-800/50 rounded-lg p-3 text-center border border-gray-700/50">
                             <div className="text-xs text-gray-500 uppercase font-bold mb-1">PTS</div>
-                            <div className="text-2xl font-black text-white">{player.points || 0}</div>
+                            <div className="text-2xl font-black text-white">{points}</div>
                         </div>
                         <div className="bg-gray-800/50 rounded-lg p-3 text-center border border-gray-700/50">
                             <div className="text-xs text-gray-500 uppercase font-bold mb-1">REB</div>
-                            <div className="text-2xl font-black text-white">{player.rebounds || 0}</div>
+                            <div className="text-2xl font-black text-white">{rebounds}</div>
                         </div>
                         <div className="bg-gray-800/50 rounded-lg p-3 text-center border border-gray-700/50">
                             <div className="text-xs text-gray-500 uppercase font-bold mb-1">AST</div>
-                            <div className="text-2xl font-black text-white">{player.assists || 0}</div>
+                            <div className="text-2xl font-black text-white">{assists}</div>
                         </div>
                     </div>
 
@@ -96,32 +106,32 @@ export default function PlayerDetailModal({ player, isOpen, onClose, teamColor =
                         <div className="grid grid-cols-2 gap-y-4">
                             <div className="flex justify-between border-b border-gray-800 pb-2 mr-2">
                                 <span className="text-gray-400 text-sm">Minutos</span>
-                                <span className="text-white font-mono">{player.minutesPlayed || '-'}</span>
+                                <span className="text-white font-mono">{minutes}</span>
                             </div>
                             <div className="flex justify-between border-b border-gray-800 pb-2 ml-2">
                                 <span className="text-gray-400 text-sm">Rating</span>
-                                <span className={`font-bold ${parseFloat(player.rating) >= 7 ? 'text-green-500' : 'text-yellow-500'}`}>
-                                    {player.rating || '-'}
+                                <span className={`font-bold ${parseFloat(rating) >= 7 ? 'text-green-500' : 'text-yellow-500'}`}>
+                                    {rating}
                                 </span>
                             </div>
 
                             {/* Extra stats if available */}
-                            {player.steals !== undefined && (
+                            {stats.steals !== undefined && (
                                 <div className="flex justify-between mr-2">
                                     <span className="text-gray-400 text-sm">Robos</span>
-                                    <span className="text-white font-mono">{player.steals}</span>
+                                    <span className="text-white font-mono">{stats.steals}</span>
                                 </div>
                             )}
-                            {player.blocks !== undefined && (
+                            {stats.blocks !== undefined && (
                                 <div className="flex justify-between ml-2">
                                     <span className="text-gray-400 text-sm">Bloqueos</span>
-                                    <span className="text-white font-mono">{player.blocks}</span>
+                                    <span className="text-white font-mono">{stats.blocks}</span>
                                 </div>
                             )}
-                            {player.turnovers !== undefined && (
+                            {stats.turnovers !== undefined && (
                                 <div className="flex justify-between mr-2 col-span-2 pt-2 border-t border-gray-800 mt-2">
                                     <span className="text-gray-400 text-sm">Pérdidas</span>
-                                    <span className="text-white font-mono">{player.turnovers}</span>
+                                    <span className="text-white font-mono">{stats.turnovers}</span>
                                 </div>
                             )}
                         </div>
