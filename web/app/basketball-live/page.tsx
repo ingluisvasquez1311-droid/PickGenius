@@ -16,24 +16,34 @@ export default function BasketballLivePage() {
             try {
                 setLoading(true);
 
+                const today = new Date().toISOString().split('T')[0];
+                const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
                 // Fetch in parallel
-                const [liveRes, scheduledRes] = await Promise.all([
+                const [liveRes, scheduledTodayRes, scheduledTomorrowRes] = await Promise.all([
                     fetch('/api/basketball/live'),
-                    fetch(`/api/basketball/scheduled?date=${new Date().toISOString().split('T')[0]}`)
+                    fetch(`/api/basketball/scheduled?date=${today}`),
+                    fetch(`/api/basketball/scheduled?date=${tomorrow}`)
                 ]);
 
                 const liveData = await liveRes.json();
-                const scheduledData = await scheduledRes.json();
+                const scheduledTodayData = await scheduledTodayRes.json();
+                const scheduledTomorrowData = await scheduledTomorrowRes.json();
 
                 // Process Live Events
                 if (liveData.success && liveData.data) {
                     setLiveEvents(liveData.data);
                 }
 
-                // Process Scheduled Events
-                if (scheduledData.success && scheduledData.data && scheduledData.data.events) {
-                    setScheduledEvents(scheduledData.data.events);
+                // Process Scheduled Events (Combine Today and Tomorrow)
+                let combinedScheduled: any[] = [];
+                if (scheduledTodayData.success && scheduledTodayData.data?.events) {
+                    combinedScheduled = [...scheduledTodayData.data.events];
                 }
+                if (scheduledTomorrowData.success && scheduledTomorrowData.data?.events) {
+                    combinedScheduled = [...combinedScheduled, ...scheduledTomorrowData.data.events];
+                }
+                setScheduledEvents(combinedScheduled);
 
             } catch (err: any) {
                 console.error("Error fetching events:", err);
@@ -160,26 +170,44 @@ export default function BasketballLivePage() {
                                 Próximos Eventos
                             </h3>
 
-                            <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-2">
-                                {scheduledEvents.slice(0, featuredMatch === scheduledEvents[0] ? 5 : 6).map((event: any) => (
-                                    <Link href={`/basketball-live/${event.id}`} key={event.id} className="group flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer">
-                                        <div className="flex items-center gap-3">
-                                            <div className="font-mono text-xs text-gray-400 bg-black/40 px-2 py-1 rounded">
-                                                {event.status.description}
+                            <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-2">
+                                {(() => {
+                                    const todayStr = new Date().toLocaleDateString();
+                                    const grouped = scheduledEvents.reduce((acc: any, event: any) => {
+                                        const date = new Date(event.startTimestamp * 1000).toLocaleDateString();
+                                        const label = date === todayStr ? 'Hoy' : 'Mañana';
+                                        if (!acc[label]) acc[label] = [];
+                                        acc[label].push(event);
+                                        return acc;
+                                    }, {});
+
+                                    return Object.entries(grouped).map(([day, games]: [string, any]) => (
+                                        <div key={day} className="space-y-2">
+                                            <div className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2 px-1">
+                                                {day}
                                             </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-tighter truncate w-32">
-                                                    {event.tournament.category?.name ? `${event.tournament.category.name}: ` : ''}{event.tournament.name}
-                                                </span>
-                                                <span className="font-bold text-sm truncate w-32">{event.homeTeam.name}</span>
-                                                <span className="font-bold text-sm text-gray-400 truncate w-32">{event.awayTeam.name}</span>
-                                            </div>
+                                            {games.slice(0, 5).map((event: any) => (
+                                                <Link href={`/basketball-live/${event.id}`} key={event.id} className="group flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="font-mono text-xs text-gray-400 bg-black/40 px-2 py-1 rounded">
+                                                            {event.status.description}
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[9px] text-gray-500 font-bold uppercase tracking-tighter truncate w-32">
+                                                                {event.tournament.name}
+                                                            </span>
+                                                            <span className="font-bold text-sm truncate w-24">{event.homeTeam.name}</span>
+                                                            <span className="font-bold text-sm text-gray-400 truncate w-24">{event.awayTeam.name}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-[10px] font-black text-gray-600 group-hover:text-green-500 transition-colors uppercase">Análisis &gt;</div>
+                                                </Link>
+                                            ))}
                                         </div>
-                                        <div className="text-xs font-black text-gray-600 group-hover:text-green-500 transition-colors">Odds &gt;</div>
-                                    </Link>
-                                ))}
+                                    ));
+                                })()}
                                 {scheduledEvents.length === 0 && (
-                                    <div className="text-center text-gray-600 text-sm py-10">No hay más partidos hoy</div>
+                                    <div className="text-center text-gray-600 text-sm py-10">No hay más partidos hoy ni mañana</div>
                                 )}
                             </div>
                         </div>

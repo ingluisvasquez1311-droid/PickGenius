@@ -238,11 +238,18 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
         );
     }
 
-    // Group events by category and tournament
+    const todayStr = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+
+    // Group events by date, category and tournament
     const groupedEvents = events.reduce((acc, event) => {
+        const dateObj = new Date(event.startTimestamp ? event.startTimestamp * 1000 : Date.now());
+        const dateKey = dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        const dateLabel = dateKey === todayStr ? 'HOY' : dateKey.toUpperCase();
+
         const countryName = event.tournament.category?.name || 'Internacional';
         const leagueName = event.tournament.name;
-        const key = `${countryName}: ${leagueName}`;
+        const key = `${dateLabel} • ${countryName}: ${leagueName}`;
+
         if (!acc[key]) acc[key] = [];
         acc[key].push(event);
         return acc;
