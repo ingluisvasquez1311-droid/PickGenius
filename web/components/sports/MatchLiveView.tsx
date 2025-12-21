@@ -9,6 +9,7 @@ import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import TopPlayersCard from '@/components/sports/TopPlayersCard';
 import TeamLogo from '@/components/ui/TeamLogo';
 import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
+import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
 
 interface MatchLiveViewProps {
     sport: string;
@@ -148,6 +149,10 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                 sport={sport}
                                 eventId={eventId}
                             />
+                        </ErrorBoundary>
+
+                        <ErrorBoundary>
+                            <MatchStatsSummary match={game} />
                         </ErrorBoundary>
 
                         {/* MVP Spotlight */}
