@@ -73,9 +73,15 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('❌ Football API Route Error:', error);
+        console.error('❌ Football API Route Error:', error.message);
+
+        // Debug info for the log
+        const isServer = typeof window === 'undefined';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        console.log(`🔍 Debug Context: isServer=${isServer}, apiUrl=${apiUrl || 'MISSING'}`);
 
         // FALLBACK: Return Mock Data so the site looks alive even if blocked
+        // ... (mockEvents remains the same)
         const mockEvents = [
             {
                 id: 1234567,
@@ -114,7 +120,8 @@ export async function GET(request: NextRequest) {
             data: mockEvents,
             count: mockEvents.length,
             source: 'fallback_mock',
-            error: error.message // Keep internal track of real error
+            error: error.message,
+            debug: { server: isServer, hasApiUrl: !!apiUrl }
         });
     }
 }

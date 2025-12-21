@@ -99,49 +99,48 @@ class SportsDataService {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
             let fetchUrl: string;
-            let fetchHeaders: any = this.headers;
+            let fetchHeaders: any = { ...this.headers };
 
-            // Log configuration on server for debugging
-            if (isServer && !process.env.NEXT_PHASE) {
-                console.log(`📡 [SportsData] Target: ${endpoint} | API_URL: ${apiUrl || 'MISSING'}`);
-            }
-
+            // Determine the final URL with robust construction
             if (isServer && apiUrl) {
-                // In production Vercel (Server Side), hit the Render Proxy to bypass IP blocks
-                // The Render backend is not blocked by Sofascore or uses its own scraper proxy
-                fetchUrl = `${apiUrl}/api/sofascore/proxy${endpoint}`;
-                console.log(`🔒 [SportsData] Proxying through Render: ${endpoint}`);
+                const cleanApiUrl = apiUrl.trim().replace(/\/$/, "");
+                const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
+                // Route through our Render bridge
+                fetchUrl = `${cleanApiUrl}/api/sofascore/proxy${cleanEndpoint}`;
+
+                if (!process.env.NEXT_PHASE) {
+                    console.log(`� [SportsData] Proxy Tunnel: ${fetchUrl}`);
+                }
             } else {
-                // Client side or dev without backend config
-                const targetUrl = endpoint.startsWith('http') ? endpoint : `https://www.sofascore.com/api/v1${endpoint}`;
-                const useProxy = process.env.USE_PROXY === 'true' && !!process.env.SCRAPER_API_KEY;
+                // Client side (browser) or local dev without apiUrl
+                const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 
-                fetchUrl = targetUrl;
-
-                // Only use ScraperAPI on the server side if explicitly configured
-                if (useProxy && isServer) {
-                    const apiKey = process.env.SCRAPER_API_KEY?.trim();
-                    fetchUrl = `http://api.scraperapi.com?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
-                    fetchHeaders = {};
-                } else if (!isServer) {
-                    // If on client, use our internal Next.js proxy (/api/proxy/sportsdata)
-                    fetchUrl = `/api/proxy/sportsdata${endpoint}`;
+                if (!isServer) {
+                    // Use local Next.js API route as gateway (which we will also update to bridge to Render)
+                    fetchUrl = `/api/proxy/sportsdata${cleanEndpoint}`;
+                } else {
+                    // Fallback to direct Sofascore (standard for local/dev)
+                    fetchUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
                 }
             }
 
             const response = await fetch(fetchUrl, {
                 headers: fetchHeaders,
-                cache: 'no-store'
+                cache: 'no-store',
+                // Wait up to 15s for the bridge/Render to wake up
+                signal: AbortSignal.timeout(15000)
             });
 
             if (!response.ok) {
-                console.error(`❌ Request Error (${endpoint}): ${response.status} from ${fetchUrl}`);
+                const errorText = await response.text().catch(() => "No error body");
+                console.error(`❌ Request Error (${endpoint}): ${response.status} from ${fetchUrl}. Body: ${errorText.substring(0, 100)}`);
                 return null;
             }
 
             return await response.json();
-        } catch (error) {
-            console.error(`❌ Fetch Exception (${endpoint}):`, error);
+        } catch (error: any) {
+            console.error(`❌ Fetch Exception (${endpoint}):`, error.message);
             return null;
         }
     }
