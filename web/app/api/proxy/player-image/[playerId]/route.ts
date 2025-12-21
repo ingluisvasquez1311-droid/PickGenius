@@ -48,18 +48,7 @@ export async function GET(
         }
 
         if (!imageResponse) {
-            // Return a 1x1 transparent PNG as fallback
-            const transparentPng = Buffer.from(
-                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-                'base64'
-            );
-            return new NextResponse(transparentPng, {
-                status: 200,
-                headers: {
-                    'Content-Type': 'image/png',
-                    'Cache-Control': 'public, max-age=86400'
-                }
-            });
+            return new NextResponse('Image not found', { status: 404 });
         }
 
         const imageBuffer = await imageResponse.arrayBuffer();
@@ -76,16 +65,7 @@ export async function GET(
     } catch (error) {
         console.error('Error proxying player image:', error);
 
-        const transparentPng = Buffer.from(
-            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
-            'base64'
-        );
-        return new NextResponse(transparentPng, {
-            status: 200,
-            headers: {
-                'Content-Type': 'image/png',
-                'Cache-Control': 'public, max-age=3600'
-            }
-        });
+        // Return 404 on error to trigger frontend fallback (Initials)
+        return new NextResponse('Error fetching image', { status: 404 });
     }
 }
