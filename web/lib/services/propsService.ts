@@ -1,6 +1,9 @@
 import { sportsDataService } from './sportsDataService';
 import { memoryCache } from './memoryCache';
 import Groq from 'groq-sdk';
+import Parser from 'rss-parser';
+
+const rssParser = new Parser();
 
 export interface PlayerProp {
     id: string;
@@ -318,6 +321,22 @@ class PropsService {
     }
 
     /**
+     * Busca noticias recientes para dar contexto a la IA
+     */
+    async fetchNewsContext(query: string): Promise<string> {
+        try {
+            // Buscamos en Google News RSS para obtener noticias de última hora
+            const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}+when:2d&hl=en-US&gl=US&ceid=US:en`;
+            const feed = await rssParser.parseURL(url);
+
+            return feed.items.slice(0, 3).map(item => `- ${item.title}`).join('\n');
+        } catch (error) {
+            console.error('Error fetching news context:', error);
+            return 'No se encontraron noticias recientes relevantes.';
+        }
+    }
+
+    /**
      * Genera una predicción usando Groq
      */
     async predictProp(prop: PlayerProp): Promise<any> {
@@ -326,9 +345,12 @@ class PropsService {
 
         const groq = new Groq({ apiKey });
 
+        // Obtener contexto de noticias (Jugador + Equipo)
+        const newsContext = await this.fetchNewsContext(`${prop.player.name} ${prop.player.team}`);
+
         const prompt = `
         Actúa como un experto analista de apuestas deportivas profesional (Sharp Bettor).
-        Analiza el siguiente "Player Prop" basado en DATOS REALES DE RENDIMIENTO y da tu predicción:
+        Analiza el siguiente "Player Prop" basado en DATOS REALES y CONTEXTO DE ÚLTIMA HORA:
         
         JUGADOR: ${prop.player.name} (${prop.player.team})
         PARTIDO: ${prop.game.homeTeam} vs ${prop.game.awayTeam}
@@ -338,21 +360,24 @@ class PropsService {
         
         ESTADÍSTICAS REALES (SportsData):
         Promedio de Temporada: ${prop.stats.average}
-        Rendimiento Últimos 5 juegos (del más reciente al antiguo): ${prop.stats.last5.join(', ')}
+        Rendimiento Últimos 5 juegos: ${prop.stats.last5.join(', ')}
         Tendencia Actual: ${prop.stats.trend === '📈' ? 'A la alza' : 'A la baja'}
+        
+        NOTICIAS Y CONTEXTO (Google News):
+        ${newsContext}
         
         Instrucciones:
         1. Evalúa si el jugador superará (OVER) o no llegará (UNDER) a la línea de apuesta.
-        2. Considera la consistencia en los últimos 5 juegos comparada con su promedio de temporada.
-        3. Si no hay datos suficientes de temporada, básate fuertemente en la racha reciente (Last 5).
+        2. IMPORTANTE: Si las noticias mencionan lesiones, descansos de compañeros clave o cambios en la alineación, dales prioridad en el análisis.
+        3. Considera la consistencia en los últimos 5 juegos comparada con el promedio.
         
-        Responde exclusivamente en formato JSON estructurado:
+        Responde exclusivamente en formato JSON:
         {
             "prediction": "OVER" o "UNDER",
-            "probability": número del 1 al 100 (precisión estadística),
+            "probability": número del 1 al 100,
             "confidence": "Baja", "Media" o "Alta",
-            "reasoning": "Resumen profesional de exacto 3 líneas en español simplificado",
-            "keyFactors": ["factor estadístico 1", "factor táctico 2", "factor de racha 3"]
+            "reasoning": "Resumen profesional de exacto 3 líneas en español. Menciona noticias si son relevantes.",
+            "keyFactors": ["factor estadístico/noticia 1", "factor táctico/noticia 2", "factor de racha 3"]
         }
         `;
 

@@ -256,6 +256,64 @@ const PropsDashboard = () => {
                 </div>
             )}
 
+            {/* AI Top Pick Section */}
+            {!loading && view === 'all' && props.some(p => p.prediction) && (
+                <div className="max-w-4xl mx-auto mb-12 animate-in zoom-in duration-700">
+                    <div className="flex items-center gap-3 mb-4 px-4">
+                        <span className="text-xl">🏆</span>
+                        <h2 className="text-sm font-black text-white/40 uppercase tracking-[0.3em]">IA Top Pick del Día</h2>
+                    </div>
+                    {(() => {
+                        const topPick = [...props]
+                            .filter(p => p.prediction)
+                            .sort((a, b) => (b.prediction.probability || 0) - (a.prediction.probability || 0))[0];
+
+                        if (!topPick) return null;
+
+                        return (
+                            <div className="premium-border rounded-[2.5rem] overflow-hidden">
+                                <div className="glass-brutal bg-gradient-to-br from-purple-600/20 to-black/40 p-8 flex flex-col md:flex-row items-center gap-8 border border-white/10">
+                                    <div className="relative shrink-0">
+                                        <div className="w-32 h-32 rounded-[2.5rem] bg-black/40 border-2 border-purple-500/30 p-1 overflow-hidden shadow-2xl">
+                                            <img src={topPick.player.image} alt={topPick.player.name} className="w-full h-full object-cover" />
+                                        </div>
+                                        <div className="absolute -bottom-2 -right-2 bg-purple-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-xl">
+                                            {topPick.prediction.probability}% PROB
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1 text-center md:text-left">
+                                        <div className="flex items-center justify-center md:justify-start gap-4 mb-2">
+                                            <span className="text-purple-400 font-bold text-[10px] uppercase tracking-widest">{topPick.sport} / {topPick.league}</span>
+                                            <div className="flex -space-x-1">
+                                                <div className="w-5 h-5 rounded-full border border-white/10 bg-black/50 overflow-hidden"><TeamLogo teamId={topPick.game.homeTeamId} teamName={topPick.game.homeTeam} size="sm" /></div>
+                                                <div className="w-5 h-5 rounded-full border border-white/10 bg-black/50 overflow-hidden"><TeamLogo teamId={topPick.game.awayTeamId} teamName={topPick.game.awayTeam} size="sm" /></div>
+                                            </div>
+                                        </div>
+                                        <h3 className="text-4xl font-black text-white italic tracking-tighter uppercase mb-2">
+                                            {topPick.player.name} <span className="text-purple-500">MÁS DE {topPick.prop.line}</span>
+                                        </h3>
+                                        <p className="text-xs text-white/60 font-medium italic leading-relaxed">
+                                            "{topPick.prediction.reasoning}"
+                                        </p>
+                                    </div>
+
+                                    <div className="shrink-0 flex flex-col gap-2">
+                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+                                            <div className="text-[8px] font-black text-white/30 uppercase tracking-widest mb-1">Confianza</div>
+                                            <div className="text-xl font-black text-purple-400 uppercase italic">{topPick.prediction.confidence}</div>
+                                        </div>
+                                        <div className="text-[10px] font-black text-center text-white p-2 animate-pulse">
+                                            🔥 HOT PICK
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
+                </div>
+            )}
+
             {
                 loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
