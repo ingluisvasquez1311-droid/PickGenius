@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useMatchDetails, useMatchBestPlayers } from '@/hooks/useMatchData';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import AIPredictionCard from '@/components/ai/AIPredictionCard';
 import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
@@ -18,42 +19,13 @@ interface MatchLiveViewProps {
 
 export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
     const router = useRouter();
-    const [game, setGame] = useState<any>(null);
-    const [bestPlayers, setBestPlayers] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
     const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
+    const { data: game, isLoading: gameLoading, error: gameError } = useMatchDetails(sport, eventId);
+    const { data: bestPlayers, isLoading: playersLoading } = useMatchBestPlayers(sport, eventId);
 
-    useEffect(() => {
-        async function fetchData() {
-            if (!eventId || !sport) return;
-
-            try {
-                // 1. Fetch Game Details from Universal API
-                const gameRes = await fetch(`/api/sports/${sport}/match/${eventId}`);
-                if (gameRes.ok) {
-                    const data = await gameRes.json();
-                    if (data.success) {
-                        setGame(data.data);
-                    }
-                }
-
-                // 2. Fetch Top Players from Universal API
-                const playersRes = await fetch(`/api/sports/${sport}/match/${eventId}/best-player`);
-                if (playersRes.ok) {
-                    const data = await playersRes.json();
-                    if (data.success) {
-                        setBestPlayers(data.data);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching game data:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchData();
-    }, [eventId, sport]);
+    // Derived state
+    const loading = gameLoading;
+    const isLive = game?.status?.type === 'inprogress';
 
     if (loading) {
         return (
@@ -78,7 +50,7 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
         );
     }
 
-    const isLive = game.status?.type === 'inprogress';
+
 
     return (
         <div className="min-h-screen bg-[#0b0b0b] pb-20">
