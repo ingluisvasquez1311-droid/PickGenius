@@ -37,12 +37,16 @@ export default function TennisPage() {
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
                 <div className="container relative z-10">
                     <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 bg-green-500 rounded-[2rem] flex items-center justify-center text-4xl shadow-[0_0_40px_rgba(34,197,94,0.4)] animate-pulse">🎾</div>
+                        <div className="w-20 h-20 bg-green-500 rounded-[2rem] flex items-center justify-center text-4xl shadow-[0_0_40px_rgba(34,197,94,0.4)] animate-float">🎾</div>
                         <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="h-px w-8 bg-green-500"></span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-green-400">Mastery Court Intelligence</span>
+                            </div>
                             <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
-                                TENIS <span className="text-green-500">ATP/WTA</span>
+                                TENNIS <span className="text-green-500">COURT MASTERY ELITE</span>
                             </h1>
-                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Precision Analysis • Court Mastery</p>
+                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Precision Analysis • Grand Slam Tracker • Match Point AI</p>
                         </div>
                     </div>
                 </div>

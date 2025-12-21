@@ -36,12 +36,16 @@ export default function BaseballPage() {
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
                 <div className="container relative z-10">
                     <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 bg-red-600 rounded-[2rem] flex items-center justify-center text-4xl shadow-[0_0_40px_rgba(220,38,38,0.4)] animate-pulse">⚾</div>
+                        <div className="w-20 h-20 bg-red-600 rounded-[2rem] flex items-center justify-center text-4xl shadow-[0_0_40px_rgba(220,38,38,0.4)] animate-float">⚾</div>
                         <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="h-px w-8 bg-red-500"></span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-400">Precision Diamond Analytics</span>
+                            </div>
                             <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
-                                BÉISBOL <span className="text-red-500">MLB</span>
+                                MLB <span className="text-red-500">DIAMOND ELITE</span>
                             </h1>
-                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Diamond Analytics • Pro Insights</p>
+                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Home Run Insights • Inning Coverage • Pitcher AI</p>
                         </div>
                     </div>
                 </div>

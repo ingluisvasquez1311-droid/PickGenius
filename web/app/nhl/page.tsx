@@ -36,12 +36,16 @@ export default function NHLPage() {
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
                 <div className="container relative z-10">
                     <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-4xl shadow-[0_0_40px_rgba(37,99,235,0.4)] animate-pulse">🏒</div>
+                        <div className="w-20 h-20 bg-blue-600 rounded-[2rem] flex items-center justify-center text-4xl shadow-[0_0_40px_rgba(37,99,235,0.4)] animate-float">🏒</div>
                         <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="h-px w-8 bg-blue-500"></span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400">Cold Hearted Hockey Analytics</span>
+                            </div>
                             <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
-                                HOCKEY <span className="text-blue-500">NHL</span>
+                                NHL <span className="text-blue-500">ICE MASTERY ELITE</span>
                             </h1>
-                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Ice Cold Analytics • Power Play Insights</p>
+                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Power Play Insights • Puck Analysis • Cold AI</p>
                         </div>
                     </div>
                 </div>

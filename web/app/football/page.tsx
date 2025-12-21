@@ -140,8 +140,29 @@ export default function FootballPage() {
   const totalMatches = allMatches.length;
 
   return (
-    <main className="min-h-screen pb-20 bg-[#0b0b0b]">
-      <div className="container pt-8">
+    <main className="min-h-screen pb-20 bg-[#050505] text-white selection:bg-green-500/30">
+      {/* Hero Section Sport - Soccer */}
+      <div className="relative h-64 overflow-hidden mb-12 flex items-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/40 to-black z-0"></div>
+        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+        <div className="container relative z-10">
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 bg-emerald-600 rounded-[2rem] flex items-center justify-center text-4xl shadow-[0_0_40px_rgba(16,185,129,0.4)] animate-float">⚽</div>
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="h-px w-8 bg-emerald-500"></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-400">Total Football Intelligence</span>
+              </div>
+              <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
+                SOCCER <span className="text-emerald-500">SUPREME ELITE</span>
+              </h1>
+              <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Global League Insights • Goal Projections • Manager AI</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container">
 
         {/* Header Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
