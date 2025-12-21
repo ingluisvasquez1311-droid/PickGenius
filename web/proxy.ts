@@ -36,7 +36,7 @@ function isRateLimited(ip: string): boolean {
     return false;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
     const path = request.nextUrl.pathname;
 
