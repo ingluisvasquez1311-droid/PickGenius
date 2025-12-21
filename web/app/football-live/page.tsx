@@ -33,14 +33,12 @@ export default function FootballLivePage() {
                 }
 
                 // Process Scheduled Data
-                if (scheduledData.success && scheduledData.data && Array.isArray(scheduledData.data.events)) {
-                    const scheduledEvents = scheduledData.data.events;
-                    // Deduplicate: Don't add if already in live list
-                    const liveIds = new Set(allEvents.map(e => e.id));
+                const processScheduled = (data: any) => {
+                    if (data.success && data.data && Array.isArray(data.data.events)) {
+                        const scheduledEvents = data.data.events;
+                        const liveIds = new Set(allEvents.map(e => e.id));
 
-                    const newScheduled = scheduledEvents.filter((e: any) => !liveIds.has(e.id)).map((item: any) => {
-                        // Ensure generic structure matches LiveEvent interface fallback
-                        return {
+                        const newScheduled = scheduledEvents.filter((e: any) => !liveIds.has(e.id)).map((item: any) => ({
                             id: item.id,
                             tournament: item.tournament,
                             homeTeam: item.homeTeam,
@@ -49,11 +47,13 @@ export default function FootballLivePage() {
                             awayScore: item.awayScore || { current: 0 },
                             status: item.status,
                             startTimestamp: item.startTimestamp
-                        };
-                    });
+                        }));
+                        allEvents = [...allEvents, ...newScheduled];
+                    }
+                };
 
-                    allEvents = [...allEvents, ...newScheduled];
-                }
+                processScheduled(scheduledTodayData);
+                processScheduled(scheduledTomorrowData);
 
                 if (allEvents.length > 0) {
                     setEvents(allEvents);
