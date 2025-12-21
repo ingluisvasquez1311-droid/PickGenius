@@ -413,9 +413,14 @@ const PlayerGroup = ({ group, onPredict, isPredicting }: { group: { player: any,
                                 <div className="w-6 h-6 rounded-full border border-white/10 bg-black/50 overflow-hidden" title={group.game.awayTeam}><TeamLogo teamId={group.game.awayTeamId} teamName={group.game.awayTeam} size="sm" /></div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">{group.player.team}</span>
-                            <span className="text-[10px] font-bold text-white/30 uppercase">VS {group.game.homeTeam === group.player.team ? group.game.awayTeam : group.game.homeTeam}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1">
+                            <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20 w-fit">{group.player.team}</span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-white/30 uppercase">VS {group.game.homeTeam === group.player.team ? group.game.awayTeam : group.game.homeTeam}</span>
+                                <span className="text-[10px] font-mono text-purple-400/50 uppercase tracking-tighter">
+                                    • {new Date(group.game.startTimestamp * 1000).toLocaleDateString([], { day: 'numeric', month: 'short' })} {new Date(group.game.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

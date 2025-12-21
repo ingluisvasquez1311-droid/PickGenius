@@ -33,21 +33,33 @@ export default function HomePage() {
 
         if (!basketballFeatured) {
           try {
-            const scheduledRes = await fetch(`/api/basketball/scheduled?date=${new Date().toISOString().split('T')[0]}`);
-            const scheduledData = await scheduledRes.json();
-            if (scheduledData.success && scheduledData.data?.events) {
-              if (scheduledData.data.events.length > 0) {
-                const nextGame = scheduledData.data.events[0];
-                basketballFeatured = {
-                  id: nextGame.id,
-                  homeTeam: nextGame.homeTeam,
-                  awayTeam: nextGame.awayTeam,
-                  homeScore: { current: 0 },
-                  awayScore: { current: 0 },
-                  status: { description: new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), type: 'scheduled' },
-                  isScheduled: true
-                };
-              }
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+            let res = await fetch(`/api/basketball/scheduled?date=${today}`);
+            let data = await res.json();
+
+            if ((!data.success || !data.data?.events || data.data.events.length === 0)) {
+              res = await fetch(`/api/basketball/scheduled?date=${tomorrow}`);
+              data = await res.json();
+            }
+
+            if (data.success && data.data?.events && data.data.events.length > 0) {
+              const nextGame = data.data.events[0];
+              const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
+              basketballFeatured = {
+                id: nextGame.id,
+                homeTeam: nextGame.homeTeam,
+                awayTeam: nextGame.awayTeam,
+                homeScore: { current: 0 },
+                awayScore: { current: 0 },
+                tournament: nextGame.tournament,
+                status: {
+                  description: `${isTomorrow ? 'Mañana ' : ''}${new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                  type: 'scheduled'
+                },
+                isScheduled: true
+              };
             }
           } catch (e) {
             console.error("Error fetching scheduled basketball", e);
@@ -66,6 +78,41 @@ export default function HomePage() {
           footballCount = footballData.data.length;
           if (footballData.data.length > 0) {
             footballFeatured = footballData.data[0];
+          }
+        }
+
+        if (!footballFeatured) {
+          try {
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+            let res = await fetch(`/api/football/scheduled?date=${today}`);
+            let data = await res.json();
+
+            if ((!data.success || !data.data?.events || data.data.events.length === 0)) {
+              res = await fetch(`/api/football/scheduled?date=${tomorrow}`);
+              data = await res.json();
+            }
+
+            if (data.success && data.data?.events && data.data.events.length > 0) {
+              const nextGame = data.data.events[0];
+              const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
+              footballFeatured = {
+                id: nextGame.id,
+                tournament: nextGame.tournament,
+                homeTeam: nextGame.homeTeam,
+                awayTeam: nextGame.awayTeam,
+                homeScore: { current: 0 },
+                awayScore: { current: 0 },
+                status: {
+                  description: `${isTomorrow ? 'Mañana ' : ''}${new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                  type: 'scheduled'
+                },
+                isScheduled: true
+              };
+            }
+          } catch (e) {
+            console.error("Error fetching scheduled football", e);
           }
         }
 

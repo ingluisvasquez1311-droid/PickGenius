@@ -252,12 +252,20 @@ class SportsDataService {
      */
     async getEventsBySport(sport: string, date?: string): Promise<SportsDataEvent[]> {
         const today = date || new Date().toISOString().split('T')[0];
-        const [liveData, scheduledData] = await Promise.all([
+        const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+        const [liveData, scheduledToday, scheduledTomorrow] = await Promise.all([
             this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/live`),
-            this.makeRequest<SportsDataResponse>(`/sport/${sport}/scheduled-events/${today}`)
+            this.makeRequest<SportsDataResponse>(`/sport/${sport}/scheduled-events/${today}`),
+            this.makeRequest<SportsDataResponse>(`/sport/${sport}/scheduled-events/${tomorrow}`)
         ]);
 
-        const allEvents = [...(liveData?.events || []), ...(scheduledData?.events || [])];
+        const allEvents = [
+            ...(liveData?.events || []),
+            ...(scheduledToday?.events || []),
+            ...(scheduledTomorrow?.events || [])
+        ];
+
         return allEvents.filter((event, index, self) =>
             index === self.findIndex(e => e.id === event.id)
         );
