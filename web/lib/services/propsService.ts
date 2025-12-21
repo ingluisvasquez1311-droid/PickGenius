@@ -65,6 +65,11 @@ class PropsService {
             propTypes: ['aces', 'doubleFaults', 'firstServePoints'],
             icons: { aces: '🎾', doubleFaults: '❌', firstServePoints: '⚡' },
             names: { aces: 'Aces', doubleFaults: 'Doble Faltas', firstServePoints: 'Puntos 1er Saque' }
+        },
+        'american-football': {
+            propTypes: ['touchdowns', 'passingYards', 'rushingYards', 'receptions'],
+            icons: { touchdowns: '🏈', passingYards: '🎯', rushingYards: '🏃', receptions: '🤲' },
+            names: { touchdowns: 'Touchdowns', passingYards: 'Yardas Aire', rushingYards: 'Yardas Tierra', receptions: 'Recepciones' }
         }
     };
 
@@ -79,7 +84,16 @@ class PropsService {
         console.log(`🔄 [PropsService] Generating REAL daily props for ${sport}...`);
 
         try {
-            const games = await sportsDataService.getEventsBySport(sport);
+            // Mapping for UI slugs to Sofascore slugs
+            const slugMapping: any = {
+                'nhl': 'hockey',
+                'american-football': 'american-football',
+                'baseball': 'baseball',
+                'tennis': 'tennis'
+            };
+            const targetSport = slugMapping[sport] || sport;
+
+            const games = await sportsDataService.getEventsBySport(targetSport);
 
             if (!games || games.length === 0) {
                 console.warn(`⚠️ [PropsService] No real games found for ${sport}, using mocks.`);
@@ -136,26 +150,47 @@ class PropsService {
         const config = this.LEAGUES_CONFIG[sport] || this.LEAGUES_CONFIG['basketball'];
         const type = config.propTypes[0];
 
-        return [
-            {
-                id: `mock_p1_${sport}`,
-                player: { id: 1, name: 'Atleta Estrella', team: 'Lions', position: 'G', image: '/player-placeholder.png' },
-                game: { id: 101, homeTeam: 'Lions', awayTeam: 'Tigers', homeTeamId: 1, awayTeamId: 2, date: new Date().toISOString(), startTimestamp: Date.now() / 1000 + 3600 },
-                prop: { type, line: 20.5, displayName: config.names[type], icon: config.icons[type] },
-                stats: { average: 22.4, last5: [25, 18, 22, 30, 19], trend: '📈' },
+        const mockData: any = {
+            basketball: [
+                { name: 'LeBron James', team: 'Lakers', pos: 'F', line: 25.5, avg: 24.8 },
+                { name: 'Stephen Curry', team: 'Warriors', pos: 'G', line: 4.5, type: 'threes', avg: 4.8 }
+            ],
+            football: [
+                { name: 'Erling Haaland', team: 'Man City', pos: 'ST', line: 1.5, type: 'goals', avg: 1.2 },
+                { name: 'Kevin De Bruyne', team: 'Man City', pos: 'MF', line: 0.5, type: 'assists', avg: 0.8 }
+            ],
+            'american-football': [
+                { name: 'Patrick Mahomes', team: 'Chiefs', pos: 'QB', line: 280.5, type: 'passingYards', avg: 295.2 },
+                { name: 'Travis Kelce', team: 'Chiefs', pos: 'TE', line: 0.5, type: 'touchdowns', avg: 0.7 }
+            ],
+            nhl: [
+                { name: 'Connor McDavid', team: 'Oilers', pos: 'C', line: 1.5, type: 'points', avg: 1.8 },
+                { name: 'Auston Matthews', team: 'Maple Leafs', pos: 'LW', line: 0.5, type: 'goals', avg: 0.9 }
+            ],
+            baseball: [
+                { name: 'Shohei Ohtani', team: 'Dodgers', pos: 'DH', line: 1.5, type: 'hits', avg: 1.4 },
+                { name: 'Aaron Judge', team: 'Yankees', pos: 'CF', line: 0.5, type: 'homeRuns', avg: 0.4 }
+            ],
+            tennis: [
+                { name: 'Carlos Alcaraz', team: 'ATP', pos: 'N/A', line: 8.5, type: 'aces', avg: 7.2 },
+                { name: 'Jannik Sinner', team: 'ATP', pos: 'N/A', line: 6.5, type: 'aces', avg: 6.8 }
+            ]
+        };
+
+        const sportMocks = mockData[sport] || mockData['basketball'];
+
+        return sportMocks.map((m: any, i: number) => {
+            const mType = m.type || type;
+            return {
+                id: `mock_${sport}_${i}`,
+                player: { id: i + 1, name: m.name, team: m.team, position: m.pos, image: '/player-placeholder.png' },
+                game: { id: 100 + i, homeTeam: m.team, awayTeam: 'Rival', homeTeamId: 1, awayTeamId: 2, date: new Date().toISOString(), startTimestamp: Date.now() / 1000 + 3600 * (i + 1) },
+                prop: { type: mType, line: m.line, displayName: config.names[mType] || mType, icon: config.icons[mType] || '📊' },
+                stats: { average: m.avg, last5: [m.avg + 1, m.avg - 1, m.avg + 2, m.avg - 2, m.avg], trend: '📈' },
                 league: 'Pro League',
                 sport: sport
-            },
-            {
-                id: `mock_p2_${sport}`,
-                player: { id: 2, name: 'MVP Candidato', team: 'Eagles', position: 'F', image: '/player-placeholder.png' },
-                game: { id: 102, homeTeam: 'Eagles', awayTeam: 'Hawks', homeTeamId: 3, awayTeamId: 4, date: new Date().toISOString(), startTimestamp: Date.now() / 1000 + 7200 },
-                prop: { type, line: 15.5, displayName: config.names[type], icon: config.icons[type] },
-                stats: { average: 18.2, last5: [20, 15, 17, 19, 21], trend: '📈' },
-                league: 'Pro League',
-                sport: sport
-            }
-        ];
+            };
+        });
     }
 
     /**
@@ -245,6 +280,12 @@ class PropsService {
                 aces: 'aces',
                 doubleFaults: 'doubleFaults',
                 firstServePoints: 'firstServePoints'
+            },
+            'american-football': {
+                touchdowns: 'touchdowns',
+                passingYards: 'passingYards',
+                rushingYards: 'rushingYards',
+                receptions: 'receptions'
             }
         };
 
@@ -288,7 +329,7 @@ class PropsService {
                 player: {
                     id: player.id,
                     name: player.name,
-                    team: game.homeTeam.id === player.teamId ? game.homeTeam.name : game.awayTeam.name,
+                    team: sport === 'tennis' ? player.name : (game.homeTeam.id === player.teamId ? game.homeTeam.name : game.awayTeam.name),
                     position: player.position,
                     image: `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.sofascore.com/api/v1/player/${player.id}/image`)}`
                 },

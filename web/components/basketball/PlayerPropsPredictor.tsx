@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
-type Sport = 'basketball' | 'baseball' | 'nhl' | 'tennis';
+type Sport = 'basketball' | 'baseball' | 'nhl' | 'tennis' | 'american-football' | 'football';
 
 interface PlayerPropsPredictorProps {
     defaultSport?: Sport;
@@ -65,6 +65,8 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
 
     const sports = [
         { id: 'basketball', label: 'NBA', icon: '🏀' },
+        { id: 'football', label: 'Fútbol', icon: '⚽' },
+        { id: 'american-football', label: 'NFL', icon: '🏈' },
         { id: 'baseball', label: 'MLB', icon: '⚾' },
         { id: 'nhl', label: 'NHL', icon: '🏒' },
         { id: 'tennis', label: 'TENIS', icon: '🎾' }
@@ -92,6 +94,16 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
             { value: 'aces', label: 'Aces', icon: '🎾' },
             { value: 'doubleFaults', label: 'D. Faltas', icon: '❌' },
             { value: 'firstServePoints', label: '1er Saque', icon: '⚡' }
+        ],
+        'football': [
+            { value: 'goals', label: 'Goles', icon: '⚽' },
+            { value: 'assists', label: 'Asistencias', icon: '🤝' },
+            { value: 'shotsOnTarget', label: 'Tiros Arco', icon: '🎯' }
+        ],
+        'american-football': [
+            { value: 'touchdowns', label: 'Touchdowns', icon: '🏈' },
+            { value: 'passingYards', label: 'Yardas Aire', icon: '🎯' },
+            { value: 'rushingYards', label: 'Yardas Tierra', icon: '🏃' }
         ]
     };
 
@@ -135,6 +147,24 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
             "Simulando trayectoria del set definitivo...",
             "Consultando modelos Ace IA...",
             "Finalizando reporte Tenis..."
+        ],
+        'football': [
+            "Analizando efectividad de cara a puerta...",
+            "Evaluando xG proyectado del delantero...",
+            "Calculando probabilidad de asistencia...",
+            "Escaneando defensas rivales...",
+            "Simulando transiciones ofensivas...",
+            "Consultando modelos Goal IA...",
+            "Finalizando reporte Fútbol..."
+        ],
+        'american-football': [
+            "Analizando yardas por pase proyectadas...",
+            "Evaluando probabilidad de Touchdown...",
+            "Calculando protección de la O-Line...",
+            "Escaneando debilidades de la secundaria...",
+            "Simulando posesiones en Red Zone...",
+            "Consultando modelos Touchdown IA...",
+            "Finalizando reporte NFL..."
         ]
     };
 
@@ -197,6 +227,14 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
             'tennis': [
                 { id: 14882, name: 'Novak Djokovic', averages: { aces: 6.5, doubleFaults: 2.1, firstServePoints: 78 } },
                 { id: 1042571, name: 'Carlos Alcaraz', averages: { aces: 4.2, doubleFaults: 1.8, firstServePoints: 72 } }
+            ],
+            'football': [
+                { id: 825123, name: 'Erling Haaland', averages: { goals: 1.1, assists: 0.2, shotsOnTarget: 2.5 } },
+                { id: 125121, name: 'Kylian Mbappé', averages: { goals: 0.9, assists: 0.4, shotsOnTarget: 2.1 } }
+            ],
+            'american-football': [
+                { id: 792821, name: 'Patrick Mahomes', averages: { touchdowns: 2.4, passingYards: 285.5, rushingYards: 25.2 } },
+                { id: 825124, name: 'Christian McCaffrey', averages: { touchdowns: 1.2, rushingYards: 95.2, passingYards: 0 } }
             ]
         };
         return mocks[sport] || mocks['basketball'];

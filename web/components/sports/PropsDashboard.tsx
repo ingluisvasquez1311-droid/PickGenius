@@ -57,6 +57,7 @@ const PropsDashboard = () => {
     const sports = [
         { id: 'basketball', name: 'NBA', icon: '🏀', color: 'blue' },
         { id: 'football', name: 'Fútbol', icon: '⚽', color: 'green' },
+        { id: 'american-football', name: 'NFL', icon: '🏈', color: 'orange' },
         { id: 'baseball', name: 'MLB', icon: '⚾', color: 'red' },
         { id: 'nhl', name: 'NHL', icon: '🏒', color: 'blue' },
         { id: 'tennis', name: 'Tenis', icon: '🎾', color: 'yellow' }
@@ -357,9 +358,13 @@ const PropsDashboard = () => {
 
             {
                 !loading && (view === 'all' ? filteredProps : (view === 'parlays' ? getParlays() : getPicks())).length === 0 && (
-                    <div className="text-center py-20 opacity-20">
-                        <div className="text-6xl mb-4">📭</div>
-                        <div className="font-black uppercase tracking-[0.5em]">No hay datos disponibles</div>
+                    <div className="text-center py-20 px-4">
+                        <div className="text-6xl mb-4 opacity-20">📭</div>
+                        <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-widest">No hay props disponibles</h3>
+                        <p className="text-gray-500 max-w-md mx-auto text-sm">
+                            Actualmente no hemos encontrado mercados de jugadores para este deporte.
+                            Inténtalo más tarde o revisa otro deporte para obtener predicciones.
+                        </p>
                     </div>
                 )
             }
