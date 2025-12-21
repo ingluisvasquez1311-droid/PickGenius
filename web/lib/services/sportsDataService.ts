@@ -96,36 +96,43 @@ class SportsDataService {
     async makeRequest<T = any>(endpoint: string): Promise<T | null> {
         try {
             const isServer = typeof window === 'undefined';
+            const scraperKey = process.env.SCRAPER_API_KEY;
+            const useProxy = process.env.USE_PROXY === 'true';
+
             // Try different env var names as fallback
             const apiUrl = process.env.NEXT_PUBLIC_API_URL ||
                 process.env.NEXT_PUBLIC_BACKEND_HOST ||
-                (isServer ? "https://pickgenius-backend.onrender.com" : ""); // Use -backend subdomain
+                (isServer ? "https://pickgenius-backend.onrender.com" : "");
 
             let fetchUrl: string;
             let fetchHeaders: any = { ...this.headers };
 
-            // Determine the final URL with robust construction
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+            const targetUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
 
-            if (isServer && apiUrl && apiUrl.startsWith('http')) {
+            if (isServer && scraperKey && useProxy) {
+                // Priority 1: Direct ScraperAPI from Vercel (if keys are provided in Vercel Dashboard)
+                fetchUrl = `http://api.scraperapi.com?api_key=${scraperKey.trim()}&url=${encodeURIComponent(targetUrl)}&render=false&country_code=us`;
+                fetchHeaders = {}; // Reset headers for ScraperAPI to avoid conflicts
+                if (!process.env.NEXT_PHASE) {
+                    console.log(`🔒 [SportsData] Direct ScraperAPI: ${cleanEndpoint}`);
+                }
+            } else if (isServer && apiUrl && apiUrl.startsWith('http')) {
+                // Priority 2: Tunnel through Render bridge (if no keys in Vercel)
                 const cleanApiUrl = apiUrl.trim().replace(/\/$/, "");
-
-                // Route through our Render bridge
                 fetchUrl = `${cleanApiUrl}/api/sofascore/proxy${cleanEndpoint}`;
 
                 if (!process.env.NEXT_PHASE) {
-                    console.log(`📡 [SportsData PROXY] Tunneling: ${fetchUrl}`);
+                    console.log(`📡 [SportsData] Render Bridge: ${fetchUrl}`);
                 }
             } else {
-                // Client side (browser) or local dev without apiUrl
+                // Client side or local dev without proxy configured
                 if (!isServer) {
-                    // Use local Next.js API route as gateway
                     fetchUrl = `/api/proxy/sportsdata${cleanEndpoint}`;
                 } else {
-                    // Fallback to direct Sofascore (standard for local/dev)
-                    fetchUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
+                    fetchUrl = targetUrl;
                     if (!process.env.NEXT_PHASE) {
-                        console.log(`📡 [SportsData DIRECT] Using Sofascore: ${fetchUrl}`);
+                        console.log(`📡 [SportsData] Direct Target: ${fetchUrl}`);
                     }
                 }
             }
@@ -133,13 +140,13 @@ class SportsDataService {
             const response = await fetch(fetchUrl, {
                 headers: fetchHeaders,
                 cache: 'no-store',
-                // Wait up to 25s for the bridge/Render to wake up (Render Free Tier can be slow)
-                signal: AbortSignal.timeout(25000)
+                // Increased to 30s to handle cold starts and ScraperAPI overhead
+                signal: AbortSignal.timeout(30000)
             });
 
             if (!response.ok) {
                 const errorText = await response.text().catch(() => "No error body");
-                console.error(`❌ Request Error (${endpoint}): ${response.status} from ${fetchUrl}. Body: ${errorText.substring(0, 100)}`);
+                console.error(`❌ Request Failed (${endpoint}): ${response.status} from ${fetchUrl}. Body: ${errorText.substring(0, 100)}`);
                 return null;
             }
 
