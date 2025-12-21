@@ -57,7 +57,7 @@ const NotificationCenter = () => {
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="absolute right-0 mt-4 w-80 md:w-96 bg-[#111] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 overflow-hidden animate-in slide-in-from-top-2 duration-300">
+                <div className="fixed md:absolute right-2 md:right-0 mt-2 md:mt-4 w-[calc(100vw-1rem)] max-w-sm md:w-96 bg-[#111] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] overflow-hidden animate-in slide-in-from-top-2 duration-300">
                     <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                         <h3 className="font-black text-xs uppercase tracking-widest text-white/60">Notificaciones</h3>
                         {unreadCount > 0 && (

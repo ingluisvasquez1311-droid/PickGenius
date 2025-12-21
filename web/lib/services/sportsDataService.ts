@@ -110,33 +110,36 @@ class SportsDataService {
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
             const targetUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
 
+            // DEBUGGING: Log environment state
+            console.log(`🔍 [SportsData] Request Debug for ${cleanEndpoint}:`);
+            console.log(`  - isServer: ${isServer}`);
+            console.log(`  - scraperKey exists: ${!!scraperKey}`);
+            console.log(`  - useProxy: ${useProxy}`);
+            console.log(`  - apiUrl: ${apiUrl || '(empty)'}`);
+
             if (isServer && scraperKey && useProxy) {
                 // Priority 1: Direct ScraperAPI from Vercel (if keys are provided in Vercel Dashboard)
-                // Use https and keep headers just in case target is sensitive (though ScraperAPI usually handles it)
                 fetchUrl = `https://api.scraperapi.com?api_key=${scraperKey.trim()}&url=${encodeURIComponent(targetUrl)}&render=false&country_code=us`;
 
-                if (!process.env.NEXT_PHASE) {
-                    console.log(`🔒 [SportsData] Direct ScraperAPI: ${cleanEndpoint}`);
-                }
+                console.log(`🔒 [SportsData] Using Direct ScraperAPI: ${cleanEndpoint}`);
             } else if (isServer && apiUrl && apiUrl.startsWith('http')) {
                 // Priority 2: Tunnel through Render bridge (if no keys in Vercel)
                 const cleanApiUrl = apiUrl.trim().replace(/\/$/, "");
                 fetchUrl = `${cleanApiUrl}/api/sofascore/proxy${cleanEndpoint}`;
 
-                if (!process.env.NEXT_PHASE) {
-                    console.log(`📡 [SportsData] Render Bridge: ${fetchUrl}`);
-                }
+                console.log(`📡 [SportsData] Using Render Bridge: ${fetchUrl}`);
             } else {
                 // Client side or local dev without proxy configured
                 if (!isServer) {
                     fetchUrl = `/api/proxy/sportsdata${cleanEndpoint}`;
+                    console.log(`🌐 [SportsData] Using Client Proxy: ${fetchUrl}`);
                 } else {
                     fetchUrl = targetUrl;
-                    if (!process.env.NEXT_PHASE) {
-                        console.log(`📡 [SportsData] Direct Target: ${fetchUrl}`);
-                    }
+                    console.log(`⚠️ [SportsData] Direct Target (may fail): ${fetchUrl}`);
                 }
             }
+
+            console.log(`🌍 [SportsData] Final URL: ${fetchUrl}`);
 
             const response = await fetch(fetchUrl, {
                 headers: fetchHeaders,
@@ -145,15 +148,20 @@ class SportsDataService {
                 signal: AbortSignal.timeout(30000)
             });
 
+            console.log(`📊 [SportsData] Response status: ${response.status} for ${cleanEndpoint}`);
+
             if (!response.ok) {
                 const errorText = await response.text().catch(() => "No error body");
-                console.error(`❌ Request Failed (${endpoint}): ${response.status} from ${fetchUrl}. Body: ${errorText.substring(0, 100)}`);
+                console.error(`❌ Request Failed (${endpoint}): ${response.status} from ${fetchUrl}. Body: ${errorText.substring(0, 200)}`);
                 return null;
             }
 
-            return await response.json();
+            const data = await response.json();
+            console.log(`✅ [SportsData] Success for ${cleanEndpoint}`);
+            return data;
         } catch (error: any) {
             console.error(`❌ Fetch Exception (${endpoint}):`, error.message);
+            console.error(`   Stack:`, error.stack?.substring(0, 300));
             return null;
         }
     }
