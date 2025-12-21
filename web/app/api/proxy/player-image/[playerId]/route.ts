@@ -4,9 +4,9 @@ export const runtime = 'edge';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { playerId: string } }
+    { params }: { params: Promise<{ playerId: string }> }
 ) {
-    const { playerId } = params;
+    const { playerId } = await params;
 
     if (!playerId) {
         return new NextResponse('Player ID required', { status: 400 });

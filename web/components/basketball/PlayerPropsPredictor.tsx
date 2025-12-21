@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import PlayerPredictionShowcase from '@/components/ai/PlayerPredictionShowcase';
 
 type Sport = 'basketball' | 'baseball' | 'nhl' | 'tennis' | 'american-football' | 'football';
 
@@ -28,6 +29,7 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
     const [thinkingProgress, setThinkingProgress] = useState(0);
     const [thinkingMessage, setThinkingMessage] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [showShowcase, setShowShowcase] = useState(false);
     const { user, usePrediction, checkPredictionLimit, saveToHistory, notify } = useAuth();
 
     const thinkingTimerRef = useRef<NodeJS.Timeout | null>(null);
