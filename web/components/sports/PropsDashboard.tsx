@@ -10,6 +10,7 @@ import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
 import TeamLogo from '@/components/ui/TeamLogo';
 import ShareButton from '@/components/sharing/ShareButton';
 import { trackPrediction } from '@/lib/analytics';
+import { notifyHotPick, registerServiceWorker, requestNotificationPermission } from '@/lib/pushNotifications';
 
 interface PlayerProp {
     id: string;
@@ -128,6 +129,12 @@ const PropsDashboard = () => {
 
     useEffect(() => {
         loadProps();
+
+        // Register service worker for push notifications
+        if (typeof window !== 'undefined') {
+            registerServiceWorker();
+        }
+
         return () => {
             if (thinkingTimerRef.current) clearInterval(thinkingTimerRef.current);
         };
@@ -222,6 +229,14 @@ const PropsDashboard = () => {
                                     predictionData.probability >= 85 ? 'success' : 'info',
                                     '/props'
                                 );
+
+                                // Send push notification
+                                notifyHotPick(
+                                    prop.player.name,
+                                    predictionData.probability,
+                                    prop.prop.displayName
+                                );
+
                                 toast.success(predictionData.probability >= 85 ? '¡Hot Pick guardado!' : 'Predicción analizada');
                             }
                         }
