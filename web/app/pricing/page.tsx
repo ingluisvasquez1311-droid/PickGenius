@@ -14,27 +14,35 @@ export default function PricingPage() {
             return;
         }
 
-        const loadingToast = toast.loading('Procesando suscripción segura...');
+        const loadingToast = toast.loading('Redirigiendo a checkout seguro...');
 
         try {
-            // Simulate API call to checkout
-            // In real world: const res = await fetch('/api/checkout', { method: 'POST' });
-            // const { url } = await res.json();
-            // window.location.href = url;
-
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            toast.dismiss(loadingToast);
-            toast.success('¡Bienvenido al Club Premium! 👑', {
-                description: 'Tu cuenta ha sido actualizada.'
+            // Call Stripe checkout API
+            const res = await fetch('/api/stripe/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.uid,
+                    email: user.email,
+                    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID, // Monthly plan
+                }),
             });
 
-            // Simulate upgrade
-            // This would normally happen via webhook
-            // We force a refresh here for demo purposes if we had a way to mock the backend update
-            // For now, we just show the success message.
+            const { url, error } = await res.json();
 
+            toast.dismiss(loadingToast);
+
+            if (error) {
+                toast.error('Error al crear sesión de pago');
+                return;
+            }
+
+            // Redirect to Stripe checkout
+            if (url) {
+                window.location.href = url;
+            }
         } catch (error) {
+            toast.dismiss(loadingToast);
             toast.error('Error al procesar la suscripción');
         }
     };
