@@ -40,10 +40,10 @@ export async function GET(
             return NextResponse.json({ success: false, error: 'No player stats found' });
         }
 
-        // 2. AI Analysis of the MVP
+        // 2. AI Analysis of the MVP usando groqService
         const statsStr = `${mvp.player?.name} (${mvp.position || 'N/A'}): ${JSON.stringify(mvp.statistics || {})}. Sport: basketball.`;
 
-        const completion = await groq.chat.completions.create({
+        const aiContent = await groqService.createPrediction({
             messages: [
                 {
                     role: "system",
@@ -61,8 +61,6 @@ export async function GET(
             model: "llama-3.3-70b-versatile",
             response_format: { type: "json_object" }
         });
-
-        const aiContent = JSON.parse(completion.choices[0].message.content || '{}');
 
         return NextResponse.json({
             success: true,
