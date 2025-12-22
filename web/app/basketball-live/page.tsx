@@ -5,12 +5,14 @@ import LiveEventsList from '@/components/LiveEventsList';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import ParleyOptimizerModal from '@/components/ai/ParleyOptimizerModal';
 
 export default function BasketballLivePage() {
     const [liveEvents, setLiveEvents] = useState<any[]>([]);
     const [scheduledEvents, setScheduledEvents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'live' | 'upcoming'>('all');
+    const [showStrategies, setShowStrategies] = useState(false);
 
     useEffect(() => {
         async function fetchAllEvents() {
@@ -171,7 +173,12 @@ export default function BasketballLivePage() {
                         <div className="bg-gradient-to-br from-orange-600 to-amber-700 rounded-[2rem] p-6 text-white shadow-xl">
                             <h4 className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-2">Power Ranking PickGenius</h4>
                             <p className="text-2xl font-black italic leading-tight mb-4">OPTIMIZACIÓN DE PARLEYS EN TIEMPO REAL</p>
-                            <button className="text-[10px] font-black uppercase tracking-widest bg-black/20 hover:bg-black/40 px-4 py-2 rounded-lg transition-colors">Ver Estrategias ↗</button>
+                            <button
+                                onClick={() => setShowStrategies(true)}
+                                className="text-[10px] font-black uppercase tracking-widest bg-black/20 hover:bg-black/40 px-4 py-2 rounded-lg transition-colors"
+                            >
+                                Ver Estrategias ↗
+                            </button>
                         </div>
                     </div>
 
@@ -205,6 +212,11 @@ export default function BasketballLivePage() {
                     </div>
                 </div>
             </div>
+
+            <ParleyOptimizerModal
+                isOpen={showStrategies}
+                onClose={() => setShowStrategies(false)}
+            />
         </main>
     );
 }
