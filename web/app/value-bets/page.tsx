@@ -26,7 +26,7 @@ export default function ValueBetsPage() {
 
             {/* Header */}
             <header className="relative py-12 text-center overflow-hidden">
-                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
                 <div className="relative z-10 container mx-auto px-4">

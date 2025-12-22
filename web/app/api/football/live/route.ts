@@ -29,51 +29,56 @@ export async function GET(request: NextRequest) {
         console.log(`✅ Filtered to ${recentEvents.length} recent events (removed all finished matches)`);
 
         // Transform to match frontend expectations
-        const transformedData = recentEvents.map((game: any) => ({
-            id: game.id,
-            tournament: {
-                name: game.tournament?.name || 'Unknown League',
-                uniqueTournament: {
-                    name: game.tournament?.uniqueTournament?.name || game.tournament?.name || 'Unknown'
-                }
-            },
-            homeTeam: {
-                id: game.homeTeam?.id,
-                name: game.homeTeam?.name || 'Home Team',
-                logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
-            },
-            awayTeam: {
-                id: game.awayTeam?.id,
-                name: game.awayTeam?.name || 'Away Team',
-                logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
-            },
-            homeScore: {
-                current: game.homeScore?.current || 0,
-                display: game.homeScore?.display || 0,
-                period1: game.homeScore?.period1,
-                period2: game.homeScore?.period2,
-                redCards: game.homeScore?.redCards ?? game.homeTeam?.redCards ?? 0
-            },
-            awayScore: {
-                current: game.awayScore?.current || 0,
-                display: game.awayScore?.display || 0,
-                period1: game.awayScore?.period1,
-                period2: game.awayScore?.period2,
-                redCards: game.awayScore?.redCards ?? game.awayTeam?.redCards ?? 0
-            },
-            category: {
+        const transformedData = recentEvents.map((game: any) => {
+            const leagueCategory = {
                 name: game.tournament?.category?.name || 'International',
                 flag: game.tournament?.category?.flag || '',
                 id: game.tournament?.category?.id
-            },
-            status: {
-                type: game.status?.type || 'inprogress',
-                description: game.status?.description || 'Live',
-                code: game.status?.code
-            },
-            roundInfo: game.roundInfo,
-            startTimestamp: game.startTimestamp
-        }));
+            };
+
+            return {
+                id: game.id,
+                tournament: {
+                    name: game.tournament?.name || 'Unknown League',
+                    category: leagueCategory,
+                    uniqueTournament: {
+                        name: game.tournament?.uniqueTournament?.name || game.tournament?.name || 'Unknown'
+                    }
+                },
+                homeTeam: {
+                    id: game.homeTeam?.id,
+                    name: game.homeTeam?.name || 'Home Team',
+                    logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
+                },
+                awayTeam: {
+                    id: game.awayTeam?.id,
+                    name: game.awayTeam?.name || 'Away Team',
+                    logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
+                },
+                homeScore: {
+                    current: game.homeScore?.current || 0,
+                    display: game.homeScore?.display || 0,
+                    period1: game.homeScore?.period1,
+                    period2: game.homeScore?.period2,
+                    redCards: game.homeScore?.redCards ?? game.homeTeam?.redCards ?? 0
+                },
+                awayScore: {
+                    current: game.awayScore?.current || 0,
+                    display: game.awayScore?.display || 0,
+                    period1: game.awayScore?.period1,
+                    period2: game.awayScore?.period2,
+                    redCards: game.awayScore?.redCards ?? game.awayTeam?.redCards ?? 0
+                },
+                category: leagueCategory,
+                status: {
+                    type: game.status?.type || 'inprogress',
+                    description: game.status?.description || 'Live',
+                    code: game.status?.code
+                },
+                roundInfo: game.roundInfo,
+                startTimestamp: game.startTimestamp
+            };
+        });
 
         return NextResponse.json({
             success: true,
@@ -89,7 +94,11 @@ export async function GET(request: NextRequest) {
         const mockEvents = [
             {
                 id: 1,
-                tournament: { name: 'La Liga', uniqueTournament: { name: 'La Liga' } },
+                tournament: {
+                    name: 'La Liga',
+                    category: { name: 'Spain', id: 32 },
+                    uniqueTournament: { name: 'La Liga' }
+                },
                 homeTeam: { id: 2829, name: 'Real Madrid', logo: '/api/proxy/team-logo/2829' },
                 awayTeam: { id: 2817, name: 'Barcelona', logo: '/api/proxy/team-logo/2817' },
                 homeScore: { current: 1, display: 1 },

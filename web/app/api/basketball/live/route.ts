@@ -27,53 +27,58 @@ export async function GET(request: NextRequest) {
         console.log(`✅ Filtered to ${liveEvents.length} live/scheduled basketball events`);
 
         // Transform to match frontend expectations
-        const transformedData = liveEvents.map((game: any) => ({
-            id: game.id,
-            tournament: {
-                name: game.tournament?.name || 'Unknown League',
-                uniqueTournament: {
-                    name: game.tournament?.uniqueTournament?.name || game.tournament?.name || 'Unknown'
-                }
-            },
-            homeTeam: {
-                id: game.homeTeam?.id,
-                name: game.homeTeam?.name || 'Home Team',
-                logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
-            },
-            awayTeam: {
-                id: game.awayTeam?.id,
-                name: game.awayTeam?.name || 'Away Team',
-                logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
-            },
-            homeScore: {
-                current: game.homeScore?.current || 0,
-                display: game.homeScore?.display || 0,
-                period1: game.homeScore?.period1,
-                period2: game.homeScore?.period2,
-                period3: game.homeScore?.period3,
-                period4: game.homeScore?.period4
-            },
-            awayScore: {
-                current: game.awayScore?.current || 0,
-                display: game.awayScore?.display || 0,
-                period1: game.awayScore?.period1,
-                period2: game.awayScore?.period2,
-                period3: game.awayScore?.period3,
-                period4: game.awayScore?.period4
-            },
-            category: {
+        const transformedData = liveEvents.map((game: any) => {
+            const leagueCategory = {
                 name: game.tournament?.category?.name || 'International',
                 flag: game.tournament?.category?.flag || '',
                 id: game.tournament?.category?.id
-            },
-            status: {
-                type: game.status?.type || 'inprogress', // Use actual status from Sofascore
-                description: game.status?.description || 'Live',
-                code: game.status?.code
-            },
-            roundInfo: game.roundInfo,
-            startTimestamp: game.startTimestamp
-        }));
+            };
+
+            return {
+                id: game.id,
+                tournament: {
+                    name: game.tournament?.name || 'Unknown League',
+                    category: leagueCategory,
+                    uniqueTournament: {
+                        name: game.tournament?.uniqueTournament?.name || game.tournament?.name || 'Unknown'
+                    }
+                },
+                homeTeam: {
+                    id: game.homeTeam?.id,
+                    name: game.homeTeam?.name || 'Home Team',
+                    logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
+                },
+                awayTeam: {
+                    id: game.awayTeam?.id,
+                    name: game.awayTeam?.name || 'Away Team',
+                    logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
+                },
+                homeScore: {
+                    current: game.homeScore?.current || 0,
+                    display: game.homeScore?.display || 0,
+                    period1: game.homeScore?.period1,
+                    period2: game.homeScore?.period2,
+                    period3: game.homeScore?.period3,
+                    period4: game.homeScore?.period4
+                },
+                awayScore: {
+                    current: game.awayScore?.current || 0,
+                    display: game.awayScore?.display || 0,
+                    period1: game.awayScore?.period1,
+                    period2: game.awayScore?.period2,
+                    period3: game.awayScore?.period3,
+                    period4: game.awayScore?.period4
+                },
+                category: leagueCategory,
+                status: {
+                    type: game.status?.type || 'inprogress', // Use actual status from Sofascore
+                    description: game.status?.description || 'Live',
+                    code: game.status?.code
+                },
+                roundInfo: game.roundInfo,
+                startTimestamp: game.startTimestamp
+            };
+        });
 
         return NextResponse.json({
             success: true,
@@ -89,23 +94,31 @@ export async function GET(request: NextRequest) {
         const mockEvents = [
             {
                 id: 11223344,
-                tournament: { name: 'NBA', uniqueTournament: { name: 'NBA' } },
-                homeTeam: { id: 3416, name: 'Boston Celtics', logo: 'https://api.sofascore.app/api/v1/team/3416/image' },
-                awayTeam: { id: 3412, name: 'LA Lakers', logo: 'https://api.sofascore.app/api/v1/team/3412/image' },
+                tournament: {
+                    name: 'NBA',
+                    category: { name: 'USA', id: 2 },
+                    uniqueTournament: { name: 'NBA' }
+                },
+                homeTeam: { id: 3416, name: 'Boston Celtics', logo: '/api/proxy/team-logo/3416' },
+                awayTeam: { id: 3412, name: 'LA Lakers', logo: '/api/proxy/team-logo/3412' },
                 homeScore: { current: 102, display: 102, period1: 28, period2: 24, period3: 25, period4: 25 },
                 awayScore: { current: 98, display: 98, period1: 22, period2: 30, period3: 20, period4: 26 },
                 status: { type: 'inprogress', description: 'Q4 - 2:30', code: 100 },
-                startTimestamp: Date.now() - 7200000
+                startTimestamp: Math.floor(Date.now() / 1000) - 7200
             },
             {
                 id: 22334455,
-                tournament: { name: 'NBA', uniqueTournament: { name: 'NBA' } },
-                homeTeam: { id: 3420, name: 'Golden State Warriors', logo: 'https://api.sofascore.app/api/v1/team/3420/image' },
-                awayTeam: { id: 3422, name: 'Phoenix Suns', logo: 'https://api.sofascore.app/api/v1/team/3422/image' },
+                tournament: {
+                    name: 'NBA',
+                    category: { name: 'USA', id: 2 },
+                    uniqueTournament: { name: 'NBA' }
+                },
+                homeTeam: { id: 3420, name: 'Golden State Warriors', logo: '/api/proxy/team-logo/3420' },
+                awayTeam: { id: 3422, name: 'Phoenix Suns', logo: '/api/proxy/team-logo/3422' },
                 homeScore: { current: 0, display: 0 },
                 awayScore: { current: 0, display: 0 },
                 status: { type: 'notstarted', description: '22:00', code: 0 },
-                startTimestamp: Date.now() + 3600000
+                startTimestamp: Math.floor(Date.now() / 1000) + 3600
             }
         ];
 

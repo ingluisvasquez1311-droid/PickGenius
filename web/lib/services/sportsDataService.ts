@@ -103,7 +103,7 @@ class SportsDataService {
 
             // Priority Detection: Local Backend vs Render vs ScraperAPI
             const localBackend = 'http://localhost:3001';
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_HOST;
+            const apiUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_HOST)?.trim();
 
             // In development, if we have a local backend, let's prefer it over slow Scraper fallback
             const isDev = process.env.NODE_ENV === 'development';
@@ -111,6 +111,12 @@ class SportsDataService {
 
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
             const targetUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
+
+            // Production Diagnostic
+            const hasScraperKey = !!(process.env.SCRAPER_API_KEY || process.env.SCRAPER_API_KEYS);
+            if (!isDev && isServer && !apiUrl && !hasScraperKey) {
+                console.warn(`🛑 [SportsData] PRODUCTION ALERT: No Bridge (NEXT_PUBLIC_API_URL) and no Scraper (SCRAPER_API_KEY/S) configured. Direct fetch will likely be blocked.`);
+            }
 
             // Priority Logic usando scraperService
             if (isServer && useProxy) {
@@ -134,18 +140,25 @@ class SportsDataService {
                 const fetchUrl = `${cleanBridgeUrl}/api/sofascore/proxy${cleanEndpoint}`;
                 console.log(`🔌 [SportsData] Using Bridge: ${cleanBridgeUrl}`);
 
-                const response = await fetch(fetchUrl, {
-                    headers: this.headers,
-                    cache: 'no-store',
-                    signal: AbortSignal.timeout(30000)
-                });
+                try {
+                    const response = await fetch(fetchUrl, {
+                        headers: this.headers,
+                        cache: 'no-store',
+                        signal: AbortSignal.timeout(10000) // Reduced timeout for faster fallback
+                    });
 
-                if (response.ok) {
-                    const jsonData = await response.json();
-                    console.log(`✅ [SportsData] Success from Bridge! Data size: ${JSON.stringify(jsonData).length} bytes`);
-                    return jsonData;
-                } else {
-                    console.warn(`⚠️ [SportsData] Bridge returned ${response.status}`);
+                    if (response.ok) {
+                        const jsonData = await response.json();
+                        console.log(`✅ [SportsData] Success from Bridge! Data size: ${JSON.stringify(jsonData).length} bytes`);
+                        return jsonData;
+                    } else {
+                        console.warn(`⚠️ [SportsData] Bridge returned ${response.status}. it might be down or out of credits (Render).`);
+                    }
+                } catch (bridgeError: any) {
+                    console.error(`❌ [SportsData] Bridge Connection Failed (${cleanBridgeUrl}): ${bridgeError.message}`);
+                    if (cleanBridgeUrl.includes('render.com')) {
+                        console.error(`🚨 [SportsData] RENDER DETECTED: If your Render free tier is out of time, PLEASE enable USE_PROXY=true and use SCRAPER_API_KEY in Vercel.`);
+                    }
                 }
             }
 
