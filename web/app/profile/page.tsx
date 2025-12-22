@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 import PremiumButton from '@/components/ui/PremiumButton';
+import PerformanceChart from '@/components/profile/PerformanceChart';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 type TabType = 'overview' | 'settings' | 'history' | 'security';
@@ -290,127 +292,130 @@ export default function ProfilePage() {
                                                 </div>
                                             </GlassCard>
                                         </div>
+                                        {/* Activity History - Integrated in Overview */}
+                                        <GlassCard hover={false} className="mt-8">
+                                            <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+                                                <h3 className="text-lg font-black italic tracking-tighter uppercase">Actividad Reciente</h3>
+                                                <PremiumButton variant="secondary" className="px-4 py-1.5 h-auto">Ver Todo</PremiumButton>
+                                            </div>
+                                            <div className="p-2">
+                                                {loadingHistory ? (
+                                                    <div className="p-12 text-center text-gray-500 uppercase font-black text-[10px] tracking-widest">Cargando Historial...</div>
+                                                ) : history.length > 0 ? (
+                                                    <div className="space-y-1">
+                                                        {history.map((record, i) => (
+                                                            <div key={i} className="flex items-center justify-between p-4 hover:bg-white/5 rounded-2xl transition-all duration-300 group border-b border-white/5 last:border-0">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-lg border border-white/5 group-hover:border-[var(--primary)]/30 group-hover:bg-[var(--primary)]/5 transition-all">
+                                                                        {record.sport === 'football' ? '⚽' : '🏀'}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="flex items-center gap-2 mb-0.5">
+                                                                            <span className="text-sm font-black italic uppercase tracking-tight group-hover:text-[var(--primary)] transition-colors">
+                                                                                {record.playerName}
+                                                                            </span>
+                                                                            <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border ${record.confidence === 'Alta' ? 'border-green-500/30 text-green-500' : 'border-yellow-500/30 text-yellow-500'}`}>
+                                                                                {record.confidence}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
+                                                                            {record.prediction} {record.line} • {new Date(record.timestamp).toLocaleDateString()}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <div className="text-xl font-black italic tracking-tighter">{record.probability}%</div>
+                                                                    <div className="text-[8px] text-gray-600 font-black uppercase tracking-widest">Probabilidad</div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="p-12 text-center text-gray-500 uppercase font-black text-[10px] tracking-widest text-white/20">No hay actividad registrada</div>
+                                                )}
+                                            </div>
+                                        </GlassCard>
                                     </motion.div>
                                 )}
-                                <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
-                                    <h3 className="text-lg font-black italic tracking-tighter uppercase">Actividad Reciente</h3>
-                                    <PremiumButton variant="secondary" className="px-4 py-1.5 h-auto">Ver Todo</PremiumButton>
-                                </div>
-                                <div className="p-2">
-                                    {loadingHistory ? (
-                                        <div className="p-12 text-center text-gray-500 uppercase font-black text-[10px] tracking-widest">Cargando Historial...</div>
-                                    ) : history.length > 0 ? (
-                                        <div className="space-y-1">
-                                            {history.map((record, i) => (
-                                                <div key={i} className="flex items-center justify-between p-4 hover:bg-white/5 rounded-2xl transition-all duration-300 group border-b border-white/5 last:border-0">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-lg border border-white/5 group-hover:border-purple-500/30 group-hover:bg-purple-500/5 transition-all">
-                                                            {record.sport === 'football' ? '⚽' : '🏀'}
-                                                        </div>
-                                                        <div>
-                                                            <div className="flex items-center gap-2 mb-0.5">
-                                                                <span className="text-sm font-black italic uppercase tracking-tight group-hover:text-purple-400 transition-colors">
-                                                                    {record.playerName}
-                                                                </span>
-                                                                <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border ${record.confidence === 'Alta' ? 'border-green-500/30 text-green-500' : 'border-yellow-500/30 text-yellow-500'}`}>
-                                                                    {record.confidence}
-                                                                </span>
+
+                                {activeTab === 'history' && (
+                                    <GlassCard hover={false} className="p-8">
+                                        <h3 className="text-xl font-black italic tracking-tighter uppercase mb-6 flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                                <History className="w-4 h-4 text-blue-500" />
+                                            </div>
+                                            Historial Completo
+                                        </h3>
+                                        {loadingHistory ? (
+                                            <div className="py-20 text-center text-gray-500 uppercase font-black text-[10px] tracking-widest animate-pulse">Analizando registros...</div>
+                                        ) : history.length > 0 ? (
+                                            <div className="grid grid-cols-1 gap-4">
+                                                {history.map((record, i) => (
+                                                    <div key={i} className="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all group">
+                                                        <div className="flex items-center gap-6">
+                                                            <div className="text-3xl filter grayscale group-hover:grayscale-0 transition-all">
+                                                                {record.sport === 'football' ? '⚽' : '🏀'}
                                                             </div>
-                                                            <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
-                                                                {record.prediction} {record.line} • {new Date(record.timestamp).toLocaleDateString()}
+                                                            <div>
+                                                                <h4 className="text-sm font-black uppercase tracking-tight text-white group-hover:text-purple-400 transition-colors">{record.playerName}</h4>
+                                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                                                                    {record.prediction} {record.line} • {new Date(record.timestamp).toLocaleDateString()}
+                                                                </p>
                                                             </div>
                                                         </div>
+                                                        <div className="text-right">
+                                                            <p className="text-2xl font-black italic tracking-tighter text-purple-500">{record.probability}%</p>
+                                                            <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest">Éxito Estimado</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <div className="text-xl font-black italic tracking-tighter">{record.probability}%</div>
-                                                        <div className="text-[8px] text-gray-600 font-black uppercase tracking-widest">Probabilidad</div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="p-12 text-center text-gray-500 uppercase font-black text-[10px] tracking-widest">No hay actividad registrada</div>
-                                    )}
-                                </div>
-                            </GlassCard>
-                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="py-20 text-center text-gray-600">
+                                                <p className="text-xs font-black uppercase tracking-[0.2em] mb-4">No has realizado ninguna predicción aún</p>
+                                                <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-purple-500 hover:text-purple-400 underline">Ir al panel principal</Link>
+                                            </div>
+                                        )}
+                                    </GlassCard>
                                 )}
 
-                    {activeTab === 'history' && (
-                        <GlassCard hover={false} className="p-8">
-                            <h3 className="text-xl font-black italic tracking-tighter uppercase mb-6 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                    <History className="w-4 h-4 text-blue-500" />
-                                </div>
-                                Historial Completo
-                            </h3>
-                            {loadingHistory ? (
-                                <div className="py-20 text-center text-gray-500 uppercase font-black text-[10px] tracking-widest animate-pulse">Analizando registros...</div>
-                            ) : history.length > 0 ? (
-                                <div className="grid grid-cols-1 gap-4">
-                                    {history.map((record, i) => (
-                                        <div key={i} className="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all group">
-                                            <div className="flex items-center gap-6">
-                                                <div className="text-3xl filter grayscale group-hover:grayscale-0 transition-all">
-                                                    {record.sport === 'football' ? '⚽' : '🏀'}
+                                {activeTab === 'security' && (
+                                    <div className="space-y-6">
+                                        <GlassCard hover={false} className="p-8">
+                                            <h3 className="text-xl font-black italic tracking-tighter uppercase mb-8 flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                                                    <Shield className="w-4 h-4 text-red-500" />
                                                 </div>
-                                                <div>
-                                                    <h4 className="text-sm font-black uppercase tracking-tight text-white group-hover:text-purple-400 transition-colors">{record.playerName}</h4>
-                                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                                                        {record.prediction} {record.line} • {new Date(record.timestamp).toLocaleDateString()}
-                                                    </p>
+                                                Seguridad de la Cuenta
+                                            </h3>
+                                            <div className="space-y-4">
+                                                <div className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-between">
+                                                    <div>
+                                                        <h4 className="text-sm font-bold">Email de acceso</h4>
+                                                        <p className="text-xs text-gray-500 mt-1">{user.email}</p>
+                                                    </div>
+                                                    <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[8px] font-black uppercase tracking-widest rounded-full border border-green-500/20">Verificado</span>
+                                                </div>
+                                                <div className="p-6 border border-white/5 rounded-2xl flex items-center justify-between bg-gradient-to-r from-red-500/5 to-transparent">
+                                                    <div>
+                                                        <h4 className="text-sm font-bold">Autenticación de Dos Pasos</h4>
+                                                        <p className="text-xs text-gray-500 mt-1 italic">Capa extra de blindaje para tus datos.</p>
+                                                    </div>
+                                                    <PremiumButton variant="secondary" className="text-[9px] py-2">Configurar</PremiumButton>
+                                                </div>
+                                                <div className="pt-6 mt-6 border-t border-white/5">
+                                                    <h4 className="text-xs font-black uppercase tracking-widest text-red-500 mb-4">Zona de Peligro</h4>
+                                                    <button className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-red-500 transition-colors">Solicitar eliminación de datos del núcleo</button>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-2xl font-black italic tracking-tighter text-purple-500">{record.probability}%</p>
-                                                <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest">Éxito Estimado</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="py-20 text-center text-gray-600">
-                                    <p className="text-xs font-black uppercase tracking-[0.2em] mb-4">No has realizado ninguna predicción aún</p>
-                                    <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-purple-500 hover:text-purple-400 underline">Ir al panel principal</Link>
-                                </div>
-                            )}
-                        </GlassCard>
-                    )}
-
-                    {activeTab === 'security' && (
-                        <div className="space-y-6">
-                            <GlassCard hover={false} className="p-8">
-                                <h3 className="text-xl font-black italic tracking-tighter uppercase mb-8 flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                                        <Shield className="w-4 h-4 text-red-500" />
+                                        </GlassCard>
                                     </div>
-                                    Seguridad de la Cuenta
-                                </h3>
-                                <div className="space-y-4">
-                                    <div className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-between">
-                                        <div>
-                                            <h4 className="text-sm font-bold">Email de acceso</h4>
-                                            <p className="text-xs text-gray-500 mt-1">{user.email}</p>
-                                        </div>
-                                        <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[8px] font-black uppercase tracking-widest rounded-full border border-green-500/20">Verificado</span>
-                                    </div>
-                                    <div className="p-6 border border-white/5 rounded-2xl flex items-center justify-between bg-gradient-to-r from-red-500/5 to-transparent">
-                                        <div>
-                                            <h4 className="text-sm font-bold">Autenticación de Dos Pasos</h4>
-                                            <p className="text-xs text-gray-500 mt-1 italic">Capa extra de blindaje para tus datos.</p>
-                                        </div>
-                                        <PremiumButton variant="secondary" className="text-[9px] py-2">Configurar</PremiumButton>
-                                    </div>
-                                    <div className="pt-6 mt-6 border-t border-white/5">
-                                        <h4 className="text-xs font-black uppercase tracking-widest text-red-500 mb-4">Zona de Peligro</h4>
-                                        <button className="text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-red-500 transition-colors">Solicitar eliminación de datos del núcleo</button>
-                                    </div>
-                                </div>
-                            </GlassCard>
-                        </div>
-                    )}
-                </motion.div>
-            </AnimatePresence>
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
