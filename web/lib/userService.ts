@@ -82,7 +82,6 @@ export async function createUserProfile(uid: string, email: string): Promise<Use
     } = {
         uid,
         email,
-        isPremium: false,
         predictionsUsed: 0,
         predictionsLimit: 3, // Free tier: 3 predictions per day
         favoriteTeams: [],
@@ -101,7 +100,10 @@ export async function createUserProfile(uid: string, email: string): Promise<Use
             longestStreak: '0w',
             winRate: 0,
             vroi: 0
-        }
+        },
+        // GROWTH: 15-Day Free Trial for new users
+        subscriptionEnd: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+        isPremium: true // Initially true for the trial
     };
 
     await setDoc(userRef, newProfile);
@@ -133,7 +135,8 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
         uid: data.uid,
         email: data.email,
         // Admins are always premium
-        isPremium: data.isPremium || role === 'admin',
+        // Users are premium if they have a flag OR if their subscription is still valid (Trial/Paid)
+        isPremium: data.isPremium || role === 'admin' || (data.subscriptionEnd && data.subscriptionEnd.toDate() > new Date()),
         subscriptionEnd: data.subscriptionEnd?.toDate(),
         predictionsUsed: data.predictionsUsed || 0,
         predictionsLimit: data.predictionsLimit || 3,
@@ -270,8 +273,11 @@ export async function canMakePrediction(uid: string): Promise<{ canPredict: bool
         return { canPredict: false, remaining: 0 };
     }
 
-    // Premium users and Admins have unlimited predictions
-    if (profile.isPremium || profile.role === 'admin') {
+    // Premium users (including Trial) and Admins have unlimited predictions
+    // We double check the date here just in case
+    const isSubscriptionActive = profile.subscriptionEnd && profile.subscriptionEnd > new Date();
+
+    if (profile.isPremium || profile.role === 'admin' || isSubscriptionActive) {
         return { canPredict: true, remaining: -1 };
     }
 
