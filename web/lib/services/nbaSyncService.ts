@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { adminDb } from '../firebase-admin';
+import { adminDb } from '@/lib/firebase-admin';
 
 interface NBAGame {
     id: number;

@@ -1,5 +1,5 @@
-import { sportsDataService } from './sportsDataService';
-import { adminDb } from '../firebase-admin';
+import { sportsDataService } from '@/lib/services/sportsDataService';
+import { adminDb } from '@/lib/firebase-admin';
 
 class FootballSyncService {
     // Priority Leagues (IDs from Sofascore)
