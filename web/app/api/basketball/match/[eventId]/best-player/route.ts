@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sportsDataService } from '@/lib/services/sportsDataService';
-import Groq from 'groq-sdk';
+import { groqService } from '@/lib/services/groqService';
 
 export const dynamic = 'force-dynamic';
-
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY
-});
 
 export async function GET(
     request: NextRequest,
