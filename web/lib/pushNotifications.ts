@@ -48,18 +48,13 @@ export const sendLocalNotification = async (
   }
 
   const registration = await navigator.serviceWorker.ready;
-  
+
   await registration.showNotification(title, {
     body,
     icon: '/icon-192.png',
     badge: '/icon-192.png',
     data: url || '/',
-    actions: [
-      {
-        action: 'open',
-        title: 'Ver Ahora',
-      },
-    ],
+    // Note: actions require user interaction and may not work in all browsers
   });
 };
 
