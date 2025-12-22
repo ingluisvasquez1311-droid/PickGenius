@@ -1,181 +1,140 @@
-import axios, { AxiosError } from 'axios';
+import { SmartAPIRotator } from './smartAPIRotator';
+import {
+    CacheManager,
+    RequestQueue,
+    CircuitBreaker,
+    Logger,
+    BudgetMonitor,
+    Analytics,
+    globalCache,
+    globalLogger,
+    globalBudget,
+    globalAnalytics,
+    CACHE_STRATEGIES,
+    API_COSTS
+} from '../utils/api-manager';
 
 /**
- * Servicio centralizado para manejar múltiples API keys de ScraperAPI
- * con rotación automática y fallback inteligente
+ * Servicio robusto para ScraperAPI/Sofascore
+ * Integrado con SmartAPIRotator y API Management Kit
  */
 
-interface ScraperConfig {
-    keys: string[];
-    currentKeyIndex: number;
-    lastRotation: number;
-    rateLimitCooldown: Map<string, number>;
+interface ScraperOptions extends RequestInit {
+    render?: boolean;
+    country_code?: string;
+    premium?: boolean;
+    keep_headers?: boolean;
+    device_type?: string;
+    useCache?: boolean;
+    cacheTTL?: number;
 }
 
 class ScraperService {
-    private config: ScraperConfig;
+    private rotator: SmartAPIRotator;
+    private keys: string[];
+
+    // Componentes de gestión
+    private cache: CacheManager;
+    private queue: RequestQueue;
+    private breaker: CircuitBreaker;
+    private logger: Logger;
+    private budget: BudgetMonitor;
+    private analytics: Analytics;
 
     constructor() {
-        const keys = this.loadApiKeys();
+        this.keys = this.loadApiKeys();
+        this.rotator = new SmartAPIRotator(this.keys);
 
-        this.config = {
-            keys,
-            currentKeyIndex: 0,
-            lastRotation: Date.now(),
-            rateLimitCooldown: new Map()
-        };
+        // Inyectar dependencias globales
+        this.cache = globalCache;
+        this.logger = globalLogger;
+        this.budget = globalBudget;
+        this.analytics = globalAnalytics;
 
-        console.log(`🔑 [ScraperService] Initialized with ${keys.length} API key(s)`);
+        // Componentes locales (por servicio)
+        this.queue = new RequestQueue(5); // Concurrencia local
+        this.breaker = new CircuitBreaker(10, 60000);
+
+        this.logger.info(`🔑 [ScraperService] Ready with ${this.keys.length} keys`);
     }
 
-    /**
-     * Carga API keys desde múltiples fuentes
-     */
     private loadApiKeys(): string[] {
         const keys: string[] = [];
-
-        // 1. Prioridad: SCRAPER_API_KEYS (múltiples keys separadas por comas)
         if (process.env.SCRAPER_API_KEYS) {
-            const multiKeys = process.env.SCRAPER_API_KEYS.split(',').map(k => k.trim()).filter(k => k);
-            keys.push(...multiKeys);
-            console.log(`✅ Loaded ${multiKeys.length} keys from SCRAPER_API_KEYS`);
+            keys.push(...process.env.SCRAPER_API_KEYS.split(',').map(k => k.trim()).filter(k => k));
         }
-
-        // 2. Fallback: SCRAPER_API_KEY (key única)
         if (process.env.SCRAPER_API_KEY && !keys.includes(process.env.SCRAPER_API_KEY)) {
             keys.push(process.env.SCRAPER_API_KEY);
-            console.log('✅ Loaded 1 key from SCRAPER_API_KEY');
         }
-
-        // Validar que al menos haya una key configurada
-        if (keys.length === 0) {
-            console.error('❌ No ScraperAPI keys configured!');
-            console.error('Please set SCRAPER_API_KEY or SCRAPER_API_KEYS in environment variables');
-            throw new Error('No ScraperAPI keys available');
-        }
-
+        if (keys.length === 0) throw new Error('No ScraperAPI keys configured');
         return keys;
     }
 
     /**
-     * Obtiene la próxima API key disponible
+     * Ejecuta una petición gestionada (Cache -> Queue -> Breaker -> Rotator -> Analytics -> Budget)
      */
-    private getAvailableKey(): string {
-        const now = Date.now();
+    async makeRequest(url: string, options: ScraperOptions = {}): Promise<any> {
+        const { useCache = true, cacheTTL = CACHE_STRATEGIES.MATCH_DATA.ttl, ...reqOptions } = options;
+        const cacheKey = `scraper:${url}:${JSON.stringify(reqOptions)}`;
+        const start = Date.now();
 
-        // Buscar una key que no esté en cooldown
-        for (let i = 0; i < this.config.keys.length; i++) {
-            const index = (this.config.currentKeyIndex + i) % this.config.keys.length;
-            const key = this.config.keys[index];
-            const cooldownUntil = this.config.rateLimitCooldown.get(key) || 0;
+        const fetchFn = async () => {
+            return this.breaker.execute(async () => {
+                return this.queue.add(async () => {
+                    try {
+                        const result = await this.rotator.makeRequest(url, reqOptions);
 
-            if (now > cooldownUntil) {
-                this.config.currentKeyIndex = index;
-                return key;
-            }
-        }
-
-        // Si todas están en cooldown, usar la actual
-        console.warn('⚠️ All ScraperAPI keys in cooldown, using current');
-        return this.config.keys[this.config.currentKeyIndex];
-    }
-
-    /**
-     * Marca una key como en rate limit
-     */
-    private handleRateLimit(apiKey: string): void {
-        const cooldownMinutes = 5; // 5 minutos de cooldown
-        const cooldownUntil = Date.now() + (cooldownMinutes * 60 * 1000);
-
-        this.config.rateLimitCooldown.set(apiKey, cooldownUntil);
-        console.warn(`⏰ [ScraperService] Key marked as rate limited for ${cooldownMinutes}min`);
-
-        this.rotateToNextKey();
-    }
-
-    /**
-     * Rota a la siguiente API key
-     */
-    private rotateToNextKey(): void {
-        this.config.currentKeyIndex = (this.config.currentKeyIndex + 1) % this.config.keys.length;
-        this.config.lastRotation = Date.now();
-        console.log(`🔄 [ScraperService] Rotated to key #${this.config.currentKeyIndex + 1}`);
-    }
-
-    /**
-     * Hace una request a través de ScraperAPI con rotación automática
-     */
-    async makeRequest(url: string, options: {
-        render?: boolean;
-        country_code?: string;
-        premium?: boolean;
-    } = {}): Promise<any> {
-        const maxRetries = this.config.keys.length;
-        let lastError: Error | null = null;
-
-        for (let attempt = 0; attempt < maxRetries; attempt++) {
-            try {
-                const apiKey = this.getAvailableKey();
-
-                const scraperUrl = new URL('https://api.scraperapi.com');
-                scraperUrl.searchParams.set('api_key', apiKey);
-                scraperUrl.searchParams.set('url', url);
-                scraperUrl.searchParams.set('render', options.render ? 'true' : 'false');
-
-                if (options.country_code) {
-                    scraperUrl.searchParams.set('country_code', options.country_code);
-                }
-                if (options.premium) {
-                    scraperUrl.searchParams.set('premium', 'true');
-                }
-
-                console.log(`🌍 [ScraperService] Attempt ${attempt + 1}/${maxRetries} with key #${this.config.currentKeyIndex + 1}`);
-
-                const response = await axios.get(scraperUrl.toString(), {
-                    timeout: 30000,
-                    headers: {
-                        'Accept': 'application/json'
+                        if (result.success) {
+                            // Registrar éxito, costo y métricas
+                            this.budget.trackCost(API_COSTS.SCRAPER_REQUEST);
+                            this.analytics.track({
+                                service: 'ScraperAPI',
+                                endpoint: url,
+                                success: true,
+                                latency: Date.now() - start
+                            });
+                            return result.data;
+                        } else {
+                            throw new Error(result.error || 'Request failed');
+                        }
+                    } catch (err: any) {
+                        this.analytics.track({
+                            service: 'ScraperAPI',
+                            endpoint: url,
+                            success: false,
+                            latency: Date.now() - start,
+                            metadata: { error: err.message }
+                        });
+                        throw err;
                     }
                 });
+            });
+        };
 
-                console.log('✅ [ScraperService] Request successful');
-                return response.data;
-
-            } catch (error: any) {
-                lastError = error;
-                console.error(`❌ [ScraperService] Attempt ${attempt + 1} failed:`, error.message);
-
-                // Detectar rate limit o errores 429/403
-                if (error.response?.status === 429 || error.response?.status === 403) {
-                    const currentKey = this.config.keys[this.config.currentKeyIndex];
-                    this.handleRateLimit(currentKey);
-                    continue;
-                }
-
-                // Para otros errores, rotar y reintentar
-                if (attempt < maxRetries - 1) {
-                    this.rotateToNextKey();
-                }
+        try {
+            if (useCache) {
+                return await this.cache.getOrFetch(cacheKey, fetchFn, cacheTTL);
+            } else {
+                return await fetchFn();
             }
+        } catch (error: any) {
+            this.logger.error(`❌ [ScraperService] Failed: ${url}`, { error: error.message });
+            throw error;
         }
-
-        console.error('❌ [ScraperService] All API keys failed');
-        throw lastError || new Error('All ScraperAPI keys failed');
     }
 
-    /**
-     * Obtiene estadísticas del servicio
-     */
     getStats() {
         return {
-            totalKeys: this.config.keys.length,
-            currentKeyIndex: this.config.currentKeyIndex,
-            keysInCooldown: Array.from(this.config.rateLimitCooldown.entries())
-                .filter(([_, cooldownUntil]) => Date.now() < cooldownUntil)
-                .length
+            rotator: this.rotator.getStats(),
+            analytics: this.analytics.getDashboard(),
+            budget: this.budget.getReport(),
+            circuit: this.breaker.getState()
         };
+    }
+
+    reset(): void {
+        this.rotator.reset();
     }
 }
 
-// Exportar instancia singleton
 export const scraperService = new ScraperService();

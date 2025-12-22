@@ -1,123 +1,64 @@
-import Groq from 'groq-sdk';
+import { GroqAPIRotator } from './groqAPIRotator';
+import {
+    CacheManager,
+    CircuitBreaker,
+    Logger,
+    BudgetMonitor,
+    Analytics,
+    globalCache,
+    globalLogger,
+    globalBudget,
+    globalAnalytics,
+    CACHE_STRATEGIES,
+    API_COSTS
+} from '../utils/api-manager';
 
 /**
- * Servicio centralizado para manejar múltiples API keys de Groq
- * con rotación automática y fallback inteligente
+ * Servicio robusto para Groq API
+ * Integrado con GroqAPIRotator y API Management Kit para control de costos y resiliencia
  */
 
-interface GroqConfig {
-    keys: string[];
-    currentKeyIndex: number;
-    lastRotation: number;
-    rateLimitCooldown: Map<string, number>;
-}
-
 class GroqService {
-    private config: GroqConfig;
-    private groqInstances: Map<string, Groq>;
+    private rotator: GroqAPIRotator;
+    private keys: string[];
+
+    // Componentes de gestión
+    private cache: CacheManager;
+    private breaker: CircuitBreaker;
+    private logger: Logger;
+    private budget: BudgetMonitor;
+    private analytics: Analytics;
 
     constructor() {
-        // Inicializar configuración con múltiples fuentes de API keys
-        const keys = this.loadApiKeys();
+        this.keys = this.loadApiKeys();
+        this.rotator = new GroqAPIRotator(this.keys);
 
-        this.config = {
-            keys,
-            currentKeyIndex: 0,
-            lastRotation: Date.now(),
-            rateLimitCooldown: new Map()
-        };
+        // Inyectar dependencias globales
+        this.cache = globalCache;
+        this.logger = globalLogger;
+        this.budget = globalBudget;
+        this.analytics = globalAnalytics;
 
-        this.groqInstances = new Map();
-        console.log(`🔑 [GroqService] Initialized with ${keys.length} API key(s)`);
+        // Circuit Breaker específico para IA (más tolerante)
+        this.breaker = new CircuitBreaker(5, 30000); // 5 fallos, 30s de descanso
+
+        this.logger.info(`🤖 [GroqService] Ready with ${this.keys.length} keys`);
     }
 
-    /**
-     * Carga API keys desde múltiples fuentes en orden de prioridad
-     */
     private loadApiKeys(): string[] {
         const keys: string[] = [];
-
-        // 1. Prioridad: GROQ_API_KEYS (múltiples keys separadas por comas)
         if (process.env.GROQ_API_KEYS) {
-            const multiKeys = process.env.GROQ_API_KEYS.split(',').map(k => k.trim()).filter(k => k);
-            keys.push(...multiKeys);
-            console.log(`✅ Loaded ${multiKeys.length} keys from GROQ_API_KEYS`);
+            keys.push(...process.env.GROQ_API_KEYS.split(',').map(k => k.trim()).filter(k => k));
         }
-
-        // 2. Fallback: GROQ_API_KEY (key única)
         if (process.env.GROQ_API_KEY && !keys.includes(process.env.GROQ_API_KEY)) {
             keys.push(process.env.GROQ_API_KEY);
-            console.log('✅ Loaded 1 key from GROQ_API_KEY');
         }
-
-        // Validar que al menos haya una key configurada
-        if (keys.length === 0) {
-            console.error('❌ No Groq API keys configured!');
-            console.error('Please set GROQ_API_KEY or GROQ_API_KEYS in environment variables');
-            throw new Error('No Groq API keys available. Please configure GROQ_API_KEY or GROQ_API_KEYS in your environment variables.');
-        }
-
+        if (keys.length === 0) throw new Error('No Groq API keys configured');
         return keys;
     }
 
     /**
-     * Obtiene la próxima API key disponible, rotando si es necesario
-     */
-    private getAvailableKey(): string {
-        const now = Date.now();
-
-        // Buscar una key que no esté en cooldown
-        for (let i = 0; i < this.config.keys.length; i++) {
-            const index = (this.config.currentKeyIndex + i) % this.config.keys.length;
-            const key = this.config.keys[index];
-            const cooldownUntil = this.config.rateLimitCooldown.get(key) || 0;
-
-            if (now > cooldownUntil) {
-                this.config.currentKeyIndex = index;
-                return key;
-            }
-        }
-
-        // Si todas están en cooldown, usar la que tenga el cooldown más corto
-        console.warn('⚠️ All keys in cooldown, using least cooled');
-        return this.config.keys[this.config.currentKeyIndex];
-    }
-
-    /**
-     * Obtiene o crea una instancia de Groq para una key específica
-     */
-    private getGroqInstance(apiKey: string): Groq {
-        if (!this.groqInstances.has(apiKey)) {
-            this.groqInstances.set(apiKey, new Groq({ apiKey }));
-        }
-        return this.groqInstances.get(apiKey)!;
-    }
-
-    /**
-     * Marca una key como en rate limit y rota a la siguiente
-     */
-    private handleRateLimit(apiKey: string): void {
-        const cooldownMinutes = 1; // 1 minuto de cooldown
-        const cooldownUntil = Date.now() + (cooldownMinutes * 60 * 1000);
-
-        this.config.rateLimitCooldown.set(apiKey, cooldownUntil);
-        console.warn(`⏰ [GroqService] Key marked as rate limited for ${cooldownMinutes}min`);
-
-        // Rotar a la siguiente key
-        this.rotateToNextKey();
-    }
-
-    /**
-     * Rota a la siguiente API key disponible
-     */
-    private rotateToNextKey(): void {
-        this.config.currentKeyIndex = (this.config.currentKeyIndex + 1) % this.config.keys.length;
-        this.config.lastRotation = Date.now();
-        console.log(`🔄 [GroqService] Rotated to key #${this.config.currentKeyIndex + 1}`);
-    }
-
-    /**
-     * Crea una predicción usando Groq con fallback automático entre keys
+     * Crea una predicción gestionada con caché y control de costos
      */
     async createPrediction(params: {
         messages: Array<{ role: string; content: string }>;
@@ -125,84 +66,116 @@ class GroqService {
         temperature?: number;
         max_tokens?: number;
         response_format?: { type: 'json_object' | 'text' };
+        useCache?: boolean; // Opción para bypass caché
     }): Promise<any> {
-        const maxRetries = this.config.keys.length; // Intentar con todas las keys disponibles
-        let lastError: Error | null = null;
+        const { useCache = true, ...aiParams } = params;
 
-        for (let attempt = 0; attempt < maxRetries; attempt++) {
-            try {
-                const apiKey = this.getAvailableKey();
-                const groq = this.getGroqInstance(apiKey);
+        // Clave de caché basada en el contenido de los mensajes (para no repetir análisis idénticos)
+        const cacheKey = `groq:prediction:${JSON.stringify(aiParams.messages)}`;
+        const start = Date.now();
 
-                console.log(`🤖 [GroqService] Attempt ${attempt + 1}/${maxRetries} with key #${this.config.currentKeyIndex + 1}`);
+        const fetchFn = async () => {
+            return this.breaker.execute(async () => {
+                try {
+                    const result = await this.rotator.chatCompletion(
+                        aiParams.messages as any,
+                        {
+                            model: aiParams.model || 'llama-3.1-8b-instant',
+                            temperature: aiParams.temperature ?? 0.6,
+                            max_tokens: aiParams.max_tokens || 800,
+                            response_format: aiParams.response_format || { type: 'json_object' as const }
+                        }
+                    );
 
-                const completion = await groq.chat.completions.create({
-                    messages: params.messages as any,
-                    model: params.model || 'llama-3.1-8b-instant',
-                    temperature: params.temperature ?? 0.6,
-                    max_tokens: params.max_tokens || 800,
-                    response_format: params.response_format || { type: 'json_object' as const }
-                });
+                    if (result.success && result.content) {
+                        // Registrar costo (estimado) y métricas
+                        this.budget.trackCost(API_COSTS.GROQ_REQUEST);
+                        this.analytics.track({
+                            service: 'GroqAPI',
+                            endpoint: 'chat/completions',
+                            success: true,
+                            latency: Date.now() - start,
+                            metadata: { model: aiParams.model, tokens: result.usage?.total_tokens }
+                        });
 
-                const responseContent = completion.choices[0]?.message?.content;
-
-                if (!responseContent) {
-                    throw new Error('Empty response from Groq');
+                        try {
+                            return JSON.parse(result.content);
+                        } catch (e) {
+                            throw new Error('Failed to parse Groq response as JSON');
+                        }
+                    } else {
+                        throw new Error(result.error || 'All Groq API keys failed');
+                    }
+                } catch (err: any) {
+                    this.analytics.track({
+                        service: 'GroqAPI',
+                        endpoint: 'chat/completions',
+                        success: false,
+                        latency: Date.now() - start,
+                        metadata: { error: err.message }
+                    });
+                    throw err;
                 }
+            });
+        };
 
-                console.log('✅ [GroqService] Prediction successful');
-                return JSON.parse(responseContent);
-
-            } catch (error: any) {
-                lastError = error;
-                console.error(`❌ [GroqService] Attempt ${attempt + 1} failed:`, error.message);
-
-                // Detectar rate limit
-                if (error.message?.includes('rate_limit') || error.status === 429) {
-                    const currentKey = this.config.keys[this.config.currentKeyIndex];
-                    this.handleRateLimit(currentKey);
-                    continue; // Intentar con la siguiente key
-                }
-
-                // Si es un error de parsing JSON, no reintentar
-                if (error.message?.includes('JSON')) {
-                    console.error('JSON parsing error, not retrying');
-                    break;
-                }
-
-                // Para otros errores, rotar y reintentar
-                if (attempt < maxRetries - 1) {
-                    this.rotateToNextKey();
-                }
+        try {
+            if (useCache) {
+                // Cachear análisis por 12 horas por defecto (Estrategia AI_ANALYSIS)
+                return await this.cache.getOrFetch(cacheKey, fetchFn, CACHE_STRATEGIES.AI_ANALYSIS.ttl);
+            } else {
+                return await fetchFn();
             }
+        } catch (error: any) {
+            this.logger.error(`❌ [GroqService] Prediction failed`, { error: error.message });
+            throw error;
         }
-
-        // Si llegamos aquí, todas las keys fallaron
-        console.error('❌ [GroqService] All API keys failed');
-        throw lastError || new Error('All Groq API keys failed');
     }
 
     /**
-     * Crea un cliente Groq directo (para casos especiales)
+     * Crea un prompt simple gestionado
      */
-    getClient(): Groq {
-        const apiKey = this.getAvailableKey();
-        return this.getGroqInstance(apiKey);
+    async complete(prompt: string, options: {
+        model?: string;
+        temperature?: number;
+        max_tokens?: number;
+        useCache?: boolean;
+    } = {}): Promise<string> {
+        const { useCache = true, ...aiOptions } = options;
+        const cacheKey = `groq:complete:${prompt}`;
+
+        const fetchFn = async () => {
+            const result = await this.rotator.complete(prompt, aiOptions);
+            if (result.success && result.content) {
+                this.budget.trackCost(API_COSTS.GROQ_REQUEST);
+                return result.content;
+            }
+            throw new Error(result.error || 'Groq completion failed');
+        };
+
+        try {
+            if (useCache) {
+                return await this.cache.getOrFetch(cacheKey, fetchFn, CACHE_STRATEGIES.AI_ANALYSIS.ttl);
+            }
+            return await fetchFn();
+        } catch (error: any) {
+            this.logger.error(`❌ [GroqService] Completion failed`, { error: error.message });
+            throw error;
+        }
     }
 
-    /**
-     * Obtiene estadísticas del servicio
-     */
     getStats() {
         return {
-            totalKeys: this.config.keys.length,
-            currentKeyIndex: this.config.currentKeyIndex,
-            keysInCooldown: Array.from(this.config.rateLimitCooldown.entries())
-                .filter(([_, cooldownUntil]) => Date.now() < cooldownUntil)
-                .length
+            rotator: this.rotator.getSummary(),
+            keys: this.rotator.getStats(),
+            budget: this.budget.getReport(),
+            circuit: this.breaker.getState()
         };
+    }
+
+    reset(): void {
+        this.rotator.reset();
     }
 }
 
-// Exportar instancia singleton
 export const groqService = new GroqService();
