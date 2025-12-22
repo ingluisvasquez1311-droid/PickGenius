@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
 import TeamLogo from '@/components/ui/TeamLogo';
+import ShareButton from '@/components/sharing/ShareButton';
 
 interface PlayerProp {
     id: string;
@@ -401,6 +402,29 @@ const PropsDashboard = () => {
                                             🔥 HOT PICK
                                         </div>
                                     </div>
+
+                                    {/* Share Button for Top Pick */}
+                                    <div className="absolute top-4 right-4">
+                                        <ShareButton data={{
+                                            player: {
+                                                name: topPick.player.name,
+                                                team: topPick.player.team,
+                                                image: topPick.player.image
+                                            },
+                                            match: {
+                                                homeTeam: topPick.game.homeTeam,
+                                                awayTeam: topPick.game.awayTeam,
+                                                time: new Date(topPick.game.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                                tournament: topPick.league
+                                            },
+                                            prediction: {
+                                                type: topPick.prop.displayName,
+                                                line: topPick.prop.line,
+                                                prediction: topPick.prediction.prediction,
+                                                probability: topPick.prediction.probability
+                                            }
+                                        }} />
+                                    </div>
                                 </div>
                             </div>
                         );
@@ -712,6 +736,28 @@ const PropCard = ({ prop, onPredict, isPredicting }: { prop: PlayerProp, onPredi
                         <p className="text-[9px] text-white/60 leading-tight italic line-clamp-2">
                             "{prop.prediction.reasoning}"
                         </p>
+
+                        <div className="absolute top-2 right-2">
+                            <ShareButton data={{
+                                player: {
+                                    name: prop.player.name,
+                                    team: prop.player.team,
+                                    image: prop.player.image
+                                },
+                                match: {
+                                    homeTeam: prop.game.homeTeam,
+                                    awayTeam: prop.game.awayTeam,
+                                    time: new Date(prop.game.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                    tournament: prop.league
+                                },
+                                prediction: {
+                                    type: prop.prop.displayName,
+                                    line: prop.prop.line,
+                                    prediction: prop.prediction.prediction,
+                                    probability: prop.prediction.probability
+                                }
+                            }} />
+                        </div>
                     </div>
                 ) : (
                     <button
