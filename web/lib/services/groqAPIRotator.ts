@@ -65,7 +65,7 @@ export class GroqAPIRotator {
         this.blockDuration = 3 * 60 * 1000; // 3 minutos
         this.rateLimitBlockDuration = 10 * 60 * 1000; // 10 minutos para rate limit
 
-        console.log(`🤖 [GroqAPIRotator] Initialized with ${apiKeys.length} API key(s)`);
+        console.log(`[GroqAPIRotator] Initialized with ${apiKeys.length} API key(s)`);
     }
 
     /**
@@ -79,7 +79,7 @@ export class GroqAPIRotator {
             if (keyObj.isBlocked && keyObj.blockUntil && now > keyObj.blockUntil) {
                 keyObj.isBlocked = false;
                 keyObj.failures = 0;
-                console.log(`✅ Groq Key #${keyObj.index + 1} desbloqueada`);
+                console.log(`[OK] Groq Key #${keyObj.index + 1} desbloqueada`);
             }
         });
 
@@ -89,7 +89,7 @@ export class GroqAPIRotator {
         if (availableKeys.length === 0) {
             const nextUnblock = Math.min(...this.apiKeys.map(k => k.blockUntil || Infinity));
             const waitTime = Math.ceil((nextUnblock - now) / 1000);
-            throw new Error(`❌ Todas las Groq API keys están bloqueadas. Próxima disponible en ${waitTime}s`);
+            throw new Error(`[Error] Todas las Groq API keys están bloqueadas. Próxima disponible en ${waitTime}s`);
         }
 
         // Ordenar por menor uso (balanceo de carga)
@@ -118,7 +118,7 @@ export class GroqAPIRotator {
             keyObj.rateLimitReset = parseInt(responseHeaders['x-ratelimit-reset']) * 1000;
         }
 
-        console.log(`✅ Groq Key #${keyObj.index + 1} - Éxito | Total: ${keyObj.successes} | Remaining: ${keyObj.remainingRequests || '?'}`);
+        console.log(`[OK] Groq Key #${keyObj.index + 1} - Éxito | Total: ${keyObj.successes} | Remaining: ${keyObj.remainingRequests || '?'}`);
     }
 
     /**
@@ -131,18 +131,18 @@ export class GroqAPIRotator {
         if (statusCode === 429) {
             keyObj.isBlocked = true;
             keyObj.blockUntil = Date.now() + this.rateLimitBlockDuration;
-            console.log(`🚫 Groq Key #${keyObj.index + 1} - RATE LIMIT - Bloqueada por ${this.rateLimitBlockDuration / 60000} min`);
+            console.log(`[Blocked] Groq Key #${keyObj.index + 1} - RATE LIMIT - Bloqueada por ${this.rateLimitBlockDuration / 60000} min`);
             return;
         }
 
-        console.log(`⚠️ Groq Key #${keyObj.index + 1} - Fallo ${keyObj.failures}/${this.maxFailuresBeforeBlock}`);
+        console.log(`[Warning] Groq Key #${keyObj.index + 1} - Fallo ${keyObj.failures}/${this.maxFailuresBeforeBlock}`);
         console.log(`   Error: ${error.message || error}`);
 
         // Bloquear si supera el límite
         if (keyObj.failures >= this.maxFailuresBeforeBlock) {
             keyObj.isBlocked = true;
             keyObj.blockUntil = Date.now() + this.blockDuration;
-            console.log(`🚫 Groq Key #${keyObj.index + 1} bloqueada por ${this.blockDuration / 60000} min`);
+            console.log(`[Blocked] Groq Key #${keyObj.index + 1} bloqueada por ${this.blockDuration / 60000} min`);
         }
     }
 
@@ -169,7 +169,7 @@ export class GroqAPIRotator {
 
             try {
                 keyObj = this.getNextKey();
-                console.log(`\n🔄 Intento ${attempts}/${this.maxRetries} - Usando Groq Key #${keyObj.index + 1}`);
+                console.log(`\n[Retry] Intento ${attempts}/${this.maxRetries} - Usando Groq Key #${keyObj.index + 1}`);
 
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
@@ -217,7 +217,7 @@ export class GroqAPIRotator {
                     throw new Error('Respuesta inválida de Groq API');
                 }
 
-                // ✅ Éxito
+                // Success
                 this.markSuccess(keyObj, headers);
                 return {
                     success: true,
@@ -238,13 +238,13 @@ export class GroqAPIRotator {
 
                 // Si no quedan más intentos, terminar
                 if (attempts >= this.maxRetries) {
-                    console.log(`\n❌ Todos los intentos fallaron`);
+                    console.log(`\n[Error] Todos los intentos fallaron`);
                     break;
                 }
 
                 // Esperar antes de reintentar (backoff exponencial)
                 const waitTime = Math.min(500 * Math.pow(2, attempts - 1), 3000);
-                console.log(`⏳ Esperando ${waitTime}ms antes de reintentar...`);
+                console.log(`[Wait] Esperando ${waitTime}ms antes de reintentar...`);
                 await this.sleep(waitTime);
             }
         }
@@ -283,7 +283,7 @@ export class GroqAPIRotator {
             failures: k.failures,
             totalRequests: k.totalRequests,
             remaining: k.remainingRequests || '?',
-            status: k.isBlocked ? '🚫 Bloqueada' : '✅ Activa'
+            status: k.isBlocked ? '[Blocked] Bloqueada' : '[Active] Activa'
         }));
     }
 
@@ -321,6 +321,6 @@ export class GroqAPIRotator {
             k.rateLimitReset = null;
             k.remainingRequests = null;
         });
-        console.log('🔄 Groq: Estadísticas reseteadas');
+        console.log('[Reset] Groq: Estadísticas reseteadas');
     }
 }

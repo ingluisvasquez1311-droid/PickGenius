@@ -25,17 +25,17 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             setLoading(true);
             setError(null);
 
-            const toastId = toast.loading('PickGenius AI accediendo al servidor de datos...', {
-                description: 'Procesando historial H2H y momentum actual...'
+            const toastId = toast.loading('Consultando el Oráculo de PickGenius...', {
+                description: 'Invocando estadísticas históricas y momentum...'
             });
 
             // Simulate steps for a more "pro" feeling
             setTimeout(() => {
-                toast.loading('Analizando alineaciones y desgaste físico...', { id: toastId });
+                toast.loading('Analizando alineaciones y mística del campo...', { id: toastId });
             }, 1000);
 
             setTimeout(() => {
-                toast.loading('Calculando probabilidades con red neuronal...', { id: toastId });
+                toast.loading('Calculando probabilidades con el Motor Genius...', { id: toastId });
             }, 2500);
 
             const result = await generatePrediction({
@@ -49,7 +49,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                     : parseInt(result.confidence || '0');
 
                 setPrediction(result);
-                toast.success('¡Análisis Estratégico Finalizado!', {
+                toast.success('¡Revelación Estratégica Finalizada!', {
                     id: toastId,
                     description: `Veredicto: ${result.winner || 'Listo'} con ${confidenceVal}% de acierto.`,
                     duration: 5000
@@ -74,12 +74,12 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
 
             } else {
                 setError('No se pudo generar la predicción');
-                toast.error('Fallo en la conexión neuronal', { id: toastId });
+                toast.error('Fallo en la conexión mística', { id: toastId });
             }
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Error al generar predicción');
-            toast.error('Error crítico en el motor de IA');
+            toast.error('Error crítico en el Motor Genius');
         } finally {
             setLoading(false);
         }
@@ -93,7 +93,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             <div className="relative z-10">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                        <span className="text-3xl">✨</span> PickGenius AI
+                        <span className="text-3xl">🧙</span> PickGenius Oracle
                     </h2>
                     {!prediction && (
                         <button
@@ -138,7 +138,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white rounded-full p-3 shadow-lg">
                                 <span className="text-4xl">🏆</span>
                             </div>
-                            <p className="text-black/70 text-xs uppercase font-bold mb-2 mt-2">Ganador Predicho</p>
+                            <p className="text-black/70 text-xs uppercase font-bold mb-2 mt-2">Veredicto del Genio</p>
                             <p className="text-2xl md:text-3xl font-black text-black">
                                 {(!prediction.winner || prediction.winner.toLowerCase().includes('undefined')) ? 'Resultado Analizado' : prediction.winner}
                             </p>
@@ -169,11 +169,11 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                     {typeof prediction.confidence === 'number' ? `${prediction.confidence}%` : (prediction.confidence ? `${parseInt(prediction.confidence)}%` : '-%')}
                                 </span>
                             </div>
-                            <p className="text-black/60 text-xs mt-2 font-semibold">Confianza de la IA</p>
+                            <p className="text-black/60 text-xs mt-2 font-semibold">Precisión del Oráculo</p>
                         </div>
 
                         <div className="bg-black/30 p-4 rounded-lg">
-                            <p className="text-purple-300 text-xs uppercase font-bold mb-2">Análisis de IA</p>
+                            <p className="text-purple-300 text-xs uppercase font-bold mb-2">Visión del Genio</p>
                             <p className="text-gray-200 leading-relaxed text-sm">
                                 {prediction.reasoning}
                             </p>

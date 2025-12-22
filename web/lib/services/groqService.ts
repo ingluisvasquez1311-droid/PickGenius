@@ -1,4 +1,3 @@
-```typescript
 import Groq from "groq-sdk";
 import { logApiCall } from '@/lib/adminService';
 import { GroqAPIRotator } from './groqAPIRotator';
@@ -46,7 +45,7 @@ class GroqService {
         // Circuit Breaker específico para IA (más tolerante)
         this.breaker = new CircuitBreaker(5, 30000); // 5 fallos, 30s de descanso
 
-        this.logger.info(`🤖[GroqService] Ready with ${ this.keys.length } keys`);
+        this.logger.info(`\u{1F9D9} [GeniusEngine] Ready with ${this.keys.length} spells`);
     }
 
     private loadApiKeys(): string[] {
@@ -76,7 +75,7 @@ class GroqService {
         const { useCache = true, schema = PredictionResponseSchema, ...aiParams } = params;
 
         // Clave de caché basada en el contenido de los mensajes (para no repetir análisis idénticos)
-        const cacheKey = `groq: prediction:${ JSON.stringify(aiParams.messages) } `;
+        const cacheKey = `groq: prediction:${JSON.stringify(aiParams.messages)} `;
         const start = Date.now();
 
         const fetchFn = async () => {
@@ -113,7 +112,7 @@ class GroqService {
                             return validatedData;
 
                         } catch (e: any) {
-                            console.error('❌ [GroqService] Validation/Parse Error:', e.errors || e.message);
+                            console.error('[GeniusEngine] Insight/Parse Error:', e.errors || e.message);
                             throw new Error('AI response validation failed: ' + (e.message || 'Invalid format'));
                         }
                     } else {
@@ -140,9 +139,9 @@ class GroqService {
                 return await fetchFn();
             }
         } catch (error: any) {
-            this.logger.error(`❌[GroqService] Prediction failed`, { error: error.message });
-            console.error("❌ Groq Error:", error.message);
-            logApiCall('Groq', '/chat/completions', 500).catch(() => {});
+            this.logger.error(`[GeniusEngine] Prediction failed`, { error: error.message });
+            console.error("[GeniusEngine] Error:", error.message);
+            logApiCall('Groq', '/chat/completions', 500).catch(() => { });
             throw error;
         }
     }
@@ -157,13 +156,13 @@ class GroqService {
         useCache?: boolean;
     } = {}): Promise<string> {
         const { useCache = true, ...aiOptions } = options;
-        const cacheKey = `groq: complete:${ prompt } `;
+        const cacheKey = `groq: complete:${prompt} `;
 
         const fetchFn = async () => {
             const result = await this.rotator.complete(prompt, aiOptions);
             if (result.success && result.content) {
                 this.budget.trackCost(API_COSTS.GROQ_REQUEST);
-                logApiCall('Groq', '/chat/completions', 200).catch(() => {});
+                logApiCall('Groq', '/chat/completions', 200).catch(() => { });
                 return result.content;
             }
             throw new Error(result.error || 'Groq completion failed');
@@ -175,7 +174,7 @@ class GroqService {
             }
             return await fetchFn();
         } catch (error: any) {
-            this.logger.error(`❌[GroqService] Completion failed`, { error: error.message });
+            this.logger.error(`[GeniusEngine] Completion failed`, { error: error.message });
             throw error;
         }
     }
