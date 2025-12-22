@@ -10,6 +10,11 @@ import {
     increment
 } from 'firebase/firestore';
 
+const ADMIN_EMAILS = [
+    'pickgenius@gmail.com',
+    'ingluisvasquez1311@gmail.com' // Explicit owner email
+];
+
 export interface FavoritePlayer {
     id: number;
     name: string;
@@ -26,6 +31,7 @@ export interface UserProfile {
     subscriptionEnd?: Date;
     predictionsUsed: number;
     predictionsLimit: number;
+    totalPredictions: number;
     favoriteTeams: string[];
     favoritePlayers: FavoritePlayer[];
     createdAt: Date;
@@ -83,12 +89,13 @@ export async function createUserProfile(uid: string, email: string): Promise<Use
         uid,
         email,
         predictionsUsed: 0,
-        predictionsLimit: 3, // Free tier: 3 predictions per day
+        predictionsLimit: 3, // Reverts to 3 after trial expires
+        totalPredictions: 0,
         favoriteTeams: [],
         favoritePlayers: [],
         createdAt: serverTimestamp(),
         lastLogin: serverTimestamp(),
-        role: 'user', // Default role
+        role: ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'user',
         stats: {
             horarios: 0,
             resultados: 0,
@@ -129,7 +136,13 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
     }
 
     const data = userSnap.data();
-    const role = data.role || 'user';
+    let role = data.role || 'user';
+
+    // Auto-promote if in whitelist but has user role
+    if (role !== 'admin' && ADMIN_EMAILS.includes(data.email?.toLowerCase())) {
+        role = 'admin';
+        updateDoc(userRef, { role: 'admin' }).catch(console.error);
+    }
 
     return {
         uid: data.uid,
@@ -140,6 +153,7 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
         subscriptionEnd: data.subscriptionEnd?.toDate(),
         predictionsUsed: data.predictionsUsed || 0,
         predictionsLimit: data.predictionsLimit || 3,
+        totalPredictions: data.totalPredictions || 0,
         favoriteTeams: data.favoriteTeams || [],
         favoritePlayers: data.favoritePlayers || [],
         createdAt: data.createdAt?.toDate() || new Date(),
@@ -230,9 +244,9 @@ export async function incrementPredictionsUsed(uid: string): Promise<void> {
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
-        const currentCount = userSnap.data().predictionsUsed || 0;
         await updateDoc(userRef, {
-            predictionsUsed: currentCount + 1
+            predictionsUsed: increment(1),
+            totalPredictions: increment(1)
         });
     }
 }
@@ -283,6 +297,12 @@ export async function canMakePrediction(uid: string): Promise<{ canPredict: bool
 
     // Free users have daily limit (Fix applied)
     const remaining = profile.predictionsLimit - profile.predictionsUsed;
+
+    if (remaining <= 0) {
+        const { logLimitAlert } = require('@/lib/adminService');
+        logLimitAlert(uid, profile.email).catch(() => { });
+    }
+
     return {
         canPredict: remaining > 0,
         remaining: Math.max(0, remaining)
@@ -310,6 +330,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
             subscriptionEnd: data.subscriptionEnd?.toDate(),
             predictionsUsed: data.predictionsUsed || 0,
             predictionsLimit: data.predictionsLimit || 3,
+            totalPredictions: data.totalPredictions || 0,
             favoriteTeams: data.favoriteTeams || [],
             favoritePlayers: data.favoritePlayers || [],
             createdAt: data.createdAt?.toDate() || new Date(),
@@ -376,6 +397,7 @@ export async function savePrediction(uid: string, prediction: Omit<PredictionRec
 
     await updateDoc(userRef, {
         predictionsUsed: increment(1),
+        totalPredictions: increment(1),
         [statToIncrement]: increment(1),
         'stats.reputation': increment(15) // Boost reputation for activity
     });

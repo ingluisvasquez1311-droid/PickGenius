@@ -31,6 +31,7 @@ interface LiveEvent {
     tournament: {
         name: string;
         category?: {
+            id: number;
             name: string;
         };
     };
@@ -222,9 +223,9 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
         );
     }
 
-    // Group events by League (Tournament)
     const groupedEvents = events.reduce((acc, event) => {
         const countryName = event.tournament.category?.name || 'Internacional';
+        const countryId = event.tournament.category?.id;
         const leagueName = event.tournament.name;
         // Unique Key for the League
         const key = `${countryName}|${leagueName}`;
@@ -232,6 +233,7 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
         if (!acc[key]) {
             acc[key] = {
                 country: countryName,
+                countryId: countryId,
                 league: leagueName,
                 events: [],
                 isPriority: PRIORITY_LEAGUES.some(pl => leagueName.includes(pl)) || PRIORITY_LEAGUES.some(pl => countryName.includes(pl))
@@ -239,7 +241,7 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
         }
         acc[key].events.push(event);
         return acc;
-    }, {} as Record<string, { country: string; league: string; events: LiveEvent[]; isPriority: boolean }>);
+    }, {} as Record<string, { country: string; countryId?: number; league: string; events: LiveEvent[]; isPriority: boolean }>);
 
     // Sort Groups: Priority First, then Alphabetical
     const sortedGroups = Object.entries(groupedEvents).sort(([, a], [, b]) => {
@@ -281,9 +283,25 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
                         >
                             <div className="flex items-center gap-4">
                                 {/* Country Flag Placeholder or Icon */}
-                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">
-                                    {/* Try to map common countries to flags or use sport icon */}
-                                    {getCountryFlag(group.country) || (sport === 'football' ? '⚽' : '🏀')}
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg overflow-hidden border border-white/5">
+                                    {group.countryId ? (
+                                        <img
+                                            src={`/api/proxy/category-image/${group.countryId}`}
+                                            className="w-full h-full object-cover"
+                                            alt={group.country}
+                                            onError={(e) => {
+                                                // Fallback to emoji if image fails
+                                                const target = e.target as HTMLImageElement;
+                                                target.style.display = 'none';
+                                                const parent = target.parentElement;
+                                                if (parent) {
+                                                    parent.innerText = getCountryFlag(group.country) || (sport === 'football' ? '⚽' : '🏀');
+                                                }
+                                            }}
+                                        />
+                                    ) : (
+                                        getCountryFlag(group.country) || (sport === 'football' ? '⚽' : '🏀')
+                                    )}
                                 </div>
 
                                 <div className="text-left">

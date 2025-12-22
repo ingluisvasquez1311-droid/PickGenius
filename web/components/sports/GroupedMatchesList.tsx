@@ -69,14 +69,20 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
                     {(() => {
                         const groupedByLeague = dateGames.reduce((acc, game) => {
                             const countryName = game.tournament.category?.name || 'Internacional';
+                            const countryId = game.tournament.category?.id;
                             const leagueName = game.tournament.name;
                             const key = `${dateLabel}-${countryName}: ${leagueName}`;
-                            if (!acc[key]) acc[key] = { displayName: `${countryName}: ${leagueName}`, games: [] };
+                            if (!acc[key]) acc[key] = {
+                                displayName: `${countryName}: ${leagueName}`,
+                                countryId: countryId,
+                                countryName: countryName,
+                                games: []
+                            };
                             acc[key].games.push(game);
                             return acc;
-                        }, {} as Record<string, { displayName: string; games: SportsDataEvent[] }>);
+                        }, {} as Record<string, { displayName: string; countryId?: number; countryName: string; games: SportsDataEvent[] }>);
 
-                        return Object.entries(groupedByLeague).map(([leagueKey, { displayName, games: leagueGames }]) => {
+                        return Object.entries(groupedByLeague).map(([leagueKey, { displayName, countryId, countryName, games: leagueGames }]) => {
                             const isExpanded = expandedGroups.has(leagueKey);
 
                             return (
@@ -86,6 +92,23 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
                                         className="w-full flex items-center justify-between gap-3 border-l-4 border-[var(--primary)] pl-4 py-3 bg-white/5 rounded-r-xl transition-all hover:bg-white/10 group/header"
                                     >
                                         <div className="flex items-center gap-3">
+                                            {/* Flag/Icon */}
+                                            <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-sm overflow-hidden border border-white/5">
+                                                {countryId ? (
+                                                    <img
+                                                        src={`/api/proxy/category-image/${countryId}`}
+                                                        className="w-full h-full object-cover"
+                                                        alt={countryName}
+                                                        onError={(e) => {
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.style.display = 'none';
+                                                            target.parentElement!.innerText = sport === 'basketball' ? '🏀' : sport === 'football' ? '⚽' : '🏆';
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    sport === 'basketball' ? '🏀' : sport === 'football' ? '⚽' : '🏆'
+                                                )}
+                                            </div>
                                             <h3 className="text-lg font-bold text-white uppercase tracking-tight">
                                                 {displayName}
                                             </h3>

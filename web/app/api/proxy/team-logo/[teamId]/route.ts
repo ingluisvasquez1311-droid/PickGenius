@@ -15,36 +15,33 @@ export async function GET(
     try {
         // Try multiple sources for team logos
         const sources = [
-            `https://img.sofascore.com/api/v1/team/${teamId}/image`, // CDN (Faster & more reliable)
+            `https://api.sofascoreapp.com/api/v1/team/${teamId}/image`,
+            `https://img.sofascore.com/api/v1/team/${teamId}/image`,
             `https://www.sofascore.com/api/v1/team/${teamId}/image`,
             `https://api.sofascore.app/api/v1/team/${teamId}/image`,
-            `https://api.sofascore.app/api/v1/player/${teamId}/image` // For tennis players
+            `https://api.sofascore.app/api/v1/player/${teamId}/image`
         ];
 
         let imageResponse: Response | null = null;
 
         for (const source of sources) {
             try {
+                console.log(`🖼️ [Logo Proxy] Fetching from: ${source}`);
                 const response = await fetch(source, {
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                         'Referer': 'https://www.sofascore.com/',
-                        'Origin': 'https://www.sofascore.com',
-                        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                        'Sec-Fetch-Dest': 'image',
-                        'Sec-Fetch-Mode': 'no-cors',
-                        'Sec-Fetch-Site': 'cross-site'
                     },
-                    cache: 'force-cache' // Cache images for 1 hour
+                    cache: 'no-store'
                 });
 
                 if (response.ok) {
                     imageResponse = response;
+                    console.log(`✅ [Logo Proxy] Success from: ${source}`);
                     break;
                 }
             } catch (err) {
-                console.warn(`Failed to fetch from ${source}`);
+                console.warn(`⚠️ [Logo Proxy] Error fetching from ${source}`);
                 continue;
             }
         }

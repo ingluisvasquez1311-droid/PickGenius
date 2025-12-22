@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
+  },
 
   // Existing Config
   reactCompiler: true,
@@ -41,11 +45,16 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    return [];
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*', // Proxy to Backend
+      },
+    ];
   },
 };
 
-export default withSentryConfig(nextConfig, {
+const sentryConfig = withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
@@ -72,12 +81,8 @@ export default withSentryConfig(nextConfig, {
     deleteSourcemapsAfterUpload: true,
   },
 
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
 
-  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-  // See the following for more information:
-  // https://docs.sentry.io/product/crons/
-  // https://vercel.com/docs/cron-jobs
-  automaticVercelMonitors: true,
 });
+
+// Exporta la configuración sin Sentry en desarrollo para mejorar la velocidad
+export default process.env.NODE_ENV === 'development' ? nextConfig : sentryConfig;

@@ -1,0 +1,69 @@
+import { db } from './firebase';
+import {
+    collection,
+    addDoc,
+    serverTimestamp,
+    query,
+    where,
+    getDocs,
+    orderBy,
+    limit,
+    Timestamp
+} from 'firebase/firestore';
+
+/**
+ * Log an API call for monitoring
+ */
+export async function logApiCall(service: string, endpoint: string, status: number = 200) {
+    if (!db) return;
+    try {
+        await addDoc(collection(db, 'admin_api_logs'), {
+            service, // 'Groq', 'Gemini', 'Sofascore'
+            endpoint,
+            status,
+            timestamp: serverTimestamp()
+        });
+    } catch (error) {
+        console.error('Error logging API call:', error);
+    }
+}
+
+/**
+ * Log when a user hits their limit
+ */
+export async function logLimitAlert(uid: string, email: string) {
+    if (!db) return;
+    try {
+        await addDoc(collection(db, 'admin_alerts'), {
+            type: 'LIMIT_EXCEEDED',
+            uid,
+            email,
+            message: `Usuario ${email} ha superado su límite diario de predicciones.`,
+            timestamp: serverTimestamp(),
+            read: false
+        });
+    } catch (error) {
+        console.error('Error logging limit alert:', error);
+    }
+}
+
+/**
+ * Fetch traffic stats for the last 24 hours
+ */
+export async function getTrafficStats() {
+    if (!db) return [];
+    try {
+        const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const q = query(
+            collection(db, 'admin_api_logs'),
+            where('timestamp', '>=', Timestamp.fromDate(last24h)),
+            orderBy('timestamp', 'desc'),
+            limit(100)
+        );
+        const snap = await getDocs(q);
+        return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+        console.error('Error fetching traffic stats:', error);
+        return [];
+    }
+}

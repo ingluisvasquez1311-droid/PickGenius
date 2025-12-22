@@ -51,11 +51,25 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
 
     if (!game) {
         return (
-            <div className="min-h-screen bg-[#0b0b0b] pb-20 flex items-center justify-center">
-                <div className="text-center">
-                    <h2 className="text-xl font-bold">Partido no encontrado</h2>
-                    <button onClick={() => router.back()} className="mt-4 bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition-colors">
-                        Volver
+            <div className="min-h-screen bg-[#0b0b0b] pb-20 flex items-center justify-center text-center px-4">
+                <div className="glass-card p-10 max-w-md w-full border border-red-500/20">
+                    <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span className="text-3xl text-red-500">⚠️</span>
+                    </div>
+                    <h2 className="text-2xl font-black text-white italic mb-2">PARTIDO NO ENCONTRADO</h2>
+                    <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+                        No pudimos conectar con los terminales de Sofascore para este ID: <span className="text-red-400 font-mono">{eventId}</span>.
+                        {gameError && (
+                            <span className="block mt-2 p-2 bg-red-500/10 rounded text-[10px] text-red-300 font-mono">
+                                ERROR: {(gameError as any).message || 'Unknown source error'}
+                            </span>
+                        )}
+                    </p>
+                    <button
+                        onClick={() => router.back()}
+                        className="w-full py-4 bg-white text-black font-black uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all active:scale-95"
+                    >
+                        Volver al Panel
                     </button>
                 </div>
             </div>

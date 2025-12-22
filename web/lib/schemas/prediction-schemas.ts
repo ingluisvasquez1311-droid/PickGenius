@@ -86,4 +86,12 @@ export const PredictionResponseSchema = z.object({
     ]).optional()
 });
 
+export const NewsAnalysisSchema = z.object({
+    bettingSignal: z.string(),
+    sentiment: z.enum(['positive', 'negative', 'neutral']),
+    impactScore: z.number().min(0).max(100),
+    brutalTitle: z.string().optional()
+});
+
 export type PredictionResponse = z.infer<typeof PredictionResponseSchema>;
+export type NewsAnalysisResponse = z.infer<typeof NewsAnalysisSchema>;

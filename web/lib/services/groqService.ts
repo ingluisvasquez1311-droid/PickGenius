@@ -68,8 +68,9 @@ class GroqService {
         max_tokens?: number;
         response_format?: { type: 'json_object' | 'text' };
         useCache?: boolean; // Opción para bypass caché
+        schema?: any; // Zod Schema opcional
     }): Promise<any> {
-        const { useCache = true, ...aiParams } = params;
+        const { useCache = true, schema = PredictionResponseSchema, ...aiParams } = params;
 
         // Clave de caché basada en el contenido de los mensajes (para no repetir análisis idénticos)
         const cacheKey = `groq:prediction:${JSON.stringify(aiParams.messages)}`;
@@ -94,7 +95,7 @@ class GroqService {
 
                             // VALIDACIÓN ZOD (Nivel Profesional)
                             // Si los datos no cumplen la estructura, lanzará error detallado
-                            const validatedData = PredictionResponseSchema.parse(rawJson);
+                            const validatedData = schema.parse(rawJson);
 
                             // Log exitoso y métricas solo si es válido
                             this.budget.trackCost(API_COSTS.GROQ_REQUEST);

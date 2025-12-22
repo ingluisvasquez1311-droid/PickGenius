@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sportsDataService } from '@/lib/services/sportsDataService';
 import { groqService } from '@/lib/services/groqService';
+import { globalCache, CACHE_STRATEGIES } from '@/lib/utils/api-manager';
+import { getUserProfile } from '@/lib/userService';
 
 export const maxDuration = 60; // Allow longer timeout for AI generation
 
@@ -18,20 +20,38 @@ export async function POST(request: NextRequest) {
         if (body.awayTeam || body.awayTeamName) fallbackAwayName = body.awayTeam || body.awayTeamName;
         if (body.sport) sport = body.sport;
         if (body.gameId) gameId = body.gameId;
+        const uid = body.uid; // User ID from request
 
         if (!gameId || !sport) {
             return NextResponse.json({ success: false, error: 'Missing gameId or sport' }, { status: 400 });
         }
 
+        // --- AUTH/TIER CHECK ---
+        let isPremiumUser = false;
+        if (uid) {
+            const profile = await getUserProfile(uid);
+            isPremiumUser = profile?.isPremium || profile?.role === 'admin' || false;
+        }
+
+        // --- CACHE LAYER ---
+        const cacheKey = `prediction:${sport}:${gameId}`;
+        const cachedPrediction = await globalCache.get(cacheKey);
+
+        if (cachedPrediction) {
+            console.log(`🎯 [Prediction API] Returning CACHED prediction for ${gameId}`);
+            return NextResponse.json(cachedPrediction);
+        }
+
         // 1. Fetch real match data in PARALLEL
         console.log(`📡 [Prediction API] Fetching data for Game ${gameId}...`);
 
-        const [gameRes, statsRes] = await Promise.all([
+        const [gameRes, statsRes, oddsRes] = await Promise.all([
             sportsDataService.makeRequest(`/event/${gameId}`).catch(err => {
                 console.error("Error fetching game:", err);
                 return null;
             }),
-            sportsDataService.makeRequest(`/event/${gameId}/statistics`).catch(() => null)
+            sportsDataService.makeRequest(`/event/${gameId}/statistics`).catch(() => null),
+            sportsDataService.getMatchOdds(Number(gameId)).catch(() => null)
         ]);
 
         if (!gameRes) {
@@ -41,6 +61,7 @@ export async function POST(request: NextRequest) {
 
         const event = gameRes.event || gameRes;
         const statistics = statsRes || {};
+        const odds = oddsRes?.markets || [];
 
         console.log(`✅ [Prediction API] Data fetched for:`, event.name || gameId);
 
@@ -55,7 +76,11 @@ export async function POST(request: NextRequest) {
             status: event.status?.description || 'Scheduled',
             startTime: event.startTimestamp,
             tournament: event.tournament?.name,
-            statistics: statistics
+            statistics: statistics,
+            marketOdds: odds.map((m: any) => ({
+                marketName: m.marketName,
+                choices: m.choices?.map((c: any) => ({ name: c.name, fraction: c.fraction }))
+            })).slice(0, 5) // Limit to top 5 markets for brevity
         };
 
         console.log(`🧠 [Prediction API] Context built for ${matchContext.home} vs ${matchContext.away}`);
@@ -67,11 +92,20 @@ export async function POST(request: NextRequest) {
         let prompt = '';
 
         if (sport === 'basketball') {
+            const isNBA = matchContext.tournament?.toLowerCase().includes('nba');
             prompt = `
-            You are an expert NBA/Basketball analyst speaking SPANISH.
+            You are an expert NBA and International Basketball analyst speaking SPANISH.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
+            **TOURNAMENT:** ${matchContext.tournament}
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
+            **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
             ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
+
+            CRITICAL CONTEXT & MARKETS:
+            - If this is NBA: Matches are 48 minutes. Scores usually range from 190 to 240 total points.
+            - If this is NOT NBA (FIBA, EuroLeague, ACB, etc.): Matches are 40 minutes. Scores vary but ALMOST NEVER exceed 180 total points.
+            - ANALYZE SPECIAL MARKETS: 1st Quarter points, Player Props, and Total Points.
+            - Current Tournament is: ${matchContext.tournament}. Use ONLY realistic lines for this specific league.
 
             RETURN JSON ONLY in SPANISH:
             {
@@ -79,32 +113,42 @@ export async function POST(request: NextRequest) {
                 "confidence": 85,
                 "reasoning": "Análisis detallado en ESPAÑOL explicando por qué ganará el equipo...",
                 "bettingTip": "${matchContext.home} -5.5",
+                "advancedMarkets": { "firstQuarter": "Over 52.5", "drawNoBet": "N/A - Basketball" },
                 "predictions": {
-                    "finalScore": "110-102",
-                    "totalPoints": "212",
+                    "finalScore": "${isNBA ? '112-105' : '82-78'}",
+                    "totalPoints": "${isNBA ? '217' : '160'}",
                     "spread": { "favorite": "${matchContext.home}", "line": -5.5, "recommendation": "Cubrir Hándicap" },
-                    "overUnder": { "line": 215.5, "pick": "Menos de", "confidence": "Alta" },
+                    "overUnder": { "line": ${isNBA ? '222.5' : '158.5'}, "pick": "Menos de", "confidence": "Alta" },
                     "topPlayers": {
-                        "homeTopScorer": { "name": "Jugador A", "predictedPoints": 25, "predictedRebounds": 8, "predictedAssists": 5 },
-                        "awayTopScorer": { "name": "Jugador B", "predictedPoints": 28, "predictedRebounds": 6, "predictedAssists": 4 }
+                        "homeTopScorer": { "name": "Jugador A", "predictedPoints": ${isNBA ? 25 : 18}, "predictedRebounds": 8, "predictedAssists": 5 },
+                        "awayTopScorer": { "name": "Jugador B", "predictedPoints": ${isNBA ? 28 : 16}, "predictedRebounds": 6, "predictedAssists": 4 }
                     }
                 },
                 "keyFactors": ["Factor en Español 1", "Factor en Español 2", "Factor en Español 3"]
             }
             `;
-        } else {
+        } else if (sport === 'football') {
             prompt = `
             You are an expert Football/Soccer analyst speaking SPANISH.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
+            **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
             ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
+            ANALYZE SPECIAL MARKETS (MAX VALUE):
+            - Win by 2+ goals (Ganará por 2+)
+            - Most Corners (Mayor número de córners)
+            - Both Teams to Score (Ambos equipos anotarán)
+            - Shots on Target (Remates a puerta) - e.g. "Player X: 2+ remates"
+            - Player to score 2+ (Anotará 2+)
+
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
-                "reasoning": "Análisis detallado en ESPAÑOL explicando la predicción...",
-                "bettingTip": "Más de 2.5 Goles",
+                "reasoning": "Análisis detallado en ESPAÑOL resaltando mercados de córners y remates...",
+                "bettingTip": "Más de 2.5 Goles y Ambos Anotan",
+                "advancedMarkets": { "corners": "Benfica: Mayor número", "shots": "Luis Suarez: 2+ a puerta", "drawNoBet": "${matchContext.home}" },
                 "predictions": {
                     "finalScore": "2-1",
                     "totalGoals": "3",
@@ -116,9 +160,146 @@ export async function POST(request: NextRequest) {
                 "keyFactors": ["Factor Clave 1", "Factor Clave 2", "Factor Clave 3"]
             }
             `;
+        } else if (sport.toLowerCase().includes('american') || sport.toLowerCase().includes('nfl')) {
+            prompt = `
+            You are an expert NFL/American Football analyst speaking SPANISH.
+            **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
+            **STATUS:** ${matchContext.status}
+            **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
+            
+            ANALYZE SPECIAL MARKETS (NFL ELITE):
+            - Touchdown Scorers (Anotadores)
+            - Passing Yards (Yardas de pase)
+            - Touchdown Passes (Pases de touchdown)
+            - Completed Passes (Pases completarios)
+            - Receiving Yards (Yardas de recepción)
+            - Receptions (Recepciones)
+            - Rushing Yards (Yardas de rushing)
+            
+            RETURN JSON ONLY in SPANISH:
+            {
+                "winner": "${matchContext.home}",
+                "confidence": 82,
+                "reasoning": "Análisis táctico de yardas aéreas y terrestres en ESPAÑOL...",
+                "bettingTip": "${matchContext.home} -3.5 Hándicap",
+                "advancedMarkets": { "touchdowns": "Jugador X anotará", "yards": "QB Y Over 250.5 yardas", "receptions": "WR Z 5+ recepciones" },
+                "predictions": {
+                    "finalScore": "27-21",
+                    "totalPoints": "48",
+                    "spread": { "favorite": "${matchContext.home}", "line": -3.5, "recommendation": "Cubrir" },
+                    "overUnder": { "line": 47.5, "pick": "Más de", "confidence": "Alta" },
+                    "topPlayers": {
+                        "homeStat": { "name": "Player A", "yards": 110, "touchdowns": 1 },
+                        "awayStat": { "name": "Player B", "yards": 95, "touchdowns": 1 }
+                    }
+                },
+                "keyFactors": ["Defensa de zona", "Ataque terrestre", "Presión al QB"]
+            }
+            `;
+        } else if (sport === 'baseball') {
+            prompt = `
+            You are an expert MLB/Baseball analyst speaking SPANISH.
+            **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
+            **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
+            **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
+            ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
+            
+            ANALYZE SPECIAL MARKETS:
+            - Run Line (Hándicap)
+            - Total Runs (Over/Under)
+            - Player Props: Pitcher Strikeouts, Batter Hits/Home Runs.
+            
+            RETURN JSON ONLY in SPANISH:
+            {
+                "winner": "${matchContext.home}",
+                "confidence": 80,
+                "reasoning": "Análisis detallado en ESPAÑOL resaltando el pitcheo y bateo...",
+                "bettingTip": "Under 8.5 Carreras",
+                "advancedMarkets": { "strikeouts": "Pitcher A Over 5.5", "homeRuns": "Player B to hit a Home Run", "runLine": "${matchContext.home} -1.5" },
+                "predictions": {
+                    "finalScore": "5-3",
+                    "totalRuns": "8",
+                    "spread": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Win by 2+" },
+                    "overUnder": { "line": 8.5, "pick": "Menos de", "confidence": "Media" },
+                    "topPlayers": {
+                        "homeStarter": { "name": "Pitcher A", "predictedStrikeouts": 6, "inningsPitched": 6 },
+                        "awayStarter": { "name": "Pitcher B", "predictedStrikeouts": 4, "inningsPitched": 5 }
+                    }
+                },
+                "keyFactors": ["Factor MLB 1", "Factor MLB 2", "Factor MLB 3"]
+            }
+            `;
+        } else if (sport.toLowerCase().includes('hockey') || sport.toLowerCase().includes('nhl')) {
+            prompt = `
+            You are an expert NHL/Ice Hockey analyst speaking SPANISH.
+            **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
+            **STATUS:** ${matchContext.status}
+            **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
+            
+            ANALYZE SPECIAL MARKETS (NHL ELITE):
+            - 60 Minute Line (Resultado en tiempo regular)
+            - Puck Line (Hándicap -1.5/+1.5)
+            - Total Goals (Over/Under)
+            - Player Props: Tiros a puerta (Shots on Goal), Puntos de jugador.
+            
+            RETURN JSON ONLY in SPANISH:
+            {
+                "winner": "${matchContext.home}",
+                "confidence": 78,
+                "reasoning": "Análisis de defensa, portería y Power Play en ESPAÑOL...",
+                "bettingTip": "Puck Line ${matchContext.home} -1.5",
+                "advancedMarkets": { "shots": "Jugador X Over 3.5 tiros", "puckLine": "${matchContext.home} -1.5", "totalGoals": "Over 5.5" },
+                "predictions": {
+                    "finalScore": "4-2",
+                    "totalGoals": "6",
+                    "spread": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Cubrir" },
+                    "overUnder": { "line": 6.0, "pick": "Más de", "confidence": "Media" }
+                },
+                "keyFactors": ["Eficiencia en Power Play", "Rendimiento del Portero", "Fisicalidad"]
+            }
+            `;
+        } else if (sport.toLowerCase().includes('tennis')) {
+            prompt = `
+            You are an expert Tennis analyst speaking SPANISH.
+            **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
+            **STATUS:** ${matchContext.status}
+            **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
+            
+            ANALYZE SPECIAL MARKETS (TENNIS ELITE):
+            - Match Winner (Ganador)
+            - Set Betting (Marcador exacto de sets)
+            - Game Handicap (Hándicap de juegos)
+            - Total Games (Over/Under juegos)
+            
+            RETURN JSON ONLY in SPANISH:
+            {
+                "winner": "${matchContext.home}",
+                "confidence": 85,
+                "reasoning": "Análisis de superficie, h2h y momento actual en ESPAÑOL...",
+                "bettingTip": "${matchContext.home} gana 2-0",
+                "advancedMarkets": { "setBetting": "2-0", "gameHandicap": "${matchContext.home} -3.5", "totalGames": "Under 21.5" },
+                "predictions": {
+                    "finalScore": "2-0",
+                    "totalGames": "20",
+                    "spread": { "favorite": "${matchContext.home}", "line": -3.5, "recommendation": "Ganador sólido" },
+                    "overUnder": { "line": 21.5, "pick": "Menos de", "confidence": "Alta" }
+                },
+                "keyFactors": ["Efectividad del primer servicio", "Estadísticas de Break Points", "Adaptación a la superficie"]
+            }
+            `;
+        } else {
+            prompt = `
+            You are an expert Sports analyst speaking SPANISH.
+            **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
+            **STATUS:** ${matchContext.status}
+            **TOURNAMENT:** ${matchContext.tournament}
+            **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
+
+            RETURN JSON ONLY in SPANISH using standard PredictionResponseSchema.
+            `;
         }
 
-        // 2. Call Groq usando el servicio centralizado
+        // 2. Call Groq using centralized service
         console.log('🤖 Calling Groq (FAST MODEL) for prediction...');
 
         const prediction = await groqService.createPrediction({
@@ -140,9 +321,35 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Successfully received prediction:', Object.keys(prediction));
 
-        // Validate required fields
-        if (!prediction.winner || !prediction.confidence) {
-            console.warn('⚠️ Missing required fields in prediction:', prediction);
+        // 3. Increment prediction count for the user
+        if (uid) {
+            const { incrementPredictionsUsed } = require('@/lib/userService');
+            incrementPredictionsUsed(uid).catch((err: any) => console.error('❌ Error incrementing usage:', err));
+        }
+
+        // 4. CACHE the result
+        const ttl = isLive ? (3 * 60 * 1000) : (60 * 60 * 1000); // 3m for live, 1h for pre-match
+        await globalCache.set(cacheKey, prediction, ttl).catch(err => {
+            console.error('❌ [Prediction API] Cache set error:', err);
+        });
+
+        // 4. MASKING FOR FREE USERS
+        if (!isPremiumUser) {
+            console.log('🔒 [Prediction API] Masking ELITE content for free user');
+            const maskedPrediction = {
+                ...prediction,
+                bettingTip: '🔒 Desbloquea con Premium',
+                advancedMarkets: {
+                    message: "🔒 Mercados de alto valor disponibles en Premium",
+                    locked: true
+                },
+                predictions: {
+                    ...prediction.predictions,
+                    topPlayers: undefined // Premium only
+                },
+                isMasked: true
+            };
+            return NextResponse.json(maskedPrediction);
         }
 
         return NextResponse.json(prediction);

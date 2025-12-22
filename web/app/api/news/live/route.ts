@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Parser from 'rss-parser';
 import { groqService } from '@/lib/services/groqService';
+import { NewsAnalysisSchema } from '@/lib/schemas/prediction-schemas';
 
 const parser = new Parser();
 
@@ -60,7 +61,8 @@ export async function GET() {
                         }
                     ],
                     model: "llama-3.3-70b-versatile",
-                    response_format: { type: "json_object" }
+                    response_format: { type: "json_object" },
+                    schema: NewsAnalysisSchema
                 });
 
                 return {

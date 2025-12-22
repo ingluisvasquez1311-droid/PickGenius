@@ -50,6 +50,68 @@ router.post('/:sport/predict', async (req, res) => {
 });
 
 /**
+ * @route   GET /api/sports/:sport/match/:eventId
+ */
+router.get('/:sport/match/:eventId', async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const result = await generalizedSofaScoreService.getEventDetails(eventId);
+        if (result.success) {
+            res.json({ success: true, data: result.data.event || result.data });
+        } else {
+            res.status(404).json(result);
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * @route   GET /api/sports/:sport/match/:eventId/statistics
+ */
+router.get('/:sport/match/:eventId/statistics', async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const result = await generalizedSofaScoreService.getEventStatistics(eventId);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * @route   GET /api/sports/:sport/match/:eventId/best-player
+ */
+router.get('/:sport/match/:eventId/best-player', async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const result = await generalizedSofaScoreService.getBestPlayers(eventId);
+
+        if (result.success && result.data && result.data.bestPlayers) {
+            // Flatten the structure: return what's inside result.data.bestPlayers
+            res.json({ success: true, data: result.data.bestPlayers });
+        } else {
+            res.json(result);
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * @route   GET /api/sports/:sport/match/:eventId/lineups
+ */
+router.get('/:sport/match/:eventId/lineups', async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const result = await generalizedSofaScoreService.getEventLineups(eventId);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
  * @route   GET /api/sports/:sport/live
  */
 router.get('/:sport/live', async (req, res) => {

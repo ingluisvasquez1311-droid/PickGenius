@@ -13,6 +13,7 @@ const apiRateLimiter = require('./src/services/apiRateLimiter');
 const sofascoreRoutes = require('./src/routes/sofascore');
 const nbaPlayerPropsRoutes = require('./src/routes/nbaPlayerProps');
 const universalSportsRoutes = require('./src/routes/universalSports');
+const proxyRoutes = require('./src/routes/proxy');
 
 
 
@@ -172,6 +173,9 @@ app.use('/api/nba/players', nbaPlayerPropsRoutes);
 
 // Universal Sports API (Baseball, NHL, Tennis, etc.)
 app.use('/api/sports', universalSportsRoutes);
+
+// General Proxy API
+app.use('/api/proxy', proxyRoutes);
 
 
 

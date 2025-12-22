@@ -34,6 +34,9 @@ interface MatchStat {
 export default function MatchStatsSummary({ match, sport, eventId }: MatchStatsSummaryProps) {
     const { data: statsData, isLoading } = useMatchStatistics(sport, eventId);
 
+    // DEBUG: Ver qué llega de la API
+    console.log(`📊 [StatsSummary] Data for ${eventId}:`, statsData);
+
     const isLiveOrFinished = match?.status?.type === 'inprogress' || match?.status?.type === 'finished';
     const isScheduled = match?.status?.type === 'notstarted';
 
@@ -41,15 +44,22 @@ export default function MatchStatsSummary({ match, sport, eventId }: MatchStatsS
     const realStats = useMemo(() => {
         if (!statsData || !statsData.statistics) return null;
 
-        const allPeriodStats = statsData.statistics.find((p: any) => p.period === 'ALL');
+        // Sofascore puede devolver estadísticas en un objeto { statistics: [...] } 
+        // o directamente el array dependiendo de cómo hayamos guardado en el proxy.
+        const statsArray = Array.isArray(statsData.statistics) ? statsData.statistics :
+            (Array.isArray(statsData) ? statsData : null);
+
+        if (!statsArray) return null;
+
+        const allPeriodStats = statsArray.find((p: any) => p.period === 'ALL');
         if (!allPeriodStats) return null;
 
         const processed: MatchStat[] = [];
 
-        // Define stats based on sport
-        const footballStats = ['Ball possession', 'Total shots', 'Shots on target', 'Corner kicks', 'Fouls'];
-        const basketballStats = ['Free throws %', '2-pointers %', '3-pointers %', 'Rebounds', 'Assists', 'Turnovers'];
-        const tennisStats = ['Aces', 'Double faults', 'Service games won'];
+        // Define stats based on sport (insensible a mayúsculas/minúsculas)
+        const footballStats = ['ball possession', 'total shots', 'shots on target', 'corner kicks', 'fouls', 'yellow cards', 'red cards'];
+        const basketballStats = ['free throws %', '2-pointers %', '3-pointers %', 'rebounds', 'assists', 'turnovers', 'field goals %'];
+        const tennisStats = ['aces', 'double faults', 'service games won'];
 
         const importantStats = sport === 'basketball' ? basketballStats :
             sport === 'tennis' ? tennisStats :
@@ -57,9 +67,9 @@ export default function MatchStatsSummary({ match, sport, eventId }: MatchStatsS
 
         allPeriodStats.groups.forEach((group: any) => {
             group.statisticsItems.forEach((item: any) => {
-                if (importantStats.includes(item.name)) {
-                    const homeVal = parseFloat(item.home.replace('%', ''));
-                    const awayVal = parseFloat(item.away.replace('%', ''));
+                if (importantStats.includes(item.name.toLowerCase())) {
+                    const homeVal = parseFloat((item.home || "0").toString().replace('%', ''));
+                    const awayVal = parseFloat((item.away || "0").toString().replace('%', ''));
                     const total = homeVal + awayVal;
 
                     processed.push({
@@ -72,11 +82,12 @@ export default function MatchStatsSummary({ match, sport, eventId }: MatchStatsS
             });
         });
         return processed;
-    }, [statsData]);
+    }, [statsData, sport]);
 
     // Fallback Mock Stats if No Real Data (Scheduled or API error)
     const mockStats = useMemo(() => {
         if (!match) return [];
+        // ... (resto del mockStats queda igual)
 
         const homeHash = match.homeTeam.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const awayHash = match.awayTeam.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -102,6 +113,26 @@ export default function MatchStatsSummary({ match, sport, eventId }: MatchStatsS
     }, [match, sport]);
 
     if (!match) return null;
+
+    if (isLoading) {
+        return (
+            <div className="glass-card p-4 animate-pulse">
+                <div className="h-4 bg-white/10 w-24 mb-6 rounded-full"></div>
+                <div className="space-y-6">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="space-y-2">
+                            <div className="flex justify-between">
+                                <div className="h-3 bg-white/5 w-8 rounded"></div>
+                                <div className="h-3 bg-white/10 w-24 rounded"></div>
+                                <div className="h-3 bg-white/5 w-8 rounded"></div>
+                            </div>
+                            <div className="h-1.5 bg-white/5 w-full rounded-full"></div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     const statsToDisplay = (realStats && realStats.length > 0) ? realStats : mockStats;
     const title = (realStats && realStats.length > 0) ? "Estadísticas Reales" : "Análisis Predictivo";

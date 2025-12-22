@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { Zap, Shield, TrendingUp, Target, X, Star, Crown, Loader2, CheckCircle2, AlertTriangle, ArrowRight, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { generatePrediction } from '@/lib/predictionService';
 import { useAuth } from '@/contexts/AuthContext';
@@ -141,6 +142,22 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             <p className="text-2xl md:text-3xl font-black text-black">
                                 {(!prediction.winner || prediction.winner.toLowerCase().includes('undefined')) ? 'Resultado Analizado' : prediction.winner}
                             </p>
+
+                            {/* Betting Tip Area - Masked if needed */}
+                            <div className="mt-4 px-4 py-2 bg-black/10 rounded-xl border border-black/10">
+                                <p className="text-[10px] text-black/50 uppercase font-black mb-1">Pick Recomendado</p>
+                                <p className={`text-lg font-black text-black ${prediction.isMasked ? 'blur-sm select-none' : ''}`}>
+                                    {prediction.bettingTip || 'Analizando...'}
+                                </p>
+                                {prediction.isMasked && (
+                                    <button
+                                        className="mt-2 text-[10px] bg-black text-white px-3 py-1 rounded-full font-bold hover:bg-black/80 transition-all"
+                                        onClick={() => window.location.href = '/pricing'}
+                                    >
+                                        ⭐ Desbloquear con Premium
+                                    </button>
+                                )}
+                            </div>
                             <div className="mt-3 flex items-center justify-center gap-2">
                                 <div className="flex-1 max-w-xs h-3 bg-black/20 rounded-full overflow-hidden">
                                     <div
@@ -249,52 +266,76 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                     <div className="space-y-3">
                                         <h4 className="text-yellow-400 text-sm font-bold uppercase tracking-wider flex items-center gap-2 mt-6 mb-2">
                                             🌟 Detalles Premium
+                                            {prediction.isMasked && <span className="text-[10px] bg-yellow-400 text-black px-2 py-0.5 rounded-full">Locked</span>}
                                         </h4>
 
-                                        {/* Exact Score & Cards */}
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 p-3 rounded-lg border border-blue-500/20 relative overflow-hidden">
-                                                <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-bl">
-                                                    {sport === 'basketball' ? 'ESTIMADO' : 'EXACTO'}
+                                        {prediction.isMasked ? (
+                                            <div className="bg-black/40 p-6 rounded-2xl border border-yellow-500/20 text-center space-y-4">
+                                                <div className="flex justify-center">
+                                                    <div className="w-12 h-12 bg-yellow-400/10 rounded-full flex items-center justify-center">
+                                                        <Crown className="w-6 h-6 text-yellow-400" />
+                                                    </div>
                                                 </div>
-                                                <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">
-                                                    {sport === 'basketball' ? 'Resultado Final' : 'Marcador Exacto'}
-                                                </p>
-                                                <p className="text-white font-bold text-xl">{prediction.predictions.finalScore || '-'}</p>
-                                            </div>
-
-                                            {/* Cards - ONLY FOR FOOTBALL */}
-                                            {sport !== 'basketball' && prediction.predictions.cards && (
-                                                <div className="bg-yellow-900/30 p-3 rounded-lg border border-yellow-500/20">
-                                                    <p className="text-yellow-300 text-[10px] uppercase font-bold mb-1">🟨 Tarjetas</p>
-                                                    <p className="text-white font-bold text-lg">
-                                                        {prediction.predictions.cards.yellowCards + prediction.predictions.cards.redCards} <span className="text-xs font-normal text-gray-400">Totales</span>
-                                                    </p>
+                                                <div>
+                                                    <p className="text-white font-bold mb-1">Mercados de Alto Valor Bloqueados</p>
+                                                    <p className="text-gray-400 text-xs">Accede a Córners exactos, Tarjetas, Offsides y Props de Jugadores con Elite.</p>
                                                 </div>
-                                            )}
-                                        </div>
-
-                                        {/* Key Factors */}
-                                        {prediction.keyFactors && prediction.keyFactors.length > 0 && (
-                                            <div className="bg-black/40 p-4 rounded-lg border border-white/5">
-                                                <p className="text-purple-300 text-xs uppercase font-bold mb-2">🧠 Inteligencia Táctica</p>
-                                                <ul className="space-y-2">
-                                                    {prediction.keyFactors.map((factor: string, idx: number) => (
-                                                        <li key={idx} className="text-gray-300 text-sm flex items-start gap-2">
-                                                            <span className="text-green-400 mt-1 text-xs">✓</span>
-                                                            <span>{factor}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                                <button
+                                                    onClick={() => window.location.href = '/pricing'}
+                                                    className="w-full py-3 bg-yellow-400 text-black font-black rounded-xl text-xs hover:bg-yellow-300 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    Pasar a Premium <Crown className="w-3 h-3" />
+                                                </button>
                                             </div>
-                                        )}
+                                        ) : (
+                                            <>
 
-                                        {/* Offsides - ONLY FOR FOOTBALL */}
-                                        {sport !== 'basketball' && prediction.predictions.offsides && (
-                                            <div className="bg-purple-900/30 p-3 rounded-lg border border-purple-500/20">
-                                                <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">⛔ Fueras de Juego</p>
-                                                <p className="text-white font-bold text-lg mb-1">{prediction.predictions.offsides.total} totales</p>
-                                            </div>
+                                                {/* Exact Score & Cards */}
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 p-3 rounded-lg border border-blue-500/20 relative overflow-hidden">
+                                                        <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-bl">
+                                                            {sport === 'basketball' ? 'ESTIMADO' : 'EXACTO'}
+                                                        </div>
+                                                        <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">
+                                                            {sport === 'basketball' ? 'Resultado Final' : 'Marcador Exacto'}
+                                                        </p>
+                                                        <p className="text-white font-bold text-xl">{prediction.predictions.finalScore || '-'}</p>
+                                                    </div>
+
+                                                    {/* Cards - ONLY FOR FOOTBALL */}
+                                                    {sport !== 'basketball' && prediction.predictions.cards && (
+                                                        <div className="bg-yellow-900/30 p-3 rounded-lg border border-yellow-500/20">
+                                                            <p className="text-yellow-300 text-[10px] uppercase font-bold mb-1">🟨 Tarjetas</p>
+                                                            <p className="text-white font-bold text-lg">
+                                                                {prediction.predictions.cards.yellowCards + prediction.predictions.cards.redCards} <span className="text-xs font-normal text-gray-400">Totales</span>
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Key Factors */}
+                                                {prediction.keyFactors && prediction.keyFactors.length > 0 && (
+                                                    <div className="bg-black/40 p-4 rounded-lg border border-white/5">
+                                                        <p className="text-purple-300 text-xs uppercase font-bold mb-2">🧠 Inteligencia Táctica</p>
+                                                        <ul className="space-y-2">
+                                                            {prediction.keyFactors.map((factor: string, idx: number) => (
+                                                                <li key={idx} className="text-gray-300 text-sm flex items-start gap-2">
+                                                                    <span className="text-green-400 mt-1 text-xs">✓</span>
+                                                                    <span>{factor}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+
+                                                {/* Offsides - ONLY FOR FOOTBALL */}
+                                                {sport !== 'basketball' && prediction.predictions.offsides && (
+                                                    <div className="bg-purple-900/30 p-3 rounded-lg border border-purple-500/20">
+                                                        <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">⛔ Fueras de Juego</p>
+                                                        <p className="text-white font-bold text-lg mb-1">{prediction.predictions.offsides.total} totales</p>
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 )}
@@ -310,12 +351,6 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             </button>
                         </div>
                     </div>
-                )}
-
-                {!prediction && !loading && !error && (
-                    <p className="text-purple-200 text-sm opacity-80">
-                        Haz clic para que Gemini analice las estadísticas en tiempo real y prediga el resultado.
-                    </p>
                 )}
             </div>
         </div>

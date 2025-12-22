@@ -6,6 +6,7 @@ const BASE_URL = typeof window === 'undefined'
     : '/api/proxy/sportsdata';
 
 import { scraperService } from './scraperService';
+import { logApiCall } from '@/lib/adminService';
 
 export interface SportsDataTeam {
     id: number;
@@ -140,7 +141,11 @@ class SportsDataService {
                 });
 
                 if (response.ok) {
-                    return await response.json();
+                    const jsonData = await response.json();
+                    console.log(`✅ [SportsData] Success from Bridge! Data size: ${JSON.stringify(jsonData).length} bytes`);
+                    return jsonData;
+                } else {
+                    console.warn(`⚠️ [SportsData] Bridge returned ${response.status}`);
                 }
             }
 
@@ -180,9 +185,11 @@ class SportsDataService {
             if (!response.ok) {
                 const errorText = await response.text().catch(() => "No error body");
                 console.error(`❌ Request Failed: ${response.status}. Body: ${errorText.substring(0, 200)}`);
-                return null;
+                logApiCall('Sofascore', endpoint, response.status).catch(() => { });
+                return null; // Changed from throw to return null to match original behavior for non-200
             }
 
+            logApiCall('Sofascore', endpoint, 200).catch(() => { });
             const data = await response.json();
             return data;
         } catch (error: any) {
@@ -279,6 +286,13 @@ class SportsDataService {
      */
     async getMatchStatistics(eventId: number): Promise<any> {
         return await this.makeRequest(`/event/${eventId}/statistics`);
+    }
+
+    /**
+     * Obtiene cuotas reales de mercado (Bet365, etc.) para el partido
+     */
+    async getMatchOdds(eventId: number): Promise<any> {
+        return await this.makeRequest(`/event/${eventId}/odds/1/all`);
     }
 
     /**

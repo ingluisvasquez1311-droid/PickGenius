@@ -99,8 +99,89 @@ class GeneralizedSofaScoreService {
         return this.makeRequest(`/event/${eventId}/statistics`, `event_stats_${eventId}`, 60);
     }
 
+    async getEventOdds(eventId) {
+        return this.makeRequest(`/event/${eventId}/odds/1/all`, `event_odds_${eventId}`, 300);
+    }
+
     async getEventLineups(eventId) {
         return this.makeRequest(`/event/${eventId}/lineups`, `event_lineups_${eventId}`, 300);
+    }
+
+    async getBestPlayers(eventId) {
+        return this.makeRequest(`/event/${eventId}/best-players`, `event_best_players_${eventId}`, 300);
+    }
+
+    async getTeamLogo(teamId) {
+        const sources = [
+            `https://api.sofascore.app/api/v1/team/${teamId}/image`,
+            `https://api.sofascore.com/api/v1/team/${teamId}/image`,
+            `https://img.sofascore.com/api/v1/team/${teamId}/image`,
+            `https://images.weserv.nl/?url=api.sofascore.app/api/v1/team/${teamId}/image`,
+            `https://images.weserv.nl/?url=api.sofascore.com/api/v1/team/${teamId}/image`
+        ];
+
+        for (const url of sources) {
+            try {
+                const response = await proxyService.makeRequest(url, {
+                    responseType: 'arraybuffer',
+                    headers: {
+                        'Referer': 'https://www.sofascore.com/',
+                        'Origin': 'https://www.sofascore.com',
+                        'User-Agent': this.getRandomUserAgent(),
+                        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+                    },
+                    timeout: 5000
+                });
+
+                if (response && response.status === 200 && response.data) {
+                    return response;
+                }
+            } catch (error) {
+                continue;
+            }
+        }
+        return null;
+    }
+
+    async getPlayerImage(playerId) {
+        const sources = [
+            `https://api.sofascore.app/api/v1/player/${playerId}/image`,
+            `https://api.sofascore.com/api/v1/player/${playerId}/image`,
+            `https://images.weserv.nl/?url=api.sofascore.app/api/v1/player/${playerId}/image`
+        ];
+
+        for (const url of sources) {
+            try {
+                const response = await proxyService.makeRequest(url, {
+                    responseType: 'arraybuffer',
+                    headers: {
+                        'Referer': 'https://www.sofascore.com/',
+                        'User-Agent': this.getRandomUserAgent()
+                    },
+                    timeout: 5000
+                });
+                if (response && response.status === 200 && response.data) return response;
+            } catch (e) { continue; }
+        }
+        return null;
+    }
+
+    async getCategoryImage(categoryId) {
+        const url = `https://api.sofascore.app/api/v1/category/${categoryId}/image`;
+        try {
+            const response = await proxyService.makeRequest(url, {
+                responseType: 'arraybuffer',
+                headers: {
+                    'Referer': 'https://www.sofascore.com/',
+                    'User-Agent': this.getRandomUserAgent()
+                },
+                timeout: 5000
+            });
+            if (response && response.status === 200 && response.data) return response;
+        } catch (e) {
+            console.error(`❌ Error fetching category image ${categoryId}:`, e.message);
+        }
+        return null;
     }
 
     /**

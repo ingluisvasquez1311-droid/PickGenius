@@ -60,13 +60,21 @@ class ScraperService {
 
     private loadApiKeys(): string[] {
         const keys: string[] = [];
+        // Evitar acceso a process en cliente si no está definido (aunque Next.js suele definirlo vacío)
+        if (typeof process === 'undefined') return [];
+
         if (process.env.SCRAPER_API_KEYS) {
             keys.push(...process.env.SCRAPER_API_KEYS.split(',').map(k => k.trim()).filter(k => k));
         }
         if (process.env.SCRAPER_API_KEY && !keys.includes(process.env.SCRAPER_API_KEY)) {
             keys.push(process.env.SCRAPER_API_KEY);
         }
-        if (keys.length === 0) throw new Error('No ScraperAPI keys configured');
+
+        if (keys.length === 0) {
+            console.warn('⚠️ [ScraperService] No API keys found (Normal on Client Side)');
+            return [];
+        }
+
         return keys;
     }
 
@@ -74,6 +82,10 @@ class ScraperService {
      * Ejecuta una petición gestionada (Cache -> Queue -> Breaker -> Rotator -> Analytics -> Budget)
      */
     async makeRequest(url: string, options: ScraperOptions = {}): Promise<any> {
+        if (this.keys.length === 0) {
+            throw new Error('ScraperService not configured (No API Keys)');
+        }
+
         const { useCache = true, cacheTTL = CACHE_STRATEGIES.MATCH_DATA.ttl, ...reqOptions } = options;
         const cacheKey = `scraper:${url}:${JSON.stringify(reqOptions)}`;
         const start = Date.now();
