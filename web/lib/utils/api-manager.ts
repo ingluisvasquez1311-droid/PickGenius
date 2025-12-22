@@ -158,35 +158,86 @@ export const globalRateLimiter = new UserRateLimiter();
 // 5. OPTIMIZACIÓN (CACHE & QUEUE)
 // ==========================================
 
-export class CacheManager {
-    private cache: Map<string, { value: any; expiry: number }> = new Map();
+import { Redis } from '@upstash/redis';
 
-    set(key: string, value: any, ttl: number = CACHE_STRATEGIES.DEFAULT.ttl): void {
-        this.cache.set(key, {
+export class CacheManager {
+    private memoryCache: Map<string, { value: any; expiry: number }> = new Map();
+    private redis: Redis | null = null;
+    private useRedis: boolean = false;
+
+    constructor() {
+        // Intentar inicializar Redis si existen las variables
+        if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+            try {
+                this.redis = new Redis({
+                    url: process.env.UPSTASH_REDIS_REST_URL,
+                    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+                });
+                this.useRedis = true;
+                console.log('📦 [CacheManager] Redis enabled via Upstash');
+            } catch (error) {
+                console.warn('⚠️ [CacheManager] Failed to initialize Redis, falling back to memory');
+            }
+        } else {
+            console.log('ℹ️ [CacheManager] Running in Memory mode (No Redis credentials)');
+        }
+    }
+
+    async set(key: string, value: any, ttl: number = CACHE_STRATEGIES.DEFAULT.ttl): Promise<void> {
+        if (this.useRedis && this.redis) {
+            // Redis TTL es en segundos
+            const seconds = Math.ceil(ttl / 1000);
+            try {
+                await this.redis.set(key, value, { ex: seconds });
+                return;
+            } catch (err) {
+                console.error('❌ [CacheManager] Redis set error:', err);
+            }
+        }
+
+        // Fallback o modo memoria
+        this.memoryCache.set(key, {
             value,
             expiry: Date.now() + ttl
         });
     }
 
-    get<T>(key: string): T | null {
-        const item = this.cache.get(key);
+    async get<T>(key: string): Promise<T | null> {
+        if (this.useRedis && this.redis) {
+            try {
+                const data = await this.redis.get<T>(key);
+                if (data) return data;
+            } catch (err) {
+                console.error('❌ [CacheManager] Redis get error:', err);
+            }
+        }
+
+        // Fallback o modo memoria
+        const item = this.memoryCache.get(key);
         if (!item) return null;
 
         if (Date.now() > item.expiry) {
-            this.cache.delete(key);
+            this.memoryCache.delete(key);
             return null;
         }
 
         return item.value as T;
     }
 
+    /**
+     * Obtiene del caché o ejecuta la función de fetch y guarda el resultado
+     */
     async getOrFetch<T>(key: string, fetchFn: () => Promise<T>, ttl?: number): Promise<T> {
-        const cached = this.get<T>(key);
+        const cached = await this.get<T>(key);
         if (cached) {
             return cached;
         }
+
         const data = await fetchFn();
-        this.set(key, data, ttl);
+
+        // Guardar en fondo para no bloquear respuesta principal
+        this.set(key, data, ttl).catch(err => console.error('Cache set background error:', err));
+
         return data;
     }
 }

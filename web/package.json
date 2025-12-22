@@ -16,6 +16,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@upstash/redis": "^1.35.8",
     "autoprefixer": "^10.0.1",
     "axios": "^1.13.2",
     "canvas-confetti": "^1.9.3",

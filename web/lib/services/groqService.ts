@@ -12,6 +12,7 @@ import {
     CACHE_STRATEGIES,
     API_COSTS
 } from '../utils/api-manager';
+import { PredictionResponseSchema } from '../schemas/prediction-schemas';
 
 /**
  * Servicio robusto para Groq API
@@ -88,20 +89,28 @@ class GroqService {
                     );
 
                     if (result.success && result.content) {
-                        // Registrar costo (estimado) y métricas
-                        this.budget.trackCost(API_COSTS.GROQ_REQUEST);
-                        this.analytics.track({
-                            service: 'GroqAPI',
-                            endpoint: 'chat/completions',
-                            success: true,
-                            latency: Date.now() - start,
-                            metadata: { model: aiParams.model, tokens: result.usage?.total_tokens }
-                        });
-
                         try {
-                            return JSON.parse(result.content);
-                        } catch (e) {
-                            throw new Error('Failed to parse Groq response as JSON');
+                            const rawJson = JSON.parse(result.content);
+
+                            // VALIDACIÓN ZOD (Nivel Profesional)
+                            // Si los datos no cumplen la estructura, lanzará error detallado
+                            const validatedData = PredictionResponseSchema.parse(rawJson);
+
+                            // Log exitoso y métricas solo si es válido
+                            this.budget.trackCost(API_COSTS.GROQ_REQUEST);
+                            this.analytics.track({
+                                service: 'GroqAPI',
+                                endpoint: 'chat/completions',
+                                success: true,
+                                latency: Date.now() - start,
+                                metadata: { model: aiParams.model, tokens: result.usage?.total_tokens }
+                            });
+
+                            return validatedData;
+
+                        } catch (e: any) {
+                            console.error('❌ [GroqService] Validation/Parse Error:', e.errors || e.message);
+                            throw new Error('AI response validation failed: ' + (e.message || 'Invalid format'));
                         }
                     } else {
                         throw new Error(result.error || 'All Groq API keys failed');
