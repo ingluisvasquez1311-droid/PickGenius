@@ -31,21 +31,23 @@ export default function AchievementBadges() {
         try {
             const history = await getHistory(100);
             const total = history.length;
-            const wins = history.filter(p => p.result === 'win').length;
+            // TODO: Add result tracking to PredictionRecord
+            // const wins = history.filter(p => p.result === 'win').length;
+            const wins = 0; // Placeholder
             const winRate = total > 0 ? (wins / total) * 100 : 0;
             const hotPicks = history.filter(p => p.probability >= 75).length;
 
-            // Calculate streak
+            // Calculate streak - TODO: Implement when result tracking is added
             let maxStreak = 0;
-            let currentStreak = 0;
-            history.forEach(p => {
-                if (p.result === 'win') {
-                    currentStreak++;
-                    maxStreak = Math.max(maxStreak, currentStreak);
-                } else {
-                    currentStreak = 0;
-                }
-            });
+            // let currentStreak = 0;
+            // history.forEach(p => {
+            //     if (p.result === 'win') {
+            //         currentStreak++;
+            //         maxStreak = Math.max(maxStreak, currentStreak);
+            //     } else {
+            //         currentStreak = 0;
+            //     }
+            // });
 
             const allBadges: Badge[] = [
                 {

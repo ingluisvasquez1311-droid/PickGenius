@@ -38,49 +38,47 @@ export default function PerformanceStats() {
 
             // Calculate stats
             const total = history.length;
-            const wins = history.filter(p => p.result === 'win').length;
+            // TODO: Add result tracking to PredictionRecord
+            // const wins = history.filter(p => p.result === 'win').length;
+            const wins = 0; // Placeholder until result tracking is implemented
             const winRate = total > 0 ? (wins / total) * 100 : 0;
             const hotPicks = history.filter(p => p.probability >= 75).length;
 
             // Calculate current streak
             let streak = 0;
-            for (let i = 0; i < history.length; i++) {
-                if (history[i].result === 'win') streak++;
-                else break;
-            }
+            // TODO: Implement when result tracking is added
+            // for (let i = 0; i < history.length; i++) {
+            //     if (history[i].result === 'win') streak++;
+            //     else break;
+            // }
 
-            // Find best sport
-            const sportCounts: Record<string, { total: number; wins: number }> = {};
+            // Find best sport (by count for now)
+            const sportCounts: Record<string, number> = {};
             history.forEach(p => {
-                if (!sportCounts[p.sport]) {
-                    sportCounts[p.sport] = { total: 0, wins: 0 };
-                }
-                sportCounts[p.sport].total++;
-                if (p.result === 'win') sportCounts[p.sport].wins++;
+                sportCounts[p.sport] = (sportCounts[p.sport] || 0) + 1;
             });
 
             let bestSport = 'N/A';
-            let bestRate = 0;
-            Object.entries(sportCounts).forEach(([sport, data]) => {
-                const rate = data.total > 0 ? (data.wins / data.total) * 100 : 0;
-                if (rate > bestRate) {
-                    bestRate = rate;
+            let maxCount = 0;
+            Object.entries(sportCounts).forEach(([sport, count]) => {
+                if (count > maxCount) {
+                    maxCount = count;
                     bestSport = sport;
                 }
             });
 
-            // Chart data (last 7 days)
+            // Chart data (last 7 days) - prediction count
             const chartData = Array.from({ length: 7 }, (_, i) => {
                 const date = new Date();
                 date.setDate(date.getDate() - (6 - i));
                 const dateStr = date.toLocaleDateString('es', { month: 'short', day: 'numeric' });
 
-                const dayWins = history.filter(p => {
+                const dayPredictions = history.filter(p => {
                     const pDate = p.timestamp.toDate();
-                    return pDate.toDateString() === date.toDateString() && p.result === 'win';
+                    return pDate.toDateString() === date.toDateString();
                 }).length;
 
-                return { date: dateStr, wins: dayWins };
+                return { date: dateStr, wins: dayPredictions };
             });
 
             setStats({
