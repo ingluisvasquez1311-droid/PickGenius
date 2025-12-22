@@ -185,7 +185,7 @@ export default function HomePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500 shadow-[0_0_10px_purple]"></span>
             </span>
-            INTELIGENCIA DEPORTIVA DE ÚLTIMA GENERACIÓN
+            INTELIGENCIA DEPORTIVA DE ÚLTIMA GENERACIÓN • <span className="text-emerald-400 ml-1">PRUEBA 15 DÍAS GRATIS</span>
           </motion.div>
 
           <motion.h1
@@ -219,8 +219,9 @@ export default function HomePage() {
               Lanzar Analizador IA <Rocket className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
             </Link>
             {!user && (
-              <Link href="/login" className="px-12 py-6 bg-white/5 text-white border border-white/10 font-black rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all duration-500 backdrop-blur-md uppercase tracking-widest text-sm">
-                Unirse a la Elite ✨
+              <Link href="/login" className="px-12 py-6 bg-white/5 text-white border border-white/10 font-black rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all duration-500 backdrop-blur-md uppercase tracking-widest text-sm relative group overflow-hidden">
+                <span className="relative z-10">Reclamar 15 Días Premium Gratis ✨</span>
+                <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
               </Link>
             )}
           </motion.div>
@@ -397,8 +398,12 @@ export default function HomePage() {
               <div className="text-5xl font-black mb-12 italic tracking-tighter">$0 <span className="text-sm font-normal text-gray-600 uppercase tracking-widest">/SIEMPRE</span></div>
               <ul className="space-y-6 mb-16 flex-1">
                 <li className="flex items-center gap-4 text-sm font-bold text-gray-400">
+                  <span className="w-5 h-5 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center text-[10px]">✓</span>
+                  <span className="text-white">15 Días de Acceso PREMIUM Total</span>
+                </li>
+                <li className="flex items-center gap-4 text-sm font-bold text-gray-400">
                   <span className="w-5 h-5 bg-white/10 rounded-full flex items-center justify-center text-[10px]">✓</span>
-                  5 Predicciones de IA al día
+                  5 Predicciones de IA al día (Post-Trial)
                 </li>
                 <li className="flex items-center gap-4 text-sm font-bold text-gray-400">
                   <span className="w-5 h-5 bg-white/10 rounded-full flex items-center justify-center text-[10px]">✓</span>
@@ -409,8 +414,8 @@ export default function HomePage() {
                   Centro de Notificaciones Básicas
                 </li>
               </ul>
-              <Link href="/login" className="w-full py-5 bg-white/5 border border-white/10 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] text-center hover:bg-white/10 transition-all">
-                EMPEZAR AHORA
+              <Link href="/login" className="w-full py-5 bg-white/5 border border-white/10 rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] text-center hover:bg-white/10 transition-all text-emerald-400">
+                INICIAR PRUEBA GRATIS
               </Link>
             </motion.div>
 
