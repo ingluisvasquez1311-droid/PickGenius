@@ -5,6 +5,8 @@ const BASE_URL = typeof window === 'undefined'
     ? 'https://www.sofascore.com/api/v1'
     : '/api/proxy/sportsdata';
 
+import { scraperService } from './scraperService';
+
 export interface SportsDataTeam {
     id: number;
     name: string;
@@ -96,7 +98,6 @@ class SportsDataService {
     async makeRequest<T = any>(endpoint: string): Promise<T | null> {
         try {
             const isServer = typeof window === 'undefined';
-            const scraperKey = process.env.SCRAPER_API_KEY;
             const useProxy = process.env.USE_PROXY === 'true';
 
             // Priority Detection: Local Backend vs Render vs ScraperAPI
@@ -107,43 +108,56 @@ class SportsDataService {
             const isDev = process.env.NODE_ENV === 'development';
             const preferredBridge = (isDev && isServer) ? localBackend : apiUrl;
 
-            let fetchUrl: string;
-            let fetchHeaders: any = { ...this.headers };
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
             const targetUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
 
-            // Priority Logic
-            if (isServer && scraperKey && useProxy && !scraperKey.includes('exhausted')) {
-                // Priority 1: ScraperAPI
-                fetchUrl = `https://api.scraperapi.com?api_key=${scraperKey.trim()}&url=${encodeURIComponent(targetUrl)}&render=false&country_code=us`;
-            } else if (isServer && preferredBridge && preferredBridge.startsWith('http')) {
-                // Priority 2: Backend Bridge (Local or Render)
-                const cleanBridgeUrl = preferredBridge.trim().replace(/\/$/, "");
-                fetchUrl = `${cleanBridgeUrl}/api/sofascore/proxy${cleanEndpoint}`;
-                console.log(`🔌 [SportsData] Using Bridge: ${cleanBridgeUrl}`);
-            } else {
-                // Priority 3: Client Proxy or Direct
-                fetchUrl = !isServer ? `/api/proxy/sportsdata${cleanEndpoint}` : targetUrl;
+            // Priority Logic usando scraperService
+            if (isServer && useProxy) {
+                // Priority 1: ScraperAPI con multi-key support
+                try {
+                    console.log(`🌍 [SportsData] Using ScraperService for: ${cleanEndpoint}`);
+                    const data = await scraperService.makeRequest(targetUrl, {
+                        render: false,
+                        country_code: 'us'
+                    });
+                    return data as T;
+                } catch (error: any) {
+                    console.warn(`⚠️ [SportsData] ScraperService failed, trying fallback...`);
+                    // Continue to fallback options
+                }
             }
 
-            console.log(`🌍 [SportsData] Fetching: ${fetchUrl}`);
+            // Priority 2: Backend Bridge (Local or Render)
+            if (isServer && preferredBridge && preferredBridge.startsWith('http')) {
+                const cleanBridgeUrl = preferredBridge.trim().replace(/\/$/, "");
+                const fetchUrl = `${cleanBridgeUrl}/api/sofascore/proxy${cleanEndpoint}`;
+                console.log(`🔌 [SportsData] Using Bridge: ${cleanBridgeUrl}`);
 
-            // ATTEMPT 1: Primary Method
+                const response = await fetch(fetchUrl, {
+                    headers: this.headers,
+                    cache: 'no-store',
+                    signal: AbortSignal.timeout(30000)
+                });
+
+                if (response.ok) {
+                    return await response.json();
+                }
+            }
+
+            // Priority 3: Client Proxy or Direct Stealth Mode
+            const fetchUrl = !isServer ? `/api/proxy/sportsdata${cleanEndpoint}` : targetUrl;
+            console.log(`🌍 [SportsData] Direct fetch: ${fetchUrl}`);
+
             let response = await fetch(fetchUrl, {
-                headers: fetchHeaders,
+                headers: this.headers,
                 cache: 'no-store',
                 signal: AbortSignal.timeout(30000)
             });
 
-            if (!response.ok) {
-                console.warn(`⚠️ [SportsData] Primary Fetch FAILED. Status: ${response.status}`);
-            }
-
-            // FALLBACK LOGIC: If ScraperAPI/Primary fails (403/500), try Direct Stealth Mode
             if (!response.ok && isServer) {
                 console.warn(`⚠️ [SportsData] Falling back to Stealth Mode...`);
 
-                // Direct call to Sofascore
+                // Direct call to Sofascore API
                 const directUrl = `https://api.sofascore.com/api/v1${cleanEndpoint}`;
 
                 response = await fetch(directUrl, {
