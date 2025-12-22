@@ -1,6 +1,7 @@
 import { sportsDataService } from './sportsDataService';
 import { memoryCache } from './memoryCache';
 import Groq from 'groq-sdk';
+import { groqService } from './groqService';
 import Parser from 'rss-parser';
 
 const rssParser = new Parser();
@@ -448,11 +449,6 @@ class PropsService {
      * Genera una predicción usando Groq
      */
     async predictProp(prop: PlayerProp): Promise<any> {
-        const apiKey = process.env.GROQ_API_KEY;
-        if (!apiKey) throw new Error('GROQ_API_KEY not found');
-
-        const groq = new Groq({ apiKey });
-
         // Obtener contexto de noticias (Jugador + Equipo)
         const newsContext = await this.fetchNewsContext(`${prop.player.name} ${prop.player.team}`);
 
@@ -491,17 +487,14 @@ class PropsService {
         `;
 
         try {
-            const completion = await groq.chat.completions.create({
+            const result = await groqService.createPrediction({
                 messages: [{ role: "user", content: prompt }],
                 model: "llama-3.3-70b-versatile",
                 temperature: 0.6,
                 response_format: { type: "json_object" }
             });
 
-            const content = completion.choices[0]?.message?.content;
-            if (!content) throw new Error('Empty response from Groq');
-
-            return JSON.parse(content);
+            return result;
         } catch (error) {
             console.error('❌ [PropsService] Groq Prediction Error:', error);
             // Fallback mock prediction

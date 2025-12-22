@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server';
 import Parser from 'rss-parser';
-import Groq from 'groq-sdk';
+import { groqService } from '@/lib/services/groqService';
 
 const parser = new Parser();
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY || 'gsk_45l2t3CJRILOERRz6fOBWGdyb3FY1VBWD3iGnlc8p1V3TVYVKXa'
-});
 
 // Simple in-memory cache
 let newsCache: any = null;
@@ -44,8 +41,8 @@ export async function GET() {
                     imageUrl = "https://images.unsplash.com/photo-1510660603728-40a256df2e7b?q=80&w=1000&auto=format&fit=crop";
                 }
 
-                // AI Analysis
-                const completion = await groq.chat.completions.create({
+                // AI Analysis usando groqService
+                const aiResult = await groqService.createPrediction({
                     messages: [
                         {
                             role: "system",
@@ -65,8 +62,6 @@ export async function GET() {
                     model: "llama-3.3-70b-versatile",
                     response_format: { type: "json_object" }
                 });
-
-                const aiResult = JSON.parse(completion.choices[0].message.content || '{}');
 
                 return {
                     id: `rss-${index}-${Date.now()}`,
@@ -97,7 +92,7 @@ export async function GET() {
                     publishedAt: item.pubDate || new Date().toISOString(),
                     aiAnalysis: {
                         sentiment: 'neutral',
-                        bettingSignal: "Análisis IA no disponible (Verifique API Key)",
+                        bettingSignal: "Análisis en proceso...",
                         impactScore: 50
                     }
                 };

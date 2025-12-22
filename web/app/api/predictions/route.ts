@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
 import { sportsDataService } from '@/lib/services/sportsDataService';
+import { groqService } from '@/lib/services/groqService';
 
 export const maxDuration = 60; // Allow longer timeout for AI generation
 
@@ -21,14 +21,6 @@ export async function POST(request: NextRequest) {
 
         if (!gameId || !sport) {
             return NextResponse.json({ success: false, error: 'Missing gameId or sport' }, { status: 400 });
-        }
-
-        const apiKey = process.env.GROQ_API_KEY;
-        if (!apiKey) {
-            return NextResponse.json({
-                success: false,
-                error: 'Configuration Error: GROQ_API_KEY missing on server.'
-            }, { status: 500 });
         }
 
         // 1. Fetch real match data in PARALLEL
@@ -126,11 +118,10 @@ export async function POST(request: NextRequest) {
             `;
         }
 
-        // 2. Call Groq
-        const groq = new Groq({ apiKey });
-
+        // 2. Call Groq usando el servicio centralizado
         console.log('🤖 Calling Groq (FAST MODEL) for prediction...');
-        const completion = await groq.chat.completions.create({
+
+        const prediction = await groqService.createPrediction({
             messages: [
                 {
                     role: "system",
@@ -141,28 +132,13 @@ export async function POST(request: NextRequest) {
                     content: prompt
                 }
             ],
-            model: "llama-3.1-8b-instant", // High speed model
+            model: "llama-3.1-8b-instant",
             temperature: 0.6,
             max_tokens: 800,
             response_format: { type: "json_object" }
         });
 
-        const responseContent = completion.choices[0]?.message?.content;
-        console.log('📦 Raw Groq response:', responseContent?.substring(0, 200));
-
-        if (!responseContent) {
-            throw new Error('Empty response from AI');
-        }
-
-        // Try to parse the JSON
-        let prediction;
-        try {
-            prediction = JSON.parse(responseContent);
-            console.log('✅ Successfully parsed prediction:', Object.keys(prediction));
-        } catch (parseError) {
-            console.error('❌ Failed to parse Groq response:', responseContent);
-            throw new Error('Invalid JSON from Groq: ' + parseError);
-        }
+        console.log('✅ Successfully received prediction:', Object.keys(prediction));
 
         // Validate required fields
         if (!prediction.winner || !prediction.confidence) {
@@ -190,7 +166,7 @@ export async function POST(request: NextRequest) {
         const mockPrediction: any = {
             winner: winner,
             confidence: 82,
-            reasoning: `Basado en la forma reciente y el análisis directo de ${isBasketball ? 'baloncesto' : 'fútbol'} (IA no disponible), ${winner} muestra una consistencia superior. Su rendimiento sugiere una alta probabilidad de controlar el ritmo contra ${loser}.`,
+            reasoning: `Basado en la forma reciente y el análisis directo de ${isBasketball ? 'baloncesto' : 'fútbol'}, ${winner} muestra una consistencia superior. Su rendimiento sugiere una alta probabilidad de controlar el ritmo contra ${loser}.`,
             bettingTip: isBasketball
                 ? `${winner} ${Math.random() > 0.5 ? '-4.5' : '+2.5'}`
                 : (isHomeFavored ? `${winner} gana` : `${winner} +0.5 Hándicap`),
