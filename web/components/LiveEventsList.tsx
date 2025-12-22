@@ -205,8 +205,10 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
         return (
             <div>
                 <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <LoadingState type="skeleton" count={6} height="140px" />
+                <div className="space-y-2">
+                    {[...Array(6)].map((_, i) => (
+                        <SkeletonLoader key={i} height="80px" />
+                    ))}
                 </div>
             </div>
         );
