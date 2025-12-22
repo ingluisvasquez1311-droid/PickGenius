@@ -207,7 +207,7 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
                 <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>
                 <div className="space-y-2">
                     {[...Array(6)].map((_, i) => (
-                        <SkeletonLoader key={i} height="80px" />
+                        <SkeletonLoader key={i} />
                     ))}
                 </div>
             </div>
