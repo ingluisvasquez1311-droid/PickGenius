@@ -9,8 +9,11 @@ import {
     where,
     orderBy,
     limit,
+    onSnapshot,
     serverTimestamp,
-    type Timestamp
+    type Timestamp,
+    type QuerySnapshot,
+    type DocumentData
 } from 'firebase/firestore';
 
 export interface AppNotification {
@@ -40,34 +43,37 @@ export async function createNotification(uid: string, data: Omit<AppNotification
 }
 
 /**
- * Obtener las notificaciones de un usuario
+ * Obtener las notificaciones de un usuario en tiempo real
  */
-export async function getUserNotifications(uid: string, limitCount: number = 50): Promise<AppNotification[]> {
-    if (!db) return [];
+export function subscribeToNotifications(uid: string, callback: (notifications: AppNotification[]) => void) {
+    if (!db) return () => { };
 
     const notificationsRef = collection(db!, 'notifications');
     const q = query(
         notificationsRef,
         where('uid', '==', uid),
-        limit(limitCount)
+        orderBy('timestamp', 'desc'),
+        limit(50)
     );
 
-    const querySnapshot = await getDocs(q);
-    const notifications = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-            id: doc.id,
-            uid: data.uid,
-            title: data.title,
-            message: data.message,
-            type: data.type,
-            read: data.read,
-            timestamp: (data.timestamp as Timestamp)?.toDate() || new Date(),
-            link: data.link
-        };
+    return onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
+        const notifications = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                uid: data.uid,
+                title: data.title,
+                message: data.message,
+                type: data.type,
+                read: data.read,
+                timestamp: (data.timestamp as Timestamp)?.toDate() || new Date(),
+                link: data.link
+            } as AppNotification;
+        });
+        callback(notifications);
+    }, (error) => {
+        console.error('❌ [NotificationService] Subscription error:', error);
     });
-
-    return notifications.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 }
 
 /**

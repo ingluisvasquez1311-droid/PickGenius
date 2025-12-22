@@ -354,9 +354,9 @@ const PropsDashboard = () => {
                         <h2 className="text-sm font-black text-white/40 uppercase tracking-[0.3em]">IA Top Pick del Día</h2>
                     </div>
                     {(() => {
-                        const topPick = [...props]
-                            .filter(p => p.prediction)
-                            .sort((a, b) => (b.prediction.probability || 0) - (a.prediction.probability || 0))[0];
+                        const topPick = (props || [])
+                            .filter(p => p && p.prediction)
+                            .sort((a, b) => ((b.prediction?.probability || 0)) - ((a.prediction?.probability || 0)))[0];
 
                         if (!topPick) return null;
 
@@ -365,10 +365,14 @@ const PropsDashboard = () => {
                                 <div className="glass-brutal bg-gradient-to-br from-purple-600/20 to-black/40 p-8 flex flex-col md:flex-row items-center gap-8 border border-white/10">
                                     <div className="relative shrink-0">
                                         <div className="w-32 h-32 rounded-[2.5rem] bg-black/40 border-2 border-purple-500/30 p-1 overflow-hidden shadow-2xl">
-                                            <img src={topPick.player.image} alt={topPick.player.name} className="w-full h-full object-cover" />
+                                            {topPick.player.image ? (
+                                                <img src={topPick.player.image} alt={topPick.player.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-purple-500/20 text-2xl">👤</div>
+                                            )}
                                         </div>
                                         <div className="absolute -bottom-2 -right-2 bg-purple-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-xl">
-                                            {topPick.prediction.probability}% PROB
+                                            {(topPick.prediction?.probability || 0)}% PROB
                                         </div>
                                     </div>
 
@@ -427,12 +431,15 @@ const PropsDashboard = () => {
                 ) : (
                     <div className="space-y-12">
                         {Object.values(
-                            (view === 'all' ? filteredProps : getPicks()).reduce((acc, prop) => {
-                                const playerId = prop.player.id;
-                                if (!acc[playerId]) acc[playerId] = { player: prop.player, game: prop.game, props: [] };
-                                acc[playerId].props.push(prop);
-                                return acc;
-                            }, {} as Record<number, { player: any, game: any, props: PlayerProp[] }>)
+                            (props || []).length > 0 ? (
+                                (view === 'all' ? filteredProps : getPicks()).reduce((acc, prop) => {
+                                    if (!prop || !prop.player) return acc;
+                                    const playerId = prop.player.id;
+                                    if (!acc[playerId]) acc[playerId] = { player: prop.player, game: prop.game, props: [] };
+                                    acc[playerId].props.push(prop);
+                                    return acc;
+                                }, {} as Record<number, { player: any, game: any, props: PlayerProp[] }>)
+                            ) : {}
                         ).map(group => (
                             <PlayerGroup
                                 key={group.player.id}
@@ -508,7 +515,11 @@ const PlayerGroup = ({
             >
                 <div className="flex items-center gap-6">
                     <div className="w-20 h-20 rounded-[2rem] bg-black/40 border border-white/10 p-1 shrink-0 overflow-hidden shadow-2xl relative group-hover:scale-110 transition-transform duration-500">
-                        <img src={group.player.image} alt={group.player.name} className="w-full h-full object-cover" />
+                        {group.player.image ? (
+                            <img src={group.player.image} alt={group.player.name} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-white/5 text-xl">👤</div>
+                        )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2">
                             <div className="w-6 h-6"><TeamLogo teamId={group.game.homeTeam === group.player.team ? group.game.homeTeamId : group.game.awayTeamId} teamName={group.player.team} size="sm" /></div>
                         </div>
@@ -747,7 +758,11 @@ const ParlayCard = ({ parlay }: { parlay: any }) => {
                     {parlay.picks.map((pick: any, idx: number) => (
                         <div key={idx} className="bg-black/20 border border-white/5 rounded-2xl p-4 flex items-center gap-4 hover:border-white/10 transition-colors">
                             <div className="w-10 h-10 rounded-xl bg-white/5 p-1 shrink-0">
-                                <img src={pick.player.image} alt={pick.player.name} className="w-full h-full object-cover" />
+                                {pick.player.image ? (
+                                    <img src={pick.player.image} alt={pick.player.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-white/5 text-[8px]">👤</div>
+                                )}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-white font-black text-[10px] uppercase truncate">{pick.player.name}</p>

@@ -41,12 +41,12 @@ export default function TennisPage() {
                         <div>
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="h-px w-8 bg-green-500"></span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-green-400">Mastery Court Intelligence</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-green-400">Inteligencia en Pista</span>
                             </div>
                             <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
-                                TENNIS <span className="text-green-500">COURT MASTERY ELITE</span>
+                                TENIS <span className="text-green-500">ELITE COURT MASTERY</span>
                             </h1>
-                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Precision Analysis • Grand Slam Tracker • Match Point AI</p>
+                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Análisis de Precisión • Rastreador de Grand Slams • IA de Match Point</p>
                         </div>
                     </div>
                 </div>

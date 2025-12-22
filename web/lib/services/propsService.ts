@@ -117,10 +117,12 @@ class PropsService {
                 ? allEvents.filter(e => e.tournament.uniqueTournament?.name.toLowerCase().includes('nba') || e.tournament.name.toLowerCase().includes('nba'))
                 : allEvents;
 
-            const gamesToUse = (filteredEvents.length > 0 ? filteredEvents : allEvents).slice(0, 10);
+            // PERFORMANCE FIX: Limit to 5 games instead of 10 for faster load
+            const gamesToUse = (filteredEvents.length > 0 ? filteredEvents : allEvents).slice(0, 5);
             const allProps: PlayerProp[] = [];
 
-            for (const game of gamesToUse) {
+            // PERFORMANCE FIX: Process games in PARALLEL
+            const gamePromises = gamesToUse.map(async (game) => {
                 try {
                     // 1. Intentar Mejores Jugadores
                     let targetPlayers: any[] = [];
@@ -133,7 +135,7 @@ class PropsService {
                         ];
                     }
 
-                    // 2. Si no hay best players (partido muy futuro), intentar obtener plantillas de los equipos
+                    // 2. Si no hay best players (partido muy futuro), intentar obtener plantillas
                     if (targetPlayers.length === 0) {
                         const [homePlayers, awayPlayers] = await Promise.all([
                             sportsDataService.getTeamPlayers(game.homeTeam.id),
@@ -148,20 +150,24 @@ class PropsService {
                         }
                     }
 
-                    if (targetPlayers.length === 0) continue;
+                    if (targetPlayers.length === 0) return [];
 
                     const results = await Promise.all(targetPlayers.map(async (playerEntry) => {
-                        const player = playerEntry.player || playerEntry; // Handle both structures
+                        const player = playerEntry.player || playerEntry;
                         if (!player || !player.id) return [];
                         const realStats = await this.getPlayerRealStats(player.id, game, sport);
                         return this.generatePropsForPlayer(player, game, sport, realStats);
                     }));
 
-                    results.forEach(p => allProps.push(...p));
+                    return results.flat();
                 } catch (gameErr) {
                     console.error(`Error processing game ${game.id}:`, gameErr);
+                    return [];
                 }
-            }
+            });
+
+            const propsResults = await Promise.all(gamePromises);
+            propsResults.forEach(p => allProps.push(...p));
 
             if (allProps.length === 0) return this.getMockDailyProps(sport);
 

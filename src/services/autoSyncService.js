@@ -41,7 +41,11 @@ class AutoSyncService {
                 }
             };
         } catch (error) {
-            console.error('❌ Auto-sync error:', error.message);
+            if (error.response?.status === 401) {
+                console.error('❌ Auto-sync UNAUTHORIZED: Check your BALL_DONT_LIE_API_KEY / NBA_API_KEY in .env');
+            } else {
+                console.error('❌ Auto-sync error:', error.message);
+            }
             return { success: false, error: error.message };
         }
     }

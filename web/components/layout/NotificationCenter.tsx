@@ -11,6 +11,19 @@ const NotificationCenter = () => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
+    // DEBUG NOTIFICATIONS
+    useEffect(() => {
+        if (isOpen) {
+            console.log('🔔 [NotificationCenter] DETALLE DE NOTIFICACIONES:');
+            console.log(' - No leídas (badge):', unreadCount);
+            console.log(' - Total cargadas:', notifications.length);
+            console.log(' - Datos:', notifications);
+            if (notifications.length === 0 && unreadCount > 0) {
+                console.warn('⚠️ [NotificationCenter] ADVERTENCIA: Hay badge pero el array está vacío. Posible error de sincronización o permisos.');
+            }
+        }
+    }, [isOpen, notifications, unreadCount]);
+
     // Close when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

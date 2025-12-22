@@ -6,32 +6,27 @@ export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
     try {
+
         console.log('⚽ Fetching Football live games from SportsData...');
 
         const result = await footballDataService.getLiveEvents();
 
         if (!result.success || !result.data) {
-            // Fallback or error
             throw new Error(result.error || 'Failed to fetch from SportsData');
         }
 
         const events = result.data.events || [];
         console.log(`📊 Found ${events.length} live football events from Sofascore`);
 
-        // Filter out finished matches that are older than 2 hours
-        const now = Date.now() / 1000; // Current time in seconds
-        const twoHoursAgo = now - (2 * 60 * 60); // 2 hours ago in seconds
-
         const recentEvents = events.filter((game: any) => {
-            // Keep all non-finished events
-            if (game.status?.type !== 'finished') {
-                return true;
+            // STRICT FILTER: Only keep actual live games (remove all finished)
+            if (game.status?.type === 'finished') {
+                return false;
             }
-            // For finished events, only keep if they finished within last 2 hours
-            return game.startTimestamp > twoHoursAgo;
+            return true;
         });
 
-        console.log(`✅ Filtered to ${recentEvents.length} recent events (removed old finished matches)`);
+        console.log(`✅ Filtered to ${recentEvents.length} recent events (removed all finished matches)`);
 
         // Transform to match frontend expectations
         const transformedData = recentEvents.map((game: any) => ({
@@ -72,7 +67,7 @@ export async function GET(request: NextRequest) {
                 id: game.tournament?.category?.id
             },
             status: {
-                type: game.status?.type || 'inprogress', // Use actual status from Sofascore
+                type: game.status?.type || 'inprogress',
                 description: game.status?.description || 'Live',
                 code: game.status?.code
             },
@@ -88,45 +83,19 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error('❌ Football API Route Error:', error.message);
+        console.error('❌ Football API Route Error:', error);
 
-        // Debug info for the log
-        const isServer = typeof window === 'undefined';
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        console.log(`🔍 Debug Context: isServer=${isServer}, apiUrl=${apiUrl || 'MISSING'}`);
-
-        // FALLBACK: Return Mock Data so the site looks alive even if blocked
-        // ... (mockEvents remains the same)
+        // FALLBACK: Mock Data for Football
         const mockEvents = [
             {
-                id: 1234567,
-                tournament: { name: 'Premier League', uniqueTournament: { name: 'Premier League' } },
-                homeTeam: { id: 33, name: 'Manchester United', logo: 'https://api.sofascore.app/api/v1/team/33/image' },
-                awayTeam: { id: 34, name: 'Newcastle', logo: 'https://api.sofascore.app/api/v1/team/34/image' },
-                homeScore: { current: 2, display: 2, period1: 1, period2: 1 },
-                awayScore: { current: 1, display: 1, period1: 0, period2: 1 },
-                status: { type: 'inprogress', description: '75\'', code: 100 },
-                startTimestamp: Date.now() - 4500000
-            },
-            {
-                id: 7654321,
+                id: 1,
                 tournament: { name: 'La Liga', uniqueTournament: { name: 'La Liga' } },
-                homeTeam: { id: 2817, name: 'Barcelona', logo: 'https://api.sofascore.app/api/v1/team/2817/image' },
-                awayTeam: { id: 2829, name: 'Real Madrid', logo: 'https://api.sofascore.app/api/v1/team/2829/image' },
-                homeScore: { current: 0, display: 0 },
-                awayScore: { current: 0, display: 0 },
-                status: { type: 'notstarted', description: '20:00', code: 0 },
-                startTimestamp: Date.now() + 3600000
-            },
-            {
-                id: 1122334,
-                tournament: { name: 'Serie A', uniqueTournament: { name: 'Serie A' } },
-                homeTeam: { id: 2692, name: 'Juventus', logo: 'https://api.sofascore.app/api/v1/team/2692/image' },
-                awayTeam: { id: 2686, name: 'AC Milan', logo: 'https://api.sofascore.app/api/v1/team/2686/image' },
+                homeTeam: { id: 2829, name: 'Real Madrid', logo: '/api/proxy/team-logo/2829' },
+                awayTeam: { id: 2817, name: 'Barcelona', logo: '/api/proxy/team-logo/2817' },
                 homeScore: { current: 1, display: 1 },
-                awayScore: { current: 1, display: 1 },
-                status: { type: 'finished', description: 'FT', code: 100 },
-                startTimestamp: Date.now() - 86400000
+                awayScore: { current: 0, display: 0 },
+                status: { type: 'inprogress', description: '75\'', code: 100 },
+                startTimestamp: Date.now() / 1000 - 4500
             }
         ];
 
@@ -135,8 +104,7 @@ export async function GET(request: NextRequest) {
             data: mockEvents,
             count: mockEvents.length,
             source: 'fallback_mock',
-            error: error.message,
-            debug: { server: isServer, hasApiUrl: !!apiUrl }
+            error: error.message
         });
     }
 }

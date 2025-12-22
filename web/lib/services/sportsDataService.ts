@@ -99,69 +99,80 @@ class SportsDataService {
             const scraperKey = process.env.SCRAPER_API_KEY;
             const useProxy = process.env.USE_PROXY === 'true';
 
-            // Try different env var names as fallback
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL ||
-                process.env.NEXT_PUBLIC_BACKEND_HOST ||
-                (isServer ? "https://pickgenius-backend.onrender.com" : "");
+            // Priority Detection: Local Backend vs Render vs ScraperAPI
+            const localBackend = 'http://localhost:3001';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_HOST;
+
+            // In development, if we have a local backend, let's prefer it over slow Scraper fallback
+            const isDev = process.env.NODE_ENV === 'development';
+            const preferredBridge = (isDev && isServer) ? localBackend : apiUrl;
 
             let fetchUrl: string;
             let fetchHeaders: any = { ...this.headers };
-
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
             const targetUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
 
-            // DEBUGGING: Log environment state
-            console.log(`🔍 [SportsData] Request Debug for ${cleanEndpoint}:`);
-            console.log(`  - isServer: ${isServer}`);
-            console.log(`  - scraperKey exists: ${!!scraperKey}`);
-            console.log(`  - useProxy: ${useProxy}`);
-            console.log(`  - apiUrl: ${apiUrl || '(empty)'}`);
-
-            if (isServer && scraperKey && useProxy) {
-                // Priority 1: Direct ScraperAPI from Vercel (if keys are provided in Vercel Dashboard)
+            // Priority Logic
+            if (isServer && scraperKey && useProxy && !scraperKey.includes('exhausted')) {
+                // Priority 1: ScraperAPI
                 fetchUrl = `https://api.scraperapi.com?api_key=${scraperKey.trim()}&url=${encodeURIComponent(targetUrl)}&render=false&country_code=us`;
-
-                console.log(`🔒 [SportsData] Using Direct ScraperAPI: ${cleanEndpoint}`);
-            } else if (isServer && apiUrl && apiUrl.startsWith('http')) {
-                // Priority 2: Tunnel through Render bridge (if no keys in Vercel)
-                const cleanApiUrl = apiUrl.trim().replace(/\/$/, "");
-                fetchUrl = `${cleanApiUrl}/api/sofascore/proxy${cleanEndpoint}`;
-
-                console.log(`📡 [SportsData] Using Render Bridge: ${fetchUrl}`);
+            } else if (isServer && preferredBridge && preferredBridge.startsWith('http')) {
+                // Priority 2: Backend Bridge (Local or Render)
+                const cleanBridgeUrl = preferredBridge.trim().replace(/\/$/, "");
+                fetchUrl = `${cleanBridgeUrl}/api/sofascore/proxy${cleanEndpoint}`;
+                console.log(`🔌 [SportsData] Using Bridge: ${cleanBridgeUrl}`);
             } else {
-                // Client side or local dev without proxy configured
-                if (!isServer) {
-                    fetchUrl = `/api/proxy/sportsdata${cleanEndpoint}`;
-                    console.log(`🌐 [SportsData] Using Client Proxy: ${fetchUrl}`);
-                } else {
-                    fetchUrl = targetUrl;
-                    console.log(`⚠️ [SportsData] Direct Target (may fail): ${fetchUrl}`);
-                }
+                // Priority 3: Client Proxy or Direct
+                fetchUrl = !isServer ? `/api/proxy/sportsdata${cleanEndpoint}` : targetUrl;
             }
 
-            console.log(`🌍 [SportsData] Final URL: ${fetchUrl}`);
+            console.log(`🌍 [SportsData] Fetching: ${fetchUrl}`);
 
-            const response = await fetch(fetchUrl, {
+            // ATTEMPT 1: Primary Method
+            let response = await fetch(fetchUrl, {
                 headers: fetchHeaders,
                 cache: 'no-store',
-                // Increased to 30s to handle cold starts and ScraperAPI overhead
                 signal: AbortSignal.timeout(30000)
             });
 
-            console.log(`📊 [SportsData] Response status: ${response.status} for ${cleanEndpoint}`);
+            if (!response.ok) {
+                console.warn(`⚠️ [SportsData] Primary Fetch FAILED. Status: ${response.status}`);
+            }
+
+            // FALLBACK LOGIC: If ScraperAPI/Primary fails (403/500), try Direct Stealth Mode
+            if (!response.ok && isServer) {
+                console.warn(`⚠️ [SportsData] Falling back to Stealth Mode...`);
+
+                // Direct call to Sofascore
+                const directUrl = `https://api.sofascore.com/api/v1${cleanEndpoint}`;
+
+                response = await fetch(directUrl, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept': '*/*',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Referer': 'https://www.sofascore.com/',
+                        'Origin': 'https://www.sofascore.com',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    },
+                    cache: 'no-store',
+                    signal: AbortSignal.timeout(30000)
+                });
+
+                console.log(`🕵️ [SportsData] Stealth Mode Response: ${response.status}`);
+            }
 
             if (!response.ok) {
                 const errorText = await response.text().catch(() => "No error body");
-                console.error(`❌ Request Failed (${endpoint}): ${response.status} from ${fetchUrl}. Body: ${errorText.substring(0, 200)}`);
+                console.error(`❌ Request Failed: ${response.status}. Body: ${errorText.substring(0, 200)}`);
                 return null;
             }
 
             const data = await response.json();
-            console.log(`✅ [SportsData] Success for ${cleanEndpoint}`);
             return data;
         } catch (error: any) {
             console.error(`❌ Fetch Exception (${endpoint}):`, error.message);
-            console.error(`   Stack:`, error.stack?.substring(0, 300));
             return null;
         }
     }

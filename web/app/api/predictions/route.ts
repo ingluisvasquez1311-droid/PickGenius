@@ -28,37 +28,26 @@ export async function POST(request: NextRequest) {
             }, { status: 500 });
         }
 
-        // 1. Fetch real match data using our Unified SportsData Service (Handles ScraperAPI)
-        let matchContext: any = null;
+        // 1. Fetch real match data in PARALLEL
+        console.log(`📡 [Prediction API] Fetching data for Game ${gameId}...`);
 
-        // Use the universal service for all sports now
-        const game = await sportsDataService.makeRequest(`/event/${gameId}`);
+        const [gameRes, statsRes] = await Promise.all([
+            sportsDataService.makeRequest(`/event/${gameId}`).catch(err => {
+                console.error("Error fetching game:", err);
+                return null;
+            }),
+            sportsDataService.makeRequest(`/event/${gameId}/statistics`).catch(() => null)
+        ]);
 
-        if (!game) {
+        if (!gameRes) {
             console.error(`❌ [Prediction API] Game ${gameId} not found or blocked (403)`);
             throw new Error("Game not found or provider blocked (403)");
         }
 
-        console.log(`✅ [Prediction API] Fetched Game:`, game.event?.name || game.name || gameId);
+        const event = gameRes.event || gameRes;
+        const statistics = statsRes || {};
 
-        const event = game.event || game; // Handle different response structures
-
-        if (!event.homeTeam || !event.awayTeam) {
-            console.warn(`⚠️ [Prediction API] Missing team data in event:`, JSON.stringify(event).substring(0, 200));
-        }
-
-        const homeScore = event.homeScore?.current ?? 0;
-        const awayScore = event.awayScore?.current ?? 0;
-
-        // Try to get detailed stats for better analysis
-        let statistics: any = {};
-        try {
-            const statsRes = await sportsDataService.makeRequest(`/event/${gameId}/statistics`);
-            if (statsRes) {
-                statistics = statsRes;
-                console.log(`📊 [Prediction API] Stats fetched successfully`);
-            }
-        } catch (ignore) { console.warn('Could not fetch stats for prediction'); }
+        console.log(`✅ [Prediction API] Data fetched for:`, event.name || gameId);
 
         matchContext = {
             sport: `${sport.toUpperCase()} (Unified)`,
@@ -134,21 +123,21 @@ export async function POST(request: NextRequest) {
         // 2. Call Groq
         const groq = new Groq({ apiKey });
 
-        console.log('🤖 Calling Groq for prediction...');
+        console.log('🤖 Calling Groq (FAST MODEL) for prediction...');
         const completion = await groq.chat.completions.create({
             messages: [
                 {
                     role: "system",
-                    content: "Eres un experto analista de apuestas deportivas. Responde siempre en JSON válido y en ESPAÑOL. Sé directo, profesional y persuasivo."
+                    content: "Eres un experto analista deportivo. Responde SIEMPRE en JSON válido y en ESPAÑOL. Sé breve, preciso y profesional."
                 },
                 {
                     role: "user",
                     content: prompt
                 }
             ],
-            model: "llama-3.3-70b-versatile",
-            temperature: 0.7, // Creativity balance
-            max_tokens: 1000,
+            model: "llama-3.1-8b-instant", // High speed model
+            temperature: 0.6,
+            max_tokens: 800,
             response_format: { type: "json_object" }
         });
 

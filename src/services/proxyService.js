@@ -44,7 +44,7 @@ class ProxyService {
                     country_code: 'us' // Use US proxy
                 },
                 headers: options.headers || {},
-                timeout: 30000 // 30 second timeout
+                timeout: 10000 // 10 second timeout for faster fallbacks
             });
 
             this.requestCount++;

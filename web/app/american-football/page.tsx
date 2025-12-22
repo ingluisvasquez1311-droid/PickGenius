@@ -39,12 +39,12 @@ export default function AmericanFootballPage() {
                         <div>
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="h-px w-8 bg-orange-500"></span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-400">Tactical Gridiron Analysis</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-400">Análisis Táctico de Emparrillado</span>
                             </div>
                             <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
                                 NFL <span className="text-orange-500">GRIDIRON ELITE</span>
                             </h1>
-                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Endzone Insights • Real-time Stats • Playbook AI</p>
+                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Endzone Insights • Stats en Tiempo Real • IA de Playbook</p>
                         </div>
                     </div>
                 </div>

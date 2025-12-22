@@ -17,7 +17,7 @@ export default function NHLPage() {
         async function fetchGames() {
             setLoading(true);
             try {
-                const allGames = await sportsDataService.getEventsBySport('icehockey');
+                const allGames = await sportsDataService.getEventsBySport('ice-hockey');
                 setGames(allGames);
             } catch (error) {
                 console.error('Error fetching nhl games:', error);
@@ -40,12 +40,12 @@ export default function NHLPage() {
                         <div>
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="h-px w-8 bg-blue-500"></span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400">Cold Hearted Hockey Analytics</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400">Análisis Frío de Hockey</span>
                             </div>
                             <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
-                                NHL <span className="text-blue-500">ICE MASTERY ELITE</span>
+                                NHL <span className="text-blue-500">MAESTRÍA SOBRE HIELO</span>
                             </h1>
-                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Power Play Insights • Puck Analysis • Cold AI</p>
+                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-2">Power Play Insights • Análisis de Puck • IA sobre Hielo</p>
                         </div>
                     </div>
                 </div>

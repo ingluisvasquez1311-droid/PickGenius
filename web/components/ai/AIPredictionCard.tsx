@@ -43,18 +43,18 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             });
 
             if (result) {
-                setPrediction(result);
-                toast.success('¡Análisis Estratégico Finalizado!', {
-                    id: toastId,
-                    description: `Veredicto: ${result.winner || 'Listo'} con ${result.confidence}% de acierto.`,
-                    duration: 5000
-                });
-
-                // Notificar si la confianza es alta (>= 75)
                 const confidenceVal = typeof result.confidence === 'number'
                     ? result.confidence
                     : parseInt(result.confidence || '0');
 
+                setPrediction(result);
+                toast.success('¡Análisis Estratégico Finalizado!', {
+                    id: toastId,
+                    description: `Veredicto: ${result.winner || 'Listo'} con ${confidenceVal}% de acierto.`,
+                    duration: 5000
+                });
+
+                // Notificar si la confianza es alta (>= 75)
                 if (confidenceVal >= 75) {
                     await notify(
                         '🏆 PICK TOP DETECTADO',
@@ -139,17 +139,17 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             </div>
                             <p className="text-black/70 text-xs uppercase font-bold mb-2 mt-2">Ganador Predicho</p>
                             <p className="text-2xl md:text-3xl font-black text-black">
-                                {(!prediction.winner || prediction.winner.includes('undefined')) ? 'Analizando...' : prediction.winner}
+                                {(!prediction.winner || prediction.winner.toLowerCase().includes('undefined')) ? 'Resultado Analizado' : prediction.winner}
                             </p>
                             <div className="mt-3 flex items-center justify-center gap-2">
                                 <div className="flex-1 max-w-xs h-3 bg-black/20 rounded-full overflow-hidden">
                                     <div
                                         className="h-full bg-black rounded-full transition-all duration-500"
-                                        style={{ width: (typeof prediction.confidence === 'string' ? prediction.confidence : `${prediction.confidence}%`) }}
+                                        style={{ width: `${typeof prediction.confidence === 'number' ? prediction.confidence : parseInt(prediction.confidence || '0')}%` }}
                                     ></div>
                                 </div>
                                 <span className="text-black font-black text-xl">
-                                    {typeof prediction.confidence === 'number' ? `${prediction.confidence}%` : prediction.confidence}
+                                    {typeof prediction.confidence === 'number' ? `${prediction.confidence}%` : (prediction.confidence ? `${parseInt(prediction.confidence)}%` : '-%')}
                                 </span>
                             </div>
                             <p className="text-black/60 text-xs mt-2 font-semibold">Confianza de la IA</p>

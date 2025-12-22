@@ -4,14 +4,16 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
+    signInWithPopup,
     signOut as firebaseSignOut,
     onAuthStateChanged
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, googleProvider } from '@/lib/firebase';
 import { type User } from 'firebase/auth';
 import {
     createUserProfile,
     getUserProfile,
+    updateUserProfile,
     updateLastLogin,
     addFavoriteTeam,
     removeFavoriteTeam,
@@ -23,7 +25,7 @@ import {
     type PredictionRecord
 } from '@/lib/userService';
 import {
-    getUserNotifications,
+    subscribeToNotifications,
     createNotification,
     markAsRead,
     markAllAsRead,
@@ -35,6 +37,7 @@ interface AuthContextType {
     loading: boolean;
     signIn: (email: string, password: string) => Promise<void>;
     signUp: (email: string, password: string) => Promise<void>;
+    signInWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
     addFavorite: (teamName: string) => Promise<void>;
     removeFavorite: (teamName: string) => Promise<void>;
@@ -43,6 +46,7 @@ interface AuthContextType {
     refreshUser: () => Promise<void>;
     getHistory: (limit?: number) => Promise<PredictionRecord[]>;
     saveToHistory: (prediction: Omit<PredictionRecord, 'uid' | 'timestamp'>) => Promise<void>;
+    updateUser: (updates: Partial<UserProfile>) => Promise<void>;
     notifications: AppNotification[];
     unreadCount: number;
     refreshNotifications: () => Promise<void>;
@@ -58,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [notifLoading, setNotifLoading] = useState(false);
 
     // ... (AuthContext definition)
 
@@ -74,6 +79,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (!profile) {
                 console.log('👤 [Auth] Creating new profile...');
                 profile = await createUserProfile(uid, email);
+            } else if (!profile.stats) {
+                // AUTO-REPAIR: Add missing stats for legacy profiles
+                console.log('👤 [Auth] Legacy profile detected (missing stats). Repairing...');
+                const defaultStats = {
+                    horarios: 0,
+                    resultados: 0,
+                    anotadores: 0,
+                    asistentes: 0,
+                    rank: 0,
+                    reputation: 0,
+                    streak: '0w',
+                    longestStreak: '0w',
+                    winRate: 0,
+                    vroi: 0
+                };
+                await updateUserProfile(uid, { stats: defaultStats });
+                profile.stats = defaultStats;
             } else {
                 // Update last login
                 console.log('👤 [Auth] Profile found, updating last login...');
@@ -127,18 +149,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const signIn = async (email: string, password: string) => {
-        if (!auth) throw new Error('Firebase not initialized');
+        if (!auth) throw new Error('Firebase no está inicializado');
         await signInWithEmailAndPassword(auth, email, password);
     };
 
     const signUp = async (email: string, password: string) => {
-        if (!auth) throw new Error('Firebase not initialized');
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Profile will be created automatically by onAuthStateChanged
+        if (!auth) throw new Error('Firebase no está inicializado');
+        await createUserWithEmailAndPassword(auth, email, password);
+    };
+
+    const signInWithGoogle = async () => {
+        if (!auth || !googleProvider) throw new Error('Firebase no está inicializado');
+        await signInWithPopup(auth, googleProvider);
     };
 
     const signOut = async () => {
-        if (!auth) throw new Error('Firebase not initialized');
+        if (!auth) throw new Error('Firebase no está inicializado');
         await firebaseSignOut(auth);
     };
 
@@ -186,11 +212,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await savePrediction(user.uid, prediction);
     };
 
-    const refreshNotifications = async () => {
+    const updateUser = async (updates: Partial<UserProfile>) => {
         if (!user) return;
-        const data = await getUserNotifications(user.uid);
-        setNotifications(data);
-        setUnreadCount(data.filter(n => !n.read).length);
+        const { updateUserProfile } = await import('@/lib/userService');
+        await updateUserProfile(user.uid, updates);
+
+        // Optimistic local update
+        setUser(prev => prev ? { ...prev, ...updates } : null);
+    };
+
+    const refreshNotifications = async () => {
+        // Obsoleto: ahora usamos subscribeToNotifications en tiempo real
+        console.log('🔔 [Auth] refreshNotifications es obsoleto, usando tiempo real.');
     };
 
     const markRead = async (id: string) => {
@@ -233,10 +266,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (user) {
-            refreshNotifications();
-            // Polling opcional cada 2 min para notificaciones
-            const interval = setInterval(refreshNotifications, 120000);
-            return () => clearInterval(interval);
+            console.log('🔔 [Auth] Estabilizando canal de notificaciones en tiempo real...');
+            const unsubscribe = subscribeToNotifications(user.uid, (data: AppNotification[]) => {
+                const unread = data.filter((n: AppNotification) => !n.read).length;
+                console.log(`🔔 [Auth] Notificaciones actualizadas: ${data.length} totales, ${unread} sin leer`);
+                setNotifications(data);
+                setUnreadCount(unread);
+            });
+            return () => unsubscribe();
+        } else {
+            setNotifications([]);
+            setUnreadCount(0);
         }
     }, [user]);
 
@@ -246,6 +286,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             loading,
             signIn,
             signUp,
+            signInWithGoogle,
             signOut,
             addFavorite,
             removeFavorite,
@@ -254,6 +295,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             refreshUser,
             getHistory,
             saveToHistory,
+            updateUser,
             notifications,
             unreadCount,
             refreshNotifications,

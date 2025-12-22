@@ -123,18 +123,53 @@ export default function Navbar() {
                             <div className="flex items-center gap-4">
                                 {!loading && (
                                     user ? (
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-3">
                                             {user.role === 'admin' && (
-                                                <Link href="/admin" className="text-[9px] font-black tracking-widest border border-red-500/50 bg-red-500/10 px-3 py-1.5 rounded-full text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                                                <Link href="/admin" className="hidden md:block text-[9px] font-black tracking-widest border border-red-500/50 bg-red-500/10 px-3 py-1.5 rounded-full text-red-500 hover:bg-red-500 hover:text-white transition-all">
                                                     ADMIN
                                                 </Link>
                                             )}
+
                                             <NotificationCenter />
-                                            <Link href="/profile" className="relative group">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center border-2 border-white/10 group-hover:border-purple-400 transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                                                    <span className="text-sm">👤</span>
+
+                                            {/* User Dropdown */}
+                                            <div className="relative group/profile">
+                                                <Link href="/profile" className="flex items-center">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center border-2 border-white/10 group-hover/profile:border-purple-400 transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] relative overflow-hidden">
+                                                        {user.photoURL ? (
+                                                            <Image src={user.photoURL} alt="Avatar" width={40} height={40} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <span className="text-xs font-black italic uppercase text-white">
+                                                                {user.email?.[0].toUpperCase()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </Link>
+
+                                                {/* Desktop Profile Menu */}
+                                                <div className="absolute top-full right-0 mt-4 w-48 bg-[#0c0c0c]/95 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] shadow-2xl opacity-0 invisible group-hover/profile:opacity-100 group-hover/profile:visible transition-all duration-300 p-2 z-50">
+                                                    <div className="px-4 py-3 border-b border-white/5 mb-1">
+                                                        <p className="text-[10px] font-black text-white truncate uppercase tracking-tighter">
+                                                            {user.displayName || user.email?.split('@')[0]}
+                                                        </p>
+                                                        <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest truncate">
+                                                            {user.role === 'admin' ? 'Administrator' : 'Premium Member'}
+                                                        </p>
+                                                    </div>
+                                                    <Link href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-white">
+                                                        <span>👤</span> Perfil / Dashboard
+                                                    </Link>
+                                                    <Link href="/profile?tab=settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-white">
+                                                        <span>⚙️</span> Ajustes
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => signOut()}
+                                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 transition-all text-[9px] font-black uppercase tracking-widest text-red-500/70 hover:text-red-500"
+                                                    >
+                                                        <span>🚪</span> Salir del Núcleo
+                                                    </button>
                                                 </div>
-                                            </Link>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="flex gap-2">
@@ -161,8 +196,8 @@ export default function Navbar() {
                                 className="flex flex-col items-center justify-center gap-1 py-2 px-1"
                             >
                                 <div className={`relative flex items-center justify-center transition-all duration-300 ${isActive(link.href)
-                                        ? 'scale-110'
-                                        : 'scale-100 opacity-60'
+                                    ? 'scale-110'
+                                    : 'scale-100 opacity-60'
                                     }`}>
                                     <span className="text-2xl">{link.icon}</span>
                                     {isActive(link.href) && (
@@ -174,8 +209,8 @@ export default function Navbar() {
                                     )}
                                 </div>
                                 <span className={`text-[9px] font-black uppercase tracking-tight transition-colors ${isActive(link.href)
-                                        ? link.textColor
-                                        : 'text-gray-500'
+                                    ? link.textColor
+                                    : 'text-gray-500'
                                     }`}>
                                     {link.shortLabel}
                                 </span>

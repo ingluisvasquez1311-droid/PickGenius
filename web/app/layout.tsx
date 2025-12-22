@@ -2,6 +2,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ToastProvider from "@/components/ui/ToastProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
+import GlobalErrorBoundary from "@/components/ui/GlobalErrorBoundary";
 import LiveTicker from "@/components/sports/LiveTicker";
 import ChristmasWrapper from "@/components/layout/ChristmasWrapper";
 import PageTransition from "@/components/providers/PageTransition";
@@ -73,9 +74,11 @@ export default function RootLayout({
               <ChristmasWrapper />
               <LiveTicker />
               <main className="pt-24 min-h-screen">
-                <PageTransition>
-                  {children}
-                </PageTransition>
+                <GlobalErrorBoundary>
+                  <PageTransition>
+                    {children}
+                  </PageTransition>
+                </GlobalErrorBoundary>
               </main>
               <Footer />
               <ToastProvider />

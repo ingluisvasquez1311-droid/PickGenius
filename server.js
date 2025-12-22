@@ -1,6 +1,6 @@
 /**
- * Servidor principal para deployment en Render
- * Incluye sincronización automática de NBA y Football con cache inteligente
+ * Servidor principal de sincronización y API
+ * Sincronización automática de NBA y Football con cache inteligente
  */
 
 require('dotenv').config();
@@ -260,6 +260,9 @@ app.get('/', (req, res) => {
             nba: {
                 games: 'GET /api/nba/games',
                 sync: 'POST /api/sync'
+            },
+            basketball: {
+                live: 'GET /api/sofascore/proxy/sport/basketball/events/live'
             },
             cache: {
                 stats: 'GET /api/cache/stats',

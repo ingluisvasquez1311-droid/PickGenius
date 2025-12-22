@@ -35,6 +35,21 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
         return acc;
     }, {} as Record<string, SportsDataEvent[]>);
 
+    // Auto-expand all groups when data loads
+    React.useEffect(() => {
+        if (games.length > 0) {
+            const allKeys = new Set<string>();
+            Object.entries(groupedByDate).forEach(([dateLabel, dateGames]) => {
+                dateGames.forEach(game => {
+                    const countryName = game.tournament.category?.name || 'Internacional';
+                    const leagueName = game.tournament.name;
+                    allKeys.add(`${dateLabel}-${countryName}: ${leagueName}`);
+                });
+            });
+            setExpandedGroups(allKeys);
+        }
+    }, [games.length]);
+
     return (
         <div className="space-y-8">
             {Object.entries(groupedByDate).map(([dateLabel, dateGames]) => (

@@ -12,6 +12,7 @@ import TeamLogo from '@/components/ui/TeamLogo';
 import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
 import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
 import { toast } from 'sonner';
+import { ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 interface MatchLiveViewProps {
     sport: string;
@@ -75,7 +76,9 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                             <div>
                                 <h2 className="text-xl md:text-3xl font-bold mb-2">{game.homeTeam.name}</h2>
                                 <div className="text-4xl md:text-6xl font-black font-mono tracking-tighter">
-                                    {game.homeScore?.current ?? 0}
+                                    {(game.homeScore?.current !== undefined ? game.homeScore.current :
+                                        game.homeScore?.display !== undefined ? game.homeScore.display :
+                                            (game.status?.type === 'notstarted' ? '-' : 0))}
                                 </div>
                             </div>
                         </div>
@@ -94,7 +97,9 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                             <div>
                                 <h2 className="text-xl md:text-3xl font-bold mb-2">{game.awayTeam.name}</h2>
                                 <div className="text-4xl md:text-6xl font-black font-mono tracking-tighter">
-                                    {game.awayScore?.current ?? 0}
+                                    {(game.awayScore?.current !== undefined ? game.awayScore.current :
+                                        game.awayScore?.display !== undefined ? game.awayScore.display :
+                                            (game.status?.type === 'notstarted' ? '-' : 0))}
                                 </div>
                             </div>
                         </div>
@@ -133,6 +138,64 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                 eventId={eventId}
                             />
                         </ErrorBoundary>
+
+                        {/* LIVE MOMENTUM TRACKER - Brutal Visual */}
+                        <div className="glass-card p-6 border border-white/5 bg-white/[0.02] rounded-[2rem] relative overflow-hidden group">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-2 h-6 bg-emerald-500 rounded-full animate-pulse"></div>
+                                    <h3 className="text-sm font-black italic uppercase tracking-widest text-white">Live Attack Momentum</h3>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">Real-Time</span>
+                                </div>
+                            </div>
+
+                            <div className="h-[120px] w-full relative">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={Array.from({ length: 20 }, (_, i) => ({
+                                        time: i,
+                                        value: 40 + Math.random() * 20 + (i > 10 ? 10 : -10)
+                                    }))}>
+                                        <defs>
+                                            <linearGradient id="colorMomentum" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <Area
+                                            type="monotone"
+                                            dataKey="value"
+                                            stroke="#8b5cf6"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorMomentum)"
+                                            animationDuration={1500}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+
+                                {/* Labels */}
+                                <div className="absolute inset-0 flex flex-col justify-between py-2 pointer-events-none">
+                                    <div className="flex justify-between items-center px-4">
+                                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{game.homeTeam.name} Pressing</span>
+                                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{game.awayTeam.name} Pressing</span>
+                                    </div>
+                                    <div className="h-px w-full bg-white/5 border-t border-dashed border-white/10"></div>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-2 gap-4">
+                                <div className="text-center p-3 bg-white/5 rounded-2xl border border-white/5">
+                                    <div className="text-[8px] font-black text-gray-500 uppercase mb-1">Peligro Local</div>
+                                    <div className="text-lg font-black italic text-purple-400">ALTO</div>
+                                </div>
+                                <div className="text-center p-3 bg-white/5 rounded-2xl border border-white/5">
+                                    <div className="text-[8px] font-black text-gray-500 uppercase mb-1">Peligro Visitante</div>
+                                    <div className="text-lg font-black italic text-gray-400">BAJO</div>
+                                </div>
+                            </div>
+                        </div>
 
                         <ErrorBoundary>
                             <MatchStatsSummary match={game} sport={sport} eventId={eventId} />

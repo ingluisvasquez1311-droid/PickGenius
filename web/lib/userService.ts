@@ -6,7 +6,8 @@ import {
     updateDoc,
     arrayUnion,
     arrayRemove,
-    serverTimestamp
+    serverTimestamp,
+    increment
 } from 'firebase/firestore';
 
 export interface FavoritePlayer {
@@ -30,6 +31,25 @@ export interface UserProfile {
     createdAt: Date;
     lastLogin: Date;
     role: 'admin' | 'user';
+    bio?: string;
+    phoneNumber?: string;
+    preferences?: {
+        notifications: boolean;
+        theme: 'dark' | 'light';
+        language: 'es' | 'en';
+    };
+    stats?: {
+        horarios: number;
+        resultados: number;
+        anotadores: number;
+        asistentes: number;
+        rank: number;
+        reputation: number;
+        streak: string;
+        longestStreak: string;
+        winRate: number;
+        vroi: number;
+    };
 }
 
 export interface PredictionRecord {
@@ -69,7 +89,19 @@ export async function createUserProfile(uid: string, email: string): Promise<Use
         favoritePlayers: [],
         createdAt: serverTimestamp(),
         lastLogin: serverTimestamp(),
-        role: 'user' // Default role
+        role: 'user', // Default role
+        stats: {
+            horarios: 0,
+            resultados: 0,
+            anotadores: 0,
+            asistentes: 0,
+            rank: 0,
+            reputation: 0,
+            streak: '0w',
+            longestStreak: '0w',
+            winRate: 0,
+            vroi: 0
+        }
     };
 
     await setDoc(userRef, newProfile);
@@ -109,7 +141,19 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
         favoritePlayers: data.favoritePlayers || [],
         createdAt: data.createdAt?.toDate() || new Date(),
         lastLogin: data.lastLogin?.toDate() || new Date(),
-        role: role
+        role: role,
+        stats: data.stats || {
+            horarios: 0,
+            resultados: 0,
+            anotadores: 0,
+            asistentes: 0,
+            rank: 0,
+            reputation: 0,
+            streak: '0w',
+            longestStreak: '0w',
+            winRate: 0,
+            vroi: 0
+        }
     };
 }
 
@@ -270,6 +314,20 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 }
 
 /**
+ * Update user profile details
+ */
+export async function updateUserProfile(uid: string, updates: Partial<UserProfile>): Promise<void> {
+    if (!db) return;
+    const userRef = doc(db, 'users', uid);
+
+    // Convert Dates to Firestore timestamps if necessary
+    const cleanedUpdates: any = { ...updates };
+    if (updates.subscriptionEnd) cleanedUpdates.subscriptionEnd = updates.subscriptionEnd;
+
+    await updateDoc(userRef, cleanedUpdates);
+}
+
+/**
  * Set user role (Admin only)
  */
 export async function setUserRole(uid: string, role: 'admin' | 'user'): Promise<void> {
@@ -291,6 +349,29 @@ export async function savePrediction(uid: string, prediction: Omit<PredictionRec
         ...prediction,
         uid,
         timestamp: serverTimestamp()
+    });
+
+    // Update user stats and predictions count
+    const userRef = doc(db, 'users', uid);
+
+    // Determine target stat based on prediction type
+    let statToIncrement = 'stats.resultados'; // Default
+
+    if (prediction.playerName) {
+        // It's a player prop
+        if (prediction.propType?.toLowerCase().includes('assist') || prediction.prediction?.toLowerCase().includes('asist')) {
+            statToIncrement = 'stats.asistentes';
+        } else {
+            statToIncrement = 'stats.anotadores';
+        }
+    } else if (prediction.sport === 'horarios') { // Hypothetical case
+        statToIncrement = 'stats.horarios';
+    }
+
+    await updateDoc(userRef, {
+        predictionsUsed: increment(1),
+        [statToIncrement]: increment(1),
+        'stats.reputation': increment(15) // Boost reputation for activity
     });
 }
 

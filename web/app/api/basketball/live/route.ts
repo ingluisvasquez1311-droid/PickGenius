@@ -6,6 +6,7 @@ export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
     try {
+
         console.log('🏀 Fetching Basketball live games from SportsData...');
 
         // Fetch using our service which handles headers and caching
@@ -17,25 +18,16 @@ export async function GET(request: NextRequest) {
 
         const events = result.data.events || [];
 
-        console.log(`📊 Found ${events.length} live basketball events`);
+        // STRICT FILTER: Only matches currently in progress
+        const liveEvents = events.filter((game: any) =>
+            game.status?.type === 'inprogress' ||
+            (game.status?.type === 'notstarted' && game.status?.description === 'Scheduled')
+        );
 
-        // Filter out finished matches that are older than 2 hours
-        const now = Date.now() / 1000; // Current time in seconds
-        const twoHoursAgo = now - (2 * 60 * 60); // 2 hours ago in seconds
-
-        const recentEvents = events.filter((game: any) => {
-            // Keep all non-finished events
-            if (game.status?.type !== 'finished') {
-                return true;
-            }
-            // For finished events, only keep if they finished within last 2 hours
-            return game.startTimestamp > twoHoursAgo;
-        });
-
-        console.log(`✅ Filtered to ${recentEvents.length} recent events (removed old finished matches)`);
+        console.log(`✅ Filtered to ${liveEvents.length} live/scheduled basketball events`);
 
         // Transform to match frontend expectations
-        const transformedData = recentEvents.map((game: any) => ({
+        const transformedData = liveEvents.map((game: any) => ({
             id: game.id,
             tournament: {
                 name: game.tournament?.name || 'Unknown League',

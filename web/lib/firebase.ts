@@ -1,5 +1,5 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { getAuth, Auth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -18,6 +18,7 @@ const hasValidConfig = !!(firebaseConfig.apiKey && firebaseConfig.projectId);
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
+const googleProvider = new GoogleAuthProvider();
 
 if (hasValidConfig) {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
@@ -48,4 +49,4 @@ if (missingVars.length > 0) {
     console.error('❌ CONFIGURACIÓN DE FIREBASE INCOMPLETA. Revisa .env.local');
 }
 
-export { auth, db, app };
+export { auth, db, app, googleProvider };

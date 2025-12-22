@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Rocket, Shield, Zap, TrendingUp, Trophy, BarChart3, Star, ArrowRight, Play } from 'lucide-react';
 import NewsSection from '@/components/home/NewsSection';
+import SportsGrid from '@/components/home/SportsGrid';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface SportStats {
@@ -184,7 +185,7 @@ export default function HomePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500 shadow-[0_0_10px_purple]"></span>
             </span>
-            NEXT-GEN SPORTS INTELLIGENCE
+            INTELIGENCIA DEPORTIVA DE ÚLTIMA GENERACIÓN
           </motion.div>
 
           <motion.h1
@@ -259,8 +260,8 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-10 shadow-2xl shadow-purple-500/5">
                 <Zap className="w-8 h-8 fill-purple-400/20" />
               </div>
-              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Deep AI Analysis</h3>
-              <p className="text-gray-400 leading-tight text-lg">No es suerte. Es computación de alto rendimiento aplicada a cada jugada, racha y estadística histórica.</p>
+              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Análisis IA Profundo</h3>
+              <p className="text-gray-400 leading-tight text-lg">No es suerte. Es computación de alto rendimiento aplicada a cada jugada, racha y estadística histórica para detectar valor real.</p>
             </motion.div>
 
             <motion.div
@@ -273,8 +274,8 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-10 shadow-2xl shadow-blue-500/5">
                 <Trophy className="w-8 h-8 fill-blue-400/20" />
               </div>
-              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Verified Data Stream</h3>
-              <p className="text-gray-400 leading-tight text-lg">Conexión directa con feeds oficiales de la industria. Actualizaciones al segundo sin retrasos ni errores manuables.</p>
+              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Flujo de Datos Verificado</h3>
+              <p className="text-gray-400 leading-tight text-lg">Conexión directa con feeds oficiales de la industria. Actualizaciones al segundo sin retrasos, procesadas por nuestro núcleo algorítmico.</p>
             </motion.div>
 
             <motion.div
@@ -287,8 +288,8 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-10 shadow-2xl shadow-emerald-500/5">
                 <ArrowRight className="w-8 h-8" />
               </div>
-              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Elite Performance</h3>
-              <p className="text-gray-400 leading-tight text-lg">Filtrado inteligente de valor. Solo te mostramos las opciones que cumplen con nuestros rigurosos estándares de probabilidad.</p>
+              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Rendimiento de Elite</h3>
+              <p className="text-gray-400 leading-tight text-lg">Filtrado inteligente de valor. Solo te mostramos las opciones que cumplen con nuestros rigurosos estándares de probabilidad y ROI.</p>
             </motion.div>
           </div>
         </section>
@@ -300,8 +301,8 @@ export default function HomePage() {
 
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
               <div>
-                <div className="inline-block px-4 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full text-[10px] font-black tracking-widest text-purple-400 uppercase mb-8">System Pulse</div>
-                <h2 className="text-6xl md:text-8xl font-black mb-12 uppercase italic tracking-tighter leading-none">REAL-TIME<br />MASTERY.</h2>
+                <div className="inline-block px-4 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full text-[10px] font-black tracking-widest text-purple-400 uppercase mb-8">Pulso del Sistema</div>
+                <h2 className="text-6xl md:text-8xl font-black mb-12 uppercase italic tracking-tighter leading-none">DOMINIO EN<br />TIEMPO REAL.</h2>
 
                 <div className="grid grid-cols-2 gap-6 mb-12">
                   <div className="bg-white/[0.02] p-8 rounded-[2.5rem] border border-white/5 backdrop-blur-md">
@@ -310,7 +311,7 @@ export default function HomePage() {
                   </div>
                   <div className="bg-white/[0.02] p-8 rounded-[2.5rem] border border-white/5 backdrop-blur-md">
                     <div className="text-5xl font-black mb-2 text-orange-500">{basketballStats.liveEvents}</div>
-                    <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">NBA / Euro Courts</div>
+                    <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Canchas NBA / Euro</div>
                   </div>
                 </div>
 
@@ -332,7 +333,7 @@ export default function HomePage() {
                     >
                       <div className="absolute top-10 right-10 flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                        <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Live Intelligence</span>
+                        <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Inteligencia en Vivo</span>
                       </div>
 
                       <div className="text-center">
@@ -369,8 +370,8 @@ export default function HomePage() {
                       </div>
 
                       <div className="mt-16 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-center group-hover:bg-emerald-500/20 transition-all">
-                        <div className="text-emerald-400 font-black text-[10px] uppercase tracking-widest mb-2">IA PROJECTION</div>
-                        <div className="text-2xl font-black italic uppercase tracking-tighter text-white">HIGH GOAL PROBABILITY</div>
+                        <div className="text-emerald-400 font-black text-[10px] uppercase tracking-widest mb-2">PROYECCIÓN IA</div>
+                        <div className="text-2xl font-black italic uppercase tracking-tighter text-white">ALTA PROBABILIDAD DE GOL</div>
                       </div>
                     </motion.div>
                   )}
@@ -392,8 +393,8 @@ export default function HomePage() {
               whileHover={{ scale: 1.02 }}
               className="p-12 bg-white/[0.01] rounded-[4rem] border border-white/5 hover:border-white/10 transition-all flex flex-col group"
             >
-              <h3 className="text-3xl font-black mb-2 uppercase tracking-tight italic">FREE ACCESS</h3>
-              <div className="text-5xl font-black mb-12 italic tracking-tighter">$0 <span className="text-sm font-normal text-gray-600 uppercase tracking-widest">/siempre</span></div>
+              <h3 className="text-3xl font-black mb-2 uppercase tracking-tight italic">ACCESO GRATUITO</h3>
+              <div className="text-5xl font-black mb-12 italic tracking-tighter">$0 <span className="text-sm font-normal text-gray-600 uppercase tracking-widest">/SIEMPRE</span></div>
               <ul className="space-y-6 mb-16 flex-1">
                 <li className="flex items-center gap-4 text-sm font-bold text-gray-400">
                   <span className="w-5 h-5 bg-white/10 rounded-full flex items-center justify-center text-[10px]">✓</span>
@@ -461,12 +462,12 @@ export default function HomePage() {
         <footer className="container mx-auto px-4 py-32 text-center opacity-40">
           <div className="font-black text-4xl mb-6 tracking-tighter italic italic">PICKGENIUS</div>
           <div className="flex justify-center gap-8 mb-8 text-xs font-black uppercase tracking-widest">
-            <Link href="/" className="hover:text-white">Home</Link>
-            <Link href="/football-live" className="hover:text-white">Live Events</Link>
-            <Link href="/props" className="hover:text-white">AI Props</Link>
+            <Link href="/" className="hover:text-white">Inicio</Link>
+            <Link href="/football-live" className="hover:text-white">Eventos en Vivo</Link>
+            <Link href="/props" className="hover:text-white">Props IA</Link>
             <Link href="/privacy" className="hover:text-white">Legal</Link>
           </div>
-          <p className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-500">© 2025 LUIS VASQUEZ • ADVANCED SPORTS INTELLIGENCE SYSTEM</p>
+          <p className="text-[9px] font-black uppercase tracking-[0.5em] text-gray-500">© 2025 LUIS VASQUEZ • SISTEMA DE INTELIGENCIA DEPORTIVA AVANZADA</p>
         </footer>
       </div>
 
