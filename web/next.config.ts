@@ -45,12 +45,13 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    return [
+    const isDev = process.env.NODE_ENV === 'development';
+    return isDev ? [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*', // Proxy to Backend
+        destination: 'http://localhost:3001/api/:path*', // Proxy to Backend only in local dev
       },
-    ];
+    ] : [];
   },
 };
 

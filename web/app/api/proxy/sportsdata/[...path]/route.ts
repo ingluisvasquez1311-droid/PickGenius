@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { scraperService } from '@/lib/services/scraperService';
 
 // Standard Node.js runtime for stability.
 
@@ -44,21 +45,26 @@ export async function GET(
             revalidate = 86400;
         }
 
-        // ATTEMPT 1: Primary Method
-        let response = await fetch(fetchUrl, {
-            headers: fetchHeaders,
-            next: { revalidate: revalidate },
-            signal: AbortSignal.timeout(30000)
-        });
+        const scraperOptions = {
+            render: false,
+            country_code: 'us',
+            useCache: true,
+            cacheTTL: revalidate * 1000 // scraperService uses ms
+        };
 
-        // FALLBACK: If ScraperAPI fails with 403 or server error, try Direct Stealth Mode
-        if (!response.ok) {
-            console.warn(`⚠️ [Proxy Route] Primary Fetch FAILED (${response.status}). Falling back to Stealth Mode...`);
+        let data: any = null;
 
-            // Direct call to Sofascore (api.sofascore.com is often more stable for bypass)
+        // ATTEMPT 1: Managed ScraperService (Rotation + Retries)
+        try {
+            console.log(`🌐 [Proxy Route] Using Managed ScraperService for: ${path}`);
+            data = await scraperService.makeRequest(targetUrl, scraperOptions);
+        } catch (scraperError: any) {
+            console.warn(`⚠️ [Proxy Route] ScraperService failed: ${scraperError.message}. Falling back to Stealth Mode...`);
+
+            // FALLBACK: Direct Stealth Mode (Direct to Sofascore)
             const directUrl = `https://api.sofascore.com/api/v1/${path}${query}`;
 
-            response = await fetch(directUrl, {
+            const stealthResponse = await fetch(directUrl, {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Accept': '*/*',
@@ -72,19 +78,19 @@ export async function GET(
                 signal: AbortSignal.timeout(30000)
             });
 
-            console.log(`🕵️ [Proxy Route] Stealth Mode Response: ${response.status}`);
+            if (stealthResponse.ok) {
+                data = await stealthResponse.json();
+                console.log(`🕵️ [Proxy Route] Stealth Mode SUCCESS (${stealthResponse.status})`);
+            } else {
+                const errorBody = await stealthResponse.text().catch(() => "Unknown error");
+                console.error(`❌ [Proxy Route] All bypass methods failed for ${path}. Final status: ${stealthResponse.status}`);
+                return NextResponse.json(
+                    { error: `Upstream error: ${stealthResponse.status}`, details: errorBody.substring(0, 100) },
+                    { status: stealthResponse.status }
+                );
+            }
         }
 
-        if (!response.ok) {
-            const errorBody = await response.text().catch(() => "Unknown error");
-            console.error(`❌ Proxy Upstream Error: ${response.status} for ${path}. Body: ${errorBody.substring(0, 100)}`);
-            return NextResponse.json(
-                { error: `Upstream error: ${response.status}` },
-                { status: response.status }
-            );
-        }
-
-        const data = await response.json();
         return NextResponse.json(data);
 
     } catch (error) {

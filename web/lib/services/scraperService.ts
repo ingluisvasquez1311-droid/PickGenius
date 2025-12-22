@@ -60,22 +60,33 @@ class ScraperService {
 
     private loadApiKeys(): string[] {
         const keys: string[] = [];
-        // Evitar acceso a process en cliente si no está definido (aunque Next.js suele definirlo vacío)
         if (typeof process === 'undefined') return [];
 
+        // Prioritize SCRAPER_API_KEYS (comma separated list)
         if (process.env.SCRAPER_API_KEYS) {
-            keys.push(...process.env.SCRAPER_API_KEYS.split(',').map(k => k.trim()).filter(k => k));
+            const list = process.env.SCRAPER_API_KEYS.split(',')
+                .map(k => k.trim())
+                .filter(k => k && k.length > 5); // Basic validation
+            keys.push(...list);
+            console.log(`🔑 [ScraperService] Loaded ${list.length} keys from SCRAPER_API_KEYS`);
         }
-        if (process.env.SCRAPER_API_KEY && !keys.includes(process.env.SCRAPER_API_KEY)) {
-            keys.push(process.env.SCRAPER_API_KEY);
+
+        // Add SCRAPER_API_KEY if not already present
+        if (process.env.SCRAPER_API_KEY) {
+            const singleKey = process.env.SCRAPER_API_KEY.trim();
+            if (singleKey && !keys.includes(singleKey)) {
+                keys.push(singleKey);
+                console.log(`🔑 [ScraperService] Added primary SCRAPER_API_KEY`);
+            }
         }
 
         if (keys.length === 0) {
-            console.warn('⚠️ [ScraperService] No API keys found (Normal on Client Side)');
+            console.warn('⚠️ [ScraperService] No API keys found! Data fetching will likely fail.');
             return [];
         }
 
-        return keys;
+        // Deduplicate
+        return Array.from(new Set(keys));
     }
 
     /**

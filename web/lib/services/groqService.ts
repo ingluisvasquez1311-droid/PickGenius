@@ -1,3 +1,6 @@
+```typescript
+import Groq from "groq-sdk";
+import { logApiCall } from '@/lib/adminService';
 import { GroqAPIRotator } from './groqAPIRotator';
 import {
     CacheManager,
@@ -43,7 +46,7 @@ class GroqService {
         // Circuit Breaker específico para IA (más tolerante)
         this.breaker = new CircuitBreaker(5, 30000); // 5 fallos, 30s de descanso
 
-        this.logger.info(`🤖 [GroqService] Ready with ${this.keys.length} keys`);
+        this.logger.info(`🤖[GroqService] Ready with ${ this.keys.length } keys`);
     }
 
     private loadApiKeys(): string[] {
@@ -73,7 +76,7 @@ class GroqService {
         const { useCache = true, schema = PredictionResponseSchema, ...aiParams } = params;
 
         // Clave de caché basada en el contenido de los mensajes (para no repetir análisis idénticos)
-        const cacheKey = `groq:prediction:${JSON.stringify(aiParams.messages)}`;
+        const cacheKey = `groq: prediction:${ JSON.stringify(aiParams.messages) } `;
         const start = Date.now();
 
         const fetchFn = async () => {
@@ -137,7 +140,9 @@ class GroqService {
                 return await fetchFn();
             }
         } catch (error: any) {
-            this.logger.error(`❌ [GroqService] Prediction failed`, { error: error.message });
+            this.logger.error(`❌[GroqService] Prediction failed`, { error: error.message });
+            console.error("❌ Groq Error:", error.message);
+            logApiCall('Groq', '/chat/completions', 500).catch(() => {});
             throw error;
         }
     }
@@ -152,12 +157,13 @@ class GroqService {
         useCache?: boolean;
     } = {}): Promise<string> {
         const { useCache = true, ...aiOptions } = options;
-        const cacheKey = `groq:complete:${prompt}`;
+        const cacheKey = `groq: complete:${ prompt } `;
 
         const fetchFn = async () => {
             const result = await this.rotator.complete(prompt, aiOptions);
             if (result.success && result.content) {
                 this.budget.trackCost(API_COSTS.GROQ_REQUEST);
+                logApiCall('Groq', '/chat/completions', 200).catch(() => {});
                 return result.content;
             }
             throw new Error(result.error || 'Groq completion failed');
@@ -169,7 +175,7 @@ class GroqService {
             }
             return await fetchFn();
         } catch (error: any) {
-            this.logger.error(`❌ [GroqService] Completion failed`, { error: error.message });
+            this.logger.error(`❌[GroqService] Completion failed`, { error: error.message });
             throw error;
         }
     }

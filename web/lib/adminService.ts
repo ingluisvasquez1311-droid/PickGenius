@@ -57,13 +57,41 @@ export async function getTrafficStats() {
         const q = query(
             collection(db, 'admin_api_logs'),
             where('timestamp', '>=', Timestamp.fromDate(last24h)),
-            orderBy('timestamp', 'desc'),
-            limit(100)
+            orderBy('timestamp', 'asc'), // Ascending for time charts
+            limit(500) // Increase limit for aggregate data
         );
         const snap = await getDocs(q);
-        return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return snap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            // Convert timestamp to Date for grouping
+            date: (doc.data() as any).timestamp?.toDate() || new Date()
+        }));
     } catch (error) {
         console.error('Error fetching traffic stats:', error);
+        return [];
+    }
+}
+
+/**
+ * Fetch latest admin alerts
+ */
+export async function getAdminAlerts(limitCount: number = 10) {
+    if (!db) return [];
+    try {
+        const q = query(
+            collection(db, 'admin_alerts'),
+            orderBy('timestamp', 'desc'),
+            limit(limitCount)
+        );
+        const snap = await getDocs(q);
+        return snap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            date: (doc.data() as any).timestamp?.toDate() || new Date()
+        }));
+    } catch (error) {
+        console.error('Error fetching admin alerts:', error);
         return [];
     }
 }
