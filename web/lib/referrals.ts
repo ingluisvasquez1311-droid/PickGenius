@@ -29,6 +29,8 @@ export const generateReferralCode = (userId: string): string => {
  * Create or get referral data for a user
  */
 export const getUserReferralData = async (userId: string): Promise<Referral | null> => {
+    if (!db) return null;
+
     try {
         const referralRef = doc(db, 'referrals', userId);
         const referralSnap = await getDoc(referralRef);
@@ -60,6 +62,8 @@ export const getUserReferralData = async (userId: string): Promise<Referral | nu
  * Find referrer by code
  */
 export const findReferrerByCode = async (code: string): Promise<string | null> => {
+    if (!db) return null;
+
     try {
         const referralsRef = collection(db, 'referrals');
         const q = query(referralsRef, where('code', '==', code));
@@ -83,6 +87,8 @@ export const processReferral = async (
     referrerId: string,
     newUserId: string
 ): Promise<boolean> => {
+    if (!db) return false;
+
     try {
         const referralRef = doc(db, 'referrals', referrerId);
 
