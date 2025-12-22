@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
 import TeamLogo from '@/components/ui/TeamLogo';
 import ShareButton from '@/components/sharing/ShareButton';
+import { trackPrediction } from '@/lib/analytics';
 
 interface PlayerProp {
     id: string;
@@ -204,6 +205,14 @@ const PropsDashboard = () => {
 
                             // Incrementar contador de uso
                             await usePrediction();
+
+                            // Track analytics event
+                            trackPrediction({
+                                sport: prop.sport,
+                                propType: prop.prop.type,
+                                probability: predictionData.probability,
+                                playerName: prop.player.name
+                            });
 
                             // Notificar si es un Hot Pick (Probabilidad >= 75%)
                             if (predictionData.probability >= 75) {

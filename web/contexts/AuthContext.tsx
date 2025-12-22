@@ -31,6 +31,7 @@ import {
     markAllAsRead,
     type AppNotification
 } from '@/lib/services/notificationService';
+import { trackSignup, trackLogin, trackTrialStart } from '@/lib/analytics';
 
 interface AuthContextType {
     user: UserProfile | null;
@@ -151,16 +152,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const signIn = async (email: string, password: string) => {
         if (!auth) throw new Error('Firebase no está inicializado');
         await signInWithEmailAndPassword(auth, email, password);
+
+        // Track login event
+        trackLogin('email');
     };
 
     const signUp = async (email: string, password: string) => {
         if (!auth) throw new Error('Firebase no está inicializado');
         await createUserWithEmailAndPassword(auth, email, password);
+
+        // Track signup and trial start
+        trackSignup('email');
+        trackTrialStart();
     };
 
     const signInWithGoogle = async () => {
         if (!auth || !googleProvider) throw new Error('Firebase no está inicializado');
-        await signInWithPopup(auth, googleProvider);
+        const result = await signInWithPopup(auth, googleProvider);
+
+        // Check if this is a new user
+        const uid = result.user.uid;
+        const profile = await getUserProfile(uid);
+
+        if (!profile) {
+            // New user - track signup
+            trackSignup('google');
+            trackTrialStart();
+        } else {
+            // Existing user - track login
+            trackLogin('google');
+        }
     };
 
     const signOut = async () => {

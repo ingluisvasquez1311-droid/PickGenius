@@ -11,6 +11,8 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BettingSlipProvider } from "@/contexts/BettingSlipContext";
 import BettingSlip from "@/components/betting/BettingSlip";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+
 
 export const viewport: Viewport = {
   themeColor: "#050505",
@@ -67,6 +69,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
+        <GoogleAnalytics />
         <AuthProvider>
           <QueryProvider>
             <BettingSlipProvider>

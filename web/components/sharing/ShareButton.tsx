@@ -5,6 +5,7 @@ import { Download, Share2, Loader2, X } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { PredictionTicket } from './PredictionTicket';
 import { createPortal } from 'react-dom';
+import { trackShare } from '@/lib/analytics';
 
 interface ShareButtonProps {
     data: {
@@ -45,6 +46,13 @@ export default function ShareButton({ data }: ShareButtonProps) {
             link.download = `pickgenius-prediction-${Date.now()}.png`;
             link.href = dataUrl;
             link.click();
+
+            // Track share event
+            trackShare({
+                sport: data.match?.tournament || 'unknown',
+                playerName: data.player?.name || 'unknown',
+                probability: data.prediction.probability
+            });
 
             setShowPreview(false);
         } catch (err) {
