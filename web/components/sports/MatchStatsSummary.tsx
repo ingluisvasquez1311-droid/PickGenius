@@ -45,15 +45,18 @@ export default function MatchStatsSummary({ match, sport, eventId }: MatchStatsS
         if (!allPeriodStats) return null;
 
         const processed: MatchStat[] = [];
+
+        // Define stats based on sport
+        const footballStats = ['Ball possession', 'Total shots', 'Shots on target', 'Corner kicks', 'Fouls'];
+        const basketballStats = ['Free throws %', '2-pointers %', '3-pointers %', 'Rebounds', 'Assists', 'Turnovers'];
+        const tennisStats = ['Aces', 'Double faults', 'Service games won'];
+
+        const importantStats = sport === 'basketball' ? basketballStats :
+            sport === 'tennis' ? tennisStats :
+                footballStats;
+
         allPeriodStats.groups.forEach((group: any) => {
             group.statisticsItems.forEach((item: any) => {
-                // Filtramos solo las estadísticas visualmente impactantes
-                const importantStats = [
-                    'Ball possession', 'Total shots', 'Shots on target', 'Corner kicks', 'Fouls',
-                    'Free throws %', '2-pointers %', '3-pointers %', 'Rebounds', 'Assists', 'Turnovers',
-                    'Aces', 'Double faults', 'Service games won'
-                ];
-
                 if (importantStats.includes(item.name)) {
                     const homeVal = parseFloat(item.home.replace('%', ''));
                     const awayVal = parseFloat(item.away.replace('%', ''));

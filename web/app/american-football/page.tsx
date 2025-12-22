@@ -7,6 +7,7 @@ import GroupedMatchesList from '@/components/sports/GroupedMatchesList';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import { sportsDataService, type SportsDataEvent } from '@/lib/services/sportsDataService';
 import PlayerPropsPredictor from '@/components/basketball/PlayerPropsPredictor';
+import ParleyOptimizerBanner from '@/components/ai/ParleyOptimizerBanner';
 
 export default function AmericanFootballPage() {
     const [games, setGames] = useState<SportsDataEvent[]>([]);
@@ -92,7 +93,8 @@ export default function AmericanFootballPage() {
                         </div>
                     </div>
 
-                    <div className="lg:col-span-4">
+                    <div className="lg:col-span-4 space-y-6">
+                        <ParleyOptimizerBanner />
                         <div className="sticky top-24">
                             <PlayerPropsPredictor fixedSport="american-football" />
                         </div>

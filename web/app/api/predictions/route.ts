@@ -7,14 +7,17 @@ export const maxDuration = 60; // Allow longer timeout for AI generation
 export async function POST(request: NextRequest) {
     let fallbackHomeName = 'Equipo Local';
     let fallbackAwayName = 'Equipo Visitante';
+    let sport = 'football';
+    let gameId = '';
 
     try {
-        const body = await request.json();
-        // Update fallbacks if body is available
+        const body = await request.json().catch(() => ({}));
+
+        // Update variables if body is available
         if (body.homeTeam || body.homeTeamName) fallbackHomeName = body.homeTeam || body.homeTeamName;
         if (body.awayTeam || body.awayTeamName) fallbackAwayName = body.awayTeam || body.awayTeamName;
-
-        const { gameId, sport } = body;
+        if (body.sport) sport = body.sport;
+        if (body.gameId) gameId = body.gameId;
 
         if (!gameId || !sport) {
             return NextResponse.json({ success: false, error: 'Missing gameId or sport' }, { status: 400 });
@@ -49,7 +52,10 @@ export async function POST(request: NextRequest) {
 
         console.log(`✅ [Prediction API] Data fetched for:`, event.name || gameId);
 
-        matchContext = {
+        const homeScore = event.homeScore?.current || 0;
+        const awayScore = event.awayScore?.current || 0;
+
+        const matchContext = {
             sport: `${sport.toUpperCase()} (Unified)`,
             home: event.homeTeam?.name || fallbackHomeName || 'Equipo Local',
             away: event.awayTeam?.name || fallbackAwayName || 'Equipo Visitante',
@@ -170,9 +176,8 @@ export async function POST(request: NextRequest) {
         console.error('Full error:', error);
 
         // FALLBACK: Generate Realistic Mock Prediction if API fails
-        console.log('⚠️ Falling back to Mock Prediction due to API error');
+        console.log(`⚠️ Falling back to Mock Prediction for ${sport} due to API error`);
 
-        // Extract team names safely using predefined fallback variables
         const hName = fallbackHomeName;
         const aName = fallbackAwayName;
 
@@ -180,33 +185,44 @@ export async function POST(request: NextRequest) {
         const winner = isHomeFavored ? hName : aName;
         const loser = isHomeFavored ? aName : hName;
 
-        const mockPrediction = {
+        const isBasketball = sport === 'basketball';
+
+        const mockPrediction: any = {
             winner: winner,
             confidence: 82,
-            reasoning: `Basado en la forma reciente y el análisis directo (IA no disponible), ${winner} muestra una consistencia superior. Su rendimiento sugiere una alta probabilidad de controlar el ritmo contra ${loser}.`,
-            bettingTip: isHomeFavored ? `${winner} gana` : `${winner} +0.5 Hándicap`,
+            reasoning: `Basado en la forma reciente y el análisis directo de ${isBasketball ? 'baloncesto' : 'fútbol'} (IA no disponible), ${winner} muestra una consistencia superior. Su rendimiento sugiere una alta probabilidad de controlar el ritmo contra ${loser}.`,
+            bettingTip: isBasketball
+                ? `${winner} ${Math.random() > 0.5 ? '-4.5' : '+2.5'}`
+                : (isHomeFavored ? `${winner} gana` : `${winner} +0.5 Hándicap`),
             predictions: {
-                finalScore: isHomeFavored ? '2-1' : '1-2',
-                totalGoals: '3',
-                corners: { home: 6, away: 4, total: 10 },
-                shots: { home: 14, away: 11, onTarget: '5' },
-                cards: { yellowCards: 3, redCards: 0, details: 'Partido limpio' },
-                offsides: { total: 4, details: 'Promedio' },
-                // Basketball specific fallbacks
-                spread: { favorite: winner, line: -4.5, recommendation: 'Cubrir' },
-                overUnder: { line: 215.5, pick: 'Más de', confidence: 'Media' },
-                topPlayers: {
-                    homeTopScorer: { name: 'Jugador Estrella (Local)', predictedPoints: 24, predictedRebounds: 8, predictedAssists: 5 },
-                    awayTopScorer: { name: 'Jugador Estrella (Visitante)', predictedPoints: 26, predictedRebounds: 6, predictedAssists: 4 }
-                }
+                finalScore: isBasketball
+                    ? `${Math.floor(Math.random() * 20) + 100}-${Math.floor(Math.random() * 20) + 95}`
+                    : (isHomeFavored ? '2-1' : '1-2'),
+                totalPoints: isBasketball ? '212' : undefined,
+                totalGoals: !isBasketball ? '3' : undefined,
             },
             keyFactors: [
-                "Forma reciente sólida del favorito",
-                "Ventaja táctica en transición",
+                `Forma reciente sólida de ${winner}`,
+                isBasketball ? "Ventaja táctica en transición y pick-and-roll" : "Ventaja táctica en transiciones ofensivas",
                 "Dominio histórico en este enfrentamiento"
             ],
             isMock: true
         };
+
+        // Add sport-specific stats to mock
+        if (isBasketball) {
+            mockPrediction.predictions.spread = { favorite: winner, line: -4.5, recommendation: 'Cubrir Hándicap' };
+            mockPrediction.predictions.overUnder = { line: 215.5, pick: 'Más de', confidence: 'Media' };
+            mockPrediction.predictions.topPlayers = {
+                homeTopScorer: { name: 'Jugador Estrella (Local)', predictedPoints: 24, predictedRebounds: 8, predictedAssists: 5 },
+                awayTopScorer: { name: 'Jugador Estrella (Visitante)', predictedPoints: 26, predictedRebounds: 6, predictedAssists: 4 }
+            };
+        } else {
+            mockPrediction.predictions.corners = { home: 6, away: 4, total: 10 };
+            mockPrediction.predictions.shots = { home: 14, away: 11, onTarget: '5' };
+            mockPrediction.predictions.cards = { yellowCards: 3, redCards: 0, details: 'Partido intenso' };
+            mockPrediction.predictions.offsides = { total: 4, details: 'Promedio' };
+        }
 
         return NextResponse.json(mockPrediction);
     }

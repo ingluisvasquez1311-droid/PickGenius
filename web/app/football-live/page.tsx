@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import LiveEventsList from '@/components/LiveEventsList';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import ParleyOptimizerBanner from '@/components/ai/ParleyOptimizerBanner';
 
 export default function FootballLivePage() {
     const [events, setEvents] = useState<any[]>([]);
@@ -132,6 +133,9 @@ export default function FootballLivePage() {
                                 <div className="text-4xl font-black tracking-tighter">2.75</div>
                             </div>
                         </div>
+
+                        {/* Parley Optimizer Banner */}
+                        <ParleyOptimizerBanner />
                     </div>
 
                     {/* Main Match List */}

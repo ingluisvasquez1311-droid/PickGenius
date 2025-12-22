@@ -50,9 +50,41 @@ export default function Navbar() {
 
     return (
         <>
-            {/* Desktop Navigation */}
+            {/* Mobile Top Bar - App Style */}
+            <div className="lg:hidden fixed top-0 left-0 right-0 z-50 pt-safe bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
+                <div className="flex justify-between items-center h-16 px-6">
+                    <Link href="/" className="flex items-center gap-2">
+                        <Image
+                            src="/logo.png"
+                            alt="Logo"
+                            width={28}
+                            height={28}
+                            className="rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                        />
+                        <span className="text-sm font-black italic tracking-tighter uppercase text-white">
+                            PICK<span className="text-purple-500">GENIUS</span>
+                        </span>
+                    </Link>
+
+                    <div className="flex items-center gap-2">
+                        <NotificationCenter />
+                        {user && (
+                            <Link href="/profile" className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 p-[1.5px] shadow-[0_0_10px_rgba(168,85,247,0.3)]">
+                                <div className="w-full h-full rounded-full bg-[#0a0a0a] flex items-center justify-center overflow-hidden">
+                                    {user.photoURL ? (
+                                        <Image src={user.photoURL} alt="Avatar" width={32} height={32} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-[10px] font-black text-white">{user.email?.[0].toUpperCase()}</span>
+                                    )}
+                                </div>
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             <nav
-                className={`fixed left-0 right-0 z-50 transition-all duration-700 ease-in-out transform ${isVisible ? 'translate-y-4 opacity-100' : '-translate-y-full opacity-0'
+                className={`fixed left-0 right-0 z-50 transition-all duration-700 ease-in-out transform hidden lg:block ${isVisible ? 'translate-y-4 opacity-100' : '-translate-y-full opacity-0'
                     }`}
             >
                 <div className="container mx-auto px-4">
@@ -186,46 +218,46 @@ export default function Navbar() {
             </nav>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe">
-                <div className="bg-[#0a0a0a]/95 backdrop-blur-3xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-                    <div className="grid grid-cols-6 gap-1 px-2 py-3">
+            <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe mobile-haptic">
+                <div className="bg-[#0a0a0a]/90 backdrop-blur-2xl border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] rounded-t-[2.5rem] overflow-hidden">
+                    <div className="grid grid-cols-6 gap-0 px-2 pt-4 pb-2">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className="flex flex-col items-center justify-center gap-1 py-2 px-1"
+                                className="flex flex-col items-center justify-center gap-1.5 py-1"
                             >
-                                <div className={`relative flex items-center justify-center transition-all duration-300 ${isActive(link.href)
-                                    ? 'scale-110'
-                                    : 'scale-100 opacity-60'
+                                <div className={`relative flex items-center justify-center transition-all duration-500 ${isActive(link.href)
+                                    ? 'scale-110 -translate-y-1'
+                                    : 'scale-100 opacity-40'
                                     }`}>
-                                    <span className="text-2xl">{link.icon}</span>
+                                    <span className="text-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">{link.icon}</span>
                                     {isActive(link.href) && (
                                         <motion.div
                                             layoutId="mobile-nav-active"
-                                            className="absolute -inset-2 border-2 border-white/30 rounded-2xl z-[-1] bg-white/5"
-                                            transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
+                                            className="absolute -inset-2 bg-white/10 rounded-[1.25rem] z-[-1]"
+                                            transition={{ type: "spring", bounce: 0.4, duration: 0.6 }}
                                         />
                                     )}
                                 </div>
-                                <span className={`text-[9px] font-black uppercase tracking-tight transition-colors ${isActive(link.href)
-                                    ? link.textColor
-                                    : 'text-gray-500'
+                                <span className={`text-[8px] font-black uppercase tracking-[0.1em] transition-colors ${isActive(link.href)
+                                    ? 'text-white'
+                                    : 'text-gray-600'
                                     }`}>
                                     {link.shortLabel}
-                                </span>
+                                </span >
                             </Link>
                         ))}
 
                         {/* Otros Deportes Button */}
                         <button
                             onClick={() => setShowOtrosModal(true)}
-                            className="flex flex-col items-center justify-center gap-1 py-2 px-1"
+                            className="flex flex-col items-center justify-center gap-1.5 py-1"
                         >
-                            <div className="relative flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                            <div className="relative flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity">
                                 <span className="text-2xl">➕</span>
                             </div>
-                            <span className="text-[9px] font-black uppercase tracking-tight text-gray-500">
+                            <span className="text-[8px] font-black uppercase tracking-[0.1em] text-gray-600">
                                 Otros
                             </span>
                         </button>

@@ -21,6 +21,12 @@
   --danger: #ef4444;
   /* Red 500 */
 
+  /* Safe Area Variables for In-App Feel */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+
   /* UI Colors */
   --surface: #171717;
   --surface-highlight: #262626;
@@ -40,9 +46,24 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  background-color: var(--bg-dark);
+  background-color: var(--background);
   color: var(--text-primary);
   font-family: 'Outfit', sans-serif;
+
+  /* Mobile App Feel */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior-y: none;
+  /* Prevent pull-to-refresh unless desired */
+}
+
+/* Allow selection in inputs */
+input,
+textarea {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 a {
@@ -324,9 +345,17 @@ h6 {
 }
 
 @keyframes borderRotate {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Pulse Animation for Live Games */
@@ -344,6 +373,33 @@ h6 {
 }
 
 @keyframes livePulse {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(1.3); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+/* App-Like Utility Classes */
+.pb-safe {
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.pt-safe {
+  padding-top: var(--safe-area-top);
+}
+
+.mobile-haptic:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+}
+
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
 }

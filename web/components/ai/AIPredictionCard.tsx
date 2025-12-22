@@ -177,11 +177,13 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                         <p className="text-green-300 text-[10px] uppercase font-bold mb-1">
                                             {sport === 'basketball' ? 'Total Puntos' : 'Total Goles'}
                                         </p>
-                                        <p className="text-white font-bold text-lg">{prediction.predictions.totalGoals || '-'}</p>
+                                        <p className="text-white font-bold text-lg">
+                                            {sport === 'basketball' ? (prediction.predictions.totalPoints || '-') : (prediction.predictions.totalGoals || '-')}
+                                        </p>
                                     </div>
 
-                                    {/* Shots (Summary) */}
-                                    {prediction.predictions.shots && (
+                                    {/* Shots (Summary) - ONLY FOR FOOTBALL */}
+                                    {sport !== 'basketball' && prediction.predictions.shots && (
                                         <div className="bg-red-900/30 p-3 rounded-lg border border-red-500/20">
                                             <p className="text-red-300 text-[10px] uppercase font-bold mb-1">Tiros al Arco</p>
                                             <p className="text-white font-bold text-lg">{prediction.predictions.shots.onTarget || '-'}</p>
@@ -189,8 +191,32 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                     )}
                                 </div>
 
-                                {/* Corners Detail */}
-                                {prediction.predictions.corners && (
+                                {/* Basketball Specific Detail (Spread & O/U) */}
+                                {sport === 'basketball' && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {prediction.predictions.spread && (
+                                            <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-500/20">
+                                                <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">Hándicap (Spread)</p>
+                                                <div className="flex justify-between items-end">
+                                                    <p className="text-white font-bold text-lg">{prediction.predictions.spread.line}</p>
+                                                    <p className="text-[9px] text-gray-400 uppercase">{prediction.predictions.spread.favorite}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {prediction.predictions.overUnder && (
+                                            <div className="bg-purple-900/30 p-3 rounded-lg border border-purple-500/20">
+                                                <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">Over/Under</p>
+                                                <div className="flex justify-between items-end">
+                                                    <p className="text-white font-bold text-lg">{prediction.predictions.overUnder.line}</p>
+                                                    <p className="text-[9px] text-gray-400 uppercase">{prediction.predictions.overUnder.pick}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Corners Detail - ONLY FOR FOOTBALL */}
+                                {sport !== 'basketball' && prediction.predictions.corners && (
                                     <div className="bg-orange-900/30 p-3 rounded-lg border border-orange-500/20">
                                         <p className="text-orange-300 text-[10px] uppercase font-bold mb-2">🚩 Córners Esperados</p>
                                         <div className="grid grid-cols-3 gap-2 text-xs">
@@ -232,13 +258,13 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                     {sport === 'basketball' ? 'ESTIMADO' : 'EXACTO'}
                                                 </div>
                                                 <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">
-                                                    {sport === 'basketball' ? 'Total Puntos' : 'Marcador Exacto'}
+                                                    {sport === 'basketball' ? 'Resultado Final' : 'Marcador Exacto'}
                                                 </p>
                                                 <p className="text-white font-bold text-xl">{prediction.predictions.finalScore || '-'}</p>
                                             </div>
 
-                                            {/* Cards */}
-                                            {prediction.predictions.cards && (
+                                            {/* Cards - ONLY FOR FOOTBALL */}
+                                            {sport !== 'basketball' && prediction.predictions.cards && (
                                                 <div className="bg-yellow-900/30 p-3 rounded-lg border border-yellow-500/20">
                                                     <p className="text-yellow-300 text-[10px] uppercase font-bold mb-1">🟨 Tarjetas</p>
                                                     <p className="text-white font-bold text-lg">
@@ -263,8 +289,8 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                             </div>
                                         )}
 
-                                        {/* Offsides */}
-                                        {prediction.predictions.offsides && (
+                                        {/* Offsides - ONLY FOR FOOTBALL */}
+                                        {sport !== 'basketball' && prediction.predictions.offsides && (
                                             <div className="bg-purple-900/30 p-3 rounded-lg border border-purple-500/20">
                                                 <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">⛔ Fueras de Juego</p>
                                                 <p className="text-white font-bold text-lg mb-1">{prediction.predictions.offsides.total} totales</p>
