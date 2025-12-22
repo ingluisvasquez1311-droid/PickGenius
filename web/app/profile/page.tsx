@@ -25,8 +25,11 @@ import PremiumButton from '@/components/ui/PremiumButton';
 import PerformanceChart from '@/components/profile/PerformanceChart';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import PerformanceStats from '@/components/dashboard/PerformanceStats';
+import AchievementBadges from '@/components/dashboard/AchievementBadges';
+import ReferralCard from '@/components/dashboard/ReferralCard';
 
-type TabType = 'overview' | 'settings' | 'history' | 'security';
+type TabType = 'overview' | 'stats' | 'badges' | 'referrals' | 'settings' | 'history' | 'security';
 
 export default function ProfilePage() {
     const { user, loading, getHistory, signOut, updateUser } = useAuth();
@@ -96,6 +99,9 @@ export default function ProfilePage() {
 
     const navItems = [
         { id: 'overview', icon: User, label: 'Resumen' },
+        { id: 'stats', icon: Target, label: 'Estadísticas' },
+        { id: 'badges', icon: Trophy, label: 'Logros' },
+        { id: 'referrals', icon: Zap, label: 'Referidos' },
         { id: 'settings', icon: Settings, label: 'Ajustes' },
         { id: 'history', icon: History, label: 'Historial' },
         { id: 'security', icon: Shield, label: 'Seguridad' },
@@ -336,6 +342,24 @@ export default function ProfilePage() {
                                             </div>
                                         </GlassCard>
                                     </motion.div>
+                                )}
+
+                                {activeTab === 'stats' && (
+                                    <div className="space-y-6">
+                                        <PerformanceStats />
+                                    </div>
+                                )}
+
+                                {activeTab === 'badges' && (
+                                    <div className="space-y-6">
+                                        <AchievementBadges />
+                                    </div>
+                                )}
+
+                                {activeTab === 'referrals' && (
+                                    <div className="space-y-6">
+                                        <ReferralCard />
+                                    </div>
                                 )}
 
                                 {activeTab === 'history' && (
