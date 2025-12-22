@@ -136,12 +136,12 @@ export default function Navbar() {
                                 <div className="relative group/dropdown px-5 py-2.5 text-gray-500 hover:text-white cursor-pointer transition-all flex items-center gap-2">
                                     <span className="text-sm">➕</span>
                                     <span className="text-[10px] font-black uppercase tracking-widest">Otros</span>
-                                    <div className="absolute top-full left-0 mt-4 w-56 bg-[#0c0c0c]/95 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-300 p-3 z-50">
+                                    <div className="absolute top-full left-0 mt-2 w-56 bg-[#0c0c0c]/95 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-300 p-3 z-[100]">
                                         {otrosDeportes.map((sub) => (
                                             <Link
                                                 key={sub.href}
                                                 href={sub.href}
-                                                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-[10px] font-black uppercase tracking-widest group/item"
+                                                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-[10px] font-black uppercase tracking-widest group/item text-gray-400 hover:text-white"
                                             >
                                                 <span className="text-lg group-hover/item:scale-125 transition-transform">{sub.icon}</span>
                                                 <span className="group-hover/item:translate-x-1 transition-transform">{sub.label}</span>
