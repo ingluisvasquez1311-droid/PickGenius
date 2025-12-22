@@ -299,12 +299,23 @@ class SportsDataService {
      * Obtiene estadísticas de un jugador para una temporada
      */
     async getPlayerSeasonStats(playerId: number, tournamentId: number, seasonId: number): Promise<any> {
-        // Primero intentamos regularSeason que es más común en ligas como NBA
-        const res = await this.makeRequest(`/player/${playerId}/unique-tournament/${tournamentId}/season/${seasonId}/statistics/regularSeason`);
-        if (res && res.statistics) return res;
+        try {
+            // Priority 1: Regular Season (Most common for NBA/leagues)
+            const regularRes = await this.makeRequest(`/player/${playerId}/unique-tournament/${tournamentId}/season/${seasonId}/statistics/regularSeason`);
+            if (regularRes && regularRes.statistics) return regularRes;
+        } catch (e) {
+            // Ignore 404s on regularSeason
+        }
 
-        // Fallback a overall
-        return await this.makeRequest(`/player/${playerId}/unique-tournament/${tournamentId}/season/${seasonId}/statistics/overall`);
+        try {
+            // Priority 2: Overall (Fallback)
+            const overallRes = await this.makeRequest(`/player/${playerId}/unique-tournament/${tournamentId}/season/${seasonId}/statistics/overall`);
+            if (overallRes && overallRes.statistics) return overallRes;
+        } catch (e) {
+            console.warn(`[SportsData] No season stats found for player ${playerId}`);
+        }
+
+        return { statistics: {} };
     }
 
     /**

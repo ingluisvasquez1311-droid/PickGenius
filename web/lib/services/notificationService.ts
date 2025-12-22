@@ -49,15 +49,16 @@ export function subscribeToNotifications(uid: string, callback: (notifications: 
     if (!db) return () => { };
 
     const notificationsRef = collection(db!, 'notifications');
+    // OPTIMIZATION: Removed orderBy to avoid need for composite index
+    // We sort the results in memory (client-side) which is fine for <50 notifications
     const q = query(
         notificationsRef,
         where('uid', '==', uid),
-        orderBy('timestamp', 'desc'),
         limit(50)
     );
 
     return onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
-        const notifications = querySnapshot.docs.map(doc => {
+        let notifications = querySnapshot.docs.map(doc => {
             const data = doc.data();
             return {
                 id: doc.id,
@@ -70,6 +71,10 @@ export function subscribeToNotifications(uid: string, callback: (notifications: 
                 link: data.link
             } as AppNotification;
         });
+
+        // Sort in memory (Newest first)
+        notifications.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
         callback(notifications);
     }, (error) => {
         console.error('❌ [NotificationService] Subscription error:', error);

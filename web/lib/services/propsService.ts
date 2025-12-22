@@ -376,6 +376,21 @@ class PropsService {
             // 5. Tendencia
             const trend = last5[0] >= average ? '📈' : '📉';
 
+            // 6. Validation: If Average is 0, try to recalculate from valid last 5 entries
+            let finalAverage = average;
+            if (finalAverage === 0) {
+                const nonZeroStats = last5.filter(v => v > 0);
+                if (nonZeroStats.length > 0) {
+                    finalAverage = nonZeroStats.reduce((a, b) => a + b, 0) / nonZeroStats.length;
+                }
+            }
+
+            // Ensure we don't show 0.0 unless it's really 0
+            if (finalAverage === 0 && last5.every(v => v === 0)) {
+                // Skip this prop if we have absolutely no data
+                continue;
+            }
+
             props.push({
                 id: `${player.id}_${type}_${line}_${game.id}`,
                 player: {
@@ -401,7 +416,7 @@ class PropsService {
                     icon: config.icons[type] || '📊'
                 },
                 stats: {
-                    average: parseFloat(average.toFixed(1)),
+                    average: parseFloat(finalAverage.toFixed(1)),
                     last5: last5,
                     trend: trend
                 },

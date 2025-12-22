@@ -12,60 +12,48 @@ export async function GET(
         return new NextResponse('Player ID required', { status: 400 });
     }
 
+    // Use weserv.nl as a caching proxy to bypass hotlink protection
+    // We try the two possible Sofascore image URLs
+    const primaryUrl = `https://api.sofascore.app/api/v1/player/${playerId}/image`;
+    const secondaryUrl = `https://www.sofascore.com/api/v1/player/${playerId}/image`;
+
+    // Construct the weserv.nl URL. We pass the primary URL as the main source, and handle errors if it fails.
+    // However, for simplicity and reliability, we will try to fetch the first valid one or redirect to weserv.nl
+    // pointing to the most likely valid URL.
+
+    // Weserv is very reliable. We'll point it to the api.sofascore.app domain which is usually the mobile API.
+    const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(primaryUrl)}&w=200&h=200&fit=cover&a=top&output=webp&q=80`;
+
     try {
-        // Try multiple sources for player images
-        const sources = [
-            `https://www.sofascore.com/api/v1/player/${playerId}/image`,
-            `https://api.sofascore.app/api/v1/player/${playerId}/image`
-        ];
+        const response = await fetch(proxyUrl);
 
-        let imageResponse: Response | null = null;
+        if (!response.ok) {
+            // If the primary fails, try the secondary domain via weserv
+            const fallbackProxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(secondaryUrl)}&w=200&h=200&fit=cover&a=top&output=webp&q=80`;
+            const fallbackResponse = await fetch(fallbackProxyUrl);
 
-        for (const source of sources) {
-            try {
-                const response = await fetch(source, {
+            if (fallbackResponse.ok) {
+                const buffer = await fallbackResponse.arrayBuffer();
+                return new NextResponse(buffer, {
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Referer': 'https://www.sofascore.com/',
-                        'Origin': 'https://www.sofascore.com',
-                        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                        'Sec-Fetch-Dest': 'image',
-                        'Sec-Fetch-Mode': 'no-cors',
-                        'Sec-Fetch-Site': 'cross-site'
-                    },
-                    cache: 'force-cache'
+                        'Content-Type': 'image/webp',
+                        'Cache-Control': 'public, max-age=86400, immutable'
+                    }
                 });
-
-                if (response.ok) {
-                    imageResponse = response;
-                    break;
-                }
-            } catch (err) {
-                console.warn(`Failed to fetch player image from ${source}`);
-                continue;
             }
-        }
-
-        if (!imageResponse) {
             return new NextResponse('Image not found', { status: 404 });
         }
 
-        const imageBuffer = await imageResponse.arrayBuffer();
-        const contentType = imageResponse.headers.get('content-type') || 'image/png';
-
-        return new NextResponse(imageBuffer, {
-            status: 200,
+        const buffer = await response.arrayBuffer();
+        return new NextResponse(buffer, {
             headers: {
-                'Content-Type': contentType,
+                'Content-Type': 'image/webp',
                 'Cache-Control': 'public, max-age=86400, immutable'
             }
         });
 
     } catch (error) {
         console.error('Error proxying player image:', error);
-
-        // Return 404 on error to trigger frontend fallback (Initials)
-        return new NextResponse('Error fetching image', { status: 404 });
+        return new NextResponse('Error fetching image', { status: 500 });
     }
 }
