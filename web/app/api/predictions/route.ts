@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sportsDataService } from '@/lib/services/sportsDataService';
 import { groqService } from '@/lib/services/groqService';
 import { globalCache, CACHE_STRATEGIES } from '@/lib/utils/api-manager';
-import { getUserProfile } from '@/lib/userService';
+import { getUserProfile, incrementPredictionsUsed } from '@/lib/userService';
 
 export const maxDuration = 60; // Allow longer timeout for AI generation
 
@@ -30,7 +30,13 @@ export async function POST(request: NextRequest) {
         let isPremiumUser = false;
         if (uid) {
             const profile = await getUserProfile(uid);
-            isPremiumUser = profile?.isPremium || profile?.role === 'admin' || false;
+            // OWNER/ADMIN is always premium regardless of Firestore flags
+            const isOwner = profile?.email && (
+                profile.email.toLowerCase() === 'pickgenius@gmail.com' ||
+                profile.email.toLowerCase() === 'ingluisvasquez1311@gmail.com'
+            );
+            isPremiumUser = profile?.isPremium || profile?.role === 'admin' || isOwner || false;
+            console.log(`👤 [Prediction API] User ${uid} | isPremium: ${isPremiumUser} | Role: ${profile?.role}`);
         }
 
         // --- CACHE LAYER ---
@@ -105,6 +111,7 @@ export async function POST(request: NextRequest) {
             - If this is NBA: Matches are 48 minutes. Scores usually range from 190 to 240 total points.
             - If this is NOT NBA (FIBA, EuroLeague, ACB, etc.): Matches are 40 minutes. Scores vary but ALMOST NEVER exceed 180 total points.
             - ANALYZE SPECIAL MARKETS: 1st Quarter points, Player Props, and Total Points.
+            - VALUE BET ANALYSIS: Compare your calculated probability with the provided MARKET ODDS. If the odds are higher than your probability suggests (e.g. you see 70% win but odds are 2.50), identify it as a "Value Bet".
             - Current Tournament is: ${matchContext.tournament}. Use ONLY realistic lines for this specific league.
 
             RETURN JSON ONLY in SPANISH:
@@ -114,6 +121,8 @@ export async function POST(request: NextRequest) {
                 "reasoning": "Análisis detallado en ESPAÑOL explicando por qué ganará el equipo...",
                 "bettingTip": "${matchContext.home} -5.5",
                 "advancedMarkets": { "firstQuarter": "Over 52.5", "drawNoBet": "N/A - Basketball" },
+                "isValueBet": true,
+                "valueAnalysis": "Explicación de por qué este pick tiene valor según las cuotas de Bet365...",
                 "predictions": {
                     "finalScore": "${isNBA ? '112-105' : '82-78'}",
                     "totalPoints": "${isNBA ? '217' : '160'}",
@@ -141,6 +150,7 @@ export async function POST(request: NextRequest) {
             - Both Teams to Score (Ambos equipos anotarán)
             - Shots on Target (Remates a puerta) - e.g. "Player X: 2+ remates"
             - Player to score 2+ (Anotará 2+)
+            - VALUE BET ANALYSIS: Compare your calculated probability with the provided MARKET ODDS. Identify picks where the market is underestimating the outcome.
 
             RETURN JSON ONLY in SPANISH:
             {
@@ -149,6 +159,8 @@ export async function POST(request: NextRequest) {
                 "reasoning": "Análisis detallado en ESPAÑOL resaltando mercados de córners y remates...",
                 "bettingTip": "Más de 2.5 Goles y Ambos Anotan",
                 "advancedMarkets": { "corners": "Benfica: Mayor número", "shots": "Luis Suarez: 2+ a puerta", "drawNoBet": "${matchContext.home}" },
+                "isValueBet": false,
+                "valueAnalysis": "Breve explicación del valor respecto a Bet365...",
                 "predictions": {
                     "finalScore": "2-1",
                     "totalGoals": "3",

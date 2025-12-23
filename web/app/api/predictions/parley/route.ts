@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
             });
 
         // If sport is "all", let's make sure we have a mix, not just the first 40 by time
-        let filteredEvents = [];
+        let filteredEvents: any[] = [];
         if (sport === 'all') {
             // Group by sport to ensure variety
             const groups: { [key: string]: any[] } = {};
@@ -161,6 +161,10 @@ export async function POST(request: NextRequest) {
             - Si NO es NBA (EuroLeague, ACB, LNB, etc.): Los partidos duran 40 min. El total de puntos suele oscilar entre 150 y 175. NO asumas automáticamente el "Under"; analiza si los equipos tienen tendencias ofensivas o defensivas basándote en 'recentResults' y las cuotas de mercado.
             - CONSIDERAR MERCADOS: Puntos en 1er Cuarto, Hándicaps y Over/Under.
 
+            VALOR DE APUESTA (VALUE BET):
+            - Compara 'realMarketOdds' (Bet365) con tu análisis de probabilidad.
+            - Si una selección tiene una probabilidad alta pero el mercado paga bien, identifícala como "Selección de Valor".
+
             INSTRUCCIONES CRÍTICAS PARA FÚTBOL:
             - PRIORIDAD PREMIUM: Los usuarios buscan mercados de CÓRNERS (más de X), TARJETAS (amarillas/rojas) y REMATES (Shots on target).
             - Si hay datos de estos mercados en 'realMarketOdds', PRIORÍZALOS sobre el ganador del partido.
@@ -188,17 +192,24 @@ export async function POST(request: NextRequest) {
             3. Explica brevemente por qué estos 3 eventos juntos maximizan el valor sincronizado con las cuotas de mercado.
             4. Asigna un nivel de riesgo (Bajo, Medio, Alto, Extremo).
 
-            RETORNA ÚNICAMENTE UN OBJETO JSON EN ESPAÑOL:
+            ESPECIFICACIONES DE RESPUESTA (JSON ÚNICAMENTE):
+            Debes devolver un JSON con esta estructura exacta:
             {
-                "title": "Nombre Creativo del Parley",
-                "totalOdds": 4.50,
-                "legs": [
-                    { "matchName": "Team A vs Team B", "pick": "Gana Team A", "confidence": 85 },
-                    { "matchName": "Team C vs Team D", "pick": "Más de 210.5 puntos", "confidence": 78 },
-                    { "matchName": "Team E vs Team F", "pick": "Hándicap -1.5 Team E", "confidence": 72 }
-                ],
-                "analysis": "Explicación breve de la combinación...",
-                "riskLevel": "Medio"
+              "title": "Título del Parley",
+              "confidence": 85,
+              "totalOdds": 5.45,
+              "isValueParley": true,
+              "valueAnalysis": "Explicación del valor en Bet365...",
+              "legs": [
+                {
+                  "matchName": "Equipo A vs Equipo B", 
+                  "pick": "Victoria Equipo A",
+                  "odds": "1.85",
+                  "confidence": 80,
+                  "reasoning": "Breve por qué..."
+                }
+              ],
+              "analysis": "Resumen final detallado del parley..."
             }
         `;
 

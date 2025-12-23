@@ -139,9 +139,16 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                 <span className="text-4xl">🏆</span>
                             </div>
                             <p className="text-black/70 text-xs uppercase font-bold mb-2 mt-2">Veredicto del Genio</p>
-                            <p className="text-2xl md:text-3xl font-black text-black">
-                                {(!prediction.winner || prediction.winner.toLowerCase().includes('undefined')) ? 'Resultado Analizado' : prediction.winner}
-                            </p>
+                            <div className="flex items-center justify-center gap-2 mb-1">
+                                <p className="text-2xl md:text-3xl font-black text-black">
+                                    {(!prediction.winner || prediction.winner.toLowerCase().includes('undefined')) ? 'Resultado Analizado' : prediction.winner}
+                                </p>
+                                {prediction.isValueBet && (
+                                    <span className="bg-black text-yellow-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-yellow-400 animate-pulse">
+                                        VALUE BET
+                                    </span>
+                                )}
+                            </div>
 
                             {/* Betting Tip Area - Masked if needed */}
                             <div className="mt-4 px-4 py-2 bg-black/10 rounded-xl border border-black/10">

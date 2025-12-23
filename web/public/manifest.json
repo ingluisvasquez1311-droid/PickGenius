@@ -1,11 +1,11 @@
 {
-    "name": "PickGenius - Predicciones Deportivas con IA",
+    "name": "PickGenius Pro",
     "short_name": "PickGenius",
-    "description": "Domina tus parlays de NBA y Fútbol con análisis de inteligencia artificial y estadísticas avanzadas",
+    "description": "IA Avanzada para Predicciones Deportivas y Parlays",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0b0b0b",
-    "theme_color": "#050505",
+    "background_color": "#000000",
+    "theme_color": "#000000",
     "orientation": "portrait",
     "icons": [
         {

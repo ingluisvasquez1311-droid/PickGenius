@@ -127,9 +127,9 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                 </div>
 
                 {/* 3-Column Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full items-start">
 
-                    {/* Left Column: Home Players (3 cols) */}
+                    {/* Left Column: Home Details & Players (3 cols) */}
                     <div className="md:col-span-3 order-2 md:order-1 space-y-4">
                         <ErrorBoundary>
                             <TopPlayersCard
@@ -142,6 +142,10 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                         </ErrorBoundary>
 
                         <ErrorBoundary>
+                            <MatchStatsSummary match={game} sport={sport} eventId={eventId} />
+                        </ErrorBoundary>
+
+                        <ErrorBoundary>
                             <MatchPlayerStats
                                 eventId={parseInt(eventId)}
                                 sport={sport}
@@ -150,7 +154,7 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                         </ErrorBoundary>
                     </div>
 
-                    {/* Center Column: AI + Scoring Detail (6 cols) */}
+                    {/* Center Column: AI Oracle Dashboard (6 cols) */}
                     <div className="md:col-span-6 order-1 md:order-2 space-y-4">
                         <ErrorBoundary>
                             <AIPredictionCard
@@ -214,27 +218,6 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                             </div>
                         </div>
 
-                        <ErrorBoundary>
-                            <MatchStatsSummary match={game} sport={sport} eventId={eventId} />
-                        </ErrorBoundary>
-
-                        {/* MVP Spotlight */}
-                        {bestPlayers?.mvp && (
-                            <div className="glass-card overflow-hidden relative group">
-                                <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-black px-3 py-1 rounded-bl-lg z-10">MVP ACTUAL</div>
-                                <div className="flex p-6 gap-6 items-center">
-                                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-amber-500/10 border border-yellow-500/30 flex-shrink-0 relative overflow-hidden">
-                                        <img src={bestPlayers.mvp.imageUrl} alt={bestPlayers.mvp.name} className="w-full h-full object-cover" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-yellow-500 text-[10px] font-black uppercase tracking-widest">{bestPlayers.ai?.title || 'DOMINIO PURO'}</p>
-                                        <h3 className="text-2xl font-black text-white italic tracking-tighter mb-1">{bestPlayers.mvp.name}</h3>
-                                        <p className="text-gray-400 text-xs leading-relaxed">{bestPlayers.ai?.description || 'Liderando el equipo con una eficiencia táctica superior esta jornada.'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
                         {/* Period Detail (Generic) */}
                         <div className="glass-card p-6">
                             <h3 className="text-xs font-black uppercase mb-6 border-b border-white/5 pb-2 tracking-widest text-gray-400">Desglose del Partido</h3>
@@ -261,8 +244,25 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                         </div>
                     </div>
 
-                    {/* Right Column: Away Players (3 cols) */}
+                    {/* Right Column: Away Details & MVP (3 cols) */}
                     <div className="md:col-span-3 order-3 md:order-3 space-y-4">
+                        {/* MVP Spotlight Moved Here */}
+                        {bestPlayers?.mvp && (
+                            <div className="glass-card overflow-hidden relative group">
+                                <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-black px-3 py-1 rounded-bl-lg z-10">MVP</div>
+                                <div className="p-4 flex flex-col gap-4">
+                                    <div className="aspect-square w-full rounded-2xl bg-gradient-to-br from-yellow-500/20 to-amber-500/10 border border-yellow-500/30 relative overflow-hidden">
+                                        <img src={bestPlayers.mvp.imageUrl} alt={bestPlayers.mvp.name} className="w-full h-full object-cover" />
+                                    </div>
+                                    <div>
+                                        <p className="text-yellow-500 text-[10px] font-black uppercase tracking-widest">{bestPlayers.ai?.title || 'DOMINIO'}</p>
+                                        <h3 className="text-xl font-black text-white italic tracking-tighter mb-1">{bestPlayers.mvp.name}</h3>
+                                        <p className="text-gray-400 text-[10px] leading-relaxed">{bestPlayers.ai?.description || 'Rendimiento superior esta jornada.'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <ErrorBoundary>
                             <TopPlayersCard
                                 title="TOP JUGADORES VISITANTE"

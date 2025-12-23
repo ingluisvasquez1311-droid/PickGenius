@@ -298,11 +298,31 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
                                                         Ticket Generado
                                                     </div>
                                                 </div>
+                                                <div>
+                                                    <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">{result.title || 'Parley sugerido'}</div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="text-xl font-bold text-white tracking-tight">{result.confidence}% Confianza</div>
+                                                        {result.isValueParley && (
+                                                            <span className="bg-orange-500 text-black text-[8px] font-black px-2 py-0.5 rounded-full animate-pulse">
+                                                                VALOR DETECTADO
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
                                                 <div className="text-right">
                                                     <div className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Cuota Total</div>
-                                                    <div className="text-2xl font-black text-orange-400">@{result.totalOdds?.toFixed(2)}</div>
+                                                    <div className="text-2xl font-black text-orange-400">@{result.totalOdds || 'N/A'}</div>
                                                 </div>
                                             </div>
+
+                                            {result.isValueParley && result.valueAnalysis && (
+                                                <div className="px-4 py-2 bg-orange-500/10 border-y border-orange-500/20 mb-2">
+                                                    <p className="text-[9px] text-orange-400 font-bold uppercase tracking-widest flex items-center gap-1">
+                                                        <TrendingUp className="w-3 h-3" /> Análisis de Valor (Bet365)
+                                                    </p>
+                                                    <p className="text-[10px] text-orange-300 italic">{result.valueAnalysis}</p>
+                                                </div>
+                                            )}
 
                                             <div className="p-4 md:p-6 space-y-4">
                                                 {result.legs.map((leg: any, i: number) => (
