@@ -82,7 +82,24 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
                             return acc;
                         }, {} as Record<string, { displayName: string; countryId?: number; countryName: string; games: SportsDataEvent[] }>);
 
-                        return Object.entries(groupedByLeague).map(([leagueKey, { displayName, countryId, countryName, games: leagueGames }]) => {
+                        // Prioritize TOP leagues
+                        const topLeagues = [
+                            'Premier League', 'LaLiga', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1',
+                            'UEFA Champions League', 'UEFA Europa League',
+                            'NBA', 'Euroleague', 'ACB', 'NCAA',
+                            'Copa Libertadores', 'Copa Sudamericana', 'Brasileirão', 'Liga Profesional'
+                        ];
+
+                        const sortedLeagues = Object.entries(groupedByLeague).sort(([keyA, dataA], [keyB, dataB]) => {
+                            const isTopA = topLeagues.some(top => dataA.displayName.includes(top));
+                            const isTopB = topLeagues.some(top => dataB.displayName.includes(top));
+
+                            if (isTopA && !isTopB) return -1;
+                            if (!isTopA && isTopB) return 1;
+                            return 0; // Keep original order for same priority
+                        });
+
+                        return sortedLeagues.map(([leagueKey, { displayName, countryId, countryName, games: leagueGames }]) => {
                             const isExpanded = expandedGroups.has(leagueKey);
 
                             return (

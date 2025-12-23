@@ -12,6 +12,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { BettingSlipProvider } from "@/contexts/BettingSlipContext";
 import BettingSlip from "@/components/betting/BettingSlip";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 
 export const viewport: Viewport = {
@@ -78,7 +79,7 @@ export default function RootLayout({
               <div className="hidden lg:block">
                 <LiveTicker />
               </div>
-              <main className="pt-24 min-h-screen">
+              <main className="pt-24 pb-20 md:pb-0 min-h-screen">
                 <GlobalErrorBoundary>
                   <PageTransition>
                     {children}
@@ -88,6 +89,7 @@ export default function RootLayout({
               <Footer />
               <ToastProvider />
               <BettingSlip />
+              <MobileBottomNav />
             </BettingSlipProvider>
           </QueryProvider>
         </AuthProvider>
