@@ -3,6 +3,7 @@ import { sportsDataService } from '@/lib/services/sportsDataService';
 import { groqService } from '@/lib/services/groqService';
 import { getUserProfile } from '@/lib/userService';
 import { globalCache } from '@/lib/utils/api-manager';
+import { ParleyResponseSchema } from '@/lib/schemas/prediction-schemas';
 
 export const maxDuration = 60;
 
@@ -136,7 +137,8 @@ export async function POST(request: NextRequest) {
                 { role: "user", content: prompt }
             ],
             model: "llama-3.1-8b-instant",
-            temperature: 0.7
+            temperature: 0.7,
+            schema: ParleyResponseSchema // Use the correct schema for Parley
         });
 
         return NextResponse.json({

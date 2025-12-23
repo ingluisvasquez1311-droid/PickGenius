@@ -93,5 +93,18 @@ export const NewsAnalysisSchema = z.object({
     brutalTitle: z.string().optional()
 });
 
+export const ParleyResponseSchema = z.object({
+    title: z.string(),
+    totalOdds: z.number().or(z.string()).transform(v => typeof v === 'string' ? parseFloat(v) : v),
+    legs: z.array(z.object({
+        matchName: z.string(),
+        pick: z.string(),
+        confidence: z.number().min(0).max(100)
+    })),
+    analysis: z.string(),
+    riskLevel: z.string()
+});
+
 export type PredictionResponse = z.infer<typeof PredictionResponseSchema>;
 export type NewsAnalysisResponse = z.infer<typeof NewsAnalysisSchema>;
+export type ParleyResponse = z.infer<typeof ParleyResponseSchema>;
