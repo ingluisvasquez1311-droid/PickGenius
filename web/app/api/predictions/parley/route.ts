@@ -38,31 +38,59 @@ export async function POST(request: NextRequest) {
             sportsDataService.getEventsBySport('tennis').catch(() => [])
         ]);
 
-        const allEvents = [...footballEvents, ...basketballEvents, ...baseballEvents, ...nflEvents, ...nhlEvents, ...tennisEvents]
+        // 2. Filter and Diversify
+        const allEventsRaw = [...footballEvents, ...basketballEvents, ...baseballEvents, ...nflEvents, ...nhlEvents, ...tennisEvents]
             .filter(e => {
-                if (e.status.type === 'finished') return false;
+                if (!e.status || e.status.type === 'finished') return false;
 
-                // Sport filtering
+                // Sport filtering - be flexible with names
                 if (sport !== 'all') {
-                    const eSport = e.tournament.category.sport.name.toLowerCase();
-                    if (sport === 'football' && eSport !== 'football') return false;
+                    const eSport = e.tournament?.category?.sport?.name?.toLowerCase() || '';
+                    const isFútbol = eSport === 'football' || eSport === 'soccer';
+
+                    if (sport === 'football' && !isFútbol) return false;
                     if (sport === 'basketball' && eSport !== 'basketball') return false;
                     if (sport === 'baseball' && eSport !== 'baseball') return false;
                     if (sport === 'tennis' && eSport !== 'tennis') return false;
+                    if (sport === 'american-football' && (eSport !== 'american-football' && eSport !== 'nfl' && eSport !== 'american football')) return false;
+                    if (sport === 'icehockey' && (eSport !== 'icehockey' && eSport !== 'ice hockey' && eSport !== 'nhl')) return false;
                 }
                 return true;
-            })
-            .sort((a, b) => a.startTimestamp - b.startTimestamp) // Prioritize today (earliest matches first)
-            .slice(0, 40); // Increased to 40 to cover more immediate events
+            });
 
-        if (allEvents.length < 2) {
+        // If sport is "all", let's make sure we have a mix, not just the first 40 by time
+        let filteredEvents = [];
+        if (sport === 'all') {
+            // Group by sport to ensure variety
+            const groups: { [key: string]: any[] } = {};
+            allEventsRaw.forEach(e => {
+                const sName = e.tournament.category.sport.slug || 'other';
+                if (!groups[sName]) groups[sName] = [];
+                groups[sName].push(e);
+            });
+
+            // Take top 15 from each major sport, then sort result by time
+            Object.values(groups).forEach(group => {
+                const sortedGroup = group.sort((a, b) => a.startTimestamp - b.startTimestamp);
+                filteredEvents.push(...sortedGroup.slice(0, 15));
+            });
+
+            filteredEvents.sort((a, b) => a.startTimestamp - b.startTimestamp);
+        } else {
+            filteredEvents = allEventsRaw
+                .sort((a, b) => a.startTimestamp - b.startTimestamp)
+                .slice(0, 60); // More room for the specific sport
+        }
+
+        if (filteredEvents.length < 2) {
+            console.log(`❌ [Parley API] Not enough events for ${sport}. Total found before final filter: ${allEventsRaw.length}`);
             return NextResponse.json({
                 success: false,
-                error: `No hay suficientes eventos de ${sport === 'all' ? 'deporte mixto' : sport} activos.`
+                error: `No hay suficientes eventos de ${sport === 'all' ? 'deporte mixto' : sport} activos en este momento.`
             });
         }
 
-        const simplifiedEvents = await Promise.all(allEvents.map(async e => {
+        const simplifiedEvents = await Promise.all(filteredEvents.map(async e => {
             const oddsRes = await sportsDataService.getMatchOdds(e.id).catch(() => null);
             const topMarkets = oddsRes?.markets?.slice(0, 3).map((m: any) => ({
                 name: m.marketName,

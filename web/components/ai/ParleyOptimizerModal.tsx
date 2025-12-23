@@ -46,6 +46,8 @@ const sportOptions = [
     { id: 'all', name: 'Mixto (Auto)', icon: Zap, color: 'text-orange-400', desc: 'La IA elige los mejores de todos' },
     { id: 'football', name: 'Fútbol', icon: Target, color: 'text-blue-400', desc: 'Goles, Córners y Props' },
     { id: 'basketball', name: 'Baloncesto', icon: TrendingUp, color: 'text-purple-400', desc: 'NBA y Ligas Europeas' },
+    { id: 'american-football', name: 'NFL', icon: Zap, color: 'text-orange-400', desc: 'Touchdowns y Yardas' },
+    { id: 'icehockey', name: 'NHL', icon: Shield, color: 'text-blue-500', desc: 'Goles y Tiros a Puerta' },
     { id: 'baseball', name: 'Béisbol', icon: Shield, color: 'text-emerald-400', desc: 'MLB y Hits/K\'s' },
     { id: 'tennis', name: 'Tenis', icon: Star, color: 'text-yellow-400', desc: 'Sets y Ganadores' },
 ];
