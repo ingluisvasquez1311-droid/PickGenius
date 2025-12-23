@@ -65,15 +65,15 @@ class ScraperService {
         // Prioritize SCRAPER_API_KEYS (comma separated list)
         if (process.env.SCRAPER_API_KEYS) {
             const list = process.env.SCRAPER_API_KEYS.split(',')
-                .map(k => k.trim())
-                .filter(k => k && k.length > 5); // Basic validation
+                .map(k => k.replace(/["']/g, '').trim())
+                .filter(k => k && k.length > 10); // Basic validation (ScraperAPI keys are usually long)
             keys.push(...list);
             console.log(`🔑 [ScraperService] Loaded ${list.length} keys from SCRAPER_API_KEYS`);
         }
 
         // Add SCRAPER_API_KEY if not already present
         if (process.env.SCRAPER_API_KEY) {
-            const singleKey = process.env.SCRAPER_API_KEY.trim();
+            const singleKey = process.env.SCRAPER_API_KEY.replace(/["']/g, '').trim();
             if (singleKey && !keys.includes(singleKey)) {
                 keys.push(singleKey);
                 console.log(`🔑 [ScraperService] Added primary SCRAPER_API_KEY`);
