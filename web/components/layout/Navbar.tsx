@@ -109,19 +109,19 @@ export default function Navbar() {
                             </Link>
 
                             {/* Navigation Links - Desktop Only */}
-                            <div className="hidden lg:flex items-center gap-2">
+                            <div className="hidden lg:flex items-center gap-4">
                                 {navLinks.map((link) => (
                                     <Link
                                         key={link.href}
                                         href={link.href}
-                                        className={`relative px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2
+                                        className={`relative px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2
                                             ${isActive(link.href)
                                                 ? `${link.textColor} bg-white/5 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]`
-                                                : 'text-gray-500 hover:text-white hover:bg-white/5'
+                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
-                                        <span>{link.icon}</span>
-                                        <span>{link.label}</span>
+                                        <span className="text-base">{link.icon}</span>
+                                        <span className="hidden xl:block">{link.label}</span>
                                         {isActive(link.href) && (
                                             <motion.div
                                                 layoutId="nav-active"
@@ -131,34 +131,20 @@ export default function Navbar() {
                                         )}
                                     </Link>
                                 ))}
-
-                                {/* Otros Deportes Dropdown */}
-                                <div className="relative group/dropdown px-5 py-2.5 text-gray-500 hover:text-white cursor-pointer transition-all flex items-center gap-2">
-                                    <span className="text-sm">➕</span>
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Otros</span>
-                                    <div className="absolute top-full left-0 mt-2 w-56 bg-[#0c0c0c]/95 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-300 p-3 z-[100]">
-                                        {otrosDeportes.map((sub) => (
-                                            <Link
-                                                key={sub.href}
-                                                href={sub.href}
-                                                className="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all text-[10px] font-black uppercase tracking-widest group/item text-gray-400 hover:text-white"
-                                            >
-                                                <span className="text-lg group-hover/item:scale-125 transition-transform">{sub.icon}</span>
-                                                <span className="group-hover/item:translate-x-1 transition-transform">{sub.label}</span>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
 
                             {/* Auth & Mobile Mini */}
                             <div className="flex items-center gap-4">
                                 {!loading && (
                                     user ? (
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-4">
                                             {user.role === 'admin' && (
-                                                <Link href="/admin" className="hidden md:block text-[9px] font-black tracking-widest border border-red-500/50 bg-red-500/10 px-3 py-1.5 rounded-full text-red-500 hover:bg-red-500 hover:text-white transition-all">
-                                                    ADMIN
+                                                <Link
+                                                    href="/admin"
+                                                    className="hidden md:flex items-center gap-2 text-[10px] font-black tracking-[0.2em] border-2 border-red-500 bg-red-500/10 px-5 py-2 rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse"
+                                                >
+                                                    <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                                                    ADMIN PANEL
                                                 </Link>
                                             )}
 
@@ -167,11 +153,11 @@ export default function Navbar() {
                                             {/* User Dropdown */}
                                             <div className="relative group/profile">
                                                 <Link href="/profile" className="flex items-center">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center border-2 border-white/10 group-hover/profile:border-purple-400 transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] relative overflow-hidden">
+                                                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center border-2 border-white/10 group-hover/profile:border-purple-400 transition-all shadow-[0_0_25px_rgba(168,85,247,0.4)] relative overflow-hidden">
                                                         {user.photoURL ? (
-                                                            <Image src={user.photoURL} alt="Avatar" width={40} height={40} className="w-full h-full object-cover" />
+                                                            <Image src={user.photoURL} alt="Avatar" width={44} height={44} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <span className="text-xs font-black italic uppercase text-white">
+                                                            <span className="text-sm font-black italic uppercase text-white">
                                                                 {user.email?.[0].toUpperCase()}
                                                             </span>
                                                         )}
@@ -179,34 +165,39 @@ export default function Navbar() {
                                                 </Link>
 
                                                 {/* Desktop Profile Menu */}
-                                                <div className="absolute top-full right-0 mt-4 w-48 bg-[#0c0c0c]/95 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] shadow-2xl opacity-0 invisible group-hover/profile:opacity-100 group-hover/profile:visible transition-all duration-300 p-2 z-50">
-                                                    <div className="px-4 py-3 border-b border-white/5 mb-1">
+                                                <div className="absolute top-full right-0 mt-4 w-52 bg-[#0c0c0c]/98 backdrop-blur-3xl border border-white/10 rounded-[2rem] shadow-2xl opacity-0 invisible group-hover/profile:opacity-100 group-hover/profile:visible transition-all duration-300 p-3 z-50">
+                                                    {user.role === 'admin' && (
+                                                        <Link href="/admin" className="md:hidden flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 text-[9px] font-black uppercase tracking-widest mb-2 border border-red-500/20">
+                                                            <span>🛡️</span> Panel Admin
+                                                        </Link>
+                                                    )}
+                                                    <div className="px-4 py-3 border-b border-white/5 mb-2">
                                                         <p className="text-[10px] font-black text-white truncate uppercase tracking-tighter">
                                                             {user.displayName || user.email?.split('@')[0]}
                                                         </p>
                                                         <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest truncate">
-                                                            {user.role === 'admin' ? 'Administrator' : 'Premium Member'}
+                                                            {user.role === 'admin' ? 'SYSTEM ADMINISTRATOR' : 'PREMIUM ANALYST'}
                                                         </p>
                                                     </div>
-                                                    <Link href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-white">
-                                                        <span>👤</span> Perfil / Dashboard
+                                                    <Link href="/profile" className="flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-white/5 transition-all text-xs font-bold text-gray-400 hover:text-white">
+                                                        <span>📊</span> Dashboard
                                                     </Link>
-                                                    <Link href="/profile?tab=settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-white">
+                                                    <Link href="/profile?tab=settings" className="flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-white/5 transition-all text-xs font-bold text-gray-400 hover:text-white">
                                                         <span>⚙️</span> Ajustes
                                                     </Link>
                                                     <button
                                                         onClick={() => signOut()}
-                                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 transition-all text-[9px] font-black uppercase tracking-widest text-red-500/70 hover:text-red-500"
+                                                        className="w-full flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-red-500/10 transition-all text-xs font-bold text-red-500/70 hover:text-red-500"
                                                     >
-                                                        <span>🚪</span> Salir del Núcleo
+                                                        <span>⚡</span> Desconectar
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
                                     ) : (
                                         <div className="flex gap-2">
-                                            <Link href="/auth/register" className="relative overflow-hidden px-8 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.2)]">
-                                                UNIRSE
+                                            <Link href="/auth/register" className="relative overflow-hidden px-8 py-3.5 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 transition-all shadow-[0_15px_35px_rgba(255,255,255,0.25)]">
+                                                UNIRSE AHORA
                                             </Link>
                                         </div>
                                     )
@@ -219,48 +210,35 @@ export default function Navbar() {
 
             {/* Mobile Bottom Navigation */}
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe mobile-haptic">
-                <div className="bg-[#0a0a0a]/90 backdrop-blur-2xl border-t border-white/5 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] rounded-t-[2.5rem] overflow-hidden">
-                    <div className="grid grid-cols-6 gap-0 px-2 pt-4 pb-2">
+                <div className="bg-[#0a0a0a]/95 backdrop-blur-3xl border-t border-white/10 shadow-[0_-15px_45px_rgba(0,0,0,0.9)] rounded-t-[3rem] overflow-hidden">
+                    <div className="grid grid-cols-5 gap-0 px-2 pt-5 pb-3">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className="flex flex-col items-center justify-center gap-1.5 py-1"
+                                className="flex flex-col items-center justify-center gap-2 py-1"
                             >
                                 <div className={`relative flex items-center justify-center transition-all duration-500 ${isActive(link.href)
-                                    ? 'scale-110 -translate-y-1'
-                                    : 'scale-100 opacity-40'
+                                    ? 'scale-125 -translate-y-1.5'
+                                    : 'scale-100 opacity-30 shadow-none'
                                     }`}>
-                                    <span className="text-2xl drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">{link.icon}</span>
+                                    <span className="text-2xl drop-shadow-[0_0_12px_rgba(255,255,255,0.3)]">{link.icon}</span>
                                     {isActive(link.href) && (
                                         <motion.div
                                             layoutId="mobile-nav-active"
-                                            className="absolute -inset-2 bg-white/10 rounded-[1.25rem] z-[-1]"
+                                            className="absolute -inset-3 bg-white/15 rounded-2xl z-[-1]"
                                             transition={{ type: "spring", bounce: 0.4, duration: 0.6 }}
                                         />
                                     )}
                                 </div>
-                                <span className={`text-[8px] font-black uppercase tracking-[0.1em] transition-colors ${isActive(link.href)
+                                <span className={`text-[9px] font-black uppercase tracking-[0.15em] transition-colors ${isActive(link.href)
                                     ? 'text-white'
-                                    : 'text-gray-600'
+                                    : 'text-gray-700'
                                     }`}>
                                     {link.shortLabel}
                                 </span >
                             </Link>
                         ))}
-
-                        {/* Otros Deportes Button */}
-                        <button
-                            onClick={() => setShowOtrosModal(true)}
-                            className="flex flex-col items-center justify-center gap-1.5 py-1"
-                        >
-                            <div className="relative flex items-center justify-center opacity-40 hover:opacity-100 transition-opacity">
-                                <span className="text-2xl">➕</span>
-                            </div>
-                            <span className="text-[8px] font-black uppercase tracking-[0.1em] text-gray-600">
-                                Otros
-                            </span>
-                        </button>
                     </div>
                 </div>
             </nav>

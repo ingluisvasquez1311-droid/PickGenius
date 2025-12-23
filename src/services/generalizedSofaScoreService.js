@@ -206,6 +206,14 @@ class GeneralizedSofaScoreService {
     async getStandings(tournamentId, seasonId) {
         return this.makeRequest(`/tournament/${tournamentId}/season/${seasonId}/standings/total`, `standings_${tournamentId}_${seasonId}`, 3600);
     }
+
+    /**
+     * Universal fetch for raw endpoints (used by proxy)
+     */
+    async fetchData(endpoint) {
+        const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+        return this.makeRequest(cleanEndpoint, `raw_${cleanEndpoint.replace(/\//g, '_')}`, 30);
+    }
 }
 
 module.exports = new GeneralizedSofaScoreService();

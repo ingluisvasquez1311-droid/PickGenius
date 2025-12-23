@@ -47,22 +47,23 @@ router.get('/player-image/:playerId', async (req, res) => {
 });
 
 /**
- * Proxy for category images (flags)
- * GET /api/proxy/category-image/:categoryId
+ * Proxy for Raw Sports Data (Unified Bridge)
+ * GET /api/proxy/sportsdata/*
  */
-router.get('/category-image/:categoryId', async (req, res) => {
+router.get('/sportsdata/*', async (req, res) => {
     try {
-        const { categoryId } = req.params;
-        const response = await generalizedSofaScoreService.getCategoryImage(categoryId);
+        const path = req.params[0] || req.params.path || req.url.split('/sportsdata/')[1];
+        console.log(`🔌 [Express Bridge] Proxying to Sofascore: ${path}`);
 
-        if (response && response.data) {
-            res.set('Cache-Control', 'public, max-age=604800, immutable'); // Flag images change very rarely
-            res.set('Content-Type', response.headers['content-type'] || 'image/png');
-            res.send(Buffer.from(response.data));
+        const response = await generalizedSofaScoreService.fetchData(path);
+
+        if (response && response.success) {
+            res.json(response.data);
         } else {
-            res.status(404).json({ success: false, error: 'Category image not found' });
+            res.status(404).json({ success: false, error: 'Data not found' });
         }
     } catch (error) {
+        console.error(`❌ Error in sportsdata proxy route:`, error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });

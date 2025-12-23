@@ -74,8 +74,10 @@ export default function RootLayout({
           <QueryProvider>
             <BettingSlipProvider>
               <Navbar />
-              <ChristmasWrapper />
-              <LiveTicker />
+              {/* <ChristmasWrapper /> */}
+              <div className="hidden lg:block">
+                <LiveTicker />
+              </div>
               <main className="pt-24 min-h-screen">
                 <GlobalErrorBoundary>
                   <PageTransition>
