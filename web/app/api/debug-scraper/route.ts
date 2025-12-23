@@ -16,14 +16,19 @@ export async function GET() {
     if (bridgeUrl) {
         try {
             const startBridge = Date.now();
-            console.log(`🔌 [Debug Bridge] Checking connection to: ${bridgeUrl}/api/health`);
+            console.log(`🔌 [Debug Bridge] Checking "Home IP" connection: ${bridgeUrl}/api/health`);
+
+            // Advanced Stealth Headers for the test itself
+            const stealthHeaders = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'ngrok-skip-browser-warning': 'true',
+                'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120"',
+                'Sec-Fetch-Mode': 'cors'
+            };
 
             const bridgeResponse = await fetch(`${bridgeUrl}/api/health`, {
-                headers: {
-                    'ngrok-skip-browser-warning': 'true',
-                    'User-Agent': 'Vercel-Bridge-Monitor'
-                },
-                signal: AbortSignal.timeout(8000)
+                headers: stealthHeaders,
+                signal: AbortSignal.timeout(10000)
             });
 
             bridgeResult = {
@@ -31,7 +36,7 @@ export async function GET() {
                 status: bridgeResponse.status,
                 ok: bridgeResponse.ok,
                 latency: Date.now() - startBridge,
-                message: bridgeResponse.ok ? "✅ CONEXIÓN EXITOSA CON PC LOCAL" : "❌ ERROR EN PUENTE LOCAL"
+                mimicry: "Enabled (Stealth Headers Active)"
             };
 
             if (!bridgeResponse.ok) {
@@ -39,13 +44,13 @@ export async function GET() {
             }
         } catch (e: any) {
             bridgeError = e.message;
-            console.error(`❌ [Debug Bridge] Connection Failed:`, e.message);
+            console.error(`❌ [Debug Bridge] Sync Failed:`, e.message);
         }
     }
 
     const diagnostics = {
         timestamp: new Date().toISOString(),
-        status: bridgeResult?.ok ? "ONLINE" : "OFFLINE",
+        status: bridgeResult?.ok ? "✅ ONLINE (Home IP Bridge Active)" : "❌ OFFLINE (Check ngrok)",
         bridge_tunnel: {
             configured: !!bridgeUrl,
             url: bridgeUrl,
@@ -53,14 +58,19 @@ export async function GET() {
             error: bridgeError,
             details: bridgeResult
         },
+        stealth_config: {
+            mimic_browser: true,
+            user_agent: "Chrome 120 (Mimic)",
+            home_ip_priority: true,
+            scraper_api: "REMOVED"
+        },
         environment: {
-            node_env: vars.NODE_ENV,
             is_vercel: !!process.env.VERCEL,
-            scraper_api_disabled: true
+            node_env: vars.NODE_ENV
         },
         instruction: bridgeResult?.ok
-            ? "Túnel configurado correctamente. Los datos en vivo deberían cargar."
-            : "REVISA: 1. ngrok debe estar corriendo. 2. La URL en Vercel debe ser la actual de ngrok. 3. Haz 'Redeploy' en Vercel tras cambiar la URL."
+            ? "El túnel está operando. Los datos se solicitan como un navegador real desde tu IP residencial."
+            : "ERROR: Vercel no puede conectar con tu PC. Asegúrate de que ngrok esté corriendo y la URL configurada en Vercel sea la correcta."
     };
 
     return NextResponse.json(diagnostics, { status: 200 });

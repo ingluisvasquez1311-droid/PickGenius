@@ -17,6 +17,7 @@ export async function GET(
         const bridgeUrl = process.env.NEXT_PUBLIC_API_URL;
 
         // --- PRIORITY 1: BRIDGE (TUNNEL) ---
+        // Forward to the "Home IP" bridge if configured (usually on Vercel)
         if (bridgeUrl && bridgeUrl.startsWith('http')) {
             const cleanBridgeUrl = bridgeUrl.trim().replace(/\/$/, "");
             const bridgeFetchUrl = `${cleanBridgeUrl}/api/proxy/sportsdata/${path}${query}`;
@@ -44,30 +45,43 @@ export async function GET(
             }
         }
 
-        // --- PRIORITY 2: DIRECT STEALTH (FALLBACK) ---
-        console.log(`🕵️ [Proxy] Using Stealth Fallback for: ${path}`);
+        // --- PRIORITY 2: DIRECT STEALTH (FALLBACK / LOCAL ROLE) ---
+        // This is the part that will actually make the request to Sofascore from the "Home IP"
+        console.log(`🕵️ [Proxy Stealth] Mimicking Browser for: ${path}`);
 
         // Determine Cache TTL based on path
-        let revalidate = 60; // Default 1 min for proxy fallback
+        let revalidate = 60;
         if (path.includes('/events/live')) revalidate = 30;
 
         const directUrl = `https://api.sofascore.com/api/v1/${path}${query}`;
 
+        // Advanced Stealth Headers to look like a real browser session
+        const stealthHeaders = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+            'Referer': 'https://www.sofascore.com/',
+            'Origin': 'https://www.sofascore.com',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-site',
+            'Pragma': 'no-cache'
+        };
+
         const response = await fetch(directUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': '*/*',
-                'Accept-Language': 'es-ES,es;q=0.9',
-                'Referer': 'https://www.sofascore.com/',
-                'Origin': 'https://www.sofascore.com',
-                'Cache-Control': 'no-cache'
-            },
+            headers: stealthHeaders,
             next: { revalidate },
             signal: AbortSignal.timeout(15000)
         });
 
         if (!response.ok) {
             const errorBody = await response.text().catch(() => "Unknown error");
+            console.error(`❌ [Proxy Stealth] Sofascore returned ${response.status} for ${path}`);
             return NextResponse.json(
                 { error: `Upstream error: ${response.status}`, details: errorBody.substring(0, 50) },
                 { status: response.status }
