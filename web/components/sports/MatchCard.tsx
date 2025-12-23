@@ -45,9 +45,26 @@ export default function MatchCard({
     const isLive = status === 'En Vivo';
     const time = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    const handleCardClick = () => {
-        if (eventId && sport) {
-            router.push(`/match/${sport}/${eventId}`);
+    const handleCardClick = (e: React.MouseEvent) => {
+        // Prevent navigation if clicking on interactive elements (buttons usually stop propagation, but just in case)
+        if ((e.target as HTMLElement).closest('button')) {
+            return;
+        }
+
+        if (eventId) {
+            const targetSport = sport || 'football'; // Default fallback
+
+            // Redirect to specialized pages for core sports
+            if (targetSport === 'football') {
+                router.push(`/football-live/${eventId}`);
+            } else if (targetSport === 'basketball' || targetSport === 'nba') {
+                router.push(`/basketball-live/${eventId}`);
+            } else {
+                // Universal fallback for others (Tennis, Baseball, etc.)
+                router.push(`/match/${targetSport}/${eventId}`);
+            }
+        } else {
+            console.warn('MatchCard: Missing eventId, cannot navigate');
         }
     };
 
