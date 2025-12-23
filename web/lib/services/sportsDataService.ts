@@ -115,7 +115,12 @@ class SportsDataService {
             const targetUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
 
             // Production Diagnostic
-            const hasScraperKey = !!(process.env.SCRAPER_API_KEY || process.env.SCRAPER_API_KEYS);
+            const scraperKeySingular = process.env.SCRAPER_API_KEY;
+            const scraperKeysPlural = process.env.SCRAPER_API_KEYS;
+            const hasScraperKey = !!(scraperKeySingular || scraperKeysPlural);
+
+            // Log detailed key status for debugging (without revealing full keys)
+            console.log(`🔑 [SportsData] Key Values -> Singular: ${!!scraperKeySingular}, Plural: ${!!scraperKeysPlural}`);
             const useProxyEnv = process.env.USE_PROXY;
             const shouldUseProxy = useProxyEnv === 'true' || useProxyEnv === '1' || process.env.USE_DIRECT_FETCH === 'true';
 
