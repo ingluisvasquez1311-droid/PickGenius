@@ -90,8 +90,28 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        const simplifiedEvents = await Promise.all(filteredEvents.map(async e => {
+        const simplifiedEvents = await Promise.all(filteredEvents.map(async (e, idx) => {
             const oddsRes = await sportsDataService.getMatchOdds(e.id).catch(() => null);
+
+            // Fetch history for top events only to avoid overhead
+            let historyContext = "";
+            if (idx < 10 && e.homeTeam && e.awayTeam) {
+                try {
+                    const [homeHistory, awayHistory] = await Promise.all([
+                        sportsDataService.getTeamLastResults(e.homeTeam.id),
+                        sportsDataService.getTeamLastResults(e.awayTeam.id)
+                    ]);
+
+                    const formatResults = (events: any[]) => events.slice(0, 3).map(ev =>
+                        `${ev.homeTeam.name} ${ev.homeScore?.current || 0}-${ev.awayScore?.current || 0} ${ev.awayTeam.name}`
+                    ).join(", ");
+
+                    historyContext = `Últimos de local: ${formatResults(homeHistory || [])} | Últimos de visita: ${formatResults(awayHistory || [])}`;
+                } catch (err) {
+                    console.warn(`[Parley API] History fetch failed for ${e.homeTeam.name}:`, err);
+                }
+            }
+
             const topMarkets = oddsRes?.markets?.slice(0, 3).map((m: any) => ({
                 name: m.marketName,
                 odds: m.choices?.map((c: any) => `${c.name}: ${c.fraction}`)
@@ -104,6 +124,7 @@ export async function POST(request: NextRequest) {
                 status: e.status.description,
                 tournament: e.tournament.name,
                 sport: e.tournament.category.sport.name,
+                recentResults: historyContext,
                 realMarketOdds: topMarkets,
                 hasPlayerProps: oddsRes?.markets?.some((m: any) => m.marketName.toLowerCase().includes('player') || m.marketName.toLowerCase().includes('prop'))
             };
@@ -131,7 +152,7 @@ export async function POST(request: NextRequest) {
 
             INSTRUCCIONES CRÍTICAS PARA BALONCESTO:
             - Si el torneo es NBA: Los partidos duran 48 min y los puntos totales suelen estar entre 200 y 240.
-            - Si NO es NBA (EuroLeague, ACB, LNB, etc.): Los partidos duran 40 min y el total de puntos CASI NUNCA supera los 180.
+            - Si NO es NBA (EuroLeague, ACB, LNB, etc.): Los partidos duran 40 min. El total de puntos suele oscilar entre 150 y 175. NO asumas automáticamente el "Under"; analiza si los equipos tienen tendencias ofensivas o defensivas basándote en las cuotas de mercado proporcionadas.
             - CONSIDERAR MERCADOS: Puntos en 1er Cuarto, Hándicaps y Over/Under.
 
             INSTRUCCIONES CRÍTICAS PARA FÚTBOL:

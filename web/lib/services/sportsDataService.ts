@@ -320,6 +320,14 @@ class SportsDataService {
     }
 
     /**
+     * Obtiene los últimos partidos de un equipo
+     */
+    async getTeamLastResults(teamId: number, sport: string = 'football'): Promise<any[]> {
+        const data = await this.makeRequest(`/team/${teamId}/events/last/0`);
+        return data?.events || [];
+    }
+
+    /**
      * Obtiene estadísticas detalladas de un jugador en un partido específico
      */
     async getPlayerEventStatistics(playerId: number, eventId: number): Promise<any> {
