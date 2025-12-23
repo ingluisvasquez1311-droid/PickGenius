@@ -14,8 +14,9 @@ export async function GET(request: NextRequest) {
             count: streaks.length,
             source: 'analytics_engine'
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('❌ Streak Analytics Error:', error);
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ success: false, error: message }, { status: 500 });
     }
 }

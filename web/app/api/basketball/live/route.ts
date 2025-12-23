@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         const events = result.data.events || [];
 
         // STRICT FILTER: Only matches currently in progress
-        const liveEvents = events.filter((game: any) =>
+        const liveEvents = events.filter((game: Record<string, any>) =>
             game.status?.type === 'inprogress' ||
             (game.status?.type === 'notstarted' && game.status?.description === 'Scheduled')
         );
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         console.log(`✅ Filtered to ${liveEvents.length} live/scheduled basketball events`);
 
         // Transform to match frontend expectations
-        const transformedData = liveEvents.map((game: any) => {
+        const transformedData = liveEvents.map((game: Record<string, any>) => {
             const leagueCategory = {
                 name: game.tournament?.category?.name || 'International',
                 flag: game.tournament?.category?.flag || '',

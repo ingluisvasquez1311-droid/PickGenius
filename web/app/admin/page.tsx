@@ -28,14 +28,27 @@ import GlassCard from '@/components/ui/GlassCard';
 import PremiumButton from '@/components/ui/PremiumButton';
 import { toast } from 'sonner';
 
+interface TrafficData {
+    name?: string;
+    calls?: number;
+    error?: number;
+    [key: string]: any;
+}
+
+interface AdminAlert {
+    email: string;
+    time: string;
+    [key: string]: any;
+}
+
 export default function AdminPage() {
     const { user, loading } = useAuth();
     const router = useRouter();
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [traffic, setTraffic] = useState<any[]>([]);
-    const [alerts, setAlerts] = useState<any[]>([]);
+    const [traffic, setTraffic] = useState<TrafficData[]>([]);
+    const [alerts, setAlerts] = useState<AdminAlert[]>([]);
 
     useEffect(() => {
         if (!loading) {
@@ -76,7 +89,7 @@ export default function AdminPage() {
                     { name: '20:00', calls: 150, error: 12 }
                 ]);
             }
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Error fetching admin data:", error);
         }
         setIsLoadingData(false);
@@ -88,7 +101,7 @@ export default function AdminPage() {
             await setUserRole(uid, newRole);
             toast.success(`Usuario actualizado a ${newRole}`);
             fetchData();
-        } catch (error) {
+        } catch (error: unknown) {
             toast.error('Error al actualizar el rol');
         }
     };
@@ -100,7 +113,7 @@ export default function AdminPage() {
             await upgradeToPremium(uid, thirtyDaysLater);
             toast.success('Suscripción Premium activada');
             fetchData();
-        } catch (error) {
+        } catch (error: unknown) {
             toast.error('Error al activar suscripción');
         }
     };

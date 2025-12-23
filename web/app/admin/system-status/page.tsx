@@ -87,7 +87,14 @@ export default async function SystemStatusPage() {
 }
 
 // Sub-components for clean code
-function Card({ title, icon, children, className = '' }: any) {
+interface CardProps {
+    title: string;
+    icon: string;
+    children: React.ReactNode;
+    className?: string;
+}
+
+function Card({ title, icon, children, className = '' }: CardProps) {
     return (
         <div className={`p-6 rounded-xl border border-slate-800 bg-slate-900 ${className}`}>
             <div className="flex items-center gap-3 mb-4">
@@ -99,7 +106,13 @@ function Card({ title, icon, children, className = '' }: any) {
     );
 }
 
-function Metric({ label, value, color = 'text-white' }: any) {
+interface MetricProps {
+    label: string;
+    value: string | number;
+    color?: string;
+}
+
+function Metric({ label, value, color = 'text-white' }: MetricProps) {
     return (
         <div className="flex justify-between items-center py-2 border-b border-slate-800 last:border-0">
             <span className="text-slate-500 text-sm">{label}</span>
@@ -108,10 +121,23 @@ function Metric({ label, value, color = 'text-white' }: any) {
     );
 }
 
-function ServiceCard({ name, status, stats, apiName }: any) {
+interface ServiceCardProps {
+    name: string;
+    status: string;
+    stats: {
+        activeKeys?: number;
+        blockedKeys?: number;
+        active?: number;
+        blocked?: number;
+        filter?: (fn: (k: any) => boolean) => any[];
+    };
+    apiName: string;
+}
+
+function ServiceCard({ name, status, stats, apiName }: ServiceCardProps) {
     const isHealthy = status === 'CLOSED';
-    const activeKeys = stats.active || stats.filter?.((k: any) => !k.isBlocked).length || 0;
-    const blockedKeys = stats.blocked || stats.filter?.((k: any) => k.isBlocked).length || 0;
+    const activeKeys = stats.activeKeys || stats.active || (typeof stats.filter === 'function' ? stats.filter((k: any) => !k.isBlocked).length : 0);
+    const blockedKeys = stats.blockedKeys || stats.blocked || (typeof stats.filter === 'function' ? stats.filter((k: any) => k.isBlocked).length : 0);
 
     return (
         <div className="p-6 rounded-xl border border-slate-800 bg-slate-900 hover:border-slate-700 transition-colors">
