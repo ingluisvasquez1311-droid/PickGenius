@@ -51,7 +51,7 @@ export default function Navbar() {
     return (
         <>
             {/* Mobile Top Bar - App Style */}
-            <div className="lg:hidden fixed top-0 left-0 right-0 z-50 pt-safe bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
+            <div className="lg:hidden fixed top-0 left-0 right-0 z-50 pt-safe bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/5 shadow-lg shadow-black/50">
                 <div className="flex justify-between items-center h-16 px-6">
                     <Link href="/" className="flex items-center gap-2">
                         <Image
