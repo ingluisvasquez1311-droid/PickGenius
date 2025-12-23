@@ -90,7 +90,8 @@ class SportsDataService {
     private headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': 'https://www.sofascore.com/',
-        'Accept': 'application/json, text/plain, */*'
+        'Accept': 'application/json, text/plain, */*',
+        'Bypass-Tunnel-Reminder': 'true' // Evita la pantalla de bloqueo de LocalTunnel
     };
 
     /**
@@ -114,12 +115,17 @@ class SportsDataService {
 
             // Production Diagnostic
             const hasScraperKey = !!(process.env.SCRAPER_API_KEY || process.env.SCRAPER_API_KEYS);
+            const useProxyEnv = process.env.USE_PROXY;
+            const shouldUseProxy = useProxyEnv === 'true' || useProxyEnv === '1' || process.env.USE_DIRECT_FETCH === 'true';
+
+            console.log(`🔍 [SportsData] Request: ${cleanEndpoint} | Env: ${process.env.NODE_ENV} | Server: ${isServer} | Proxy: ${shouldUseProxy} | ScraperKeys: ${hasScraperKey}`);
+
             if (!isDev && isServer && !apiUrl && !hasScraperKey) {
                 console.warn(`🛑 [SportsData] PRODUCTION ALERT: No Bridge (NEXT_PUBLIC_API_URL) and no Scraper (SCRAPER_API_KEY/S) configured. Direct fetch will likely be blocked.`);
             }
 
             // Priority Logic usando scraperService
-            if (isServer && useProxy) {
+            if (isServer && shouldUseProxy) {
                 // Priority 1: ScraperAPI con multi-key support
                 try {
                     console.log(`🌍 [SportsData] Using ScraperService for: ${cleanEndpoint}`);
@@ -127,9 +133,10 @@ class SportsDataService {
                         render: false,
                         country_code: 'us'
                     });
-                    return data as T;
+                    if (data) return data as T;
+                    throw new Error("Scraper returned null data");
                 } catch (error: any) {
-                    console.warn(`⚠️ [SportsData] ScraperService failed, trying fallback...`);
+                    console.warn(`⚠️ [SportsData] ScraperService failed: ${error.message}, trying fallback...`);
                     // Continue to fallback options
                 }
             }
@@ -137,7 +144,7 @@ class SportsDataService {
             // Priority 2: Backend Bridge (Local or Render)
             if (isServer && preferredBridge && preferredBridge.startsWith('http')) {
                 const cleanBridgeUrl = preferredBridge.trim().replace(/\/$/, "");
-                const fetchUrl = `${cleanBridgeUrl}/api/sofascore/proxy${cleanEndpoint}`;
+                const fetchUrl = `${cleanBridgeUrl}/api/proxy/sportsdata${cleanEndpoint}`;
                 console.log(`🔌 [SportsData] Using Bridge: ${cleanBridgeUrl}`);
 
                 try {

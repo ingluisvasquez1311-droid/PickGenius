@@ -12,7 +12,15 @@ export async function GET() {
 
         // 1. Env Check
         const keys = process.env.SCRAPER_API_KEYS || '';
-        log(`🔑 Keys loaded: ${keys.split(',').length} (Raw length: ${keys.length})`);
+        log(`🔑 Keys loaded (Raw Env): ${keys.split(',').length} (Raw length: ${keys.length})`);
+
+        // Check Service Keys
+        try {
+            const serviceKeys = scraperService.getKeysDebugInfo();
+            log(`🛡️ Service Sanitized Keys: ${JSON.stringify(serviceKeys)}`);
+        } catch (e) {
+            log('⚠️ Could not read service keys');
+        }
 
         // 2. Test Connection
         const testUrl = 'https://www.sofascore.com/api/v1/sport/football/events/live';

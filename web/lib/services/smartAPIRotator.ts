@@ -160,6 +160,14 @@ export class SmartAPIRotator {
                 });
 
                 // Verificar respuesta
+                if (response.status === 403) {
+                    console.error(`⛔ Key #${keyObj.index + 1} ha excedido su cuota o es inválida (403 Forbidden). Bloqueando inmediatamente.`);
+                    // Forzar bloqueo inmediato para esta key
+                    keyObj.failures = this.maxFailuresBeforeBlock;
+                    this.markFailure(keyObj, new Error('403 Forbidden - Quota Exceeded'));
+                    throw new Error('403 Forbidden - Quota Exceeded');
+                }
+
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }

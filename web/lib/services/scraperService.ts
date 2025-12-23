@@ -62,18 +62,21 @@ class ScraperService {
         const keys: string[] = [];
         if (typeof process === 'undefined') return [];
 
+        // Helper for strict cleaning (Alphanumeric only)
+        const cleanKey = (k: string) => k.replace(/[^a-zA-Z0-9]/g, '');
+
         // Prioritize SCRAPER_API_KEYS (comma separated list)
         if (process.env.SCRAPER_API_KEYS) {
             const list = process.env.SCRAPER_API_KEYS.split(',')
-                .map(k => k.replace(/["']/g, '').trim())
-                .filter(k => k && k.length > 10); // Basic validation (ScraperAPI keys are usually long)
+                .map(cleanKey)
+                .filter(k => k && k.length > 20); // ScraperAPI keys are 32 chars
             keys.push(...list);
             console.log(`🔑 [ScraperService] Loaded ${list.length} keys from SCRAPER_API_KEYS`);
         }
 
         // Add SCRAPER_API_KEY if not already present
         if (process.env.SCRAPER_API_KEY) {
-            const singleKey = process.env.SCRAPER_API_KEY.replace(/["']/g, '').trim();
+            const singleKey = cleanKey(process.env.SCRAPER_API_KEY);
             if (singleKey && !keys.includes(singleKey)) {
                 keys.push(singleKey);
                 console.log(`🔑 [ScraperService] Added primary SCRAPER_API_KEY`);
@@ -89,11 +92,36 @@ class ScraperService {
         return Array.from(new Set(keys));
     }
 
+    // DEBUG METHOD: Expose key status (masked)
+    public getKeysDebugInfo() {
+        return this.keys.map(k => `${k.substring(0, 4)}...${k.substring(k.length - 4)} (len: ${k.length})`);
+    }
+
+    // Headers de navegador real para pasar desapercibido
+    private getStealthHeaders(): HeadersInit {
+        return {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+            'Referer': 'https://www.sofascore.com/',
+            'Origin': 'https://www.sofascore.com',
+            'Connection': 'keep-alive',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-site',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        };
+    }
+
     /**
-     * Ejecuta una petición gestionada (Cache -> Queue -> Breaker -> Rotator -> Analytics -> Budget)
+     * Ejecuta una petición gestionada (Cache -> Queue -> Breaker -> (Direct/Rotator) -> Analytics -> Budget)
      */
     async makeRequest(url: string, options: ScraperOptions = {}): Promise<any> {
-        if (this.keys.length === 0) {
+        // MODO DIRECTO (Stealth) - Para uso local o VPS propio
+        const useDirect = process.env.USE_DIRECT_FETCH === 'true';
+
+        if (!useDirect && this.keys.length === 0) {
             throw new Error('ScraperService not configured (No API Keys)');
         }
 
@@ -105,13 +133,39 @@ class ScraperService {
             return this.breaker.execute(async () => {
                 return this.queue.add(async () => {
                     try {
-                        const result = await this.rotator.makeRequest(url, reqOptions);
+                        let result;
+
+                        if (useDirect) {
+                            // 🚀 MODO DIRECTO: Sin intermediarios, con headers reales
+                            try {
+                                const headers = this.getStealthHeaders();
+                                const response = await fetch(url, {
+                                    method: 'GET',
+                                    headers: headers
+                                });
+
+                                if (!response.ok) {
+                                    throw new Error(`Direct Fetch Failed: ${response.status} ${response.statusText}`);
+                                }
+
+                                const data = await response.json();
+                                result = { success: true, data };
+
+                                this.logger.info(`🥷 [StealthMode] Success: ${url}`);
+                            } catch (err: any) {
+                                result = { success: false, error: err.message };
+                            }
+                        } else {
+                            // 🔄 MODO PROXY: Usando ScraperAPI
+                            result = await this.rotator.makeRequest(url, reqOptions);
+                        }
 
                         if (result.success) {
-                            // Registrar éxito, costo y métricas
-                            this.budget.trackCost(API_COSTS.SCRAPER_REQUEST);
+                            // Registrar éxito, costo (0 si es directo) y métricas
+                            if (!useDirect) this.budget.trackCost(API_COSTS.SCRAPER_REQUEST);
+
                             this.analytics.track({
-                                service: 'ScraperAPI',
+                                service: useDirect ? 'DirectStealth' : 'ScraperAPI',
                                 endpoint: url,
                                 success: true,
                                 latency: Date.now() - start
@@ -122,7 +176,7 @@ class ScraperService {
                         }
                     } catch (err: any) {
                         this.analytics.track({
-                            service: 'ScraperAPI',
+                            service: useDirect ? 'DirectStealth' : 'ScraperAPI',
                             endpoint: url,
                             success: false,
                             latency: Date.now() - start,
@@ -148,6 +202,7 @@ class ScraperService {
 
     getStats() {
         return {
+            mode: process.env.USE_DIRECT_FETCH === 'true' ? '🥷 Stealth Direct' : '🔄 Proxy Rotator',
             rotator: this.rotator.getStats(),
             analytics: this.analytics.getDashboard(),
             budget: this.budget.getReport(),
