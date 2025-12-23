@@ -56,7 +56,10 @@ class GroqService {
         if (process.env.GROQ_API_KEY && !keys.includes(process.env.GROQ_API_KEY)) {
             keys.push(process.env.GROQ_API_KEY);
         }
-        if (keys.length === 0) throw new Error('No Groq API keys configured');
+        if (keys.length === 0) {
+            console.warn('⚠️ No Groq API keys configured. Service will not work at runtime.');
+            return ['dummy-key-for-build'];
+        }
         return keys;
     }
 
