@@ -33,14 +33,57 @@ export async function GET() {
         console.error(`❌ [Debug] Test Failed:`, e.message);
     }
 
-    // Add Connection Test Results to diagnostics
+    // 3. Bridge/Tunnel Test
+    const bridgeUrl = vars.NEXT_PUBLIC_API_URL;
+    let bridgeResult = null;
+    let bridgeError = null;
+
+    if (bridgeUrl) {
+        try {
+            const startBridge = Date.now();
+            console.log(`🔌 [Debug] Testing Bridge: ${bridgeUrl}/api/health`);
+
+            const bridgeResponse = await fetch(`${bridgeUrl}/api/health`, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true',
+                    'User-Agent': 'Vercel-Debug-Bot'
+                },
+                signal: AbortSignal.timeout(5000)
+            });
+
+            bridgeResult = {
+                url: bridgeUrl,
+                status: bridgeResponse.status,
+                ok: bridgeResponse.ok,
+                latency: Date.now() - startBridge,
+                headers: Object.fromEntries(bridgeResponse.headers.entries())
+            };
+
+            if (!bridgeResponse.ok) {
+                bridgeError = `HTTP ${bridgeResponse.status} ${bridgeResponse.statusText}`;
+            }
+        } catch (e: any) {
+            bridgeError = e.message;
+            console.error(`❌ [Debug] Bridge Test Failed:`, e.message);
+        }
+    }
+
     const diagnostics = {
         timestamp: new Date().toISOString(),
-        connection_test: {
-            url: testUrl,
-            success: !testError,
-            error: testError,
-            details: testResult
+        tests: {
+            scraper_api: {
+                url: testUrl,
+                success: !testError,
+                error: testError,
+                details: testResult
+            },
+            bridge_tunnel: {
+                configured: !!bridgeUrl,
+                url: bridgeUrl,
+                success: bridgeUrl ? !bridgeError : false,
+                error: bridgeError,
+                details: bridgeResult
+            }
         },
         keys_status: {
             SCRAPER_API_KEYS: {

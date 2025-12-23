@@ -109,7 +109,7 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
                             {!loading && (
                                 <button
                                     onClick={onClose}
-                                    className="absolute top-6 right-6 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors"
+                                    className="absolute top-6 right-6 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors z-20"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>

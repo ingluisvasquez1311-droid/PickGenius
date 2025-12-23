@@ -403,6 +403,59 @@ export default function ProfilePage() {
                                     </GlassCard>
                                 )}
 
+
+                                {activeTab === 'settings' && (
+                                    <GlassCard hover={false} className="p-8">
+                                        <h3 className="text-xl font-black italic tracking-tighter uppercase mb-6 flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-gray-500/10 flex items-center justify-center">
+                                                <Settings className="w-4 h-4 text-gray-400" />
+                                            </div>
+                                            Configuración de Perfil
+                                        </h3>
+                                        <div className="space-y-6 max-w-xl">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Nombre Visible</label>
+                                                <input
+                                                    type="text"
+                                                    value={editData.displayName}
+                                                    onChange={(e) => setEditData({ ...editData, displayName: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
+                                                    placeholder="Tu nombre de usuario"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Biografía</label>
+                                                <textarea
+                                                    value={editData.bio}
+                                                    onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500/50 transition-colors min-h-[100px]"
+                                                    placeholder="Cuéntanos sobre tu estilo de apuestas..."
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Teléfono (Opcional)</label>
+                                                <input
+                                                    type="tel"
+                                                    value={editData.phoneNumber}
+                                                    onChange={(e) => setEditData({ ...editData, phoneNumber: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
+                                                    placeholder="+1 234 567 890"
+                                                />
+                                            </div>
+                                            <div className="pt-4">
+                                                <PremiumButton
+                                                    onClick={handleSaveProfile}
+                                                    loading={isSaving}
+                                                    className="w-full justify-center"
+                                                >
+                                                    <Save className="w-4 h-4 mr-2" />
+                                                    Guardar Cambios
+                                                </PremiumButton>
+                                            </div>
+                                        </div>
+                                    </GlassCard>
+                                )}
+
                                 {activeTab === 'security' && (
                                     <div className="space-y-6">
                                         <GlassCard hover={false} className="p-8">

@@ -7,6 +7,9 @@ import { useRouter } from 'next/navigation';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import {
     getTrafficStats,
+    recalculateScores,
+    resetCache,
+    broadcastNotification
 } from '@/lib/adminService';
 import {
     Users,
@@ -116,6 +119,52 @@ export default function AdminPage() {
         } catch (error: unknown) {
             toast.error('Error al activar suscripción');
         }
+    };
+
+    const handleRecalculate = async () => {
+        const confirm = window.confirm("¿Seguro que deseas recalcular todas las puntuaciones? Esto puede tardar unos minutos.");
+        if (!confirm) return;
+
+        try {
+            toast.promise(recalculateScores(), {
+                loading: 'Recalculando datos del núcleo...',
+                success: 'Sincronización masiva completada con éxito',
+                error: 'Error en la sincronización'
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleResetCache = async () => {
+        try {
+            const res = await resetCache();
+            if (res.success) toast.success("Caché global reiniciado correctamente");
+        } catch (error) {
+            toast.error("Fallo al reiniciar caché");
+        }
+    };
+
+    const handleMassNotify = async () => {
+        const message = window.prompt("Introduce el mensaje para todos los usuarios:");
+        if (!message) return;
+
+        try {
+            const res = await broadcastNotification(message);
+            if (res.success) toast.success("Notificación enviada a todos");
+        } catch (error) {
+            toast.error("Error al enviar notificación");
+        }
+    };
+
+    const handleClearLogs = () => {
+        setAlerts([]);
+        toast.info("Terminal de logs temporalmente limpia");
+    };
+
+    const handleResolveAlert = (email: string) => {
+        setAlerts(prev => prev.filter(a => a.email !== email));
+        toast.success(`Alerta de ${email} marcada como resuelta`);
     };
 
     const filteredUsers = useMemo(() => {
@@ -369,7 +418,12 @@ export default function AdminPage() {
                                 <h3 className="text-xl font-black italic tracking-tighter uppercase mb-1">Terminal de Auditoría</h3>
                                 <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">Logs de Sistema y Seguridad</p>
                             </div>
-                            <button className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Limpiar Logs</button>
+                            <button
+                                onClick={handleClearLogs}
+                                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                            >
+                                Limpiar Logs
+                            </button>
                         </div>
 
                         <div className="space-y-4 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">
@@ -390,7 +444,12 @@ export default function AdminPage() {
                                             <div className="flex items-center gap-1.5 text-[9px] font-black text-gray-500 uppercase tracking-widest">
                                                 <Calendar className="w-3 h-3" /> Hoy, {alert.time}
                                             </div>
-                                            <button className="text-[9px] font-black text-purple-400 uppercase tracking-widest hover:underline">Resolver Incidente</button>
+                                            <button
+                                                onClick={() => handleResolveAlert(alert.email)}
+                                                className="text-[9px] font-black text-purple-400 uppercase tracking-widest hover:underline"
+                                            >
+                                                Resolver Incidente
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -404,15 +463,24 @@ export default function AdminPage() {
                             <Shield className="w-4 h-4 text-purple-400" /> System Tools
                         </h3>
                         <div className="space-y-3">
-                            <button className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-left transition-all active:scale-95">
+                            <button
+                                onClick={handleResetCache}
+                                className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-left transition-all active:scale-95"
+                            >
                                 REINICIAR CACHE GLOBAL
                                 <p className="text-[8px] text-gray-500 mt-1 lowercase font-bold">Limpia redis y cache local</p>
                             </button>
-                            <button className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-left transition-all active:scale-95">
+                            <button
+                                onClick={handleRecalculate}
+                                className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-left transition-all active:scale-95"
+                            >
                                 RECALCULAR PUNTUACIONES
                                 <p className="text-[8px] text-gray-500 mt-1 lowercase font-bold">Sync masivo de resultados</p>
                             </button>
-                            <button className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-left transition-all active:scale-95">
+                            <button
+                                onClick={handleMassNotify}
+                                className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-left transition-all active:scale-95"
+                            >
                                 NOTIFICACIÓN MASIVA
                                 <p className="text-[8px] text-gray-500 mt-1 lowercase font-bold">Enviar push a todos</p>
                             </button>

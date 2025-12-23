@@ -95,3 +95,51 @@ export async function getAdminAlerts(limitCount: number = 10) {
         return [];
     }
 }
+
+/**
+ * Trigger a full recalculation of scores and outcomes
+ */
+export async function recalculateScores() {
+    try {
+        const response = await fetch('/api/admin/actions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'RECALCULATE' })
+        });
+        return await response.json();
+    } catch (error) {
+        throw new Error('Error al recalcular puntuaciones');
+    }
+}
+
+/**
+ * Reset global system cache
+ */
+export async function resetCache() {
+    try {
+        const response = await fetch('/api/admin/actions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'CLEAR_CACHE' })
+        });
+        return await response.json();
+    } catch (error) {
+        throw new Error('Error al reiniciar cache');
+    }
+}
+
+/**
+ * Broadcast a notification to all users
+ */
+export async function broadcastNotification(message: string) {
+    try {
+        const response = await fetch('/api/admin/actions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'NOTIFY_ALL', payload: { message } })
+        });
+        return await response.json();
+    } catch (error) {
+        throw new Error('Error al enviar notificación masiva');
+    }
+}
