@@ -5,13 +5,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getAllUsers, UserProfile, setUserRole, upgradeToPremium } from '@/lib/userService';
 import { useRouter } from 'next/navigation';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-Calendar,
+import {
+    Users,
     Activity,
     Shield,
     Eye,
     Target,
     Zap,
-    Clock
+    Clock,
+    Calendar
 } from 'lucide-react';
 import {
     getTrafficStats,
