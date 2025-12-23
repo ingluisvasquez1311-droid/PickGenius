@@ -91,7 +91,8 @@ class SportsDataService {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': 'https://www.sofascore.com/',
         'Accept': 'application/json, text/plain, */*',
-        'Bypass-Tunnel-Reminder': 'true' // Evita la pantalla de bloqueo de LocalTunnel
+        'Bypass-Tunnel-Reminder': 'true', // Evita la pantalla de bloqueo de LocalTunnel
+        'ngrok-skip-browser-warning': 'true' // Evita la pantalla de advertencia de ngrok
     };
 
     /**
