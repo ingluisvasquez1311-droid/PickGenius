@@ -5,7 +5,6 @@
 
 require('dotenv').config();
 const express = require('express');
-const autoSyncService = require('./src/services/autoSyncService');
 const footballService = require('./src/services/football/footballService');
 const footballApiService = require('./src/services/football/footballApiService');
 const cacheManager = require('./src/services/cacheManager');
@@ -153,20 +152,8 @@ app.post('/api/football/load', async (req, res) => {
 });
 
 // ========================================
-// NBA ENDPOINTS
+// NBA ENDPOINTS (Now handled by Sofascore)
 // ========================================
-
-// Get NBA games
-app.get('/api/nba/games', async (req, res) => {
-    try {
-        console.log('🏀 Fetching NBA games...');
-        const games = await autoSyncService.fetchTodayGames();
-        res.json({ success: true, games });
-    } catch (error) {
-        console.error('❌ NBA games error:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
 
 // NBA Player Props Analysis
 app.use('/api/nba/players', nbaPlayerPropsRoutes);
@@ -179,18 +166,6 @@ app.use('/api/proxy', proxyRoutes);
 
 
 
-
-// Manual NBA sync
-app.post('/api/sync', async (req, res) => {
-    try {
-        console.log('🔄 Manual NBA sync triggered...');
-        const result = await autoSyncService.syncCurrentSeason();
-        res.json({ success: true, result });
-    } catch (error) {
-        console.error('❌ Sync error:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
 
 // ========================================
 // CACHE MANAGEMENT ENDPOINTS
@@ -284,10 +259,8 @@ app.listen(PORT, () => {
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
     console.log(`📖 API docs: http://localhost:${PORT}/`);
     console.log('='.repeat(60));
-
-    // Iniciar sincronización automática diaria
-    console.log('⏰ Starting daily auto-sync...');
-    autoSyncService.startDailySync();
+    console.log('✅ All services ready - using Sofascore for live data');
+    console.log('='.repeat(60));
 });
 
 // Graceful shutdown
