@@ -60,10 +60,10 @@ export class GroqAPIRotator {
             remainingRequests: null
         }));
 
-        this.maxRetries = 5; // Más intentos porque tienes múltiples keys
-        this.maxFailuresBeforeBlock = 3;
-        this.blockDuration = 3 * 60 * 1000; // 3 minutos
-        this.rateLimitBlockDuration = 10 * 60 * 1000; // 10 minutos para rate limit
+        this.maxRetries = 10; // Más intentos dado que ahora tenemos 30 keys
+        this.maxFailuresBeforeBlock = 2; // Más estricto para rotar rápido si hay fallos
+        this.blockDuration = 1 * 60 * 1000; // Bloqueo más corto (1 min) para reintentar rápido
+        this.rateLimitBlockDuration = 5 * 60 * 1000; // 5 minutos para rate limit (Groq suele resetear rápido)
 
         console.log(`[GroqAPIRotator] Initialized with ${apiKeys.length} API key(s)`);
     }
