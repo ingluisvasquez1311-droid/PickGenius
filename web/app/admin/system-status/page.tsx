@@ -129,15 +129,15 @@ interface ServiceCardProps {
         blockedKeys?: number;
         active?: number;
         blocked?: number;
-        filter?: (fn: (k: any) => boolean) => any[];
+        filter?: (fn: (k: { isBlocked: boolean }) => boolean) => any[];
     };
     apiName: string;
 }
 
 function ServiceCard({ name, status, stats, apiName }: ServiceCardProps) {
     const isHealthy = status === 'CLOSED';
-    const activeKeys = stats.activeKeys || stats.active || (typeof stats.filter === 'function' ? stats.filter((k: any) => !k.isBlocked).length : 0);
-    const blockedKeys = stats.blockedKeys || stats.blocked || (typeof stats.filter === 'function' ? stats.filter((k: any) => k.isBlocked).length : 0);
+    const activeKeys = stats.activeKeys || stats.active || (typeof stats.filter === 'function' ? stats.filter((k: { isBlocked: boolean }) => !k.isBlocked).length : 0);
+    const blockedKeys = stats.blockedKeys || stats.blocked || (typeof stats.filter === 'function' ? stats.filter((k: { isBlocked: boolean }) => k.isBlocked).length : 0);
 
     return (
         <div className="p-6 rounded-xl border border-slate-800 bg-slate-900 hover:border-slate-700 transition-colors">

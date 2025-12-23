@@ -4,7 +4,7 @@ import { streakService } from '@/lib/services/streakService';
 export const dynamic = 'force-dynamic';
 export const revalidate = 60; // Cache for 1 minute at edge
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
     try {
         const streaks = await streakService.getStreaks();
 

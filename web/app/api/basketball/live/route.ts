@@ -19,64 +19,66 @@ export async function GET(request: NextRequest) {
         const events = result.data.events || [];
 
         // STRICT FILTER: Only matches currently in progress
-        const liveEvents = events.filter((game: Record<string, any>) =>
-            game.status?.type === 'inprogress' ||
-            (game.status?.type === 'notstarted' && game.status?.description === 'Scheduled')
-        );
+        const liveEvents = events.filter((game: unknown) => {
+            const g = game as Record<string, any>;
+            return g.status?.type === 'inprogress' ||
+                (g.status?.type === 'notstarted' && g.status?.description === 'Scheduled');
+        });
 
         console.log(`✅ Filtered to ${liveEvents.length} live/scheduled basketball events`);
 
         // Transform to match frontend expectations
-        const transformedData = liveEvents.map((game: Record<string, any>) => {
+        const transformedData = liveEvents.map((game: unknown) => {
+            const g = game as Record<string, any>;
             const leagueCategory = {
-                name: game.tournament?.category?.name || 'International',
-                flag: game.tournament?.category?.flag || '',
-                id: game.tournament?.category?.id
+                name: g.tournament?.category?.name || 'International',
+                flag: g.tournament?.category?.flag || '',
+                id: g.tournament?.category?.id
             };
 
             return {
-                id: game.id,
+                id: g.id,
                 tournament: {
-                    name: game.tournament?.name || 'Unknown League',
+                    name: g.tournament?.name || 'Unknown League',
                     category: leagueCategory,
                     uniqueTournament: {
-                        name: game.tournament?.uniqueTournament?.name || game.tournament?.name || 'Unknown'
+                        name: g.tournament?.uniqueTournament?.name || g.tournament?.name || 'Unknown'
                     }
                 },
                 homeTeam: {
-                    id: game.homeTeam?.id,
-                    name: game.homeTeam?.name || 'Home Team',
-                    logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
+                    id: g.homeTeam?.id,
+                    name: g.homeTeam?.name || 'Home Team',
+                    logo: `/api/proxy/team-logo/${g.homeTeam?.id}`,
                 },
                 awayTeam: {
-                    id: game.awayTeam?.id,
-                    name: game.awayTeam?.name || 'Away Team',
-                    logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
+                    id: g.awayTeam?.id,
+                    name: g.awayTeam?.name || 'Away Team',
+                    logo: `/api/proxy/team-logo/${g.awayTeam?.id}`,
                 },
                 homeScore: {
-                    current: game.homeScore?.current || 0,
-                    display: game.homeScore?.display || 0,
-                    period1: game.homeScore?.period1,
-                    period2: game.homeScore?.period2,
-                    period3: game.homeScore?.period3,
-                    period4: game.homeScore?.period4
+                    current: g.homeScore?.current || 0,
+                    display: g.homeScore?.display || 0,
+                    period1: g.homeScore?.period1,
+                    period2: g.homeScore?.period2,
+                    period3: g.homeScore?.period3,
+                    period4: g.homeScore?.period4
                 },
                 awayScore: {
-                    current: game.awayScore?.current || 0,
-                    display: game.awayScore?.display || 0,
-                    period1: game.awayScore?.period1,
-                    period2: game.awayScore?.period2,
-                    period3: game.awayScore?.period3,
-                    period4: game.awayScore?.period4
+                    current: g.awayScore?.current || 0,
+                    display: g.awayScore?.display || 0,
+                    period1: g.awayScore?.period1,
+                    period2: g.awayScore?.period2,
+                    period3: g.awayScore?.period3,
+                    period4: g.awayScore?.period4
                 },
                 category: leagueCategory,
                 status: {
-                    type: game.status?.type || 'inprogress', // Use actual status from Sofascore
-                    description: game.status?.description || 'Live',
-                    code: game.status?.code
+                    type: g.status?.type || 'inprogress',
+                    description: g.status?.description || 'Live',
+                    code: g.status?.code
                 },
-                roundInfo: game.roundInfo,
-                startTimestamp: game.startTimestamp
+                roundInfo: g.roundInfo,
+                startTimestamp: g.startTimestamp
             };
         });
 
@@ -87,8 +89,9 @@ export async function GET(request: NextRequest) {
             source: 'sofascore'
         });
 
-    } catch (error: any) {
-        console.error('❌ Basketball API Route Error:', error);
+    } catch (error: unknown) {
+        const err = error as Error;
+        console.error('❌ Basketball API Route Error:', err);
 
         // FALLBACK: Return Mock Data so the site looks alive even if blocked
         const mockEvents = [
@@ -127,15 +130,14 @@ export async function GET(request: NextRequest) {
             data: mockEvents,
             count: mockEvents.length,
             source: 'fallback_mock',
-            error: error.message
+            error: (error as Error).message || 'Unknown error'
         });
     }
 }
 
-function getDescription(game: any): string {
-    const status = game.status?.description;
-    const period = game.status?.type === 'inprogress' ? 'Live' : status;
-
+function getDescription(game: unknown): string {
+    const g = game as Record<string, any>;
+    const status = g.status?.description;
     // Try to construct Q4 - 2:30 format if data allows
     return status || 'Live';
 }

@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import MatchCard from '@/components/sports/MatchCard';
 import GroupedMatchesList from '@/components/sports/GroupedMatchesList';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import { sportsDataService, type SportsDataEvent } from '@/lib/services/sportsDataService';

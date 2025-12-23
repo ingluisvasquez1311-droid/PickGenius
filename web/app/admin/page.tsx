@@ -7,9 +7,7 @@ import { useRouter } from 'next/navigation';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import {
     getTrafficStats,
-    logApiCall,
 } from '@/lib/adminService';
-import * as adminService from '@/lib/adminService';
 import {
     Users,
     Crown,
