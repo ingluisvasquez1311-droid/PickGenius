@@ -106,7 +106,7 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
                                 <div key={leagueKey} className="space-y-4">
                                     <button
                                         onClick={() => toggleGroup(leagueKey)}
-                                        className="w-full flex items-center justify-between gap-3 border-l-4 border-[var(--primary)] pl-4 py-3 bg-white/5 rounded-r-xl transition-all hover:bg-white/10 group/header"
+                                        className="w-full flex items-center justify-between gap-3 border-l-4 border-[var(--primary)] pl-4 py-3 bg-white/5 rounded-r-xl transition-all hover:bg-white/10 active:bg-white/20 mobile-haptic group/header"
                                     >
                                         <div className="flex items-center gap-3">
                                             {/* Flag/Icon */}
