@@ -14,7 +14,10 @@ export default function NotificationPermissionButton() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        setPermission(getNotificationPermission() as NotificationPermission);
+        // Safe generic check on mount
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            setPermission(Notification.permission);
+        }
     }, []);
 
     const handleEnableNotifications = async () => {

@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 
 export function useFavorites() {
-    const [favorites, setFavorites] = useState<string[]>([]);
-
-    useEffect(() => {
-        const stored = localStorage.getItem('favorites');
-        if (stored) {
-            setFavorites(JSON.parse(stored));
+    const [favorites, setFavorites] = useState<string[]>(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('favorites');
+            if (stored) {
+                return JSON.parse(stored);
+            }
         }
-    }, []);
+        return [];
+    });
 
     const toggleFavorite = (id: string) => {
         setFavorites(prev => {

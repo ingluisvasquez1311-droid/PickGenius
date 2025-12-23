@@ -121,7 +121,7 @@ export default function MatchCard({
                                 {homeTeam.name}
                             </span>
                         </div>
-                        {isLive && Math.random() > 0.5 && <TrendingUp className="w-3 h-3 text-emerald-500 animate-pulse" />}
+                        {isLive && (eventId ? eventId % 2 !== 0 : false) && <TrendingUp className="w-3 h-3 text-emerald-500 animate-pulse" />}
                     </div>
 
                     {/* Away Team */}
@@ -134,7 +134,7 @@ export default function MatchCard({
                                 {awayTeam.name}
                             </span>
                         </div>
-                        {isLive && Math.random() < 0.5 && <Activity className="w-3 h-3 text-blue-500 animate-pulse" />}
+                        {isLive && (eventId ? eventId % 2 === 0 : false) && <Activity className="w-3 h-3 text-blue-500 animate-pulse" />}
                     </div>
                 </div>
 

@@ -23,20 +23,20 @@ interface BettingSlipContextType {
 const BettingSlipContext = createContext<BettingSlipContextType | undefined>(undefined);
 
 export function BettingSlipProvider({ children }: { children: React.ReactNode }) {
-    const [bets, setBets] = useState<Bet[]>([]);
-    const [isOpen, setIsOpen] = useState(false);
-
-    // Load from local storage on mount
-    useEffect(() => {
-        const savedBets = localStorage.getItem('pickgenius_betslip');
-        if (savedBets) {
-            try {
-                setBets(JSON.parse(savedBets));
-            } catch (e) {
-                console.error('Error loading bet slip', e);
+    const [bets, setBets] = useState<Bet[]>(() => {
+        if (typeof window !== 'undefined') {
+            const savedBets = localStorage.getItem('pickgenius_betslip');
+            if (savedBets) {
+                try {
+                    return JSON.parse(savedBets);
+                } catch (e) {
+                    console.error('Error loading bet slip', e);
+                }
             }
         }
-    }, []);
+        return [];
+    });
+    const [isOpen, setIsOpen] = useState(false);
 
     // Save to local storage on change
     useEffect(() => {

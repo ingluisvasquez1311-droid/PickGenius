@@ -167,10 +167,10 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
 
                             <div className="h-[120px] w-full relative">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={Array.from({ length: 20 }, (_, i) => ({
+                                    <AreaChart data={React.useMemo(() => Array.from({ length: 20 }, (_, i) => ({
                                         time: i,
                                         value: 40 + Math.random() * 20 + (i > 10 ? 10 : -10)
-                                    }))}>
+                                    })), [])}>
                                         <defs>
                                             <linearGradient id="colorMomentum" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
