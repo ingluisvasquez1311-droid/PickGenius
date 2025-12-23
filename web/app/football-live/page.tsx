@@ -5,6 +5,7 @@ import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import LiveEventsList from '@/components/LiveEventsList';
 import ParleyOptimizerBanner from '@/components/ai/ParleyOptimizerBanner';
 import SportHeader from '@/components/sports/SportHeader';
+import LiveSportSelector from '@/components/sports/LiveSportSelector';
 
 export default function FootballLivePage() {
     const [events, setEvents] = useState<any[]>([]);
@@ -82,7 +83,10 @@ export default function FootballLivePage() {
                 subtitle="Stadium Vibes • Live Stats • Goal Prediction AI"
             />
 
-            <div className="container">
+            <div className="container mx-auto px-4 py-6">
+                <LiveSportSelector />
+                {/* Stats Summary */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"></div>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
                     {/* Left Sidebar: Filters & Stats */}
