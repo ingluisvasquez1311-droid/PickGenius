@@ -26,7 +26,7 @@ class FootballDataService {
             if (!data) {
                 const isServer = typeof window === 'undefined';
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-                const scraperKey = process.env.SCRAPER_API_KEY;
+                const scraperKey = process.env.SCRAPER_API_KEY || process.env.SCRAPER_API_KEYS;
                 const useProxy = process.env.USE_PROXY;
 
                 // More detailed error message for debugging
