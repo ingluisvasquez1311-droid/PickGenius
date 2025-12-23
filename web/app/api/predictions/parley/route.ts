@@ -18,7 +18,13 @@ export async function POST(request: NextRequest) {
         let isPremiumUser = false;
         if (uid) {
             const profile = await getUserProfile(uid);
-            isPremiumUser = profile?.isPremium || profile?.role === 'admin' || false;
+            // OWNER/ADMIN is always premium regardless of Firestore flags
+            const isOwner = profile?.email && (
+                profile.email.toLowerCase() === 'pickgenius@gmail.com' ||
+                profile.email.toLowerCase() === 'ingluisvasquez1311@gmail.com'
+            );
+            isPremiumUser = profile?.isPremium || profile?.role === 'admin' || isOwner || false;
+            console.log(`👤 [Parley API] User ${uid} | isPremium: ${isPremiumUser} | Role: ${profile?.role}`);
         }
 
         // Force "Safe" strategy for Free users
@@ -152,11 +158,12 @@ export async function POST(request: NextRequest) {
 
             INSTRUCCIONES CRÍTICAS PARA BALONCESTO:
             - Si el torneo es NBA: Los partidos duran 48 min y los puntos totales suelen estar entre 200 y 240.
-            - Si NO es NBA (EuroLeague, ACB, LNB, etc.): Los partidos duran 40 min. El total de puntos suele oscilar entre 150 y 175. NO asumas automáticamente el "Under"; analiza si los equipos tienen tendencias ofensivas o defensivas basándote en las cuotas de mercado proporcionadas.
+            - Si NO es NBA (EuroLeague, ACB, LNB, etc.): Los partidos duran 40 min. El total de puntos suele oscilar entre 150 y 175. NO asumas automáticamente el "Under"; analiza si los equipos tienen tendencias ofensivas o defensivas basándote en 'recentResults' y las cuotas de mercado.
             - CONSIDERAR MERCADOS: Puntos en 1er Cuarto, Hándicaps y Over/Under.
 
             INSTRUCCIONES CRÍTICAS PARA FÚTBOL:
-            - ANALIZAR MERCADOS AVANZADOS: Córners, Remates (Shots on target), Fuera de juego, Goles Under/Over y Apuesta sin Empate (Draw No Bet).
+            - PRIORIDAD PREMIUM: Los usuarios buscan mercados de CÓRNERS (más de X), TARJETAS (amarillas/rojas) y REMATES (Shots on target).
+            - Si hay datos de estos mercados en 'realMarketOdds', PRIORÍZALOS sobre el ganador del partido.
 
             INSTRUCCIONES CRÍTICAS PARA BÉISBOL (MLB):
             - ANALIZAR MERCADOS DE VALOR: Total de Carreras (Under/Over), Hándicap (Run Line), y especialmente PLAYER PROPS (Strikeouts del pitcher, Hits de bateadores).
@@ -170,14 +177,15 @@ export async function POST(request: NextRequest) {
             INSTRUCCIONES CRÍTICAS PARA TENIS:
             - ANALIZAR MERCADOS: Ganador del partido, Ganador de Set, Hándicap de Juegos y Total de Juegos.
 
-            INSTRUCCIONES DE PLAYER PROPS (MÁXIMO ATRACTIVO):
-            - Los usuarios buscan picks de jugadores estrellas (Puntos en NBA, Goles en Fútbol, Home Runs en MLB, Touchdowns en NFL, Tiros en NHL).
-            - Si detectas valor en un Player Prop, PRIORÍZALO en el parley.
+            INSTRUCCIONES DE MERCADOS PRO (MÁXIMO ATRACTIVO):
+            - Los usuarios PREMIUM esperan picks de: "Más de 8.5 córners", "Equipo X: Más de 1.5 tarjetas", "Jugador Y: 1+ remate a puerta".
+            - SIEMPRE utiliza los nombres de los mercados reales que veas en 'realMarketOdds' para que coincidan con lo que el usuario ve en Bet365.
+            - Si detectas valor en un mercado de Córners o Prop de jugador, INTEGRÁLO en el parley.
 
             INSTRUCCIONES GENERALES:
             1. Selecciona EXACTAMENTE 3 eventos de la lista para formar un PARLEY.
-            2. Proporciona un pick específico para cada uno (Prioriza Ganadores, Over/Under o Props de jugadores estrella como "Player X: 2+ remates" o "QB Y: 2+ pases TD").
-            3. Explica brevemente por qué estos 3 eventos juntos maximizan el valor según la estrategia.
+            2. Proporciona un pick específico para cada uno (Prioriza Córners, Tarjetas o Props de jugadores sobre el simple Ganador).
+            3. Explica brevemente por qué estos 3 eventos juntos maximizan el valor sincronizado con las cuotas de mercado.
             4. Asigna un nivel de riesgo (Bajo, Medio, Alto, Extremo).
 
             RETORNA ÚNICAMENTE UN OBJETO JSON EN ESPAÑOL:
