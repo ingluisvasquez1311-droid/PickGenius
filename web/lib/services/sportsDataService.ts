@@ -129,7 +129,8 @@ class SportsDataService {
                     const response = await fetch(fetchUrl, {
                         headers: {
                             ...this.headers,
-                            'Cache-Control': 'no-store'
+                            'Cache-Control': 'no-store',
+                            'ngrok-skip-browser-warning': 'true'
                         },
                         cache: 'no-store',
                         signal: AbortSignal.timeout(8000) // Tighter timeout for Bridge

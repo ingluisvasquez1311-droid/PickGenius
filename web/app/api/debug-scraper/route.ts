@@ -46,10 +46,19 @@ export async function GET() {
                         latency: Date.now() - startData,
                         message: "✅ DATOS REALES RECIBIDOS DESDE CASA"
                     };
+                } else {
+                    const errorText = await dataResponse.text().catch(() => "Unknown");
+                    dataResult = {
+                        success: false,
+                        status: dataResponse.status,
+                        error: errorText.substring(0, 100),
+                        message: "❌ EL PUENTE NO DEVOLVIÓ DATOS (Posible bloqueo o error local)"
+                    };
                 }
             }
         } catch (e: any) {
             bridgeResult = { ...bridgeResult, error: e.message };
+            dataResult = { success: false, error: e.message, message: "❌ ERROR DE CONEXIÓN AL REALIZAR TEST DE DATOS" };
         }
     }
 
