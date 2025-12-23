@@ -16,10 +16,16 @@ export default function AmericanFootballPage() {
         async function fetchGames() {
             setLoading(true);
             try {
-                const allGames = await sportsDataService.getEventsBySport('american-football');
-                setGames(allGames);
+                if (typeof sportsDataService.getEventsBySport === 'function') {
+                    const allGames = await sportsDataService.getEventsBySport('american-football');
+                    setGames(allGames || []);
+                } else {
+                    console.warn('getEventsBySport not implemented yet, showing empty state');
+                    setGames([]);
+                }
             } catch (error) {
                 console.error('Error fetching american football games:', error);
+                setGames([]);
             } finally {
                 setLoading(false);
             }

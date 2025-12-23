@@ -8,6 +8,14 @@ import { toast } from 'sonner';
 export default function BettingSlip() {
     const { bets, removeFromSlip, clearSlip, isOpen, toggleSlip } = useBettingSlip();
     const [wager, setWager] = useState<string>('10');
+    const [selectedHouse, setSelectedHouse] = useState<string>('betano');
+
+    const bettingHouses = [
+        { id: 'betano', name: 'Betano', url: 'https://www.betano.com.co/', color: 'from-yellow-600 to-orange-600' },
+        { id: 'betplay', name: 'BetPlay', url: 'https://www.betplay.com.co/', color: 'from-green-600 to-emerald-600' },
+        { id: 'rushbet', name: 'Rushbet', url: 'https://www.rushbet.co/', color: 'from-blue-600 to-cyan-600' },
+        { id: 'bet365', name: 'Bet365', url: 'https://www.bet365.com/', color: 'from-green-600 to-green-700' },
+    ];
 
     if (!isOpen && bets.length === 0) {
         return null;
@@ -18,26 +26,29 @@ export default function BettingSlip() {
     const potentialReturn = (parseFloat(wager) || 0) * totalOdds;
 
     const handlePlaceBet = () => {
-        const loadingToast = toast.loading('Procesando apuesta...');
+        const selectedHouseData = bettingHouses.find(h => h.id === selectedHouse);
 
-        setTimeout(() => {
-            toast.dismiss(loadingToast);
-            toast.success('¡Apuesta Realizada con Éxito!', {
-                description: `Ganancia Potencial: $${potentialReturn.toFixed(2)}`
+        if (selectedHouseData) {
+            // Open betting house in new tab (preserves PickGenius session)
+            window.open(selectedHouseData.url, '_blank', 'noopener,noreferrer');
+
+            // Show success message
+            toast.success('Redirigiendo a ' + selectedHouseData.name, {
+                description: `Tu ticket se mantiene guardado. Ganancia Potencial: $${potentialReturn.toFixed(2)}`
             });
 
-            // Trigger Confetti
+            // Trigger visual feedback
             confetti({
-                particleCount: 150,
-                spread: 80,
-                origin: { y: 0.7 },
-                colors: ['#22c55e', '#ffffff', '#eab308'], // Green, White, Gold
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#22c55e', '#ffffff', '#eab308'],
                 zIndex: 9999
             });
+        }
 
-            // Optional: Clear slip after a delay
-            // setTimeout(clearSlip, 3000);
-        }, 1500);
+        // NOTE: We do NOT clear the slip automatically
+        // User must manually clear it with the trash button
     };
 
     return (
@@ -144,6 +155,25 @@ export default function BettingSlip() {
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-gray-300">Ganancia Potencial</span>
                                     <span className="font-bold text-green-400 text-lg">${potentialReturn.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            {/* Betting House Selector */}
+                            <div className="mb-5">
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Casa de Apuestas</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {bettingHouses.map((house) => (
+                                        <button
+                                            key={house.id}
+                                            onClick={() => setSelectedHouse(house.id)}
+                                            className={`p-3 rounded-xl font-bold text-sm transition-all border-2 ${selectedHouse === house.id
+                                                    ? `bg-gradient-to-r ${house.color} border-white/30 text-white scale-105`
+                                                    : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                                                }`}
+                                        >
+                                            {house.name}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 

@@ -77,7 +77,7 @@ export default function BaseballPage() {
                         <div className="space-y-6">
                             <h3 className="text-xl font-black italic uppercase tracking-widest flex items-center gap-3 mb-8">
                                 <span className="w-2 h-8 bg-red-600 rounded-full"></span>
-                                Cartelera del Día
+                                ⚾ JUEGOS DE HOY
                             </h3>
                             {loading ? (
                                 <SkeletonLoader />

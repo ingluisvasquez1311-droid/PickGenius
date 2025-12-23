@@ -164,7 +164,7 @@ export default function BasketballLivePage() {
                         <div className="flex items-center justify-between mb-8 px-2">
                             <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
                                 <span className="w-3 h-8 bg-orange-500 rounded-full"></span>
-                                Cartelera: NBA & NCAA
+                                🔥 JUEGOS EN VIVO
                             </h2>
                         </div>
 

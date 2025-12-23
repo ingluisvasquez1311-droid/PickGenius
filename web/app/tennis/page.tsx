@@ -18,11 +18,16 @@ export default function TennisPage() {
         async function fetchGames() {
             setLoading(true);
             try {
-                // SofaScore uses 'tennis' for both ATP and WTA
-                const allGames = await sportsDataService.getEventsBySport('tennis');
-                setGames(allGames);
+                if (typeof sportsDataService.getEventsBySport === 'function') {
+                    const allGames = await sportsDataService.getEventsBySport('tennis');
+                    setGames(allGames || []);
+                } else {
+                    console.warn('getEventsBySport not implemented yet, showing empty state');
+                    setGames([]);
+                }
             } catch (error) {
                 console.error('Error fetching tennis matches:', error);
+                setGames([]);
             } finally {
                 setLoading(false);
             }

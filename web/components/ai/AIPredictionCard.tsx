@@ -179,6 +179,23 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             <p className="text-black/60 text-xs mt-2 font-semibold">Precisión del Oráculo</p>
                         </div>
 
+                        {/* VALUE BET ANALYSIS - Only if it's a value bet */}
+                        {prediction.isValueBet && prediction.valueAnalysis && (
+                            <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/30 p-4 rounded-lg border border-yellow-500/30 animate-in slide-in-from-bottom-5 duration-500">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-yellow-400 text-lg">💎</span>
+                                    <p className="text-yellow-300 text-xs uppercase font-black">¿Por qué es Value Bet?</p>
+                                </div>
+                                <p className="text-gray-200 leading-relaxed text-sm">
+                                    {prediction.valueAnalysis}
+                                </p>
+                                <div className="mt-3 flex items-center gap-2 text-[10px] text-yellow-400/70 font-mono">
+                                    <span>⚡</span>
+                                    <span>El mercado subestima esta predicción según nuestro análisis</span>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="bg-black/30 p-4 rounded-lg">
                             <p className="text-purple-300 text-xs uppercase font-bold mb-2">Visión del Genio</p>
                             <p className="text-gray-200 leading-relaxed text-sm">

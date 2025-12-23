@@ -56,26 +56,45 @@ class StreakService {
         console.log('🔄 Calculating NEW Real Streaks from SportsData...');
         try {
             // Priority: Football and Basketball (Main drivers)
-            const [footballStreaks, basketballStreaks] = await Promise.all([
+            const [footballStreaks, basketballStreaks] = await Promise.allSettled([
                 this.analyzeSportStreaks(TOP_FOOTBALL_LEAGUES.slice(0, 4), 'football'),
                 this.analyzeSportStreaks(TOP_BASKETBALL_LEAGUES, 'basketball')
             ]);
 
-            let realStreaks = [...footballStreaks, ...basketballStreaks];
+            let realStreaks: Streak[] = [];
+
+            // Extract successful results
+            if (footballStreaks.status === 'fulfilled') {
+                realStreaks.push(...footballStreaks.value);
+            }
+            if (basketballStreaks.status === 'fulfilled') {
+                realStreaks.push(...basketballStreaks.value);
+            }
 
             // If we have few real streaks, mix with smart mock data to "fill" the UI
             if (realStreaks.length < 6) {
+                console.log('⚠️ Limited real streaks, adding mocks for better UX');
                 const mocks = this.getMockStreaks();
-                realStreaks = [...realStreaks, ...mocks.slice(0, 8 - realStreaks.length)];
+                realStreaks = [...realStreaks, ...mocks.slice(0, Math.max(0, 8 - realStreaks.length))];
+            }
+
+            // If still empty (all APIs failed), use all mocks
+            if (realStreaks.length === 0) {
+                console.warn('⚠️ All streak APIs failed, using full mock data');
+                realStreaks = this.getMockStreaks();
             }
 
             this.streaksCache = realStreaks.sort((a, b) => b.count - a.count);
             this.lastFetch = Date.now();
 
+            console.log(`✅ Returning ${this.streaksCache.length} streaks (${realStreaks.filter(s => !s.id.startsWith('m-')).length} real, ${realStreaks.filter(s => s.id.startsWith('m-')).length} mock)`);
             return this.streaksCache;
         } catch (error) {
-            console.error('Failed to calculate streaks, using mocks', error);
-            return this.getMockStreaks();
+            console.error('❌ Critical error in getStreaks, using mocks', error);
+            const mocks = this.getMockStreaks();
+            this.streaksCache = mocks;
+            this.lastFetch = Date.now();
+            return mocks;
         }
     }
 

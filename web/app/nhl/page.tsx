@@ -18,10 +18,17 @@ export default function NHLPage() {
         async function fetchGames() {
             setLoading(true);
             try {
-                const allGames = await sportsDataService.getEventsBySport('ice-hockey');
-                setGames(allGames);
+                // Try to fetch games - method may not exist yet
+                if (typeof sportsDataService.getEventsBySport === 'function') {
+                    const allGames = await sportsDataService.getEventsBySport('ice-hockey');
+                    setGames(allGames || []);
+                } else {
+                    console.warn('getEventsBySport not implemented yet, showing empty state');
+                    setGames([]);
+                }
             } catch (error) {
                 console.error('Error fetching nhl games:', error);
+                setGames([]); // Ensure we set empty array instead of leaving it undefined
             } finally {
                 setLoading(false);
             }
