@@ -18,7 +18,12 @@ export default function AmericanFootballPage() {
             try {
                 if (typeof sportsDataService.getEventsBySport === 'function') {
                     const allGames = await sportsDataService.getEventsBySport('american-football');
-                    setGames(allGames || []);
+                    // Filter specifically for NFL games (and maybe NCAA top tier if needed, but sticking to NFL for now)
+                    const nflGames = allGames ? allGames.filter(g =>
+                        g.tournament.name.includes('NFL') ||
+                        g.tournament.uniqueTournament?.name.includes('NFL')
+                    ) : [];
+                    setGames(nflGames);
                 } else {
                     console.warn('getEventsBySport not implemented yet, showing empty state');
                     setGames([]);

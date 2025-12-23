@@ -21,7 +21,12 @@ export default function NHLPage() {
                 // Try to fetch games - method may not exist yet
                 if (typeof sportsDataService.getEventsBySport === 'function') {
                     const allGames = await sportsDataService.getEventsBySport('ice-hockey');
-                    setGames(allGames || []);
+                    // Filter specifically for NHL games to avoid clutter
+                    const nhlGames = allGames ? allGames.filter(g =>
+                        g.tournament.name.includes('NHL') ||
+                        g.tournament.uniqueTournament?.name.includes('NHL')
+                    ) : [];
+                    setGames(nhlGames);
                 } else {
                     console.warn('getEventsBySport not implemented yet, showing empty state');
                     setGames([]);
