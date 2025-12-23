@@ -2,7 +2,7 @@
 // Si estamos en el servidor, usamos la API directa.
 // Si estamos en el cliente, usamos nuestro Proxy para evitar CORS.
 const BASE_URL = typeof window === 'undefined'
-    ? 'https://www.sofascore.com/api/v1'
+    ? 'https://api.sofascore.com/api/v1'
     : '/api/proxy/sportsdata';
 
 import { logApiCall } from '@/lib/adminService';
@@ -116,9 +116,12 @@ class SportsDataService {
             console.log(`🔍 [SportsData] Requesting: ${cleanEndpoint} | isServer: ${isServer}`);
 
             // Priority 1: Backend Bridge (Local Tunnel / ngrok)
-            // This is our primary data source now that ScraperAPI is exhausted.
-            if (isServer && preferredBridge && preferredBridge.startsWith('http')) {
-                const cleanBridgeUrl = preferredBridge.trim().replace(/\/$/, "");
+            // ONLY use the bridge if we are in PRODUCTION (Vercel) to reach the local PC.
+            // If we are in development, we are the bridge, so fetch directly.
+            const shouldTryBridge = !isDev && isServer && preferredBridge && preferredBridge.startsWith('http');
+
+            if (shouldTryBridge) {
+                const cleanBridgeUrl = preferredBridge!.trim().replace(/\/$/, "");
                 const fetchUrl = `${cleanBridgeUrl}/api/proxy/sportsdata${cleanEndpoint}`;
                 console.log(`🔌 [SportsData] Routing to Bridge: ${cleanBridgeUrl}${cleanEndpoint}`);
 

@@ -15,10 +15,12 @@ export async function GET(
         const targetUrl = `${BASE_URL}/${path}${query}`;
 
         const bridgeUrl = process.env.NEXT_PUBLIC_API_URL;
+        const isVercel = !!process.env.VERCEL;
 
         // --- PRIORITY 1: BRIDGE (TUNNEL) ---
-        // Forward to the "Home IP" bridge if configured (usually on Vercel)
-        if (bridgeUrl && bridgeUrl.startsWith('http')) {
+        // ONLY route through bridge if we are on Vercel. 
+        // This prevents the local PC from trying to tunnel to itself recursively.
+        if (isVercel && bridgeUrl && bridgeUrl.startsWith('http')) {
             const cleanBridgeUrl = bridgeUrl.trim().replace(/\/$/, "");
             const bridgeFetchUrl = `${cleanBridgeUrl}/api/proxy/sportsdata/${path}${query}`;
 

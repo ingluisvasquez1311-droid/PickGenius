@@ -8,69 +8,101 @@ export async function GET() {
         NODE_ENV: process.env.NODE_ENV,
     };
 
-    // 1. Bridge/Tunnel Test
     const bridgeUrl = vars.NEXT_PUBLIC_API_URL;
-    let bridgeResult = null;
-    let bridgeError = null;
+    const isVercel = !!process.env.VERCEL;
 
+    let bridgeResult = null;
+    let dataResult = null;
+    let stealthResult = null;
+
+    // 1. Bridge/Tunnel Connectivity Test
     if (bridgeUrl) {
         try {
             const startBridge = Date.now();
-            console.log(`🔌 [Debug Bridge] Checking "Home IP" connection: ${bridgeUrl}/api/health`);
-
-            // Advanced Stealth Headers for the test itself
-            const stealthHeaders = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'ngrok-skip-browser-warning': 'true',
-                'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120"',
-                'Sec-Fetch-Mode': 'cors'
-            };
-
             const bridgeResponse = await fetch(`${bridgeUrl}/api/health`, {
-                headers: stealthHeaders,
-                signal: AbortSignal.timeout(10000)
+                headers: { 'ngrok-skip-browser-warning': 'true' },
+                signal: AbortSignal.timeout(8000)
             });
 
             bridgeResult = {
-                url: bridgeUrl,
                 status: bridgeResponse.status,
                 ok: bridgeResponse.ok,
-                latency: Date.now() - startBridge,
-                mimicry: "Enabled (Stealth Headers Active)"
+                latency: Date.now() - startBridge
             };
 
-            if (!bridgeResponse.ok) {
-                bridgeError = `HTTP ${bridgeResponse.status} ${bridgeResponse.statusText}`;
+            // 2. REAL DATA TEST THROUGH BRIDGE (only if on Vercel)
+            if (bridgeResponse.ok && isVercel) {
+                const startData = Date.now();
+                const dataResponse = await fetch(`${bridgeUrl}/api/proxy/sportsdata/sport/football/events/live`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' },
+                    signal: AbortSignal.timeout(10000)
+                });
+
+                if (dataResponse.ok) {
+                    const data = await dataResponse.json();
+                    dataResult = {
+                        success: true,
+                        count: data.events?.length || 0,
+                        latency: Date.now() - startData,
+                        message: "✅ DATOS REALES RECIBIDOS DESDE CASA"
+                    };
+                }
             }
         } catch (e: any) {
-            bridgeError = e.message;
-            console.error(`❌ [Debug Bridge] Sync Failed:`, e.message);
+            bridgeResult = { ...bridgeResult, error: e.message };
         }
+    }
+
+    // 3. INTERNAL STEALTH TEST (Mimicry Verification)
+    // This tests if the server where this code runs can hit Sofascore
+    try {
+        const testUrl = 'https://api.sofascore.com/api/v1/sport/football/events/live';
+        const startStealth = Date.now();
+        const stealthResponse = await fetch(testUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+                'Referer': 'https://www.sofascore.com/',
+                'Origin': 'https://www.sofascore.com',
+                'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120"',
+                'Sec-Fetch-Mode': 'cors'
+            },
+            signal: AbortSignal.timeout(10000)
+        });
+
+        stealthResult = {
+            status: stealthResponse.status,
+            ok: stealthResponse.ok,
+            latency: Date.now() - startStealth,
+            events: stealthResponse.ok ? (await stealthResponse.json()).events?.length : 0
+        };
+    } catch (e: any) {
+        stealthResult = { error: e.message };
     }
 
     const diagnostics = {
         timestamp: new Date().toISOString(),
-        status: bridgeResult?.ok ? "✅ ONLINE (Home IP Bridge Active)" : "❌ OFFLINE (Check ngrok)",
+        overall_status: (bridgeResult?.ok && (isVercel ? dataResult?.success : stealthResult?.ok)) ? "✅ SISTEMA OPERATIVO" : "❌ PROBLEMA DETECTADO",
         bridge_tunnel: {
             configured: !!bridgeUrl,
             url: bridgeUrl,
-            success: !!bridgeResult?.ok,
-            error: bridgeError,
-            details: bridgeResult
+            connection: bridgeResult,
+            real_data_flow: dataResult || "N/A (Carga en Vercel para probar flujo)"
+        },
+        local_stealth_test: {
+            description: "Prueba si este servidor (Vercel o PC) puede llegar a Sofascore directamente",
+            result: stealthResult
         },
         stealth_config: {
             mimic_browser: true,
-            user_agent: "Chrome 120 (Mimic)",
-            home_ip_priority: true,
-            scraper_api: "REMOVED"
+            browser_version: "Chrome 120",
+            scraper_api: "OFF"
         },
-        environment: {
-            is_vercel: !!process.env.VERCEL,
+        env: {
+            is_vercel: isVercel,
             node_env: vars.NODE_ENV
-        },
-        instruction: bridgeResult?.ok
-            ? "El túnel está operando. Los datos se solicitan como un navegador real desde tu IP residencial."
-            : "ERROR: Vercel no puede conectar con tu PC. Asegúrate de que ngrok esté corriendo y la URL configurada en Vercel sea la correcta."
+        }
     };
 
     return NextResponse.json(diagnostics, { status: 200 });
