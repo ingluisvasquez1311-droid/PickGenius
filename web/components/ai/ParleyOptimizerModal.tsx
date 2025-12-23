@@ -237,15 +237,22 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
                                         </div>
 
                                         {/* Ticket Display */}
-                                        <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden relative">
-                                            <div className="absolute top-0 right-0 p-4">
+                                        <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden">
+                                            {/* Header with Total Odds */}
+                                            <div className="bg-white/[0.03] border-b border-white/5 p-6 flex justify-between items-center">
+                                                <div>
+                                                    <div className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                        Ticket Generado
+                                                    </div>
+                                                </div>
                                                 <div className="text-right">
                                                     <div className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Cuota Total</div>
                                                     <div className="text-2xl font-black text-orange-400">@{result.totalOdds?.toFixed(2)}</div>
                                                 </div>
                                             </div>
 
-                                            <div className="p-6 space-y-4">
+                                            <div className="p-4 md:p-6 space-y-4">
                                                 {result.legs.map((leg: any, i: number) => (
                                                     <div key={i} className="flex items-center gap-4 py-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors px-2 rounded-xl group/leg">
                                                         <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-black text-white group-hover/leg:bg-orange-500/20 group-hover/leg:text-orange-400 transition-colors">
