@@ -58,7 +58,7 @@ export function subscribeToNotifications(uid: string, callback: (notifications: 
     );
 
     return onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
-        let notifications = querySnapshot.docs.map(doc => {
+        const notifications = querySnapshot.docs.map(doc => {
             const data = doc.data();
             return {
                 id: doc.id,

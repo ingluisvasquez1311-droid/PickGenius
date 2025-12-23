@@ -68,7 +68,7 @@ export default function TeamStatsComparison({ eventId, homeColor = 'bg-purple-50
     // If not, simply summing the first period might be wrong if it's just Q1.
     // We will accumulate numeric values.
 
-    let totalStats: Record<string, StatItem> = {};
+    const totalStats: Record<string, StatItem> = {};
 
     // Helper to normalize and sum up
     const processGroups = (periodData: any) => {

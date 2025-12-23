@@ -45,7 +45,7 @@ export default function PerformanceStats() {
             const hotPicks = history.filter(p => p.probability >= 75).length;
 
             // Calculate current streak
-            let streak = 0;
+            const streak = 0;
             // TODO: Implement when result tracking is added
             // for (let i = 0; i < history.length; i++) {
             //     if (history[i].result === 'win') streak++;

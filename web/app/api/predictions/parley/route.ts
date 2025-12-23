@@ -9,7 +9,9 @@ export const maxDuration = 60;
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json().catch(() => ({}));
-        let { strategyIndex = 0, uid } = body;
+        let strategyIndex = 0;
+        const { uid } = body;
+        if (body.strategyIndex !== undefined) strategyIndex = body.strategyIndex;
 
         // --- AUTH/TIER CHECK ---
         let isPremiumUser = false;

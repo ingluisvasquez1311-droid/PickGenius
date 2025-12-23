@@ -323,7 +323,6 @@ export async function POST(request: NextRequest) {
 
         // 3. Increment prediction count for the user
         if (uid) {
-            const { incrementPredictionsUsed } = require('@/lib/userService');
             incrementPredictionsUsed(uid).catch((err: any) => console.error('❌ Error incrementing usage:', err));
         }
 

@@ -38,7 +38,7 @@ export default function AchievementBadges() {
             const hotPicks = history.filter(p => p.probability >= 75).length;
 
             // Calculate streak - TODO: Implement when result tracking is added
-            let maxStreak = 0;
+            const maxStreak = 0;
             // let currentStreak = 0;
             // history.forEach(p => {
             //     if (p.result === 'win') {

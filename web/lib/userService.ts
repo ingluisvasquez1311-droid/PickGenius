@@ -9,6 +9,7 @@ import {
     serverTimestamp,
     increment
 } from 'firebase/firestore';
+import { logLimitAlert } from './adminService';
 
 const ADMIN_EMAILS = [
     'pickgenius@gmail.com',
@@ -299,7 +300,6 @@ export async function canMakePrediction(uid: string): Promise<{ canPredict: bool
     const remaining = profile.predictionsLimit - profile.predictionsUsed;
 
     if (remaining <= 0) {
-        const { logLimitAlert } = require('@/lib/adminService');
         logLimitAlert(uid, profile.email).catch(() => { });
     }
 
