@@ -13,14 +13,22 @@ import {
     Target,
     Zap,
     Clock,
-    Calendar
+    Calendar,
+    Crown,
+    DollarSign,
+    Search,
+    Download,
+    UserMinus,
+    UserPlus,
+    MoreVertical
 } from 'lucide-react';
 import {
     getTrafficStats,
     recalculateScores,
     resetCache,
     broadcastNotification,
-    getGlobalActivity
+    getGlobalActivity,
+    getAdminAlerts
 } from '@/lib/adminService';
 import GlassCard from '@/components/ui/GlassCard';
 import PremiumButton from '@/components/ui/PremiumButton';
@@ -52,21 +60,18 @@ export default function AdminPage() {
     const fetchData = useCallback(async () => {
         setIsLoadingData(true);
         try {
-            const [usersData, trafficData, activityData] = await Promise.all([
+            const [usersData, trafficData, activityData, alertsData] = await Promise.all([
                 getAllUsers(),
                 getTrafficStats(),
-                getGlobalActivity(20)
+                getGlobalActivity(20),
+                getAdminAlerts(20)
             ]);
             setUsers(usersData);
             setTraffic(trafficData);
             setGlobalActivity(activityData);
+            setAlerts(alertsData);
 
-            // Generate mock alerts for now
-            setAlerts([
-                { email: 'daniels@gmail.com', time: '5m' },
-                { email: 'usuario78@yahoo.es', time: '12m' },
-                { email: 'tester_beta@pickgenius.com', time: '45m' }
-            ]);
+            // Alertas reales desde adminService
 
             // Mocking some traffic data for UI development if empty
             if (trafficData.length === 0) {
@@ -196,10 +201,16 @@ export default function AdminPage() {
 
     if (!user || user.role !== 'admin') return null;
 
+    const totalUsers = users.length;
+    const paidUsers = users.filter(u => u.isPremium).length;
+    // Revenue calculated based on a mock price or external data if available
+    // Here we use a standard $25/month for PRO users
+    const revenue = paidUsers * 25;
+
     const activeToday = users.filter(u => {
         if (!u.lastActive) return false;
         const now = new Date();
-        const diff = now.getTime() - u.lastActive.getTime();
+        const diff = now.getTime() - new Date(u.lastActive).getTime();
         return diff < 24 * 60 * 60 * 1000;
     }).length;
 
