@@ -11,8 +11,37 @@ export async function GET() {
         NODE_ENV: process.env.NODE_ENV,
     };
 
+    const testUrl = 'https://www.sofascore.com/api/v1/sport/football/events/live';
+    let testResult = null;
+    let testError = null;
+
+    try {
+        const start = Date.now();
+        console.log(`🧪 [Debug] Testing connection to ${testUrl} with ${vars.SCRAPER_API_KEYS ? 'keys' : 'NO KEYS'}...`);
+        const data = await scraperService.makeRequest(testUrl, {
+            render: false,
+            country_code: 'us',
+            useCache: false
+        });
+        testResult = {
+            success: true,
+            latency: Date.now() - start,
+            events_count: data?.events?.length || 0
+        };
+    } catch (e: any) {
+        testError = e.message;
+        console.error(`❌ [Debug] Test Failed:`, e.message);
+    }
+
+    // Add Connection Test Results to diagnostics
     const diagnostics = {
         timestamp: new Date().toISOString(),
+        connection_test: {
+            url: testUrl,
+            success: !testError,
+            error: testError,
+            details: testResult
+        },
         keys_status: {
             SCRAPER_API_KEYS: {
                 present: !!vars.SCRAPER_API_KEYS,
