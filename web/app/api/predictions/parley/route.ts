@@ -40,7 +40,8 @@ export async function POST(request: NextRequest) {
 
         const allEvents = [...footballEvents, ...basketballEvents, ...baseballEvents, ...nflEvents, ...nhlEvents, ...tennisEvents]
             .filter(e => e.status.type !== 'finished')
-            .slice(0, 30); // Increased to 30 to cover all sports
+            .sort((a, b) => a.startTimestamp - b.startTimestamp) // Prioritize today (earliest matches first)
+            .slice(0, 40); // Increased to 40 to cover more immediate events
 
         if (allEvents.length < 2) {
             return NextResponse.json({

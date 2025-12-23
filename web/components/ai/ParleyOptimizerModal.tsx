@@ -14,8 +14,8 @@ interface StrategyModalProps {
 
 const strategies = [
     {
-        title: "Correlación de Props NBA",
-        description: "Nuestro algoritmo detecta cuando el Over de puntos de un jugador estrella está infravalorado respecto a la victoria de su equipo. Combinamos ambos para maximizar el multiplicador con riesgo controlado.",
+        title: "Correlación de Props (Elite)",
+        description: "Nuestro algoritmo detecta cuando el mercado de un jugador estrella (Puntos, Goles, Hits) está infravalorado respecto a la victoria de su equipo. Maximiza el multiplicador con riesgo controlado.",
         icon: Target,
         impact: "Alto",
         successRate: "78%",
@@ -24,7 +24,7 @@ const strategies = [
     },
     {
         title: "Hedge de Volatilidad",
-        description: "Estrategia para parleys de 3+ piernas. Combinamos dos 'Lock Picks' (90%+ prob) con un prop de alto valor basado en cuotas mal puestas por la casa. La IA ajusta el peso de cada selección.",
+        description: "Estrategia para parleys de 3+ piernas. Combinamos apuestas de alta probabilidad con un mercado de valor. La IA ajusta el peso de cada selección para garantizar equilibrio.",
         icon: Shield,
         impact: "Medio-Alto",
         successRate: "72%",
@@ -33,7 +33,7 @@ const strategies = [
     },
     {
         title: "Detección de Rachas (Streak-Rider)",
-        description: "Utiliza el motor de 'Streak Finder' para identificar jugadores que han superado su línea en los últimos 5 partidos. El sistema optimiza el parley seleccionando solo rachas con momentum ascendente.",
+        description: "Encuentra jugadores o equipos que han superado sus líneas de forma consecutiva. El sistema optimiza el parley seleccionando solo rachas con momentum ascendente en todos los deportes.",
         icon: TrendingUp,
         impact: "Extremo",
         successRate: "81%",

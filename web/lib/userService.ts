@@ -29,6 +29,7 @@ export interface UserProfile {
     displayName?: string;
     photoURL?: string;
     isPremium: boolean;
+    subscriptionType?: 'trial' | 'paid' | 'admin';
     subscriptionEnd?: Date;
     predictionsUsed: number;
     predictionsLimit: number;
@@ -111,7 +112,8 @@ export async function createUserProfile(uid: string, email: string): Promise<Use
         },
         // GROWTH: 15-Day Free Trial for new users
         subscriptionEnd: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-        isPremium: true // Initially true for the trial
+        isPremium: true, // Initially true for the trial
+        subscriptionType: 'trial'
     };
 
     await setDoc(userRef, newProfile);
@@ -151,6 +153,7 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
         // Admins are always premium
         // Users are premium if they have a flag OR if their subscription is still valid (Trial/Paid)
         isPremium: data.isPremium || role === 'admin' || (data.subscriptionEnd && data.subscriptionEnd.toDate() > new Date()),
+        subscriptionType: data.subscriptionType || (role === 'admin' ? 'admin' : (data.isPremium ? 'paid' : 'trial')),
         subscriptionEnd: data.subscriptionEnd?.toDate(),
         predictionsUsed: data.predictionsUsed || 0,
         predictionsLimit: data.predictionsLimit || 3,
@@ -274,6 +277,7 @@ export async function upgradeToPremium(uid: string, subscriptionEndDate: Date): 
     await updateDoc(userRef, {
         isPremium: true,
         subscriptionEnd: subscriptionEndDate,
+        subscriptionType: 'paid',
         predictionsLimit: -1 // -1 means unlimited
     });
 }
@@ -323,10 +327,12 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 
     return querySnapshot.docs.map(doc => {
         const data = doc.data();
+        const role = data.role || 'user';
         return {
             uid: data.uid,
             email: data.email,
             isPremium: data.isPremium || false,
+            subscriptionType: data.subscriptionType || (role === 'admin' ? 'admin' : (data.isPremium ? 'paid' : 'trial')),
             subscriptionEnd: data.subscriptionEnd?.toDate(),
             predictionsUsed: data.predictionsUsed || 0,
             predictionsLimit: data.predictionsLimit || 3,

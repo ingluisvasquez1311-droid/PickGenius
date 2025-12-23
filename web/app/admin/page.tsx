@@ -198,8 +198,9 @@ export default function AdminPage() {
 
     const totalUsers = users.length;
     const premiumUsers = users.filter(u => u.isPremium).length;
-    const revenue = premiumUsers * 15; // Adjusted to a more premium price point
-    const conversionRate = totalUsers > 0 ? ((premiumUsers / totalUsers) * 100).toFixed(1) : '0';
+    const paidUsers = users.filter(u => u.subscriptionType === 'paid').length;
+    const revenue = paidUsers * 15;
+    const conversionRate = totalUsers > 0 ? ((paidUsers / totalUsers) * 100).toFixed(1) : '0';
 
     const kpis = [
         { label: 'Usuarios Totales', value: totalUsers, color: '#a855f7', icon: Users, prefix: '' },
