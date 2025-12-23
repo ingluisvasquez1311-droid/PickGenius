@@ -1,39 +1,14 @@
 import { NextResponse } from 'next/server';
-import { scraperService } from '@/lib/services/scraperService';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     const vars = {
-        SCRAPER_API_KEYS: process.env.SCRAPER_API_KEYS || null,
-        SCRAPER_API_KEY: process.env.SCRAPER_API_KEY || null,
         NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || null,
         NODE_ENV: process.env.NODE_ENV,
     };
 
-    const testUrl = 'https://www.sofascore.com/api/v1/sport/football/events/live';
-    let testResult = null;
-    let testError = null;
-
-    try {
-        const start = Date.now();
-        console.log(`🧪 [Debug] Testing connection to ${testUrl} with ${vars.SCRAPER_API_KEYS ? 'keys' : 'NO KEYS'}...`);
-        const data = await scraperService.makeRequest(testUrl, {
-            render: false,
-            country_code: 'us',
-            useCache: false
-        });
-        testResult = {
-            success: true,
-            latency: Date.now() - start,
-            events_count: data?.events?.length || 0
-        };
-    } catch (e: any) {
-        testError = e.message;
-        console.error(`❌ [Debug] Test Failed:`, e.message);
-    }
-
-    // 3. Bridge/Tunnel Test
+    // 1. Bridge/Tunnel Test
     const bridgeUrl = vars.NEXT_PUBLIC_API_URL;
     let bridgeResult = null;
     let bridgeError = null;
@@ -41,14 +16,14 @@ export async function GET() {
     if (bridgeUrl) {
         try {
             const startBridge = Date.now();
-            console.log(`🔌 [Debug] Testing Bridge: ${bridgeUrl}/api/health`);
+            console.log(`🔌 [Debug Bridge] Checking connection to: ${bridgeUrl}/api/health`);
 
             const bridgeResponse = await fetch(`${bridgeUrl}/api/health`, {
                 headers: {
                     'ngrok-skip-browser-warning': 'true',
-                    'User-Agent': 'Vercel-Debug-Bot'
+                    'User-Agent': 'Vercel-Bridge-Monitor'
                 },
-                signal: AbortSignal.timeout(5000)
+                signal: AbortSignal.timeout(8000)
             });
 
             bridgeResult = {
@@ -56,7 +31,7 @@ export async function GET() {
                 status: bridgeResponse.status,
                 ok: bridgeResponse.ok,
                 latency: Date.now() - startBridge,
-                headers: Object.fromEntries(bridgeResponse.headers.entries())
+                message: bridgeResponse.ok ? "✅ CONEXIÓN EXITOSA CON PC LOCAL" : "❌ ERROR EN PUENTE LOCAL"
             };
 
             if (!bridgeResponse.ok) {
@@ -64,43 +39,28 @@ export async function GET() {
             }
         } catch (e: any) {
             bridgeError = e.message;
-            console.error(`❌ [Debug] Bridge Test Failed:`, e.message);
+            console.error(`❌ [Debug Bridge] Connection Failed:`, e.message);
         }
     }
 
     const diagnostics = {
         timestamp: new Date().toISOString(),
-        tests: {
-            scraper_api: {
-                url: testUrl,
-                success: !testError,
-                error: testError,
-                details: testResult
-            },
-            bridge_tunnel: {
-                configured: !!bridgeUrl,
-                url: bridgeUrl,
-                success: bridgeUrl ? !bridgeError : false,
-                error: bridgeError,
-                details: bridgeResult
-            }
+        status: bridgeResult?.ok ? "ONLINE" : "OFFLINE",
+        bridge_tunnel: {
+            configured: !!bridgeUrl,
+            url: bridgeUrl,
+            success: !!bridgeResult?.ok,
+            error: bridgeError,
+            details: bridgeResult
         },
-        keys_status: {
-            SCRAPER_API_KEYS: {
-                present: !!vars.SCRAPER_API_KEYS,
-                length: vars.SCRAPER_API_KEYS ? vars.SCRAPER_API_KEYS.length : 0,
-                preview: vars.SCRAPER_API_KEYS ? `${vars.SCRAPER_API_KEYS.substring(0, 5)}...` : 'N/A'
-            },
-            SCRAPER_API_KEY: {
-                present: !!vars.SCRAPER_API_KEY,
-                length: vars.SCRAPER_API_KEY ? vars.SCRAPER_API_KEY.length : 0
-            }
+        environment: {
+            node_env: vars.NODE_ENV,
+            is_vercel: !!process.env.VERCEL,
+            scraper_api_disabled: true
         },
-        env_dump: {
-            has_api_url: !!vars.NEXT_PUBLIC_API_URL,
-            api_url: vars.NEXT_PUBLIC_API_URL,
-            node_env: vars.NODE_ENV
-        }
+        instruction: bridgeResult?.ok
+            ? "Túnel configurado correctamente. Los datos en vivo deberían cargar."
+            : "REVISA: 1. ngrok debe estar corriendo. 2. La URL en Vercel debe ser la actual de ngrok. 3. Haz 'Redeploy' en Vercel tras cambiar la URL."
     };
 
     return NextResponse.json(diagnostics, { status: 200 });

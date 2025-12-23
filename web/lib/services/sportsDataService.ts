@@ -5,7 +5,6 @@ const BASE_URL = typeof window === 'undefined'
     ? 'https://www.sofascore.com/api/v1'
     : '/api/proxy/sportsdata';
 
-import { scraperService } from './scraperService';
 import { logApiCall } from '@/lib/adminService';
 
 export interface SportsDataTeam {
@@ -114,75 +113,50 @@ class SportsDataService {
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
             const targetUrl = `https://www.sofascore.com/api/v1${cleanEndpoint}`;
 
-            // Production Diagnostic
-            const scraperKeySingular = process.env.SCRAPER_API_KEY;
-            const scraperKeysPlural = process.env.SCRAPER_API_KEYS;
-            const hasScraperKey = !!(scraperKeySingular || scraperKeysPlural);
+            console.log(`🔍 [SportsData] Requesting: ${cleanEndpoint} | isServer: ${isServer}`);
 
-            // Log detailed key status for debugging (without revealing full keys)
-            console.log(`🔑 [SportsData] Key Values -> Singular: ${!!scraperKeySingular}, Plural: ${!!scraperKeysPlural}`);
-            const useProxyEnv = process.env.USE_PROXY;
-            const shouldUseProxy = useProxyEnv === 'true' || useProxyEnv === '1' || process.env.USE_DIRECT_FETCH === 'true';
-
-            console.log(`🔍 [SportsData] Request: ${cleanEndpoint} | Env: ${process.env.NODE_ENV} | Server: ${isServer} | Proxy: ${shouldUseProxy} | ScraperKeys: ${hasScraperKey}`);
-
-            if (!isDev && isServer && !apiUrl && !hasScraperKey) {
-                console.warn(`🛑 [SportsData] PRODUCTION ALERT: No Bridge (NEXT_PUBLIC_API_URL) and no Scraper (SCRAPER_API_KEY/S) configured. Direct fetch will likely be blocked.`);
-            }
-
-            // Priority Logic usando scraperService
-            if (isServer && shouldUseProxy) {
-                // Priority 1: ScraperAPI con multi-key support
-                try {
-                    console.log(`🌍 [SportsData] Using ScraperService for: ${cleanEndpoint}`);
-                    const data = await scraperService.makeRequest(targetUrl, {
-                        render: false,
-                        country_code: 'us'
-                    });
-                    if (data) return data as T;
-                    throw new Error("Scraper returned null data");
-                } catch (error: any) {
-                    console.warn(`⚠️ [SportsData] ScraperService failed: ${error.message}, trying fallback...`);
-                    // Continue to fallback options
-                }
-            }
-
-            // Priority 2: Backend Bridge (Local or Render)
+            // Priority 1: Backend Bridge (Local Tunnel / ngrok)
+            // This is our primary data source now that ScraperAPI is exhausted.
             if (isServer && preferredBridge && preferredBridge.startsWith('http')) {
                 const cleanBridgeUrl = preferredBridge.trim().replace(/\/$/, "");
                 const fetchUrl = `${cleanBridgeUrl}/api/proxy/sportsdata${cleanEndpoint}`;
-                console.log(`🔌 [SportsData] Using Bridge: ${cleanBridgeUrl}`);
+                console.log(`🔌 [SportsData] Routing to Bridge: ${cleanBridgeUrl}${cleanEndpoint}`);
 
                 try {
                     const response = await fetch(fetchUrl, {
-                        headers: this.headers,
+                        headers: {
+                            ...this.headers,
+                            'Cache-Control': 'no-store'
+                        },
                         cache: 'no-store',
-                        signal: AbortSignal.timeout(10000) // Reduced timeout for faster fallback
+                        signal: AbortSignal.timeout(8000) // Tighter timeout for Bridge
                     });
 
                     if (response.ok) {
                         const jsonData = await response.json();
-                        console.log(`✅ [SportsData] Success from Bridge! Data size: ${JSON.stringify(jsonData).length} bytes`);
+                        console.log(`✅ [SportsData] Success from Bridge! (${cleanEndpoint})`);
                         return jsonData;
                     } else {
-                        console.warn(`⚠️ [SportsData] Bridge returned ${response.status}. it might be down or out of credits (Render).`);
+                        const errorMsg = await response.text().catch(() => "Unknown error");
+                        console.warn(`⚠️ [SportsData] Bridge error ${response.status}: ${errorMsg.substring(0, 100)}`);
                     }
                 } catch (bridgeError: any) {
                     console.error(`❌ [SportsData] Bridge Connection Failed (${cleanBridgeUrl}): ${bridgeError.message}`);
-                    if (cleanBridgeUrl.includes('render.com')) {
-                        console.error(`🚨 [SportsData] RENDER DETECTED: If your Render free tier is out of time, PLEASE enable USE_PROXY=true and use SCRAPER_API_KEY in Vercel.`);
+                    if (bridgeError.name === 'TimeoutError') {
+                        console.error(`⏳ [SportsData] Bridge TIMEOUT - Check if ngrok is running and responsive.`);
                     }
                 }
             }
 
-            // Priority 3: Client Proxy or Direct Stealth Mode
+            // Priority 2: Direct Fetch (Stealth Mode)
+            // Fallback if the bridge is down/not configured.
             const fetchUrl = !isServer ? `/api/proxy/sportsdata${cleanEndpoint}` : targetUrl;
-            console.log(`🌍 [SportsData] Direct fetch: ${fetchUrl}`);
+            console.log(`🌍 [SportsData] Internal Fallback: ${fetchUrl}`);
 
             let response = await fetch(fetchUrl, {
                 headers: this.headers,
                 cache: 'no-store',
-                signal: AbortSignal.timeout(30000)
+                signal: AbortSignal.timeout(15000)
             });
 
             if (!response.ok && isServer) {
