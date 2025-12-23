@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import LiveEventsList from '@/components/LiveEventsList';
 import { toast } from 'sonner';
-import Link from 'next/link';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import Link from 'next/link';
 import ParleyOptimizerBanner from '@/components/ai/ParleyOptimizerBanner';
+import SportHeader from '@/components/sports/SportHeader';
 
 export default function BasketballLivePage() {
     const [liveEvents, setLiveEvents] = useState<any[]>([]);
@@ -61,28 +62,14 @@ export default function BasketballLivePage() {
 
     return (
         <main className="min-h-screen pb-20 bg-[#050505] text-white selection:bg-orange-500/30">
-            {/* Hero Section Alusivo - Basketball */}
-            <div className="relative h-64 md:h-80 overflow-hidden mb-12 flex items-center">
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-900/40 to-black z-0"></div>
-                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                <div className="absolute top-0 right-0 w-[50%] h-full bg-orange-500/5 blur-[120px] -z-10"></div>
-
-                <div className="container relative z-10 w-full">
-                    <div className="flex items-center gap-4 md:gap-8">
-                        <div className="w-20 h-20 md:w-28 md:h-28 bg-orange-600 rounded-[2.5rem] flex items-center justify-center text-5xl md:text-6xl shadow-[0_0_50px_rgba(234,88,12,0.4)] animate-float">🏀</div>
-                        <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="h-px w-8 bg-orange-500"></span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-400">Hardwood Intelligence System</span>
-                            </div>
-                            <h1 className="text-5xl md:text-8xl font-black italic tracking-tighter uppercase leading-none text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
-                                NBA <span className="text-orange-500">SUPREME</span>
-                            </h1>
-                            <p className="text-gray-400 font-mono text-xs tracking-[0.4em] uppercase mt-3">Court Insights • Live Scoring • Point Spread AI</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <SportHeader
+                title="BALONCESTO"
+                sport="BASKETBALL"
+                emoji="🏀"
+                color="from-orange-900/40 to-black"
+                accentColor="bg-orange-500/5 blur-[120px]"
+                subtitle="Court Insights • Live Scoring • Point Spread AI"
+            />
 
             <div className="container">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

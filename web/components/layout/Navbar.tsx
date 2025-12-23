@@ -38,10 +38,10 @@ export default function Navbar() {
         { href: '/football-live', label: 'Fútbol', shortLabel: 'Fútbol', icon: '⚽', color: 'bg-green-600', textColor: 'text-green-400' },
         { href: '/value-bets', label: 'Value Bets', shortLabel: 'Value', icon: '💎', color: 'bg-emerald-600', textColor: 'text-emerald-400' },
         { href: '/streaks', label: 'Rachas', shortLabel: 'Rachas', icon: '🔥', color: 'bg-orange-600', textColor: 'text-orange-400' },
-        { href: '/props', label: 'Props', shortLabel: 'Props', icon: '🎯', color: 'bg-purple-600', textColor: 'text-purple-400' },
     ];
 
     const otrosDeportes = [
+        { href: '/props', label: 'Props Predictor', icon: '🎯' },
         { href: '/american-football', label: 'Fútbol Americano (NFL)', icon: '🏈' },
         { href: '/baseball', label: 'Béisbol (MLB)', icon: '⚾' },
         { href: '/nhl', label: 'Hockey (NHL)', icon: '🏒' },
@@ -89,7 +89,6 @@ export default function Navbar() {
             >
                 <div className="container mx-auto px-4">
                     <div className="mx-auto max-w-6xl bg-[#0a0a0a]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-8 relative overflow-hidden group">
-                        {/* Inner highlight border */}
                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
                         <div className="flex justify-between items-center h-20">
@@ -109,13 +108,13 @@ export default function Navbar() {
                             </Link>
 
                             {/* Navigation Links - Desktop Only */}
-                            <div className="hidden lg:flex items-center gap-4">
+                            <div className="flex items-center gap-4">
                                 {navLinks.map((link) => (
                                     <Link
                                         key={link.href}
                                         href={link.href}
                                         className={`relative px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2
-                                            ${isActive(link.href)
+                                                ${isActive(link.href)
                                                 ? `${link.textColor} bg-white/5 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]`
                                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                             }`}
@@ -131,6 +130,15 @@ export default function Navbar() {
                                         )}
                                     </Link>
                                 ))}
+
+                                {/* Desktop "Más" Toggle */}
+                                <button
+                                    onClick={() => setShowOtrosModal(true)}
+                                    className="px-4 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2 border border-white/5"
+                                >
+                                    <span>➕</span>
+                                    <span>Más</span>
+                                </button>
                             </div>
 
                             {/* Auth & Mobile Mini */}
@@ -236,9 +244,22 @@ export default function Navbar() {
                                     : 'text-gray-700'
                                     }`}>
                                     {link.shortLabel}
-                                </span >
+                                </span>
                             </Link>
                         ))}
+
+                        {/* Mobile "Más" Button */}
+                        <button
+                            onClick={() => setShowOtrosModal(true)}
+                            className="flex flex-col items-center justify-center gap-2 py-1"
+                        >
+                            <div className="relative flex items-center justify-center scale-100 opacity-30">
+                                <span className="text-2xl">➕</span>
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.15em] text-gray-700">
+                                Más
+                            </span>
+                        </button>
                     </div>
                 </div>
             </nav>
@@ -246,23 +267,20 @@ export default function Navbar() {
             {/* Mobile "Otros Deportes" Modal */}
             <AnimatePresence>
                 {showOtrosModal && (
-                    <>
-                        {/* Backdrop */}
+                    <div className="contents">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setShowOtrosModal(false)}
-                            className="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]"
+                            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]"
                         />
-
-                        {/* Modal */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             transition={{ type: "spring", bounce: 0.3 }}
-                            className="lg:hidden fixed bottom-24 left-4 right-4 z-[70] bg-[#0c0c0c]/95 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl p-6"
+                            className="fixed inset-x-4 bottom-24 lg:bottom-auto lg:top-24 lg:left-auto lg:right-24 lg:w-96 z-[70] bg-[#0c0c0c]/98 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl p-6"
                         >
                             <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-lg font-black uppercase tracking-wider text-white">
@@ -294,7 +312,7 @@ export default function Navbar() {
                                 ))}
                             </div>
                         </motion.div>
-                    </>
+                    </div>
                 )}
             </AnimatePresence>
         </>

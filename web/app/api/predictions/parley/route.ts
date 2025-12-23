@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sportsDataService } from '@/lib/services/sportsDataService';
 import { groqService } from '@/lib/services/groqService';
-import { getUserProfile } from '@/lib/userService';
+import { getUserProfile, saveParleyPrediction } from '@/lib/userService';
 import { globalCache } from '@/lib/utils/api-manager';
 import { ParleyResponseSchema } from '@/lib/schemas/prediction-schemas';
 
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json().catch(() => ({}));
         let strategyIndex = 0;
-        const { uid } = body;
+        const { uid, sport = 'all' } = body;
         if (body.strategyIndex !== undefined) strategyIndex = body.strategyIndex;
 
         // --- AUTH/TIER CHECK ---
@@ -39,14 +39,26 @@ export async function POST(request: NextRequest) {
         ]);
 
         const allEvents = [...footballEvents, ...basketballEvents, ...baseballEvents, ...nflEvents, ...nhlEvents, ...tennisEvents]
-            .filter(e => e.status.type !== 'finished')
+            .filter(e => {
+                if (e.status.type === 'finished') return false;
+
+                // Sport filtering
+                if (sport !== 'all') {
+                    const eSport = e.tournament.category.sport.name.toLowerCase();
+                    if (sport === 'football' && eSport !== 'football') return false;
+                    if (sport === 'basketball' && eSport !== 'basketball') return false;
+                    if (sport === 'baseball' && eSport !== 'baseball') return false;
+                    if (sport === 'tennis' && eSport !== 'tennis') return false;
+                }
+                return true;
+            })
             .sort((a, b) => a.startTimestamp - b.startTimestamp) // Prioritize today (earliest matches first)
             .slice(0, 40); // Increased to 40 to cover more immediate events
 
         if (allEvents.length < 2) {
             return NextResponse.json({
                 success: false,
-                error: 'No hay suficientes eventos activos para generar un parley.'
+                error: `No hay suficientes eventos de ${sport === 'all' ? 'deporte mixto' : sport} activos.`
             });
         }
 
@@ -83,9 +95,10 @@ export async function POST(request: NextRequest) {
 
         const prompt = `
             Eres un experto tipster profesional de apuestas deportivas.
+            FOCO DEL USUARIO: El usuario desea un parley de ${sport === 'all' ? 'VARIOS DEPORTES (MIXTO)' : sport.toUpperCase()}.
             ESTRATEGIA REQUERIDA: ${strategyPrompts[strategyIndex] || strategyPrompts[0]}
             
-            EVENTOS DISPONIBLES:
+            EVENTOS DISPONIBLES EN ${sport.toUpperCase()}:
             ${JSON.stringify(simplifiedEvents, null, 2)}
 
             INSTRUCCIONES CRÍTICAS PARA BALONCESTO:
@@ -141,6 +154,15 @@ export async function POST(request: NextRequest) {
             temperature: 0.7,
             schema: ParleyResponseSchema // Use the correct schema for Parley
         });
+
+        // 4. Save to history (if uid provided)
+        if (uid) {
+            await saveParleyPrediction(uid, {
+                ...parleyResult,
+                strategyIndex,
+                sport
+            }).catch(err => console.error('❌ Failed to save parley history:', err));
+        }
 
         return NextResponse.json({
             success: true,

@@ -74,6 +74,29 @@ export async function getTrafficStats() {
 }
 
 /**
+ * Fetch latest global activity (predictions, parleys, etc.)
+ */
+export async function getGlobalActivity(limitCount: number = 20) {
+    if (!db) return [];
+    try {
+        const q = query(
+            collection(db, 'stats_predictions'),
+            orderBy('timestamp', 'desc'),
+            limit(limitCount)
+        );
+        const snap = await getDocs(q);
+        return snap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            date: (doc.data() as any).timestamp?.toDate() || new Date()
+        }));
+    } catch (error) {
+        console.error('Error fetching global activity:', error);
+        return [];
+    }
+}
+
+/**
  * Fetch latest admin alerts
  */
 export async function getAdminAlerts(limitCount: number = 10) {

@@ -31,6 +31,7 @@ export interface UserProfile {
     isPremium: boolean;
     subscriptionType?: 'trial' | 'paid' | 'admin';
     subscriptionEnd?: Date;
+    lastActive?: Date;
     predictionsUsed: number;
     predictionsLimit: number;
     totalPredictions: number;
@@ -141,6 +142,9 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
     const data = userSnap.data();
     let role = data.role || 'user';
 
+    // Update lastActive timestamp (non-blocking)
+    updateDoc(userRef, { lastActive: serverTimestamp() }).catch(() => null);
+
     // Auto-promote if in whitelist but has user role
     if (role !== 'admin' && ADMIN_EMAILS.includes(data.email?.toLowerCase())) {
         role = 'admin';
@@ -155,6 +159,7 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
         isPremium: data.isPremium || role === 'admin' || (data.subscriptionEnd && data.subscriptionEnd.toDate() > new Date()),
         subscriptionType: data.subscriptionType || (role === 'admin' ? 'admin' : (data.isPremium ? 'paid' : 'trial')),
         subscriptionEnd: data.subscriptionEnd?.toDate(),
+        lastActive: data.lastActive?.toDate(),
         predictionsUsed: data.predictionsUsed || 0,
         predictionsLimit: data.predictionsLimit || 3,
         totalPredictions: data.totalPredictions || 0,
@@ -334,6 +339,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
             isPremium: data.isPremium || false,
             subscriptionType: data.subscriptionType || (role === 'admin' ? 'admin' : (data.isPremium ? 'paid' : 'trial')),
             subscriptionEnd: data.subscriptionEnd?.toDate(),
+            lastActive: data.lastActive?.toDate(),
             predictionsUsed: data.predictionsUsed || 0,
             predictionsLimit: data.predictionsLimit || 3,
             totalPredictions: data.totalPredictions || 0,
@@ -431,4 +437,16 @@ export async function getUserPredictions(uid: string, limitCount: number = 20): 
         ...doc.data() as PredictionRecord,
         timestamp: (doc.data() as any).timestamp?.toDate() || new Date()
     }));
+}
+
+/**
+ * Saves a generated parley prediction to user's history
+ */
+export async function saveParleyPrediction(uid: string, parleyData: any) {
+    if (!db) return;
+    const historyRef = collection(db, 'users', uid, 'parleyHistory');
+    return await addDoc(historyRef, {
+        ...parleyData,
+        createdAt: serverTimestamp()
+    });
 }

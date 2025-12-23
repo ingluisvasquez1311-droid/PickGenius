@@ -42,9 +42,18 @@ const strategies = [
     }
 ];
 
+const sportOptions = [
+    { id: 'all', name: 'Mixto (Auto)', icon: Zap, color: 'text-orange-400', desc: 'La IA elige los mejores de todos' },
+    { id: 'football', name: 'Fútbol', icon: Target, color: 'text-blue-400', desc: 'Goles, Córners y Props' },
+    { id: 'basketball', name: 'Baloncesto', icon: TrendingUp, color: 'text-purple-400', desc: 'NBA y Ligas Europeas' },
+    { id: 'baseball', name: 'Béisbol', icon: Shield, color: 'text-emerald-400', desc: 'MLB y Hits/K\'s' },
+    { id: 'tennis', name: 'Tenis', icon: Star, color: 'text-yellow-400', desc: 'Sets y Ganadores' },
+];
+
 export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalProps) {
     const { user } = useAuth();
-    const [step, setStep] = useState<'selection' | 'loading' | 'result'>('selection');
+    const [step, setStep] = useState<'sport' | 'selection' | 'loading' | 'result'>('sport');
+    const [selectedSport, setSelectedSport] = useState('all');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
@@ -59,6 +68,7 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     strategyIndex: selectedIndex,
+                    sport: selectedSport,
                     uid: user?.uid
                 })
             });
@@ -82,7 +92,7 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
     };
 
     const reset = () => {
-        setStep('selection');
+        setStep('sport');
         setResult(null);
     };
 
@@ -127,6 +137,38 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
 
                         <div className="p-8">
                             <AnimatePresence mode="wait">
+                                {step === 'sport' && (
+                                    <motion.div
+                                        key="sport"
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                    >
+                                        <p className="text-gray-400 text-sm font-medium italic mb-6">
+                                            ¿En qué deporte quieres enfocar tu jugada hoy?
+                                        </p>
+
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {sportOptions.map((sport) => (
+                                                <div
+                                                    key={sport.id}
+                                                    onClick={() => {
+                                                        setSelectedSport(sport.id);
+                                                        setStep('selection');
+                                                    }}
+                                                    className={`group p-4 rounded-3xl transition-all cursor-pointer border-2 bg-white/[0.02] border-white/5 hover:border-orange-500/30 hover:bg-white/5 flex flex-col items-center text-center`}
+                                                >
+                                                    <div className={`p-4 rounded-full bg-white/5 mb-3 group-hover:scale-110 transition-transform ${sport.color}`}>
+                                                        <sport.icon className="w-6 h-6" />
+                                                    </div>
+                                                    <h4 className="text-xs font-black uppercase tracking-widest text-white mb-1">{sport.name}</h4>
+                                                    <p className="text-[8px] text-gray-500 font-bold uppercase">{sport.desc}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+
                                 {step === 'selection' && (
                                     <motion.div
                                         key="selection"
@@ -134,9 +176,17 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
                                     >
-                                        <p className="text-gray-400 text-sm font-medium italic mb-6">
-                                            Selecciona una de nuestras estrategias optimizadas por IA para construir tus combinadas con ventaja matemática real.
-                                        </p>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <p className="text-gray-400 text-sm font-medium italic">
+                                                Selecciona la estrategia de análisis:
+                                            </p>
+                                            <button
+                                                onClick={() => setStep('sport')}
+                                                className="text-[9px] font-black text-orange-400 uppercase tracking-widest hover:underline"
+                                            >
+                                                ← Cambiar Deporte
+                                            </button>
+                                        </div>
 
                                         <div className="space-y-3">
                                             {strategies.map((strategy, i) => (

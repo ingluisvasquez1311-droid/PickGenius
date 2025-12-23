@@ -25,6 +25,7 @@ export async function GET(
     const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(primaryUrl)}&w=200&h=200&fit=cover&a=top&output=webp&q=80`;
 
     try {
+        console.log(`🖼️ [Player Proxy] Fetching from: ${proxyUrl}`);
         const response = await fetch(proxyUrl);
 
         if (!response.ok) {
@@ -54,6 +55,6 @@ export async function GET(
 
     } catch (error) {
         console.error('Error proxying player image:', error);
-        return new NextResponse('Error fetching image', { status: 500 });
+        return new NextResponse('Error fetching image', { status: 404 });
     }
 }

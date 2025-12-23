@@ -14,44 +14,34 @@ export async function GET(
 
     try {
         // Try multiple sources for team logos
-        const sources = [
-            `https://api.sofascoreapp.com/api/v1/team/${teamId}/image`,
-            `https://img.sofascore.com/api/v1/team/${teamId}/image`,
-            `https://www.sofascore.com/api/v1/team/${teamId}/image`,
-            `https://api.sofascore.app/api/v1/team/${teamId}/image`,
-            `https://api.sofascore.app/api/v1/player/${teamId}/image`
-        ];
+        const primaryUrl = `https://api.sofascore.com/api/v1/team/${teamId}/image`;
+        const secondaryUrl = `https://www.sofascore.com/api/v1/team/${teamId}/image`;
 
-        let imageResponse: Response | null = null;
+        // Use weserv.nl as a caching proxy to bypass hotlink protection
+        const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(primaryUrl)}&w=200&h=200&fit=contain&output=png&q=80`;
 
-        for (const source of sources) {
-            try {
-                console.log(`🖼️ [Logo Proxy] Fetching from: ${source}`);
-                const response = await fetch(source, {
+        console.log(`🖼️ [Logo Proxy] Fetching from: ${proxyUrl}`);
+        const response = await fetch(proxyUrl);
+
+        if (!response.ok) {
+            // If primary fails via weserv, try secondary domain
+            const fallbackProxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(secondaryUrl)}&w=200&h=200&fit=contain&output=png&q=80`;
+            const fallbackResponse = await fetch(fallbackProxyUrl);
+
+            if (fallbackResponse.ok) {
+                const buffer = await fallbackResponse.arrayBuffer();
+                return new NextResponse(buffer, {
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Referer': 'https://www.sofascore.com/',
-                    },
-                    cache: 'no-store'
+                        'Content-Type': 'image/png',
+                        'Cache-Control': 'public, max-age=86400, immutable'
+                    }
                 });
-
-                if (response.ok) {
-                    imageResponse = response;
-                    console.log(`✅ [Logo Proxy] Success from: ${source}`);
-                    break;
-                }
-            } catch (err) {
-                console.warn(`⚠️ [Logo Proxy] Error fetching from ${source}`);
-                continue;
             }
-        }
-
-        if (!imageResponse) {
             return new NextResponse('Image not found', { status: 404 });
         }
 
-        const imageBuffer = await imageResponse.arrayBuffer();
-        const contentType = imageResponse.headers.get('content-type') || 'image/png';
+        const imageBuffer = await response.arrayBuffer();
+        const contentType = response.headers.get('content-type') || 'image/png';
 
         return new NextResponse(imageBuffer, {
             status: 200,

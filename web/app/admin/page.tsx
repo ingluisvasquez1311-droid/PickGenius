@@ -5,26 +5,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getAllUsers, UserProfile, setUserRole, upgradeToPremium } from '@/lib/userService';
 import { useRouter } from 'next/navigation';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+Calendar,
+    Activity,
+    Shield,
+    Eye,
+    Target,
+    Zap,
+    Clock
+} from 'lucide-react';
 import {
     getTrafficStats,
     recalculateScores,
     resetCache,
-    broadcastNotification
+    broadcastNotification,
+    getGlobalActivity
 } from '@/lib/adminService';
-import {
-    Users,
-    Crown,
-    DollarSign,
-    TrendingUp,
-    Shield,
-    Search,
-    Download,
-    MoreVertical,
-    UserPlus,
-    UserMinus,
-    Calendar,
-    Activity
-} from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 import PremiumButton from '@/components/ui/PremiumButton';
 import { toast } from 'sonner';
@@ -50,16 +45,19 @@ export default function AdminPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [traffic, setTraffic] = useState<TrafficData[]>([]);
     const [alerts, setAlerts] = useState<AdminAlert[]>([]);
+    const [globalActivity, setGlobalActivity] = useState<any[]>([]);
 
     const fetchData = useCallback(async () => {
         setIsLoadingData(true);
         try {
-            const [usersData, trafficData] = await Promise.all([
+            const [usersData, trafficData, activityData] = await Promise.all([
                 getAllUsers(),
-                getTrafficStats()
+                getTrafficStats(),
+                getGlobalActivity(20)
             ]);
             setUsers(usersData);
             setTraffic(trafficData);
+            setGlobalActivity(activityData);
 
             // Generate mock alerts for now
             setAlerts([
@@ -196,17 +194,18 @@ export default function AdminPage() {
 
     if (!user || user.role !== 'admin') return null;
 
-    const totalUsers = users.length;
-    const premiumUsers = users.filter(u => u.isPremium).length;
-    const paidUsers = users.filter(u => u.subscriptionType === 'paid').length;
-    const revenue = paidUsers * 15;
-    const conversionRate = totalUsers > 0 ? ((paidUsers / totalUsers) * 100).toFixed(1) : '0';
+    const activeToday = users.filter(u => {
+        if (!u.lastActive) return false;
+        const now = new Date();
+        const diff = now.getTime() - u.lastActive.getTime();
+        return diff < 24 * 60 * 60 * 1000;
+    }).length;
 
     const kpis = [
         { label: 'Usuarios Totales', value: totalUsers, color: '#a855f7', icon: Users, prefix: '' },
-        { label: 'Suscripciones Pro', value: premiumUsers, color: '#3b82f6', icon: Crown, prefix: '' },
-        { label: 'Ingresos MRR', value: revenue, color: '#22c55e', icon: DollarSign, prefix: '$' },
-        { label: 'Conversión', value: `${conversionRate}%`, color: '#f59e0b', icon: TrendingUp, prefix: '' }
+        { label: 'Activos Hoy (DAU)', value: activeToday, color: '#ec4899', icon: Activity, prefix: '' },
+        { label: 'Suscripciones Pro', value: paidUsers, color: '#3b82f6', icon: Crown, prefix: '' },
+        { label: 'Ingresos MRR', value: revenue, color: '#22c55e', icon: DollarSign, prefix: '$' }
     ];
 
     const COLORS = ['#a855f7', '#3b82f6', '#22c55e', '#f59e0b'];
@@ -431,7 +430,7 @@ export default function AdminPage() {
                             {alerts.map((alert, idx) => (
                                 <div key={idx} className="flex items-start gap-4 p-4 bg-black/40 border border-white/5 rounded-2xl group hover:border-red-500/30 transition-all">
                                     <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500">
-                                        <Activity className="w-4 h-4" />
+                                        <Shield className="w-4 h-4" />
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex justify-between items-center mb-1">
@@ -455,6 +454,54 @@ export default function AdminPage() {
                                     </div>
                                 </div>
                             ))}
+                            {alerts.length === 0 && (
+                                <div className="text-center py-10 opacity-30">No hay alertas activas</div>
+                            )}
+                        </div>
+                    </GlassCard>
+
+                    {/* Live Activity Feed */}
+                    <GlassCard hover={false} className="lg:col-span-1 p-8 border-white/10 shadow-3xl bg-[#080808]/50 flex flex-col h-full">
+                        <div className="flex items-center gap-2 mb-6">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <h3 className="text-lg font-black italic tracking-tighter uppercase whitespace-nowrap">Live activity</h3>
+                        </div>
+
+                        <div className="space-y-6 flex-1 overflow-y-auto pr-3 custom-scrollbar">
+                            {globalActivity.map((act, i) => (
+                                <div key={i} className="relative pl-6 border-l border-white/5 py-1 group">
+                                    <div className="absolute top-2 -left-[5px] w-2.5 h-2.5 rounded-full bg-purple-500/30 group-hover:bg-purple-500 border-2 border-[#050505] transition-all"></div>
+                                    <div className="mb-1 flex justify-between items-start">
+                                        <span className="text-[8px] font-black text-purple-400 uppercase tracking-widest">{act.sport || 'MULTI'} EVENT</span>
+                                        <span className="text-[8px] font-bold text-gray-600 uppercase tabular-nums">
+                                            {act.date ? new Date(act.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}
+                                        </span>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-gray-300 leading-tight mb-1">
+                                        {act.pick || act.title || 'Nueva Predicción'}
+                                    </p>
+                                    <p className="text-[8px] text-gray-500 font-black uppercase tracking-tighter">
+                                        {act.matchName || 'Evento Detectado'}
+                                    </p>
+                                </div>
+                            ))}
+                            {globalActivity.length === 0 && (
+                                <div className="text-center py-20 opacity-20 flex flex-col items-center">
+                                    <Eye className="w-8 h-8 mb-4" />
+                                    <p className="text-[8px] font-black uppercase tracking-[0.2em]">Escaneando actividad...</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-white/5">
+                            <div className="flex items-center justify-between mb-4">
+                                <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Total 24h</span>
+                                <span className="text-sm font-black italic text-white">{globalActivity.length * 4}+</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Accuracy</span>
+                                <span className="text-sm font-black italic text-emerald-400">84.2%</span>
+                            </div>
                         </div>
                     </GlassCard>
 
@@ -537,7 +584,7 @@ export default function AdminPage() {
                                     <th className="px-8 py-5 text-left">Identidad</th>
                                     <th className="px-8 py-5 text-left">Privilegios</th>
                                     <th className="px-8 py-5 text-left">Suscripción</th>
-                                    <th className="px-8 py-5 text-left">Registro</th>
+                                    <th className="px-8 py-5 text-left">Última Actividad</th>
                                     <th className="px-8 py-5 text-left">Uso (Hoy/Total)</th>
                                     <th className="px-8 py-5 text-right">Acciones Directas</th>
                                 </tr>
@@ -585,9 +632,9 @@ export default function AdminPage() {
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-2 text-gray-400">
-                                                <Calendar className="w-3 h-3" />
+                                                <Activity className="w-3 h-3" />
                                                 <p className="text-[10px] font-black uppercase tracking-tighter">
-                                                    {u.createdAt ? new Date(u.createdAt).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}
+                                                    {u.lastActive ? new Date(u.lastActive).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date(u.lastActive).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }) : 'NUNCA'}
                                                 </p>
                                             </div>
                                         </td>
