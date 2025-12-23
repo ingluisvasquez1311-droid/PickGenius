@@ -10,15 +10,13 @@ import {
 import { toast } from 'sonner';
 
 export default function NotificationPermissionButton() {
-    const [permission, setPermission] = useState<NotificationPermission>('default');
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        // Safe generic check on mount
+    const [permission, setPermission] = useState<NotificationPermission>(() => {
         if (typeof window !== 'undefined' && 'Notification' in window) {
-            setPermission(Notification.permission);
+            return Notification.permission;
         }
-    }, []);
+        return 'default';
+    });
+    const [loading, setLoading] = useState(false);
 
     const handleEnableNotifications = async () => {
         setLoading(true);

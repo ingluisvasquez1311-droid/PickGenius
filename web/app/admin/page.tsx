@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAllUsers, UserProfile, setUserRole, upgradeToPremium } from '@/lib/userService';
 import { useRouter } from 'next/navigation';
@@ -48,18 +48,7 @@ export default function AdminPage() {
     const [traffic, setTraffic] = useState<TrafficData[]>([]);
     const [alerts, setAlerts] = useState<AdminAlert[]>([]);
 
-    useEffect(() => {
-        if (!loading) {
-            if (!user || user.role !== 'admin') {
-                router.push('/');
-                return;
-            }
-
-            fetchData();
-        }
-    }, [user, loading, router]);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setIsLoadingData(true);
         try {
             const [usersData, trafficData] = await Promise.all([
@@ -91,7 +80,20 @@ export default function AdminPage() {
             console.error("Error fetching admin data:", error);
         }
         setIsLoadingData(false);
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!loading) {
+            if (!user || user.role !== 'admin') {
+                router.push('/');
+                return;
+            }
+
+            void (async () => {
+                await fetchData();
+            })();
+        }
+    }, [user, loading, router, fetchData]);
 
     const handleRoleChange = async (uid: string, currentRole: string) => {
         const newRole = currentRole === 'admin' ? 'user' : 'admin';
@@ -379,7 +381,7 @@ export default function AdminPage() {
                                     <div className="flex-1">
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="text-[10px] font-black uppercase tracking-widest text-red-400">Security Alert: Limit Exceeded</span>
-                                            <span className="text-[9px] font-bold text-gray-500 tabular-nums uppercase">ID: TX-{Math.floor(Math.random() * 9999)}</span>
+                                            <span className="text-[9px] font-bold text-gray-500 tabular-nums uppercase">ID: TX-{(idx + 1000).toString().padStart(4, '0')}</span>
                                         </div>
                                         <p className="text-sm font-bold text-gray-200 mb-2 italic">
                                             El sistema detectó un intento de bypass de límites por <span className="text-white underline decoration-red-500/50">{alert.email}</span>. Bloqueo preventivo aplicado.

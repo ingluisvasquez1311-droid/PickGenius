@@ -4,12 +4,7 @@ import React, { useState, useEffect } from 'react';
 import ChristmasSnow from '@/components/ui/ChristmasSnow';
 
 export default function ChristmasWrapper() {
-    const [mounted, setMounted] = useState(false);
-
-    // Only run on client to avoid hydration mismatch with random values
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    const [mounted, setMounted] = useState(() => typeof window !== 'undefined');
 
     if (!mounted) return null;
 
