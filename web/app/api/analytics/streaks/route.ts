@@ -6,11 +6,15 @@ export const revalidate = 60; // Cache for 1 minute at edge
 
 export async function GET(_request: NextRequest) {
     try {
-        const streaks = await streakService.getStreaks();
+        const [streaks, playerStreaks] = await Promise.all([
+            streakService.getStreaks(),
+            streakService.getPlayerStreaks()
+        ]);
 
         return NextResponse.json({
             success: true,
             data: streaks,
+            players: playerStreaks,
             count: streaks.length,
             source: 'analytics_engine'
         });

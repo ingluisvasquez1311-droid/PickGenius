@@ -13,6 +13,21 @@ export interface Streak {
     confidenceScore: number;
 }
 
+export interface PlayerStreak {
+    id: string;
+    playerName: string;
+    playerImage: string;
+    teamLogo: string;
+    sport: 'basketball';
+    type: 'points' | 'assists' | 'rebounds' | 'threes';
+    count: number;
+    value: number; // e.g. 25.5
+    trend: 'over' | 'under';
+    lastMatch: string;
+    confidenceScore: number;
+    description: string;
+}
+
 import { footballDataService } from './footballDataService';
 import { basketballDataService } from './basketballDataService';
 import { baseballDataService } from './baseballDataService';
@@ -96,6 +111,69 @@ class StreakService {
             this.lastFetch = Date.now();
             return mocks;
         }
+    }
+
+    async getPlayerStreaks(): Promise<PlayerStreak[]> {
+        // In a real scenario, this would analyze last 5 games for every player.
+        // For now, we return curated "Burning Hot" trends for major stars.
+        return [
+            {
+                id: 'p-streak-1',
+                playerName: 'Luka Dončić',
+                playerImage: 'https://api.sofascore.app/api/v1/player/829211/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3411/image', // Mavs
+                sport: 'basketball',
+                type: 'points',
+                count: 5,
+                value: 32.5,
+                trend: 'over',
+                lastMatch: '39 PTS vs PHX',
+                confidenceScore: 9.6,
+                description: 'Ha superado 32.5 puntos en sus últimos 5 partidos consecutivos.'
+            },
+            {
+                id: 'p-streak-2',
+                playerName: 'Nikola Jokić',
+                playerImage: 'https://api.sofascore.app/api/v1/player/345229/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3415/image', // Nuggets
+                sport: 'basketball',
+                type: 'assists',
+                count: 7,
+                value: 9.5,
+                trend: 'over',
+                lastMatch: '12 AST vs MIL',
+                confidenceScore: 9.4,
+                description: 'El Joker promedia 11.2 asistencias en la última semana.'
+            },
+            {
+                id: 'p-streak-3',
+                playerName: 'Stephen Curry',
+                playerImage: 'https://api.sofascore.app/api/v1/player/353272/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3428/image', // Warriors
+                sport: 'basketball',
+                type: 'threes',
+                count: 4,
+                value: 4.5,
+                trend: 'over',
+                lastMatch: '6 3PM vs LAC',
+                confidenceScore: 9.2,
+                description: 'Lluvia de triples: 4+ triples en 4 juegos seguidos.'
+            },
+            {
+                id: 'p-streak-4',
+                playerName: 'Giannis Antetokounmpo',
+                playerImage: 'https://api.sofascore.app/api/v1/player/354569/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3416/image', // Bucks
+                sport: 'basketball',
+                type: 'rebounds',
+                count: 6,
+                value: 11.5,
+                trend: 'over',
+                lastMatch: '14 REB vs BOS',
+                confidenceScore: 8.9,
+                description: 'Dominio en la pintura: 6 dobles-dobles consecutivos.'
+            }
+        ];
     }
 
     private getMockStreaks(): Streak[] {

@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import { Streak } from '@/lib/services/streakService';
+import PlayerStreakCard from '@/components/streaks/PlayerStreakCard';
+import { Streak, PlayerStreak } from '@/lib/services/streakService';
 
 export default function StreaksPage() {
     const [streaks, setStreaks] = useState<Streak[]>([]);
+    const [playerStreaks, setPlayerStreaks] = useState<PlayerStreak[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'all' | 'win' | 'loss' | 'goals'>('all');
+    const [filter, setFilter] = useState<'all' | 'win' | 'loss' | 'goals' | 'nba-players'>('all');
 
     useEffect(() => {
         const fetchStreaks = async () => {
@@ -16,6 +18,7 @@ export default function StreaksPage() {
                 const json = await res.json();
                 if (json.success) {
                     setStreaks(json.data);
+                    setPlayerStreaks(json.players || []);
                 }
             } catch (error) {
                 console.error('Failed to load streaks');
@@ -29,8 +32,14 @@ export default function StreaksPage() {
 
     const filteredStreaks = streaks.filter(s => {
         if (filter === 'all') return true;
+        if (filter === 'nba-players') return false; // Hide team streaks when showing players only
         if (filter === 'goals') return s.type.includes('over_') || s.type === 'btts';
         return s.type === filter;
+    });
+
+    const filteredPlayerStreaks = playerStreaks.filter(p => {
+        if (filter === 'all') return true; // Show all in 'all' view? Maybe just top 2 as requested.
+        return filter === 'nba-players';
     });
 
     return (
@@ -56,24 +65,27 @@ export default function StreaksPage() {
             </header>
 
             {/* Filters */}
-            <div className="container mx-auto px-4 flex justify-center gap-2 mb-10 overflow-x-auto pb-4">
-                {[
-                    { id: 'all', label: 'Todas' },
-                    { id: 'win', label: '🔥 Victorias' },
-                    { id: 'loss', label: '🧊 Derrotas' },
-                    { id: 'goals', label: '⚽ Goles' },
-                ].map((f) => (
-                    <button
-                        key={f.id}
-                        onClick={() => setFilter(f.id as any)}
-                        className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider border transition-all ${filter === f.id
-                                ? 'bg-white text-black border-white'
+            <div className="container mx-auto px-4">
+                <div className="flex justify-center gap-2 mb-10 overflow-x-auto pb-4 no-scrollbar">
+                    {[
+                        { id: 'all', label: 'Todas' },
+                        { id: 'nba-players', label: '🏀 NBA Players', highlight: true },
+                        { id: 'win', label: '🔥 Victorias' },
+                        { id: 'loss', label: '🧊 Derrotas' },
+                        { id: 'goals', label: '⚽ Goles' },
+                    ].map((f) => (
+                        <button
+                            key={f.id}
+                            onClick={() => setFilter(f.id as any)}
+                            className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap ${filter === f.id
+                                ? f.highlight ? 'bg-orange-500 text-black border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.4)]' : 'bg-white text-black border-white'
                                 : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30'
-                            }`}
-                    >
-                        {f.label}
-                    </button>
-                ))}
+                                }`}
+                        >
+                            {f.label}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Grid */}
@@ -85,10 +97,38 @@ export default function StreaksPage() {
                         ))}
                     </div>
                 ) : (
-                    <div className="grid md:grid-cols-2 gap-4">
-                        {filteredStreaks.map((streak) => (
-                            <StreakCard key={streak.id} streak={streak} />
-                        ))}
+                    <div className="space-y-8">
+                        {/* FEATURED: NBA PLAYER TRENDS (Show 2 in 'All' mode, or all in 'NBA' mode) */}
+                        {(filter === 'all' || filter === 'nba-players') && playerStreaks.length > 0 && (
+                            <div className="animate-in slide-in-from-bottom-4 duration-700">
+                                {filter === 'all' && (
+                                    <div className="flex items-center gap-2 mb-4 px-2">
+                                        <span className="text-orange-500 animate-pulse">🔥</span>
+                                        <h3 className="text-sm font-black uppercase tracking-widest text-orange-100">Tendencias de Jugadores NBA</h3>
+                                    </div>
+                                )}
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    {(filter === 'nba-players' ? filteredPlayerStreaks : filteredPlayerStreaks.slice(0, 2)).map((streak, idx) => (
+                                        <PlayerStreakCard key={streak.id} streak={streak} index={idx} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TEAM STREAKS */}
+                        {(filter !== 'nba-players') && (
+                            <div className="grid md:grid-cols-2 gap-4 animate-in slide-in-from-bottom-8 duration-700 delay-100">
+                                {filteredStreaks.map((streak) => (
+                                    <StreakCard key={streak.id} streak={streak} />
+                                ))}
+                            </div>
+                        )}
+
+                        {filter === 'nba-players' && filteredPlayerStreaks.length === 0 && (
+                            <div className="text-center py-20 text-gray-500">
+                                No hay tendencias destacadas de jugadores en este momento.
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
