@@ -79,3 +79,23 @@ export function useMatchStatistics(sport: string, eventId: string) {
         staleTime: 20000,
     });
 }
+
+async function fetchMatchMomentum(sport: string, eventId: string) {
+    const res = await fetch(`/api/sports/${sport}/match/${eventId}/attack-momentum`);
+    if (!res.ok) throw new Error('Failed to fetch momentum');
+    const data = await res.json();
+    return data.data;
+}
+
+export function useMatchMomentum(sport: string, eventId: string) {
+    return useQuery({
+        queryKey: ['match-momentum', sport, eventId],
+        queryFn: () => fetchMatchMomentum(sport, eventId),
+        enabled: !!sport && !!eventId,
+        refetchInterval: (query) => {
+            // High frequency for momentum
+            return 30000;
+        },
+        staleTime: 15000,
+    });
+}

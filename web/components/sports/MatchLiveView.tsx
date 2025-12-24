@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMatchDetails, useMatchBestPlayers } from '@/hooks/useMatchData';
+import { useMatchDetails, useMatchBestPlayers, useMatchMomentum } from '@/hooks/useMatchData';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import AIPredictionCard from '@/components/ai/AIPredictionCard';
-import MatchPlayerStats from '@/components/sports/MatchPlayerStats';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import TopPlayersCard from '@/components/sports/TopPlayersCard';
 import TeamLogo from '@/components/ui/TeamLogo';
@@ -13,6 +12,7 @@ import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
 import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
 import { toast } from 'sonner';
 import { ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { Zap } from 'lucide-react';
 
 interface MatchLiveViewProps {
     sport: string;
@@ -24,12 +24,45 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
     const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
     const { data: game, isLoading: gameLoading, error: gameError } = useMatchDetails(sport, eventId);
     const { data: bestPlayers, isLoading: playersLoading } = useMatchBestPlayers(sport, eventId);
+    const { data: momentumData } = useMatchMomentum(sport, eventId);
 
-    // Generate random data once for chart
-    const [chartData] = useState(() => Array.from({ length: 20 }, (_, i) => ({
-        time: i,
-        value: 40 + Math.random() * 20 + (i > 10 ? 10 : -10)
-    })));
+    // Process real momentum data
+    const chartData = React.useMemo(() => {
+        if (!momentumData?.items) {
+            return Array.from({ length: 40 }, (_, i) => ({
+                minute: i,
+                homeValue: 0,
+                awayValue: 0
+            }));
+        }
+
+        return momentumData.items.map((item: any) => ({
+            minute: item.minute,
+            homeValue: item.value > 0 ? item.value : 0,
+            awayValue: item.value < 0 ? Math.abs(item.value) : 0
+        }));
+    }, [momentumData]);
+
+    // Calculate danger levels based on last 5 minutes
+    const dangerLevels = React.useMemo(() => {
+        if (!momentumData?.items || momentumData.items.length === 0) return { home: 'BAJO', away: 'BAJO' };
+
+        const lastPoints = momentumData.items.slice(-5);
+        const homeAvg = lastPoints.reduce((acc: number, curr: any) => acc + (curr.value > 0 ? curr.value : 0), 0) / Math.max(1, lastPoints.length);
+        const awayAvg = lastPoints.reduce((acc: number, curr: any) => acc + (curr.value < 0 ? Math.abs(curr.value) : 0), 0) / Math.max(1, lastPoints.length);
+
+        const getLevel = (avg: number) => {
+            if (avg > 40) return 'CRÍTICO';
+            if (avg > 25) return 'ALTO';
+            if (avg > 10) return 'MODERADO';
+            return 'BAJO';
+        };
+
+        return {
+            home: getLevel(homeAvg),
+            away: getLevel(awayAvg)
+        };
+    }, [momentumData]);
 
     // Derived state
     const loading = gameLoading;
@@ -202,41 +235,86 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={chartData}>
                                         <defs>
-                                            <linearGradient id="colorMomentum" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
-                                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                            <linearGradient id="colorHome" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4} />
+                                                <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                                            </linearGradient>
+                                            <linearGradient id="colorAway" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#f97316" stopOpacity={0.4} />
+                                                <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
                                         <Area
                                             type="monotone"
-                                            dataKey="value"
-                                            stroke="#8b5cf6"
-                                            strokeWidth={3}
+                                            dataKey="homeValue"
+                                            stroke="#a855f7"
+                                            strokeWidth={2}
                                             fillOpacity={1}
-                                            fill="url(#colorMomentum)"
-                                            animationDuration={1500}
+                                            fill="url(#colorHome)"
+                                            animationDuration={1000}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="awayValue"
+                                            stroke="#f97316"
+                                            strokeWidth={2}
+                                            fillOpacity={1}
+                                            fill="url(#colorAway)"
+                                            animationDuration={1000}
+                                            style={{ transform: 'scaleY(-1)', transformOrigin: 'center' }}
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
 
+                                {/* Center Line */}
+                                <div className="absolute top-1/2 left-0 w-full h-px bg-white/10 border-t border-dashed border-white/5 pointer-events-none"></div>
+
                                 {/* Labels */}
                                 <div className="absolute inset-0 flex flex-col justify-between py-2 pointer-events-none">
                                     <div className="flex justify-between items-center px-4">
-                                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{game.homeTeam.name} Pressing</span>
-                                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{game.awayTeam.name} Pressing</span>
+                                        <span className="text-[7px] font-black text-purple-500/40 uppercase tracking-[0.2em]">{game.homeTeam.name} Pressing</span>
+                                        <span className="text-[7px] font-black text-orange-500/40 uppercase tracking-[0.2em]">{game.awayTeam.name} Pressing</span>
                                     </div>
-                                    <div className="h-px w-full bg-white/5 border-t border-dashed border-white/10"></div>
                                 </div>
                             </div>
 
-                            <div className="mt-4 grid grid-cols-2 gap-4">
-                                <div className="text-center p-3 bg-white/5 rounded-2xl border border-white/5">
-                                    <div className="text-[8px] font-black text-gray-500 uppercase mb-1">Peligro Local</div>
-                                    <div className="text-lg font-black italic text-purple-400">ALTO</div>
+                            {/* GENIUS TACTICAL INSIGHT */}
+                            <div className="mt-4 p-4 bg-gradient-to-br from-indigo-500/10 to-purple-500/5 rounded-2xl border border-white/5 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <Zap className="w-8 h-8 text-purple-400" />
                                 </div>
-                                <div className="text-center p-3 bg-white/5 rounded-2xl border border-white/5">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-[8px] font-black text-purple-400 uppercase tracking-[0.2em]">Genius Insights</span>
+                                    <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                                    <span className="text-[8px] font-bold text-gray-500 uppercase italic">Análisis Táctico</span>
+                                </div>
+                                <p className="text-[10px] font-bold text-gray-300 leading-relaxed italic">
+                                    {dangerLevels.home === 'CRÍTICO' ? (
+                                        <span className="text-purple-400 font-black animate-pulse">⚠️ PRESIÓN ASFIXIANTE: {game.homeTeam.name} está volcando el campo. El gol local tiene alta probabilidad en los próximos minutos.</span>
+                                    ) : dangerLevels.away === 'CRÍTICO' ? (
+                                        <span className="text-orange-400 font-black animate-pulse">⚠️ ALERTA DE CONTRA: {game.awayTeam.name} está dominando el volumen de ataque. Cuidado con la defensa local.</span>
+                                    ) : dangerLevels.home === 'ALTO' ? (
+                                        `Dominio posicional de ${game.homeTeam.name}. Buscando espacios en zona de finalización.`
+                                    ) : dangerLevels.away === 'ALTO' ? (
+                                        `Iniciativa visitante detectada. ${game.awayTeam.name} controla el ritmo del encuentro.`
+                                    ) : (
+                                        "Fase de estudio y equilibrio táctico. Los equipos mantienen sus líneas compactas."
+                                    )}
+                                </p>
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-2 gap-4">
+                                <div className={`text-center p-3 rounded-2xl border transition-all ${dangerLevels.home === 'CRÍTICO' || dangerLevels.home === 'ALTO' ? 'bg-purple-500/10 border-purple-500/20' : 'bg-white/5 border-white/5'}`}>
+                                    <div className="text-[8px] font-black text-gray-500 uppercase mb-1">Peligro Local</div>
+                                    <div className={`text-lg font-black italic ${dangerLevels.home === 'CRÍTICO' ? 'text-purple-400 animate-pulse' : 'text-purple-400'}`}>
+                                        {dangerLevels.home}
+                                    </div>
+                                </div>
+                                <div className={`text-center p-3 rounded-2xl border transition-all ${dangerLevels.away === 'CRÍTICO' || dangerLevels.away === 'ALTO' ? 'bg-orange-500/10 border-orange-500/20' : 'bg-white/5 border-white/5'}`}>
                                     <div className="text-[8px] font-black text-gray-500 uppercase mb-1">Peligro Visitante</div>
-                                    <div className="text-lg font-black italic text-gray-400">BAJO</div>
+                                    <div className={`text-lg font-black italic ${dangerLevels.away === 'CRÍTICO' ? 'text-orange-400 animate-pulse' : 'text-orange-400'}`}>
+                                        {dangerLevels.away}
+                                    </div>
                                 </div>
                             </div>
                         </div>

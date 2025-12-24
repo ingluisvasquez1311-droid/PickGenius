@@ -346,6 +346,10 @@ class SportsDataService {
         }
     }
 
+    async getMatchMomentum(eventId: number): Promise<any> {
+        return await this.makeRequest(`/event/${eventId}/attack-momentum`);
+    }
+
     /**
      * Obtiene estadísticas generales del partido (posesión, tiros, etc.)
      */

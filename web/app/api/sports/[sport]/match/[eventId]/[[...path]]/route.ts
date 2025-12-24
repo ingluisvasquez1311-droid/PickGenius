@@ -24,6 +24,9 @@ export async function GET(
         } else if (subPath === 'statistics') {
             data = await sportsDataService.getMatchStatistics(parseInt(eventId));
             console.log(`📊 [Match Proxy] Statistics for ${eventId}:`, data ? 'FOUND' : 'NOT FOUND');
+        } else if (subPath === 'attack-momentum') {
+            data = await sportsDataService.getMatchMomentum(parseInt(eventId));
+            console.log(`⚡ [Match Proxy] Momentum for ${eventId}:`, data ? 'FOUND' : 'NOT FOUND');
         } else if (subPath === 'lineups') {
             data = await sportsDataService.getMatchLineups(parseInt(eventId));
             console.log(`📋 [Match Proxy] Lineups for ${eventId}:`, data ? 'FOUND' : 'NOT FOUND');

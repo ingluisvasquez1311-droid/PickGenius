@@ -172,81 +172,79 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                 )}
 
                 {prediction && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
-                        {/* THE VERDICT - ULTRA PREMIUM BADGE */}
-                        <div className="relative group">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                            <div className="relative bg-[#0a0a0a] rounded-[2rem] p-8 text-center border border-white/10 overflow-hidden">
-                                {/* Geometric Decoration */}
-                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] grayscale pointer-events-none select-none">
-                                    <div className="text-9xl font-black italic tracking-tighter">AI</div>
-                                </div>
-
-                                <div className="relative z-10">
-                                    <div className="flex items-center justify-center gap-2 mb-4">
-                                        <div className="h-px w-8 bg-gradient-to-r from-transparent to-yellow-500/50"></div>
-                                        <span className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.3em] italic">Veredicto del Oráculo</span>
-                                        <div className="h-px w-8 bg-gradient-to-l from-transparent to-yellow-500/50"></div>
-                                    </div>
-
-                                    <h3 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter uppercase leading-none mb-6">
-                                        {(!prediction.winner || prediction.winner.toLowerCase().includes('undefined')) ? 'Resultado Analizado' : prediction.winner}
-                                    </h3>
-
-                                    <div className="flex flex-col md:flex-row items-stretch gap-4 mb-8">
-                                        <div className="flex-1 bg-white/[0.03] border border-white/5 rounded-2xl p-4 backdrop-blur-md">
-                                            <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest block mb-2">Pick Recomendado</span>
-                                            <div className={`text-xl font-black text-green-400 italic uppercase tracking-tighter ${showMasked ? 'blur-md select-none' : ''}`}>
-                                                {prediction.bettingTip || 'Analizando...'}
-                                            </div>
-                                            {showMasked && (
-                                                <button
-                                                    className="mt-3 w-full bg-white text-black py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-500 transition-all"
-                                                    onClick={() => window.location.href = '/pricing'}
-                                                >
-                                                    🔓 Desbloquear VIP
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        <div className="flex-1 bg-white/[0.03] border border-white/5 rounded-2xl p-4 backdrop-blur-md">
-                                            <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest block mb-2">Confianza Genius</span>
-                                            <div className="flex items-center justify-between gap-3">
-                                                <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-gradient-to-r from-yellow-500 to-emerald-500 rounded-full transition-all duration-1000 ease-out"
-                                                        style={{ width: `${typeof prediction.confidence === 'number' ? prediction.confidence : parseInt(prediction.confidence || '0')}%` }}
-                                                    ></div>
-                                                </div>
-                                                <span className="text-2xl font-black text-white italic tabular-nums leading-none">
-                                                    {typeof prediction.confidence === 'number' ? `${prediction.confidence}%` : (prediction.confidence ? `${parseInt(prediction.confidence)}%` : '-%')}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {!showMasked && (
-                                        <button
-                                            onClick={() => {
-                                                const confidence = typeof prediction.confidence === 'number' ? prediction.confidence : parseInt(prediction.confidence || '50');
-                                                const estimatedOdds = estimateOdds(confidence);
-                                                addToSlip({
-                                                    matchId: eventId.toString(),
-                                                    selection: prediction.winner || 'Resultado Analizado',
-                                                    odds: estimatedOdds,
-                                                    matchLabel: prediction.teamsLabel || `${sport.toUpperCase()} Match`,
-                                                    market: prediction.bettingTip || 'Ganador'
-                                                });
-                                                toast.success('¡Añadido al Ticket!', { description: `Cuota estimada: ${estimatedOdds.toFixed(2)}` });
-                                            }}
-                                            className="w-full bg-green-500 hover:bg-green-400 text-black py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_30px_rgba(34,197,94,0.2)] active:scale-95 flex items-center justify-center gap-3"
-                                        >
-                                            <Zap className="w-4 h-4 fill-current" />
-                                            <span>Invertir en esta Selección</span>
-                                        </button>
-                                    )}
-                                </div>
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {/* PROMINENT WINNER BADGE */}
+                        <div className="relative bg-gradient-to-r from-yellow-500 to-amber-600 rounded-2xl p-6 text-center shadow-2xl shadow-yellow-500/30 border-2 border-yellow-400">
+                            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white rounded-full p-3 shadow-lg">
+                                <span className="text-4xl">🏆</span>
                             </div>
+                            <p className="text-black/70 text-xs uppercase font-bold mb-2 mt-2">Veredicto del Genio</p>
+                            <div className="flex items-center justify-center gap-2 mb-1">
+                                <p className="text-2xl md:text-3xl font-black text-black">
+                                    {(!prediction.winner || prediction.winner.toLowerCase().includes('undefined')) ? 'Resultado Analizado' : prediction.winner}
+                                </p>
+                                {prediction.isValueBet && (
+                                    <span className="bg-black text-yellow-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-yellow-400 animate-pulse">
+                                        VALUE BET
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Betting Tip Area - Masked if needed */}
+                            <div className="mt-4 px-4 py-2 bg-black/10 rounded-xl border border-black/10">
+                                <p className="text-[10px] text-black/50 uppercase font-black mb-1">Pick Recomendado</p>
+                                <p className={`text-lg font-black text-black ${showMasked ? 'blur-sm select-none' : ''}`}>
+                                    {prediction.bettingTip || 'Analizando...'}
+                                </p>
+                                {showMasked && (
+                                    <button
+                                        className="mt-2 text-[10px] bg-black text-white px-3 py-1 rounded-full font-bold hover:bg-black/80 transition-all"
+                                        onClick={() => window.location.href = '/pricing'}
+                                    >
+                                        ⭐ Desbloquear con Premium
+                                    </button>
+                                )}
+
+                                {/* Add to Ticket Button - Only for non-masked predictions */}
+                                {!showMasked && (
+                                    <button
+                                        onClick={() => {
+                                            const confidence = typeof prediction.confidence === 'number'
+                                                ? prediction.confidence
+                                                : parseInt(prediction.confidence || '50');
+                                            const estimatedOdds = estimateOdds(confidence);
+
+                                            addToSlip({
+                                                matchId: eventId.toString(),
+                                                selection: prediction.winner || 'Resultado Analizado',
+                                                odds: estimatedOdds,
+                                                matchLabel: prediction.teamsLabel || `${sport.toUpperCase()} Match`,
+                                                market: prediction.bettingTip || 'Ganador'
+                                            });
+
+                                            toast.success('¡Añadido al Ticket!', {
+                                                description: `Cuota estimada: ${estimatedOdds.toFixed(2)}`
+                                            });
+                                        }}
+                                        className="mt-2 w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-lg shadow-purple-900/30 active:scale-95 flex items-center justify-center gap-2"
+                                    >
+                                        <span>🎫</span>
+                                        <span>Añadir al Ticket</span>
+                                    </button>
+                                )}
+                            </div>
+                            <div className="mt-3 flex items-center justify-center gap-2">
+                                <div className="flex-1 max-w-xs h-3 bg-black/20 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-black rounded-full transition-all duration-500"
+                                        style={{ width: `${typeof prediction.confidence === 'number' ? prediction.confidence : parseInt(prediction.confidence || '0')}%` }}
+                                    ></div>
+                                </div>
+                                <span className="text-black font-black text-xl">
+                                    {typeof prediction.confidence === 'number' ? `${prediction.confidence}%` : (prediction.confidence ? `${parseInt(prediction.confidence)}%` : '-%')}
+                                </span>
+                            </div>
+                            <p className="text-black/60 text-xs mt-2 font-semibold">Precisión del Oráculo</p>
                         </div>
 
                         {/* VALUE BET / ODDS SECTION - ONLY IF IT IS A VALUE BET */}
