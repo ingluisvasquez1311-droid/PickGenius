@@ -1,6 +1,7 @@
 // src/services/nbaPlayerPropsService.js
 const { db } = require('../config/firebase');
 const sofaScoreBasketballService = require('./basketball/sofaScoreBasketballService');
+const groqRotator = require('../utils/groqRotator');
 
 class NBAPlayerPropsService {
     constructor() {
@@ -223,15 +224,9 @@ RESPONDE ÚNICAMENTE EN FORMATO JSON EN ESPAÑOL:
 
     async callAI(prompt) {
         // 1. Intentar con Groq primero (Preferido por el usuario)
-        if (process.env.GROQ_API_KEY) {
+        if (groqRotator) {
             try {
-                const { OpenAI } = require('openai');
-                const groq = new OpenAI({
-                    apiKey: process.env.GROQ_API_KEY,
-                    baseURL: 'https://api.groq.com/openai/v1'
-                });
-
-                const completion = await groq.chat.completions.create({
+                const completion = await groqRotator.chatCompletion({
                     model: "llama-3.3-70b-versatile",
                     messages: [
                         { role: "system", content: "Eres un analista experto de la NBA. Responde siempre en formato JSON válido en español." },

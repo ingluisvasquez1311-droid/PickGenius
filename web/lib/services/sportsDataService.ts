@@ -118,8 +118,8 @@ class SportsDataService {
 
             // Priority 1: Backend Bridge (Dual Strategy: Cloud First -> Local Backup)
             const bridgeUrls = [
-                process.env.NEXT_PUBLIC_CLOUD_API_URL, // Render (Stabilized 24/7)
-                process.env.NEXT_PUBLIC_API_URL        // Local Ngrok (Developer Mode)
+                process.env.NEXT_PUBLIC_API_URL,        // Local Ngrok (Primary for today's tests)
+                process.env.NEXT_PUBLIC_CLOUD_API_URL  // Render (Fallback/Cloud)
             ].filter(url => url && url.startsWith('http')) as string[];
 
             for (const bridgeUrl of bridgeUrls) {

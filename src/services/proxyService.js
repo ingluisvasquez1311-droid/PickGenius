@@ -6,57 +6,73 @@ const axios = require('axios');
  */
 class ProxyService {
     constructor() {
-        this.scraperApiKey = process.env.SCRAPER_API_KEY;
-        this.useProxy = process.env.USE_PROXY === 'true' || process.env.NODE_ENV === 'production';
+        this.scraperApiKeys = this.loadScraperKeys();
+        this.currentKeyIndex = 0;
+        this.useProxy = process.env.USE_PROXY === 'true'; // Only if explicitly enabled
         this.requestCount = 0;
-        this.maxFreeRequests = 1000; // ScraperAPI free tier limit
+        this.maxFreeRequests = 1000; // Total expected limit per key
     }
 
-    /**
-     * Make a proxied request through ScraperAPI
-     * @param {string} url - Target URL to scrape
-     * @param {object} options - Axios options (headers, etc.)
-     * @returns {Promise<object>} Response data
-     */
+    loadScraperKeys() {
+        const keys = [];
+        if (process.env.SCRAPER_API_KEYS) {
+            keys.push(...process.env.SCRAPER_API_KEYS.split(',').map(k => k.trim()).filter(k => k));
+        }
+        if (process.env.SCRAPER_API_KEY && !keys.includes(process.env.SCRAPER_API_KEY)) {
+            keys.push(process.env.SCRAPER_API_KEY);
+        }
+        return keys;
+    }
+
+    getNextScraperKey() {
+        if (this.scraperApiKeys.length === 0) return null;
+        const key = this.scraperApiKeys[this.currentKeyIndex];
+        this.currentKeyIndex = (this.currentKeyIndex + 1) % this.scraperApiKeys.length;
+        return key;
+    }
+
     async makeRequest(url, options = {}) {
-        // If proxy is disabled or no API key, make direct request
-        if (!this.useProxy || !this.scraperApiKey) {
-            console.log('🔗 Direct request (proxy disabled):', url);
-            return axios.get(url, options);
+        // Priority 1: Home-IP Bridge (If running on Render, call Local Ngrok)
+        const localBridgeUrl = process.env.LOCAL_BRIDGE_URL; // e.g. https://xxxx.ngrok-free.app
+        if (process.env.NODE_ENV === 'production' && localBridgeUrl && !url.includes(localBridgeUrl)) {
+            try {
+                console.log('🌉 Bridging request through Home-IP (Ngrok):', url);
+                const bridgeResponse = await axios.get(`${localBridgeUrl}/api/sofascore/proxy${new URL(url).pathname}${new URL(url).search}`, {
+                    headers: { 'ngrok-skip-browser-warning': 'true' },
+                    timeout: 8000
+                });
+                if (bridgeResponse.data) return bridgeResponse;
+            } catch (err) {
+                console.warn('⚠️ Bridge failed, trying alternative methods...');
+            }
         }
 
-        // Check if we're approaching free tier limit
-        if (this.requestCount >= this.maxFreeRequests * 0.9) {
-            console.warn(`⚠️ Approaching ScraperAPI limit: ${this.requestCount}/${this.maxFreeRequests}`);
+        // Priority 2: ScraperAPI (If enabled and keys exist)
+        const currentApiKey = this.getNextScraperKey();
+        if (this.useProxy && currentApiKey) {
+            try {
+                console.log(`🔒 Proxied request via ScraperAPI (Key index: ${this.currentKeyIndex}):`, url);
+                const proxyUrl = 'http://api.scraperapi.com';
+                const response = await axios.get(proxyUrl, {
+                    params: {
+                        api_key: currentApiKey,
+                        url: url,
+                        render: false,
+                        country_code: 'us'
+                    },
+                    headers: options.headers || {},
+                    timeout: 10000
+                });
+                this.requestCount++;
+                return response;
+            } catch (error) {
+                console.error('❌ ScraperAPI request failed:', error.message);
+            }
         }
 
-        try {
-            console.log('🔒 Proxied request via ScraperAPI:', url);
-
-            // ScraperAPI endpoint
-            const proxyUrl = 'http://api.scraperapi.com';
-
-            const response = await axios.get(proxyUrl, {
-                params: {
-                    api_key: this.scraperApiKey,
-                    url: url,
-                    render: false, // Don't render JavaScript (faster & cheaper)
-                    country_code: 'us' // Use US proxy
-                },
-                headers: options.headers || {},
-                timeout: 10000 // 10 second timeout for faster fallbacks
-            });
-
-            this.requestCount++;
-            return response;
-
-        } catch (error) {
-            console.error('❌ ScraperAPI request failed:', error.message);
-
-            // Fallback to direct request
-            console.log('🔄 Falling back to direct request...');
-            return axios.get(url, options);
-        }
+        // Priority 3: Direct Request (Default fallback)
+        console.log('🔗 Direct request:', url);
+        return axios.get(url, options);
     }
 
     /**

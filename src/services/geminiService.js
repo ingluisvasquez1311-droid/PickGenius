@@ -3,6 +3,7 @@ const { OpenAI } = require("openai");
 const historyService = require('./HistoryService');
 const sofaScoreFootballService = require('./football/sofaScoreService');
 const sofaScoreBasketballService = require('./basketball/sofaScoreBasketballService');
+const groqRotator = require('../utils/groqRotator');
 
 class GeminiService {
     constructor() {
@@ -13,15 +14,9 @@ class GeminiService {
             this.geminiModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         }
 
-        // Initialize Groq as fallback - FREE, fast, and internationally available!
-        const groqKey = process.env.GROQ_API_KEY;
-        if (groqKey) {
-            this.groq = new OpenAI({
-                apiKey: groqKey,
-                baseURL: 'https://api.groq.com/openai/v1'
-            });
-            console.log('✅ Groq AI configured as fallback (FREE 14,400 req/day)');
-        }
+        // Initialize Groq keys handled by rotator
+        this.groqService = groqRotator;
+        console.log('✅ Groq AI system ready with key rotation');
 
         // Initialize Claude (Anthropic) as fallback - better free tier
         const claudeKey = process.env.ANTHROPIC_API_KEY;
@@ -90,10 +85,10 @@ class GeminiService {
         const prompt = this.buildPrompt(history, sport, standingsContext);
 
         // 1. Intentar con Groq primero (FREE & Fast!)
-        if (this.groq) {
+        if (this.groqService) {
             try {
                 console.log('🤖 Trying Groq AI (Primary)...');
-                const completion = await this.groq.chat.completions.create({
+                const completion = await this.groqService.chatCompletion({
                     model: "llama-3.3-70b-versatile",
                     messages: [
                         {
