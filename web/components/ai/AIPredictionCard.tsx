@@ -421,8 +421,12 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                 <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 p-3 rounded-lg border border-purple-500/20">
                                                     <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">Mercado O/U (Total)</p>
                                                     <p className="text-white font-bold text-xl">
-                                                        {prediction.predictions.totalPoints || prediction.predictions.totalGoals || prediction.predictions.totalRuns || prediction.predictions.overUnder?.line || '-'}
-                                                        <span className="text-[10px] ml-1 opacity-50 font-black italic">({prediction.predictions.overUnder?.pick || 'Veredicto'})</span>
+                                                        {prediction.predictions.overUnder?.line || prediction.predictions.totalPoints || prediction.predictions.totalGoals || '-'}
+                                                        {(prediction.predictions.overUnder?.pick) && (
+                                                            <span className="block text-[10px] text-purple-400 font-black uppercase">
+                                                                {prediction.predictions.overUnder.pick} {prediction.predictions.overUnder.line}
+                                                            </span>
+                                                        )}
                                                     </p>
                                                     <p className="text-[9px] text-purple-200/50 font-bold uppercase">Proyección Genio</p>
                                                 </div>
