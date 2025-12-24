@@ -43,31 +43,56 @@ export default function TopPlayersCard({ title, players, sport, teamColor = 'pur
     const renderStats = (player: any) => {
         const stats = player.statistics || {};
         const pColor = getTeamColorHex();
+        const sportKey = sport.toLowerCase();
 
-        switch (sport.toLowerCase()) {
-            case 'basketball':
-                // Check if we have specific stats, otherwise fallback to generic
-                if (stats.points === undefined && stats.rebounds === undefined) return null;
-                return (
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider opacity-80">
-                        {stats.points !== undefined && <span>{stats.points} PTS</span>}
-                        {stats.rebounds !== undefined && <span className="text-white/40">•</span>}
-                        {stats.rebounds !== undefined && <span>{stats.rebounds} REB</span>}
-                        {stats.assists !== undefined && <span className="text-white/40">•</span>}
-                        {stats.assists !== undefined && <span>{stats.assists} AST</span>}
-                    </div>
-                );
-            case 'football':
-                return (
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider opacity-80">
-                        {stats.goals !== undefined && stats.goals > 0 && <span>{stats.goals} Goles</span>}
-                        {stats.rating !== undefined && <span>Rating {stats.rating}</span>}
-                    </div>
-                );
-            // Add other sports as needed, simplified
-            default:
-                return null;
+        if (sportKey === 'basketball' || sportKey === 'nba') {
+            if (stats.points === undefined && stats.rebounds === undefined) return null;
+            return (
+                <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider opacity-80">
+                    {stats.points !== undefined && <span className="text-white">{stats.points} PTS</span>}
+                    {stats.rebounds !== undefined && <span className="text-white/40">•</span>}
+                    {stats.rebounds !== undefined && <span>{stats.rebounds} REB</span>}
+                    {stats.assists !== undefined && <span className="text-white/40">•</span>}
+                    {stats.assists !== undefined && <span>{stats.assists} AST</span>}
+                </div>
+            );
         }
+
+        if (sportKey === 'football' || sportKey === 'soccer') {
+            return (
+                <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider opacity-80">
+                    {stats.goals !== undefined && stats.goals > 0 && <span className="text-green-400">⚽ {stats.goals} Goles</span>}
+                    {stats.assists !== undefined && stats.assists > 0 && <span className="text-blue-400">👟 {stats.assists} Asist.</span>}
+                    {stats.rating !== undefined && <span>Rating {stats.rating}</span>}
+                </div>
+            );
+        }
+
+        if (sportKey === 'baseball' || sportKey === 'mlb') {
+            return (
+                <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider opacity-80">
+                    {stats.homeRuns !== undefined && <span className="text-orange-400">{stats.homeRuns} HR</span>}
+                    {stats.runsBattedIn !== undefined && <span className="text-white/40">•</span>}
+                    {stats.runsBattedIn !== undefined && <span>{stats.runsBattedIn} RBI</span>}
+                    {stats.hits !== undefined && <span className="text-white/40">•</span>}
+                    {stats.hits !== undefined && <span>{stats.hits} H</span>}
+                </div>
+            );
+        }
+
+        if (sportKey === 'american-football' || sportKey === 'nfl') {
+            return (
+                <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-wider opacity-80">
+                    {stats.touchdowns !== undefined && <span className="text-red-400">{stats.touchdowns} TD</span>}
+                    {stats.passingYards !== undefined && <span className="text-white/40">•</span>}
+                    {stats.passingYards !== undefined && <span>{stats.passingYards} Yds Pass</span>}
+                    {stats.rushingYards !== undefined && <span className="text-white/40">•</span>}
+                    {stats.rushingYards !== undefined && <span>{stats.rushingYards} Yds Rush</span>}
+                </div>
+            );
+        }
+
+        return null;
     };
 
     return (

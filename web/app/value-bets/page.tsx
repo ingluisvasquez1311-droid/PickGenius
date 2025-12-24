@@ -73,117 +73,125 @@ const ValueBetCard = ({ bet, isPremium }: { bet: ValueBet; isPremium: boolean })
     const getBookmakerLogo = (name: string) => {
         const n = name.toLowerCase();
         if (n.includes('bet365')) return 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Bet365_Logo.svg';
+        if (n.includes('betano')) return 'https://logos-world.net/wp-content/uploads/2023/12/Betano-Logo.png';
         if (n.includes('pinnacle')) return 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Pinnacle_Sports_Logo.svg';
-        if (n.includes('1xbet')) return 'https://upload.wikimedia.org/wikipedia/commons/3/3e/1xBet_Logo.svg';
         if (n.includes('betfair')) return 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Betfair_Logo.svg';
-        if (n.includes('william')) return 'https://upload.wikimedia.org/wikipedia/commons/0/07/William_Hill_Logo.svg';
-        return '/logo-mock-bookie.png'; // Fallback
+        return '/logo-mock-bookie.png';
     };
 
     return (
-        <div className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden hover:border-green-500/30 transition-all duration-300">
-            {/* Edge Ribbon */}
-            <div className="absolute top-0 left-0 bg-green-500 text-black text-[10px] font-black px-4 py-1.5 rounded-br-2xl z-20 shadow-[0_0_20px_rgba(34,197,94,0.3)] uppercase italic tracking-tighter">
-                +{bet.edge.toFixed(1)}% EDGE
+        <div className="group relative bg-white/[0.02] border border-white/5 rounded-[2rem] overflow-hidden hover:border-green-500/40 transition-all duration-500 hover:shadow-[0_0_40px_rgba(34,197,94,0.1)]">
+            {/* Edge Badge - High Impact */}
+            <div className="absolute top-6 left-6 z-20">
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-green-500 uppercase tracking-widest mb-1">Algorithmic Edge</span>
+                    <div className="bg-green-500 text-black text-xl font-black px-4 py-1.5 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] italic">
+                        +{bet.edge.toFixed(1)}%
+                    </div>
+                </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-stretch">
-
+            <div className="flex flex-col lg:flex-row items-stretch min-h-[220px]">
                 {/* Visual Side Match Info */}
-                <div className="p-8 flex-1 flex flex-col justify-center relative">
-                    <div className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                        <span className="text-green-500">
-                            {bet.sport === 'football' ? '⚽ FÚTBOL' : bet.sport === 'basketball' ? '🏀 NBA' : bet.sport}
-                        </span>
-                        <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
-                        <span>{bet.league}</span>
+                <div className="p-8 lg:p-10 flex-1 flex flex-col justify-end relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-10 opacity-[0.03] grayscale pointer-events-none">
+                        <div className="text-9xl font-black italic tracking-tighter">DATA</div>
                     </div>
-                    <div className="text-2xl font-black text-white mb-3 flex items-center gap-4 italic tracking-tighter">
-                        {bet.homeTeam} <span className="text-gray-700 text-sm not-italic opacity-50">VS</span> {bet.awayTeam}
-                    </div>
-                    <div className="text-[10px] text-gray-500 font-bold flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                        {new Date(bet.startTime).toLocaleString('es-ES', { weekday: 'long', hour: '2-digit', minute: '2-digit' }).toUpperCase()}
+
+                    <div className="relative z-10">
+                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
+                            <span className="px-2 py-0.5 bg-white/5 rounded border border-white/10 text-white">
+                                {bet.sport === 'football' ? '⚽' : '🏀'} {bet.sport.toUpperCase()}
+                            </span>
+                            <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
+                            <span>{bet.league}</span>
+                        </div>
+
+                        <div className="flex items-center gap-6 mb-4">
+                            <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
+                                {bet.homeTeam} <span className="text-gray-800 not-italic mx-2">VS</span> {bet.awayTeam}
+                            </h2>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase">
+                                <Clock className="w-3 h-3 text-green-500" />
+                                {new Date(bet.startTime).toLocaleString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                            <div className="w-px h-3 bg-white/10"></div>
+                            <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">
+                                Confianza Genius: <span className="text-white">{bet.confidenceScore}/10</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* The "Pick" Side - BLURRED IF NOT PREMIUM */}
-                <div className="relative p-8 md:w-[450px] bg-[#111]/50 flex flex-col justify-center border-l border-white/5">
+                {/* The "Pick" Side - Advanced Intelligence */}
+                <div className="relative p-8 lg:p-10 lg:w-[480px] bg-white/[0.03] flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-white/5 backdrop-blur-md">
 
                     {!isPremium && (
-                        <div className="absolute inset-0 z-30 backdrop-blur-[12px] bg-black/70 flex flex-col items-center justify-center p-8 text-center border-l border-green-500/20">
-                            <div className="mb-4 text-4xl">💎</div>
-                            <h3 className="text-white font-black mb-2 tracking-tighter text-xl italic">OPORTUNIDAD EXCLUSIVA</h3>
-                            <p className="text-[10px] text-gray-400 mb-6 max-w-[220px] leading-relaxed">
-                                Este algoritmo detectó una discrepancia de <span className="text-green-400 font-black">+{bet.edge.toFixed(1)}%</span>. Desbloquea el análisis completo.
+                        <div className="absolute inset-0 z-30 backdrop-blur-[14px] bg-black/60 flex flex-col items-center justify-center p-10 text-center">
+                            <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center text-3xl mb-4 shadow-xl shadow-green-500/20 rotate-3">
+                                💎
+                            </div>
+                            <h3 className="text-white font-black mb-3 tracking-tighter text-2xl italic uppercase leading-none">Análisis VIP Detectado</h3>
+                            <p className="text-xs text-gray-400 mb-8 max-w-[280px] leading-relaxed">
+                                Nuestro escáner encontró un valor de <span className="text-green-400 font-bold">+{bet.edge.toFixed(1)}%</span> en la cuota de {bet.bookmaker}.
                             </p>
                             <button
                                 onClick={() => window.location.href = '/pricing'}
-                                className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-[10px] font-black px-8 py-3 rounded-full hover:scale-105 transition-transform shadow-xl shadow-green-900/40 uppercase tracking-widest"
+                                className="w-full bg-white text-black text-xs font-black px-8 py-4 rounded-2xl hover:bg-green-500 hover:text-black transition-all shadow-xl shadow-white/5 uppercase tracking-widest active:scale-95"
                             >
-                                Desbloquear Pick
+                                Desbloquear Selección
                             </button>
                         </div>
                     )}
 
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">MERCADO</div>
-                            <div className="text-white font-black text-lg italic tracking-tighter">{bet.market}</div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">CUOTA DETECTADA</div>
-                            <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-green-300 to-green-600 tabular-nums italic">
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-black/20 rounded-2xl p-4 border border-white/5">
+                            <span className="text-[9px] text-gray-600 uppercase font-black tracking-widest block mb-2">Cuota Mercado</span>
+                            <div className="text-4xl font-black text-white italic tabular-nums">
                                 {bet.odds.toFixed(2)}
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white/[0.03] rounded-2xl p-4 flex items-center justify-between mb-4 border border-white/5">
-                        <div className="flex flex-col">
-                            <span className="text-[9px] text-gray-500 uppercase font-black mb-1">Selección Genius</span>
-                            <span className="text-xl font-black text-white tracking-widest italic">{bet.selection}</span>
-                        </div>
-                        <div className="h-10 w-24 flex items-center justify-center bg-white/5 rounded-xl px-3 border border-white/5">
-                            {/* Logo handling */}
-                            {getBookmakerLogo(bet.bookmaker) !== '/logo-mock-bookie.png' ? (
-                                <img src={getBookmakerLogo(bet.bookmaker)} alt={bet.bookmaker} className="max-h-6 max-w-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
-                            ) : (
-                                <span className="text-[10px] font-black text-gray-400 uppercase italic opacity-50">{bet.bookmaker}</span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* INTERNAL STRATEGY BREAKDOWN - Requested by user */}
-                    <div className="bg-black/40 rounded-xl p-4 mb-4 border border-white/5">
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="text-[9px] font-black text-green-500 uppercase tracking-widest">Desglose de Estrategia</span>
-                            <span className="text-[10px] font-mono text-gray-600">ID: {bet.id.slice(-5).toUpperCase()}</span>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-[11px]">
-                                <span className="text-gray-500">Línea Combinada Interna</span>
-                                <span className="text-white font-bold">Inyectada</span>
-                            </div>
-                            <div className="flex justify-between text-[11px]">
-                                <span className="text-gray-500">Probabilidad Real IA</span>
-                                <span className="text-green-400 font-bold">{bet.aiProbability}%</span>
+                            <div className="mt-2 flex items-center gap-2">
+                                <img src={getBookmakerLogo(bet.bookmaker)} alt={bet.bookmaker} className="h-3 object-contain opacity-50 grayscale" />
                             </div>
                         </div>
-                        <p className="text-[9px] text-gray-600 italic mt-3 leading-tight border-t border-white/5 pt-3">
-                            * Ingresa en la casa de apuesta y verifica si es una <span className="text-white font-bold">línea simple</span> o una <span className="text-white font-bold">combinación interna</span> para esta cuota específica.
-                        </p>
+                        <div className="bg-green-500/5 rounded-2xl p-4 border border-green-500/20">
+                            <span className="text-[9px] text-green-500/60 uppercase font-black tracking-widest block mb-2">Genius Probability</span>
+                            <div className="text-4xl font-black text-green-400 italic tabular-nums">
+                                {bet.aiProbability}%
+                            </div>
+                            <div className="mt-2 text-[9px] text-green-500/40 font-bold uppercase">Línea de Valor</div>
+                        </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-[9px] font-mono bg-black/30 rounded-lg px-3 py-1.5 border border-white/5">
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-gray-600">RATING:</span>
-                            <span className="text-green-400 font-black">{bet.confidenceScore}/10</span>
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 group-hover:border-green-500/20 transition-all">
+                            <div>
+                                <span className="text-[9px] text-gray-500 uppercase font-black block mb-1">Mercado e Inversión</span>
+                                <span className="text-sm font-black text-white tracking-widest italic uppercase">{bet.market}</span>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-[9px] text-gray-500 uppercase font-black block mb-1">Recomendación</span>
+                                <span className="text-lg font-black text-green-500 italic tracking-tighter uppercase">{bet.selection}</span>
+                            </div>
                         </div>
-                        <div className="w-px h-3 bg-white/10"></div>
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-gray-600">IMPLICADA:</span>
-                            <span className="text-gray-400">{bet.impliedProbability.toFixed(1)}%</span>
+
+                        <div className="p-4 bg-black/40 rounded-2xl border border-white/5">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Target className="w-3 h-3 text-gray-600" />
+                                <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Análisis del Scanner</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-y-2">
+                                <div className="text-[10px] text-gray-600 font-bold uppercase">Prob. Implicada</div>
+                                <div className="text-[10px] text-white font-mono text-right">{bet.impliedProbability}%</div>
+                                <div className="text-[10px] text-gray-600 font-bold uppercase">Discrepancia</div>
+                                <div className="text-[10px] text-green-400 font-bold text-right">MARGEN ALTO</div>
+                            </div>
+                            <p className="text-[9px] text-gray-600 italic mt-3 pt-3 border-t border-white/5 leading-tight">
+                                * La cuota ofrecida es superior a la probabilidad real detectada. Inversión sugerida: <span className="text-white font-bold">Stake 3%</span>.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -191,3 +199,6 @@ const ValueBetCard = ({ bet, isPremium }: { bet: ValueBet; isPremium: boolean })
         </div>
     );
 };
+
+// Add missing Lucide imports
+import { Clock, Target } from 'lucide-react';

@@ -399,36 +399,59 @@ import { addDoc } from 'firebase/firestore';
 export async function savePrediction(uid: string, prediction: Omit<PredictionRecord, 'uid' | 'timestamp'>): Promise<void> {
     if (!db) return;
 
-    const predictionsRef = collection(db, 'predictions');
-    await addDoc(predictionsRef, {
+    const isGuest = !uid || uid === 'guest';
+    const finalUid = isGuest ? 'guest' : uid;
+
+    const predictionData = {
         ...prediction,
-        uid,
+        uid: finalUid,
+        isGuest,
+        timestamp: serverTimestamp()
+    };
+
+    // 1. Save to main predictions collection
+    const predictionsRef = collection(db, 'predictions');
+    await addDoc(predictionsRef, predictionData);
+
+    // 2. Save to global stats for Admin Live Feed
+    const statsRef = collection(db, 'stats_predictions');
+    await addDoc(statsRef, {
+        gameId: prediction.gameId || 'N/A',
+        pick: prediction.bettingTip || prediction.prediction || 'Consulta IA',
+        confidence: prediction.confidence || 0,
+        sport: prediction.sport || 'football',
+        isGuest,
+        userEmail: isGuest ? 'Invitado' : 'Usuario Registrado',
         timestamp: serverTimestamp()
     });
 
-    // Update user stats and predictions count
-    const userRef = doc(db, 'users', uid);
+    // 3. Update user stats ONLY if not a guest
+    if (!isGuest) {
+        const userRef = doc(db, 'users', uid);
 
-    // Determine target stat based on prediction type
-    let statToIncrement = 'stats.resultados'; // Default
+        // Determine target stat based on prediction type
+        let statToIncrement = 'stats.resultados'; // Default
 
-    if (prediction.playerName) {
-        // It's a player prop
-        if (prediction.propType?.toLowerCase().includes('assist') || prediction.prediction?.toLowerCase().includes('asist')) {
-            statToIncrement = 'stats.asistentes';
-        } else {
-            statToIncrement = 'stats.anotadores';
+        if (prediction.playerName) {
+            // It's a player prop
+            if (prediction.propType?.toLowerCase().includes('assist') || prediction.prediction?.toLowerCase().includes('asist')) {
+                statToIncrement = 'stats.asistentes';
+            } else {
+                statToIncrement = 'stats.anotadores';
+            }
         }
-    } else if (prediction.sport === 'horarios') { // Hypothetical case
-        statToIncrement = 'stats.horarios';
-    }
 
-    await updateDoc(userRef, {
-        predictionsUsed: increment(1),
-        totalPredictions: increment(1),
-        [statToIncrement]: increment(1),
-        'stats.reputation': increment(15) // Boost reputation for activity
-    });
+        try {
+            await updateDoc(userRef, {
+                predictionsUsed: increment(1),
+                totalPredictions: increment(1),
+                [statToIncrement]: increment(1),
+                'stats.reputation': increment(15)
+            });
+        } catch (err) {
+            console.error('Error updating user stats (might be non-existent doc):', err);
+        }
+    }
 }
 
 /**

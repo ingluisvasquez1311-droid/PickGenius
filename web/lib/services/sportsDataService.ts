@@ -305,7 +305,45 @@ class SportsDataService {
     }
 
     async getMatchBestPlayers(eventId: number): Promise<any> {
-        return await this.makeRequest(`/event/${eventId}/best-players`);
+        try {
+            const data = await this.makeRequest(`/event/${eventId}/best-players`);
+
+            // If data is valid and has expected structure, return it
+            if (data && (data.bestPlayers || data.allPlayers)) {
+                return data;
+            }
+
+            // Fallback: Try to derive best players from lineups/statistics
+            console.log(`🔍 [SportsData] No direct 'best-players' for ${eventId}, using lineups fallback...`);
+            const lineups = await this.getMatchLineups(eventId);
+
+            if (lineups && lineups.home && lineups.away) {
+                const mapPlayers = (players: any[] = []) => players
+                    .filter(p => p.statistics && (p.statistics.rating > 0 || p.statistics.points > 0))
+                    .sort((a, b) => (b.statistics.rating || 0) - (a.statistics.rating || 0));
+
+                const homePlayers = [...(lineups.home.players || []), ...(lineups.home.bench || [])];
+                const awayPlayers = [...(lineups.away.players || []), ...(lineups.away.bench || [])];
+
+                const processed = {
+                    allPlayers: {
+                        home: mapPlayers(homePlayers),
+                        away: mapPlayers(awayPlayers)
+                    },
+                    bestPlayers: {
+                        home: mapPlayers(homePlayers).slice(0, 3),
+                        away: mapPlayers(awayPlayers).slice(0, 3)
+                    },
+                    source: 'lineups_derived'
+                };
+                return processed;
+            }
+
+            return { allPlayers: { home: [], away: [] }, bestPlayers: { home: [], away: [] } };
+        } catch (error) {
+            console.error(`❌ [SportsData] Error getting best players for ${eventId}:`, error);
+            return { allPlayers: { home: [], away: [] }, bestPlayers: { home: [], away: [] } };
+        }
     }
 
     /**

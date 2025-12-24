@@ -231,8 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const saveToHistory = async (prediction: Omit<PredictionRecord, 'uid' | 'timestamp'>) => {
-        if (!user) return;
-        await savePrediction(user.uid, prediction);
+        await savePrediction(user?.uid || 'guest', prediction);
     };
 
     const saveParley = async (parleyData: any) => {

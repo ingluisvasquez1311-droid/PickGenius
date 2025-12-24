@@ -42,8 +42,9 @@ interface TrafficData {
 }
 
 interface AdminAlert {
-    email: string;
-    time: string;
+    id: string;
+    email?: string;
+    date: Date;
     [key: string]: any;
 }
 
@@ -455,10 +456,10 @@ export default function AdminPage() {
                                         </p>
                                         <div className="flex items-center gap-4">
                                             <div className="flex items-center gap-1.5 text-[9px] font-black text-gray-500 uppercase tracking-widest">
-                                                <Calendar className="w-3 h-3" /> Hoy, {alert.time}
+                                                <Calendar className="w-3 h-3" /> Hoy, {alert.date?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                             <button
-                                                onClick={() => handleResolveAlert(alert.email)}
+                                                onClick={() => handleResolveAlert(alert.email || alert.id)}
                                                 className="text-[9px] font-black text-purple-400 uppercase tracking-widest hover:underline"
                                             >
                                                 Resolver Incidente
@@ -485,13 +486,15 @@ export default function AdminPage() {
                                 <div key={i} className="relative pl-6 border-l border-white/5 py-1 group">
                                     <div className="absolute top-2 -left-[5px] w-2.5 h-2.5 rounded-full bg-purple-500/30 group-hover:bg-purple-500 border-2 border-[#050505] transition-all"></div>
                                     <div className="mb-1 flex justify-between items-start">
-                                        <span className="text-[8px] font-black text-purple-400 uppercase tracking-widest">{act.sport || 'MULTI'} EVENT</span>
+                                        <span className={`text-[8px] font-black uppercase tracking-widest ${act.isGuest ? 'text-amber-500' : 'text-purple-400'}`}>
+                                            {act.isGuest ? 'GUEST / ' : ''}{act.sport || 'MULTI'} EVENT
+                                        </span>
                                         <span className="text-[8px] font-bold text-gray-600 uppercase tabular-nums">
                                             {act.date ? new Date(act.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---'}
                                         </span>
                                     </div>
                                     <p className="text-[10px] font-bold text-gray-300 leading-tight mb-1">
-                                        {act.pick || act.title || 'Nueva Predicción'}
+                                        {act.pick || act.title || (act.isGuest ? 'Consulta Anónima' : 'Nueva Predicción')}
                                     </p>
                                     <p className="text-[8px] text-gray-500 font-black uppercase tracking-tighter">
                                         {act.matchName || 'Evento Detectado'}

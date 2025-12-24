@@ -175,14 +175,6 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                         <ErrorBoundary>
                             <MatchStatsSummary match={game} sport={sport} eventId={eventId} />
                         </ErrorBoundary>
-
-                        <ErrorBoundary>
-                            <MatchPlayerStats
-                                eventId={parseInt(eventId)}
-                                sport={sport}
-                                team="home"
-                            />
-                        </ErrorBoundary>
                     </div>
 
                     {/* Center Column: AI Oracle Dashboard (6 cols) */}
@@ -301,14 +293,6 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                 sport={sport}
                                 teamColor="orange"
                                 onPlayerClick={setSelectedPlayer}
-                            />
-                        </ErrorBoundary>
-
-                        <ErrorBoundary>
-                            <MatchPlayerStats
-                                eventId={parseInt(eventId)}
-                                sport={sport}
-                                team="away"
                             />
                         </ErrorBoundary>
                     </div>
