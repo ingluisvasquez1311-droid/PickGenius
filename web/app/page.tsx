@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Rocket, Shield, Zap, TrendingUp, Trophy, BarChart3, Star, ArrowRight, Play } from 'lucide-react';
+import { Rocket, Shield, Zap, TrendingUp, Trophy, BarChart3, Star, ArrowRight, Play, Target } from 'lucide-react';
 import NewsSection from '@/components/home/NewsSection';
 import SportsGrid from '@/components/home/SportsGrid';
 import { useAuth } from '@/contexts/AuthContext';
@@ -286,13 +286,13 @@ export default function HomePage() {
               className="glass-card p-12 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <BarChart3 className="w-32 h-32" />
+                <Target className="w-32 h-32" />
               </div>
               <div className="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-10 shadow-2xl shadow-purple-500/5">
                 <Zap className="w-8 h-8 fill-purple-400/20" />
               </div>
-              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Análisis IA Profundo</h3>
-              <p className="text-gray-400 leading-tight text-lg">No es suerte. Es computación de alto rendimiento aplicada a cada jugada, racha y estadística histórica para detectar valor real.</p>
+              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Criterio de Kelly (Parley)</h3>
+              <p className="text-gray-400 leading-tight text-lg">Optimización matemática de tus apuestas combinadas. No solo multiplicamos cuotas, calculamos tu stake ideal para maximizar el crecimiento del capital.</p>
             </motion.div>
 
             <motion.div
@@ -303,10 +303,10 @@ export default function HomePage() {
                 <Shield className="w-32 h-32" />
               </div>
               <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-10 shadow-2xl shadow-blue-500/5">
-                <Trophy className="w-8 h-8 fill-blue-400/20" />
+                <TrendingUp className="w-8 h-8" />
               </div>
-              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Flujo de Datos Verificado</h3>
-              <p className="text-gray-400 leading-tight text-lg">Conexión directa con feeds oficiales de la industria. Actualizaciones al segundo sin retrasos, procesadas por nuestro núcleo algorítmico.</p>
+              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Bankroll Terminal</h3>
+              <p className="text-gray-400 leading-tight text-lg">Visualiza tu ROI, beneficio proyectado y distribución de riesgo por deporte. Una suite financiera profesional para el apostador disciplinado.</p>
             </motion.div>
 
             <motion.div
@@ -314,13 +314,13 @@ export default function HomePage() {
               className="glass-card p-12 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Star className="w-32 h-32" />
+                <Zap className="w-32 h-32" />
               </div>
               <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-10 shadow-2xl shadow-emerald-500/5">
                 <ArrowRight className="w-8 h-8" />
               </div>
-              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Rendimiento de Elite</h3>
-              <p className="text-gray-400 leading-tight text-lg">Filtrado inteligente de valor. Solo te mostramos las opciones que cumplen con nuestros rigurosos estándares de probabilidad y ROI.</p>
+              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Alpha de Tiempo Real</h3>
+              <p className="text-gray-400 leading-tight text-lg">Alertas de "Peligro Crítico" (Grito de Gol) basadas en momentum de ataque en vivo. Recibe notificaciones antes de que el mercado reaccione.</p>
             </motion.div>
           </div>
         </section>
@@ -328,31 +328,42 @@ export default function HomePage() {
         {/* LIVE SYSTEM SHOWCASE - REDESIGNED */}
         <section className="container mx-auto px-4 pb-48">
           <div className="bg-gradient-to-br from-[#0c0c0c] to-black rounded-[4rem] p-16 border border-white/5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/5 blur-[120px] rounded-full -mr-32 -mt-32"></div>
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[120px] rounded-full -mr-32 -mt-32 opacity-50 group-hover:opacity-100 transition-opacity"></div>
 
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
               <div>
-                <div className="inline-block px-4 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full text-[10px] font-black tracking-widest text-purple-400 uppercase mb-8">Pulso del Sistema</div>
-                <h2 className="text-6xl md:text-8xl font-black mb-12 uppercase italic tracking-tighter leading-none">DOMINIO EN<br />TIEMPO REAL.</h2>
+                <div className="inline-block px-4 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-black tracking-widest text-emerald-400 uppercase mb-8">Ecosistema Profesional</div>
+                <h2 className="text-6xl md:text-8xl font-black mb-12 uppercase italic tracking-tighter leading-none">LA TERMINAL<br />DETERMINISTA.</h2>
 
-                <div className="grid grid-cols-2 gap-6 mb-12">
-                  <div className="bg-white/[0.02] p-8 rounded-[2.5rem] border border-white/5 backdrop-blur-md">
-                    <div className="text-5xl font-black mb-2 text-emerald-500">{footballStats.liveEvents}</div>
-                    <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Partidos Elite Live</div>
-                  </div>
-                  <div className="bg-white/[0.02] p-8 rounded-[2.5rem] border border-white/5 backdrop-blur-md">
-                    <div className="text-5xl font-black mb-2 text-orange-500">{basketballStats.liveEvents}</div>
-                    <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Canchas NBA / Euro</div>
-                  </div>
+                <p className="text-xl text-gray-500 mb-12 max-w-lg leading-tight font-medium">
+                  Hemos diseñado un centro de control unificado. De la detección del valor en vivo a la gestión del capital, todo en un solo flujo de trabajo.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+                  <Link href="/bankroll" className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 hover:bg-white/5 transition-all flex items-center justify-between group">
+                    <div>
+                      <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Finanzas Pro</div>
+                      <div className="text-xl font-bold italic uppercase tracking-tighter">Bankroll Hub</div>
+                    </div>
+                    <TrendingUp className="w-5 h-5 text-gray-600 group-hover:text-emerald-400" />
+                  </Link>
+                  <Link href="/parley" className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 hover:bg-white/5 transition-all flex items-center justify-between group">
+                    <div>
+                      <div className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-1">Multiplicadores</div>
+                      <div className="text-xl font-bold italic uppercase tracking-tighter">Smart Parley</div>
+                    </div>
+                    <Zap className="w-5 h-5 text-gray-600 group-hover:text-purple-400" />
+                  </Link>
                 </div>
 
-                <Link href="/football-live" className="group flex items-center gap-4 text-white font-black uppercase text-sm tracking-[0.2em] hover:text-purple-400 transition-colors">
-                  ACCEDER AL CENTRO DE CONTROL <Play className="w-5 h-5 fill-white group-hover:fill-purple-400 transition-all" />
+                <Link href="/football-live" className="group flex items-center gap-4 text-white font-black uppercase text-sm tracking-[0.2em] hover:text-emerald-400 transition-colors">
+                  ENTRAR AL WAR ROOM <Play className="w-5 h-5 fill-white group-hover:fill-emerald-400 transition-all" />
                 </Link>
               </div>
 
               {/* Match Card Preview - Modern Brutal */}
-              <div className="relative">
+              <div className="relative group/card">
+                <div className="absolute -inset-4 bg-emerald-500/10 blur-3xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-1000"></div>
                 <AnimatePresence mode="wait">
                   {footballStats.featuredMatch && (
                     <motion.div
@@ -364,7 +375,7 @@ export default function HomePage() {
                     >
                       <div className="absolute top-10 right-10 flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                        <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Inteligencia en Vivo</span>
+                        <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Live Momentum Control</span>
                       </div>
 
                       <div className="text-center">
@@ -402,7 +413,7 @@ export default function HomePage() {
 
                       <div className="mt-16 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-center group-hover:bg-emerald-500/20 transition-all">
                         <div className="text-emerald-400 font-black text-[10px] uppercase tracking-widest mb-2">PROYECCIÓN IA</div>
-                        <div className="text-2xl font-black italic uppercase tracking-tighter text-white">ALTA PROBABILIDAD DE GOL</div>
+                        <div className="text-2xl font-black italic uppercase tracking-tighter text-white">PELIGRO CRÍTICO DETECTADO</div>
                       </div>
                     </motion.div>
                   )}

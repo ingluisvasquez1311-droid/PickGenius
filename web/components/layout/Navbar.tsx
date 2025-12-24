@@ -37,10 +37,12 @@ export default function Navbar() {
         { href: '/basketball-live', label: 'Baloncesto', shortLabel: 'Basket', icon: '🏀', color: 'bg-orange-600', textColor: 'text-orange-400' },
         { href: '/football-live', label: 'Fútbol', shortLabel: 'Fútbol', icon: '⚽', color: 'bg-green-600', textColor: 'text-green-400' },
         { href: '/value-bets', label: 'Value Bets', shortLabel: 'Value', icon: '💎', color: 'bg-emerald-600', textColor: 'text-emerald-400' },
+        { href: '/parley', label: 'Smart Parley', shortLabel: 'Parley', icon: '🎯', color: 'bg-purple-600', textColor: 'text-purple-400' },
         { href: '/streaks', label: 'Rachas', shortLabel: 'Rachas', icon: '🔥', color: 'bg-orange-600', textColor: 'text-orange-400' },
     ];
 
     const otrosDeportes = [
+        { href: '/bankroll', label: 'Bankroll Terminal', icon: '💰' },
         { href: '/props', label: 'Props Predictor', icon: '🎯' },
         { href: '/american-football', label: 'Fútbol Americano (NFL)', icon: '🏈' },
         { href: '/baseball', label: 'Béisbol (MLB)', icon: '⚾' },
@@ -88,7 +90,7 @@ export default function Navbar() {
                     }`}
             >
                 <div className="container mx-auto px-4">
-                    <div className="mx-auto max-w-6xl bg-[#0a0a0a]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-8 relative overflow-hidden group">
+                    <div className="mx-auto max-w-6xl bg-[#0a0a0a]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-8 relative group">
                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
                         <div className="flex justify-between items-center h-20">

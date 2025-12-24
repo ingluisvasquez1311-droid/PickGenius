@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Navbar from '@/components/layout/Navbar';
 import PlayerStreakCard from '@/components/streaks/PlayerStreakCard';
 import { Streak, PlayerStreak } from '@/lib/services/streakService';
 
@@ -44,7 +43,6 @@ export default function StreaksPage() {
 
     return (
         <main className="min-h-screen bg-[#050505] text-white font-sans selection:bg-orange-500/30 pb-20 pt-24">
-            <Navbar />
 
             {/* Header */}
             <header className="relative py-12 text-center overflow-hidden">

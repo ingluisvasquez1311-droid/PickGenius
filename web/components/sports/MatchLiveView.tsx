@@ -8,11 +8,11 @@ import AIPredictionCard from '@/components/ai/AIPredictionCard';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import TopPlayersCard from '@/components/sports/TopPlayersCard';
 import TeamLogo from '@/components/ui/TeamLogo';
-import PlayerDetailModal from '@/components/basketball/PlayerDetailModal';
+import UniversalPlayerPropModal from '@/components/sports/UniversalPlayerPropModal';
 import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
 import { toast } from 'sonner';
 import { ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { Zap } from 'lucide-react';
+import { Zap, Bell, ShieldCheck } from 'lucide-react';
 
 interface MatchLiveViewProps {
     sport: string;
@@ -22,6 +22,7 @@ interface MatchLiveViewProps {
 export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
     const router = useRouter();
     const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
+    const [isAlertsEnabled, setIsAlertsEnabled] = useState(false);
     const { data: game, isLoading: gameLoading, error: gameError } = useMatchDetails(sport, eventId);
     const { data: bestPlayers, isLoading: playersLoading } = useMatchBestPlayers(sport, eventId);
     const { data: momentumData } = useMatchMomentum(sport, eventId);
@@ -77,6 +78,39 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
             });
         }
     }, [isLive, game?.id]);
+
+    // SMART ALERTS: Monitor Danger Levels
+    useEffect(() => {
+        if (!isAlertsEnabled || !game) return;
+
+        if (dangerLevels.home === 'CRÍTICO') {
+            toast('🔥 PELIGRO LOCAL CRÍTICO', {
+                description: `${game.homeTeam.name} está bajo presión máxima de gol.`,
+                icon: '⚽',
+                duration: 8000
+            });
+            // Try to use browser notification if permission granted
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(`¡ALERTA DE GOL! - ${game.homeTeam.name}`, {
+                    body: 'Presión crítica detectada por la IA.',
+                    icon: '/logo.png'
+                });
+            }
+        }
+        if (dangerLevels.away === 'CRÍTICO') {
+            toast('🔥 PELIGRO VISITANTE CRÍTICO', {
+                description: `${game.awayTeam.name} está bajo presión máxima de gol.`,
+                icon: '⚽',
+                duration: 8000
+            });
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(`¡ALERTA DE GOL! - ${game.awayTeam.name}`, {
+                    body: 'Presión crítica detectada por la IA.',
+                    icon: '/logo.png'
+                });
+            }
+        }
+    }, [dangerLevels.home, dangerLevels.away, isAlertsEnabled, game]);
 
     if (loading) {
         return (
@@ -226,7 +260,20 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                     <div className="w-2 h-6 bg-emerald-500 rounded-full animate-pulse"></div>
                                     <h3 className="text-sm font-black italic uppercase tracking-widest text-white">Live Attack Momentum</h3>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => {
+                                            const newState = !isAlertsEnabled;
+                                            setIsAlertsEnabled(newState);
+                                            toast(newState ? '🔔 Alertas Activadas' : '🔕 Alertas Desactivadas', {
+                                                description: newState ? 'Te avisaremos cuando el peligro sea Crítico.' : 'No recibirás notificaciones tácticas.'
+                                            });
+                                        }}
+                                        className={`p-2 rounded-xl border transition-all ${isAlertsEnabled ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/5 text-gray-500'}`}
+                                        title={isAlertsEnabled ? 'Desactivar Alertas' : 'Activar Alertas de Gol'}
+                                    >
+                                        <Bell className="w-4 h-4" />
+                                    </button>
                                     <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">Real-Time</span>
                                 </div>
                             </div>
@@ -377,13 +424,12 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
 
                 </div>
             </div>
-
             {selectedPlayer && (
-                <PlayerDetailModal
+                <UniversalPlayerPropModal
                     isOpen={!!selectedPlayer}
                     onClose={() => setSelectedPlayer(null)}
                     player={selectedPlayer}
-                    teamColor="purple"
+                    sport={sport as any}
                 />
             )}
         </div>
