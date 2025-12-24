@@ -13,7 +13,8 @@ import { logLimitAlert } from './adminService';
 
 const ADMIN_EMAILS = [
     'pickgenius@gmail.com',
-    'ingluisvasquez1311@gmail.com' // Explicit owner email
+    'ingluisvasquez1311@gmail.com', // Explicit owner email
+    'luisvasquez1311@gmail.com'    // Admin whitelist
 ];
 
 export interface FavoritePlayer {

@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
             const profile = await getUserProfile(uid);
             const isOwner = profile?.email && (
                 profile.email.toLowerCase() === 'pickgenius@gmail.com' ||
-                profile.email.toLowerCase() === 'ingluisvasquez1311@gmail.com'
+                profile.email.toLowerCase() === 'ingluisvasquez1311@gmail.com' ||
+                profile.email.toLowerCase() === 'luisvasquez1311@gmail.com'
             );
             isPremiumUser = profile?.isPremium || profile?.role === 'admin' || isOwner || false;
             console.log(`👤 [Parley API] User ${uid} | isPremium: ${isPremiumUser}`);
@@ -42,12 +43,19 @@ export async function POST(request: NextRequest) {
             sportsDataService.getEventsBySport('tennis').catch(() => [])
         ]);
 
-        // 2. Filter by Sport AND Mode
+        const BIG_LEAGUES = [
+            'Premier League', 'LaLiga', 'Serie A', 'Bundesliga', 'Ligue 1',
+            'Eredivisie', 'Brasileirão', 'Primera División', 'Liga Profesional',
+            'NBA', 'NBA Cup', 'EuroLeague', 'Champions League', 'Libertadores', 'Sudamericana',
+            'MLB', 'NFL', 'NHL'
+        ];
+
+        // 2. Filter by Sport AND Mode AND Priority Leagues
         const allEventsRaw = [...footballEvents, ...basketballEvents, ...baseballEvents, ...nflEvents, ...nhlEvents, ...tennisEvents]
             .filter(e => {
                 if (!e.status || e.status.type === 'finished') return false;
 
-                // Match Mode Filtering (Live vs Pre-match)
+                // Match Mode Filtering
                 if (mode === 'live' && e.status.type !== 'inprogress') return false;
                 if (mode === 'pre' && e.status.type === 'inprogress') return false;
 
@@ -63,13 +71,28 @@ export async function POST(request: NextRequest) {
                     if (sport === 'american-football' && (eSport !== 'american-football' && eSport !== 'nfl')) return false;
                     if (sport === 'icehockey' && (eSport !== 'icehockey' && eSport !== 'nhl')) return false;
                 }
-                return true;
-            });
 
+                return true;
+            })
+            .map(e => ({
+                ...e,
+                isPriority: BIG_LEAGUES.some(bl =>
+                    e.tournament.name.toLowerCase().includes(bl.toLowerCase()) ||
+                    e.tournament.category.name.toLowerCase().includes(bl.toLowerCase())
+                )
+            }));
+
+        // Prioritize Big Leagues in the final selection
         let filteredEvents: any[] = [];
+        const priorityEvents = allEventsRaw.filter(e => e.isPriority);
+        const secondaryEvents = allEventsRaw.filter(e => !e.isPriority);
+
         if (sport === 'all') {
             const groups: { [key: string]: any[] } = {};
-            allEventsRaw.forEach(e => {
+            // Take up to 20 priority events first
+            const baseEvents = priorityEvents.length >= 10 ? priorityEvents : [...priorityEvents, ...secondaryEvents];
+
+            baseEvents.forEach(e => {
                 const sName = e.tournament.category.sport.slug || 'other';
                 if (!groups[sName]) groups[sName] = [];
                 groups[sName].push(e);
@@ -79,7 +102,10 @@ export async function POST(request: NextRequest) {
             });
             filteredEvents.sort((a, b) => a.startTimestamp - b.startTimestamp);
         } else {
-            filteredEvents = allEventsRaw.sort((a, b) => a.startTimestamp - b.startTimestamp).slice(0, 50);
+            // Specific sport: Priority first
+            filteredEvents = [...priorityEvents, ...secondaryEvents.slice(0, 30)]
+                .sort((a, b) => (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0) || a.startTimestamp - b.startTimestamp)
+                .slice(0, 60);
         }
 
         if (filteredEvents.length < 2) {
@@ -132,32 +158,37 @@ export async function POST(request: NextRequest) {
         ];
 
         const prompt = `
-            Eres un experto tipster profesional. Genera un parley de 2 a 5 selecciones.
+            Eres un experto tipster profesional de apuestas de alto nivel.
             MODALIDAD: ${mode === 'live' ? 'PARTIDOS EN VIVO' : 'PARTIDOS PROXIMOS'}.
             DEPORTE: ${sport.toUpperCase()}.
             ESTRATEGIA: ${strategyPrompts[strategyIndex] || strategyPrompts[0]}
             
-            DATOS:
+            INSTRUCCIÓN DE FILTRADO (CRÍTICO):
+            - He filtrado los datos para priorizar las GRANDES LIGAS: Premier League, LaLiga, Serie A, Bundes, Eredivisie, Brasileirao, Liga Argentina y la NBA (incluyendo NBA Cup).
+            - PRIORIDAD MÁXIMA PARA NBA: Si hay juegos de NBA, enfócate en PLAYER PROPS de estrellas (más de X puntos, rebotes, etc).
+            - PRIORIDAD FÚTBOL: Enfócate en las ligas de élite mencionadas. Prefiere mercados de Córners o Goles en estas ligas antes que ganar/perder en ligas menores.
+
+            DATOS (Ordenados por relevancia y liga):
             ${JSON.stringify(simplifiedEvents, null, 2)}
 
-            ${!isPremiumUser ? 'BLOQUEO: SOLO mercados de equipo (ganador, goles, handicaps). NO PLAYER PROPS.' : 'PREMIUM: Incluye PLAYER PROPS de alto valor.'}
+            ${!isPremiumUser ? 'BLOQUEO: SOLO mercados de equipo (ganador, goles, handicaps). NO PLAYER PROPS.' : 'PREMIUM: Incluye PLAYER PROPS de estrellas de NBA y Fútbol.'}
 
-            JSON ÚNICAMENTE (Asegúrate de incluir 'startTime' para cada leg):
+            INSTRUCCIONES DE FORMATO (JSON ÚNICAMENTE):
             {
-              "title": "Título",
+              "title": "Título del Parley Élite",
               "confidence": 85,
               "totalOdds": 5.45,
               "isValueParley": true,
-              "valueAnalysis": "Razonamiento...",
+              "valueAnalysis": "Por qué estas ligas principales tienen valor...",
               "legs": [{ 
                 "matchName": "A vs B", 
                 "pick": "Pick", 
                 "odds": "1.85", 
                 "confidence": 80, 
                 "startTime": "Mier, 24 Dic 18:00",
-                "reasoning": "Por qué..." 
+                "reasoning": "Breve análisis basado en el nivel de la liga..." 
               }],
-              "analysis": "Análisis final...",
+              "analysis": "Resumen de por qué elegiste estas ligas...",
               "riskLevel": "Medio"
             }
         `;

@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
             // OWNER/ADMIN is always premium regardless of Firestore flags
             const isOwner = profile?.email && (
                 profile.email.toLowerCase() === 'pickgenius@gmail.com' ||
-                profile.email.toLowerCase() === 'ingluisvasquez1311@gmail.com'
+                profile.email.toLowerCase() === 'ingluisvasquez1311@gmail.com' ||
+                profile.email.toLowerCase() === 'luisvasquez1311@gmail.com'
             );
             isPremiumUser = profile?.isPremium || profile?.role === 'admin' || isOwner || false;
             console.log(`👤 [Prediction API] User ${uid} | isPremium: ${isPremiumUser} | Role: ${profile?.role}`);
