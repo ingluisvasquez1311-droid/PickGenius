@@ -1,213 +1,109 @@
-# 🚀 Guía de Deployment en Render
+# Guía Rápida: Desplegar Backend en Render
 
-## 📋 Preparación Completada
+## Paso 1: Crear Cuenta en Render
+1. Ve a https://render.com
+2. Haz clic en "Get Started for Free"
+3. Regístrate con tu cuenta de GitHub
 
-Todos los archivos necesarios para el deployment están listos:
-- ✅ `server.js` - Servidor Express con auto-sync
-- ✅ `Procfile` - Configuración de Render
-- ✅ `package.json` - Dependencias
-- ✅ `.env.example` - Variables de entorno
-- ✅ Servicios de sincronización automática
+## Paso 2: Crear Nuevo Web Service
+1. En el dashboard de Render, haz clic en "New +"
+2. Selecciona "Web Service"
+3. Conecta tu repositorio: `ingluisvasquez1311-droid/PickGenius`
+4. Haz clic en "Connect"
 
-## 🎯 Pasos para Deploy en Render
+## Paso 3: Configurar el Servicio
+Usa la siguiente configuración:
 
-### 1. Preparar Repositorio Git
+**Name:** `pickgenius-backend`
 
-```powershell
-# Inicializar git (si no está inicializado)
-git init
+**Region:** `Oregon (US West)` (o el más cercano a ti)
 
-# Agregar todos los archivos
-git add .
+**Branch:** `main`
 
-# Commit
-git commit -m "feat: NBA Sync Service con auto-sync y dashboard"
+**Root Directory:** (dejar vacío)
 
-# Crear repositorio en GitHub y conectar
-git remote add origin https://github.com/tu-usuario/tiren-parleys.git
-git branch -M main
-git push -u origin main
+**Runtime:** `Node`
+
+**Build Command:**
+```
+npm install
 ```
 
-### 2. Configurar en Render
-
-1. **Ir a** [https://render.com/](https://render.com/)
-2. **Sign up / Login** con GitHub
-3. **New +** → **Web Service**
-4. **Connect repository**: Selecciona `tiren-parleys`
-
-### 3. Configuración del Servicio
-
-**Build & Deploy**:
-- **Name**: `tiren-parleys-nba-sync`
-- **Region**: `Oregon (US West)` o el más cercano
-- **Branch**: `main`
-- **Root Directory**: (dejar vacío)
-- **Runtime**: `Node`
-- **Build Command**: `npm install`
-- **Start Command**: `npm start`
-
-**Plan**:
-- Selecciona **Free** (para empezar)
-
-### 4. Variables de Entorno
-
-En Render, ve a **Environment** y agrega:
-
-```env
-# Firebase
-GOOGLE_CLOUD_PROJECT=tu-proyecto-id
-FIREBASE_API_KEY=tu-firebase-api-key
-
-# NBA API (balldontlie.io)
-NBA_API_KEY=tu-nba-api-key
-
-# Gemini AI
-GEMINI_API_KEY=tu-gemini-api-key
-
-# Node
-NODE_ENV=production
-PORT=3000
+**Start Command:**
+```
+npm start
 ```
 
-### 5. Firebase Credentials
+**Instance Type:** `Free`
 
-**Opción A: Variable de entorno** (Recomendado)
+## Paso 4: Variables de Entorno
+Haz clic en "Advanced" y agrega estas variables:
 
-1. Copia el contenido de `firebase-credentials.json`
-2. En Render, agrega variable: `FIREBASE_CREDENTIALS`
-3. Pega el JSON completo como valor
+| Key | Value |
+|-----|-------|
+| `NODE_ENV` | `production` |
+| `SCRAPER_API_KEY` | `tu_clave_de_scraperapi` |
+| `PORT` | `10000` |
 
-**Opción B: Secret File**
+> **Nota:** Si no tienes ScraperAPI key, puedes obtener una gratis en https://www.scraperapi.com (1,000 requests/mes gratis)
 
-1. En Render, ve a **Secret Files**
-2. Filename: `firebase-credentials.json`
-3. Contents: Pega el contenido del archivo
+## Paso 5: Desplegar
+1. Haz clic en "Create Web Service"
+2. Espera 5-10 minutos mientras Render hace el build
+3. Una vez completado, verás un mensaje "Live" con un ✅
 
-### 6. Deploy
-
-1. Click **Create Web Service**
-2. Render automáticamente:
-   - Clonará el repo
-   - Instalará dependencias
-   - Iniciará el servidor
-   - Configurará auto-sync
-
-## ✅ Verificación
-
-Una vez deployado, verifica:
-
-```bash
-# Health check
-curl https://tiren-parleys-nba-sync.onrender.com/health
-
-# Status
-curl https://tiren-parleys-nba-sync.onrender.com/api/status
-
-# Manual sync (POST)
-curl -X POST https://tiren-parleys-nba-sync.onrender.com/api/sync
+## Paso 6: Obtener URL del Servidor
+Tu servidor estará disponible en:
+```
+https://pickgenius-backend.onrender.com
 ```
 
-## 🔄 Sincronización Automática
+## Paso 7: Configurar Vercel
+1. Ve a tu proyecto en Vercel: https://vercel.com/pickgenius-projects/pick-genius
+2. Ve a "Settings" → "Environment Variables"
+3. Agrega una nueva variable:
+   - **Name:** `NEXT_PUBLIC_API_URL`
+   - **Value:** `https://pickgenius-backend.onrender.com`
+   - **Environment:** Production, Preview, Development
+4. Haz clic en "Save"
 
-El servidor automáticamente:
-- ✅ Se inicia al deployar
-- ✅ Ejecuta `autoSyncService.startDailySync()`
-- ✅ Sincroniza últimos 7 días cada 24 horas
-- ✅ Guarda datos en Firestore
-- ✅ Se mantiene activo 24/7
+## Paso 8: Redeploy en Vercel
+1. Ve a "Deployments"
+2. Haz clic en los tres puntos (...) del último deployment
+3. Selecciona "Redeploy"
+4. Espera 2-3 minutos
 
-## 📊 Dashboard
-
-Para el dashboard de Streamlit, necesitas un servicio separado:
-
-### Opción 1: Render (Streamlit)
-
-1. **New +** → **Web Service**
-2. **Same repository**
-3. **Build Command**: `pip install -r requirements.txt`
-4. **Start Command**: `streamlit run dashboard.py --server.port=$PORT --server.address=0.0.0.0`
-
-### Opción 2: Streamlit Cloud
-
-1. Ve a [share.streamlit.io](https://share.streamlit.io/)
-2. Connect GitHub repo
-3. Main file: `dashboard.py`
-4. Deploy
-
-## 🔐 Seguridad
-
-**Importante**:
-- ✅ Nunca subas `firebase-credentials.json` al repo
-- ✅ Usa variables de entorno en Render
-- ✅ Agrega `.env` a `.gitignore`
-- ✅ Usa Secret Files para credenciales
-
-## 📝 .gitignore
-
-Asegúrate de tener:
-
-```
-# Credentials
-firebase-credentials.json
-.env
-
-# Dependencies
-node_modules/
-.venv/
-
-# Logs
-logs/
-*.log
-
-# Data
-data/
-backups/
-
-# Python
-__pycache__/
-*.pyc
-```
-
-## 🎉 Resultado Final
-
-Después del deployment:
-
-1. **Servidor Node.js**: `https://tiren-parleys-nba-sync.onrender.com`
-   - Auto-sync cada 24 horas
-   - API endpoints disponibles
-   - Logs en Render dashboard
-
-2. **Dashboard Streamlit**: `https://tiren-parleys.streamlit.app`
-   - Visualización en tiempo real
-   - Accesible desde cualquier lugar
-   - Actualización automática
-
-3. **Firestore**: Datos sincronizados en la nube
-   - Accesible desde ambos servicios
-   - Persistente y escalable
-
-## 🚨 Troubleshooting
-
-### Error: "Module not found"
-- Verifica `package.json` tiene todas las dependencias
-- Re-deploy desde Render dashboard
-
-### Error: "Firebase credentials"
-- Verifica variable `FIREBASE_CREDENTIALS` o Secret File
-- Formato debe ser JSON válido
-
-### Sync no funciona
-- Verifica `NBA_API_KEY` en variables de entorno
-- Revisa logs en Render dashboard
-- Prueba endpoint manual: `POST /api/sync`
-
-## 📞 Soporte
-
-- Render Docs: https://render.com/docs
-- Streamlit Docs: https://docs.streamlit.io/
-- Firebase Docs: https://firebase.google.com/docs
+## Paso 9: Verificar
+1. Ve a https://pickgeniuspro.com/football-live
+2. Deberías ver partidos reales en lugar de mock data
+3. Los IDs de partidos deben ser números reales (no 112233, 445566, etc.)
 
 ---
 
-**¿Listo para deployar?** Sigue los pasos arriba y tendrás tu servicio NBA corriendo en la nube 24/7! 🚀
+## Troubleshooting
+
+### El servidor no inicia
+- Verifica que todas las dependencias estén en `package.json`
+- Revisa los logs en Render Dashboard
+
+### Sigue mostrando datos mock
+- Verifica que `NEXT_PUBLIC_API_URL` esté configurada en Vercel
+- Asegúrate de haber hecho redeploy después de agregar la variable
+- Limpia el caché del navegador
+
+### Error 503 en el servidor
+- Render puede tardar 30-60 segundos en "despertar" el servidor en el plan gratuito
+- Espera un momento y recarga la página
+
+---
+
+## Costos
+- **Render Free Tier:** $0/mes (suficiente para empezar)
+- **ScraperAPI Free:** 1,000 requests/mes (suficiente para testing)
+
+## Próximos Pasos
+Una vez que el servidor esté funcionando:
+1. ✅ Verificar datos reales en producción
+2. ✅ Probar predicciones de IA
+3. ✅ Confirmar mercados secundarios
+4. ✅ Monitorear uso de ScraperAPI
