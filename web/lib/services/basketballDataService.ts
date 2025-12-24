@@ -284,7 +284,7 @@ class BasketballDataService {
      */
     async getScheduledEvents(date: string): Promise<ApiResponse> {
         return this.makeRequest(
-            `/sport/basketball/scheduled-events/${date}`,
+            `/sport/basketball/events/${date}`,
             `basketball_scheduled_${date}`,
             300 // 5 minutes cache
         );

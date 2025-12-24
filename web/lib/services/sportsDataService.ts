@@ -237,7 +237,7 @@ class SportsDataService {
      * Obtiene partidos de fútbol programados para una fecha
      */
     async getScheduledFootballMatches(date: string): Promise<SportsDataEvent[]> {
-        const data = await this.makeRequest<SportsDataResponse>(`/sport/football/scheduled-events/${date}`);
+        const data = await this.makeRequest<SportsDataResponse>(`/sport/football/events/${date}`);
         return data?.events || [];
     }
 
@@ -269,7 +269,7 @@ class SportsDataService {
      * Obtiene partidos de baloncesto programados para una fecha
      */
     async getScheduledBasketballGames(date: string): Promise<SportsDataEvent[]> {
-        const data = await this.makeRequest<SportsDataResponse>(`/sport/basketball/scheduled-events/${date}`);
+        const data = await this.makeRequest<SportsDataResponse>(`/sport/basketball/events/${date}`);
         return data?.events || [];
     }
 
@@ -441,9 +441,9 @@ class SportsDataService {
 
         const [liveData, scheduledYesterday, scheduledToday, scheduledTomorrow] = await Promise.all([
             this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/live`),
-            this.makeRequest<SportsDataResponse>(`/sport/${sport}/scheduled-events/${yesterday}`),
-            this.makeRequest<SportsDataResponse>(`/sport/${sport}/scheduled-events/${today}`),
-            this.makeRequest<SportsDataResponse>(`/sport/${sport}/scheduled-events/${tomorrow}`)
+            this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/${yesterday}`),
+            this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/${today}`),
+            this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/${tomorrow}`)
         ]);
 
         const allEvents = [

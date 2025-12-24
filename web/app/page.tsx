@@ -42,13 +42,13 @@ export default function HomePage() {
             let res = await fetch(`/api/basketball/scheduled?date=${today}`);
             let data = await res.json();
 
-            if ((!data.success || !data.data?.events || data.data.events.length === 0)) {
+            if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
               res = await fetch(`/api/basketball/scheduled?date=${tomorrow}`);
               data = await res.json();
             }
 
-            if (data.success && data.data?.events && data.data.events.length > 0) {
-              const nextGame = data.data.events[0];
+            if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+              const nextGame = data.data[0];
               const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
               basketballFeatured = {
                 id: nextGame.id,
@@ -92,13 +92,13 @@ export default function HomePage() {
             let res = await fetch(`/api/football/scheduled?date=${today}`);
             let data = await res.json();
 
-            if ((!data.success || !data.data?.events || data.data.events.length === 0)) {
+            if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
               res = await fetch(`/api/football/scheduled?date=${tomorrow}`);
               data = await res.json();
             }
 
-            if (data.success && data.data?.events && data.data.events.length > 0) {
-              const nextGame = data.data.events[0];
+            if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+              const nextGame = data.data[0];
               const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
               footballFeatured = {
                 id: nextGame.id,

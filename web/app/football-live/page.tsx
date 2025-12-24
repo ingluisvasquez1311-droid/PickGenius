@@ -34,8 +34,8 @@ export default function FootballLivePage() {
                 if (liveData.success && Array.isArray(liveData.data)) allEvents = [...liveData.data];
 
                 const processScheduled = (data: any) => {
-                    if (data.success && data.data && Array.isArray(data.data.events)) {
-                        const scheduledEvents = data.data.events;
+                    if (data.success && Array.isArray(data.data)) {
+                        const scheduledEvents = data.data;
                         const liveIds = new Set(allEvents.map(e => e.id));
                         const newScheduled = scheduledEvents.filter((e: any) => !liveIds.has(e.id));
                         allEvents = [...allEvents, ...newScheduled];

@@ -20,7 +20,7 @@ class FootballSyncService {
 
             // Use our robust sportsDataService (uses ScraperAPI/Bypass)
             // Endpoint for all scheduled events on a date
-            const data = await sportsDataService.makeRequest(`/sport/football/scheduled-events/${today}`);
+            const data = await sportsDataService.makeRequest(`/sport/football/events/${today}`);
 
             if (!data || !data.events) {
                 throw new Error('No events found in Sofascore response');

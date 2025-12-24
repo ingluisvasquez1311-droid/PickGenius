@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Zap, Target, TrendingUp, ShieldCheck, Info } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
+import MatchSelectorModal from '@/components/parley/MatchSelectorModal';
 
 interface ParleyLeg {
     id: string;
@@ -21,6 +22,7 @@ export default function SmartParleyPage() {
     const [legs, setLegs] = useState<ParleyLeg[]>([]);
     const [bankroll, setBankroll] = useState(100);
     const [isSaving, setIsSaving] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // AI Calculations
     const totalOdds = useMemo(() => {
@@ -53,14 +55,8 @@ export default function SmartParleyPage() {
 
     const potentialPayout = (bankroll * (suggestedStake / 100)) * totalOdds;
 
-    const addMockLeg = () => {
-        const mockLegs: ParleyLeg[] = [
-            { id: Math.random().toString(), fixture: 'Real Madrid vs Barcelona', sport: 'football', selection: 'Real Madrid WIN', odds: 1.85, aiProbability: 62 },
-            { id: Math.random().toString(), fixture: 'Lakers vs Celtics', sport: 'basketball', selection: 'Over 220.5', odds: 1.90, aiProbability: 58 },
-            { id: Math.random().toString(), fixture: 'Kansas City vs Eagles', sport: 'american-football', selection: 'KC Chiefs -3', odds: 1.95, aiProbability: 55 },
-        ];
-        const random = mockLegs[legs.length % mockLegs.length];
-        setLegs([...legs, random]);
+    const addRealLeg = (leg: ParleyLeg) => {
+        setLegs([...legs, leg]);
     };
 
     const removeLeg = (id: string) => {
@@ -120,8 +116,8 @@ export default function SmartParleyPage() {
                                 <p className="text-xs text-gray-500 uppercase font-bold tracking-widest">Añade eventos para calcular el multiplicador</p>
                             </div>
                             <button
-                                onClick={addMockLeg}
-                                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
+                                onClick={() => setIsModalOpen(true)}
+                                className="px-4 py-2 bg-purple-500 hover:bg-purple-600 border border-purple-400/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 text-white shadow-[0_0_20px_rgba(168,85,247,0.2)]"
                             >
                                 <Plus className="w-3 h-3" /> Añadir Pick
                             </button>
@@ -266,6 +262,11 @@ export default function SmartParleyPage() {
 
                 </div>
             </div>
+            <MatchSelectorModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSelect={addRealLeg}
+            />
         </main>
     );
 }

@@ -34,11 +34,11 @@ export default function BasketballLivePage() {
                 if (liveData.success && liveData.data) setLiveEvents(liveData.data);
 
                 let combinedScheduled: any[] = [];
-                if (scheduledTodayData.success && scheduledTodayData.data?.events) {
-                    combinedScheduled = [...scheduledTodayData.data.events];
+                if (scheduledTodayData.success && Array.isArray(scheduledTodayData.data)) {
+                    combinedScheduled = [...scheduledTodayData.data];
                 }
-                if (scheduledTomorrowData.success && scheduledTomorrowData.data?.events) {
-                    combinedScheduled = [...combinedScheduled, ...scheduledTomorrowData.data.events];
+                if (scheduledTomorrowData.success && Array.isArray(scheduledTomorrowData.data)) {
+                    combinedScheduled = [...combinedScheduled, ...scheduledTomorrowData.data];
                 }
                 setScheduledEvents(combinedScheduled);
 
