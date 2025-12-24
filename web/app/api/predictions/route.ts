@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
                         "awayTopScorer": { "name": "...", "predictedPoints": ${isNBA ? 28 : 16}, "rebounds": 6, "assists": 4 }
                     }
                 },
-                "keyFactors": ["Factor 1", "Factor 2", "Factor 3"]
+                "keyFactors": ["Dominio en Puntos (PTS)", "Volumen de Asistencias (AST)", "Control de Rebotes (REB)"]
             }
             `;
         } else if (sport === 'football') {
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
                     "shots": { "home": 12, "away": 8, "onTarget": "6" },
                     "cards": { "yellowCards": 4, "redCards": 0, "details": "Partido con tendencia a faltas tácticas" }
                 },
-                "keyFactors": ["Línea defensiva adelantada (Fueras de juego)", "Historial de remates H2H", "Factor 3"]
+                "keyFactors": ["Volumen de Remates a puerta", "Línea defensiva adelantada (Fueras de juego)", "Historial de remates H2H"]
             }
             `;
         } else if (sport.toLowerCase().includes('american') || sport.toLowerCase().includes('nfl')) {

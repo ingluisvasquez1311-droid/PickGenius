@@ -36,6 +36,21 @@ class UniversalPlayerPropsService {
                 { id: 902404, name: 'Jannik Sinner' },
                 { id: 10609, name: 'Rafael Nadal' },
                 { id: 799049, name: 'Iga Swiatek' }
+            ],
+            'football': [
+                { id: 825123, name: 'Erling Haaland' },
+                { id: 326778, name: 'Kylian Mbappé' },
+                { id: 846602, name: 'Vinícius Júnior' },
+                { id: 935510, name: 'Jude Bellingham' },
+                { id: 351221, name: 'Robert Lewandowski' },
+                { id: 106584, name: 'Mohamed Salah' }
+            ],
+            'american-football': [
+                { id: 792821, name: 'Patrick Mahomes' },
+                { id: 1056763, name: 'Lamar Jackson' },
+                { id: 916124, name: 'Josh Allen' },
+                { id: 1098522, name: 'Tyreek Hill' },
+                { id: 1056801, name: 'Christian McCaffrey' }
             ]
         };
     }
@@ -104,6 +119,18 @@ class UniversalPlayerPropsService {
                 assists: g.assists || 0,
                 rebounds: g.reboundsTotal || g.totReb || 0,
                 minutes: Math.round((g.secondsPlayed || 0) / 60)
+            }),
+            'football': (g) => ({
+                goals: g.goals || 0,
+                assists: g.goalAssist || g.assists || 0,
+                shotsOnTarget: g.shotsOnTarget || 0,
+                rating: g.rating || 0
+            }),
+            'american-football': (g) => ({
+                touchdowns: g.touchdowns || 0,
+                passingYards: g.passingYards || 0,
+                rushingYards: g.rushingYards || 0,
+                receivingYards: g.receivingYards || 0
             }),
             'baseball': (g) => ({
                 hits: g.hits || 0,
