@@ -118,25 +118,25 @@ class PropsService {
                 ? allEvents.filter(e => e.tournament.uniqueTournament?.name.toLowerCase().includes('nba') || e.tournament.name.toLowerCase().includes('nba'))
                 : allEvents;
 
-            // PERFORMANCE FIX: Limit to 5 games instead of 10 for faster load
-            const gamesToUse = (filteredEvents.length > 0 ? filteredEvents : allEvents).slice(0, 5);
+            // PERFORMANCE FIX: Limit to 3 games for faster load (High profile matches only)
+            const gamesToUse = (filteredEvents.length > 0 ? filteredEvents : allEvents).slice(0, 3);
             const allProps: PlayerProp[] = [];
 
             // PERFORMANCE FIX: Process games in PARALLEL
             const gamePromises = gamesToUse.map(async (game) => {
                 try {
-                    // 1. Intentar Mejores Jugadores
+                    // 1. Intentar Mejores Jugadores (Top 1 per team to save API calls)
                     let targetPlayers: any[] = [];
                     const bestPlayersRes = await sportsDataService.getMatchBestPlayers(game.id);
 
                     if (bestPlayersRes && (bestPlayersRes.home || bestPlayersRes.away)) {
                         targetPlayers = [
-                            ...(bestPlayersRes.home || []).slice(0, 2),
-                            ...(bestPlayersRes.away || []).slice(0, 2)
+                            ...(bestPlayersRes.home || []).slice(0, 1),
+                            ...(bestPlayersRes.away || []).slice(0, 1)
                         ];
                     }
 
-                    // 2. Si no hay best players (partido muy futuro), intentar obtener plantillas
+                    // 2. Si no hay best players (partido muy futuro), intentar obtener plantillas (Captain/Star only)
                     if (targetPlayers.length === 0) {
                         const [homePlayers, awayPlayers] = await Promise.all([
                             sportsDataService.getTeamPlayers(game.homeTeam.id),
@@ -145,8 +145,8 @@ class PropsService {
 
                         if (homePlayers?.players && awayPlayers?.players) {
                             targetPlayers = [
-                                ...homePlayers.players.slice(0, 2),
-                                ...awayPlayers.players.slice(0, 2)
+                                ...homePlayers.players.slice(0, 1),
+                                ...awayPlayers.players.slice(0, 1)
                             ];
                         }
                     }

@@ -159,30 +159,93 @@ export default function BasketballLivePage() {
                         <ParleyOptimizerBanner />
                     </div>
 
-                    {/* Main Events Grid */}
                     <div className="lg:col-span-12 mt-8">
-                        <div className="flex items-center justify-between mb-8 px-2">
-                            <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
-                                <span className="w-3 h-8 bg-orange-500 rounded-full"></span>
-                                🔥 JUEGOS EN VIVO
-                            </h2>
-                        </div>
-
                         {loading ? (
                             <SkeletonLoader />
                         ) : (
-                            <div className="animate-in fade-in duration-700">
-                                <LiveEventsList
-                                    events={filteredEvents}
-                                    sport="basketball"
-                                    title=""
-                                />
-                                {filteredEvents.length === 0 && (
-                                    <div className="glass-card p-32 text-center border-dashed border-2 border-white/5 rounded-[4rem] bg-white/[0.01]">
-                                        <div className="text-9xl mb-8 opacity-5">🏀</div>
-                                        <p className="text-gray-500 font-black uppercase tracking-[0.2em] text-sm">No hay actividad en el tablero</p>
-                                        <p className="text-gray-600 text-[10px] mt-4 uppercase">Explora mañana para más acción en la cancha</p>
-                                    </div>
+                            <div className="space-y-12 animate-in fade-in duration-700">
+                                {filter === 'all' ? (
+                                    <>
+                                        {/* SECTION 1: LIVE */}
+                                        {liveEvents.length > 0 && (
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between px-2">
+                                                    <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
+                                                        <span className="w-3 h-8 bg-red-500 rounded-full animate-pulse"></span>
+                                                        🔴 EN VIVO AHORA
+                                                    </h2>
+                                                </div>
+                                                <LiveEventsList
+                                                    events={liveEvents}
+                                                    sport="basketball"
+                                                    title=""
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* SECTION 2: UPCOMING */}
+                                        {scheduledEvents.filter(e => e.status.type === 'notstarted' || e.status.type === 'scheduled').length > 0 && (
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between px-2">
+                                                    <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
+                                                        <span className="w-3 h-8 bg-orange-500 rounded-full"></span>
+                                                        📅 PRÓXIMOS PARTIDOS
+                                                    </h2>
+                                                </div>
+                                                <LiveEventsList
+                                                    events={scheduledEvents.filter(e => e.status.type === 'notstarted' || e.status.type === 'scheduled')}
+                                                    sport="basketball"
+                                                    title=""
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* SECTION 3: FINISHED */}
+                                        {scheduledEvents.filter(e => e.status.type === 'finished').length > 0 && (
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between px-2">
+                                                    <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
+                                                        <span className="w-3 h-8 bg-gray-500 rounded-full"></span>
+                                                        ✅ FINALIZADOS
+                                                    </h2>
+                                                </div>
+                                                <LiveEventsList
+                                                    events={scheduledEvents.filter(e => e.status.type === 'finished')}
+                                                    sport="basketball"
+                                                    title=""
+                                                />
+                                            </div>
+                                        )}
+
+                                        {filteredEvents.length === 0 && (
+                                            <div className="glass-card p-32 text-center border-dashed border-2 border-white/5 rounded-[4rem] bg-white/[0.01]">
+                                                <div className="text-9xl mb-8 opacity-5">🏀</div>
+                                                <p className="text-gray-500 font-black uppercase tracking-[0.2em] text-sm">No hay actividad en el tablero</p>
+                                                <p className="text-gray-600 text-[10px] mt-4 uppercase">Explora mañana para más acción en la cancha</p>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    // Regular single list for specific filters
+                                    <>
+                                        <div className="flex items-center justify-between mb-8 px-2">
+                                            <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
+                                                <span className={`w-3 h-8 rounded-full ${filter === 'live' ? 'bg-red-500' : 'bg-orange-500'}`}></span>
+                                                {filter === 'live' ? '🔴 JUEGOS EN VIVO' : filter === 'upcoming' ? '📅 PRÓXIMOS' : 'JUEGOS'}
+                                            </h2>
+                                        </div>
+                                        <LiveEventsList
+                                            events={filteredEvents}
+                                            sport="basketball"
+                                            title=""
+                                        />
+                                        {filteredEvents.length === 0 && (
+                                            <div className="glass-card p-32 text-center border-dashed border-2 border-white/5 rounded-[4rem] bg-white/[0.01]">
+                                                <div className="text-9xl mb-8 opacity-5">🏀</div>
+                                                <p className="text-gray-500 font-black uppercase tracking-[0.2em] text-sm">No se encontraron eventos</p>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )}

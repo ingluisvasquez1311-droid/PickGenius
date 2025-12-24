@@ -73,7 +73,7 @@ export default function MatchCard({
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -2, backgroundColor: 'rgba(255,255,255,0.05)' }}
-            className="group glass-card border border-white/5 bg-white/[0.02] rounded-3xl overflow-hidden transition-all duration-300 mb-3 cursor-pointer relative"
+            className="group glass-card border border-white/5 bg-white/[0.02] rounded-3xl overflow-hidden transition-all duration-300 mb-3 cursor-pointer relative mobile-haptic"
             onClick={handleCardClick}
         >
             {/* Elite Momentum Overlay (Live Only) */}
@@ -116,12 +116,12 @@ export default function MatchCard({
                             <div className="text-xl font-black italic text-emerald-400">
                                 {homeScore ?? 0} - {awayScore ?? 0}
                             </div>
-                            <div className="text-[8px] font-black text-gray-500 uppercase tracking-widest mt-1">Live Impact</div>
+                            <div className="text-[8px] font-black text-gray-500 uppercase tracking-widest mt-1">En Juego</div>
                         </div>
                     ) : (
                         <div className="text-center">
                             <div className="text-sm font-black text-white/80">{time}</div>
-                            <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">Today</div>
+                            <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">Hoy</div>
                         </div>
                     )}
                 </div>
@@ -166,7 +166,7 @@ export default function MatchCard({
                                     selection: prediction.pick,
                                     odds: parseFloat(prediction.odds?.replace(/[^0-9.]/g, '') || '1.90'),
                                     matchLabel: `${homeTeam.name} vs ${awayTeam.name}`,
-                                    market: 'Match Winner'
+                                    market: 'Ganador'
                                 });
                             }}
                             className="w-full relative group/btn"
@@ -185,7 +185,7 @@ export default function MatchCard({
                             className="group/ia w-full flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white hover:text-black transition-all duration-500"
                         >
                             <span className="text-[10px] font-black uppercase tracking-widest italic flex items-center gap-2">
-                                <Activity className="w-3 h-3 group-hover/ia:animate-spin" /> IA Analysis
+                                <Activity className="w-3 h-3 group-hover/ia:animate-spin" /> Análisis IA
                             </span>
                         </button>
                     )}

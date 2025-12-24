@@ -15,8 +15,9 @@ export interface Streak {
 
 export interface PlayerStreak {
     id: string;
+    playerId: string; // ID for proxy image construction
     playerName: string;
-    playerImage: string;
+    playerImage: string; // Keep for backward compat, but we'll prefer constructing from ID
     teamLogo: string;
     sport: 'basketball';
     type: 'points' | 'assists' | 'rebounds' | 'threes';
@@ -26,6 +27,8 @@ export interface PlayerStreak {
     lastMatch: string;
     confidenceScore: number;
     description: string;
+    last5Values: number[];
+    seasonAverage: number;
 }
 
 import { footballDataService } from './footballDataService';
@@ -117,61 +120,222 @@ class StreakService {
         // In a real scenario, this would analyze last 5 games for every player.
         // For now, we return curated "Burning Hot" trends for major stars.
         return [
+            // --- DALLAS MAVERICKS ---
             {
-                id: 'p-streak-1',
+                id: 'p-streak-luka',
+                playerId: '829211',
                 playerName: 'Luka Dončić',
                 playerImage: 'https://api.sofascore.app/api/v1/player/829211/image',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/3411/image', // Mavs
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3411/image',
                 sport: 'basketball',
                 type: 'points',
                 count: 5,
                 value: 32.5,
                 trend: 'over',
                 lastMatch: '39 PTS vs PHX',
-                confidenceScore: 9.6,
-                description: 'Ha superado 32.5 puntos en sus últimos 5 partidos consecutivos.'
+                confidenceScore: 9.8,
+                description: 'Luka Magic: Ha superado 32.5 puntos en sus últimos 5 juegos.',
+                last5Values: [39, 35, 42, 33, 38],
+                seasonAverage: 34.2
             },
             {
-                id: 'p-streak-2',
+                id: 'p-streak-kyrie',
+                playerId: '136662',
+                playerName: 'Kyrie Irving',
+                playerImage: 'https://api.sofascore.app/api/v1/player/136662/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3411/image',
+                sport: 'basketball',
+                type: 'points',
+                count: 4,
+                value: 24.5,
+                trend: 'over',
+                lastMatch: '28 PTS vs NYK',
+                confidenceScore: 8.9,
+                description: 'El mago del manejo ha estado imparable anotando +25.',
+                last5Values: [28, 26, 29, 25, 22],
+                seasonAverage: 25.4
+            },
+
+            // --- DENVER NUGGETS ---
+            {
+                id: 'p-streak-jokic',
+                playerId: '345229',
                 playerName: 'Nikola Jokić',
                 playerImage: 'https://api.sofascore.app/api/v1/player/345229/image',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/3415/image', // Nuggets
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3415/image',
                 sport: 'basketball',
                 type: 'assists',
                 count: 7,
                 value: 9.5,
                 trend: 'over',
                 lastMatch: '12 AST vs MIL',
-                confidenceScore: 9.4,
-                description: 'El Joker promedia 11.2 asistencias en la última semana.'
+                confidenceScore: 9.7,
+                description: 'El Joker promedia 11.2 asistencias en la última semana.',
+                last5Values: [12, 11, 14, 10, 13],
+                seasonAverage: 9.8
             },
             {
-                id: 'p-streak-3',
+                id: 'p-streak-murray',
+                playerId: '836640',
+                playerName: 'Jamal Murray',
+                playerImage: 'https://api.sofascore.app/api/v1/player/836640/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3415/image',
+                sport: 'basketball',
+                type: 'threes',
+                count: 3,
+                value: 2.5,
+                trend: 'over',
+                lastMatch: '4 3PM vs GSW',
+                confidenceScore: 8.5,
+                description: 'Murray ha encontrado su ritmo desde el perímetro.',
+                last5Values: [4, 3, 5, 2, 1],
+                seasonAverage: 2.4
+            },
+
+            // --- GOLDEN STATE WARRIORS ---
+            {
+                id: 'p-streak-curry',
+                playerId: '353272',
                 playerName: 'Stephen Curry',
                 playerImage: 'https://api.sofascore.app/api/v1/player/353272/image',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/3428/image', // Warriors
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3428/image',
                 sport: 'basketball',
                 type: 'threes',
                 count: 4,
                 value: 4.5,
                 trend: 'over',
                 lastMatch: '6 3PM vs LAC',
-                confidenceScore: 9.2,
-                description: 'Lluvia de triples: 4+ triples en 4 juegos seguidos.'
+                confidenceScore: 9.5,
+                description: 'El Chef cocinando: 4+ triples en 4 juegos seguidos.',
+                last5Values: [6, 5, 7, 5, 3],
+                seasonAverage: 4.9
             },
+
+            // --- MILWAUKEE BUCKS ---
             {
-                id: 'p-streak-4',
+                id: 'p-streak-giannis',
+                playerId: '354569',
                 playerName: 'Giannis Antetokounmpo',
                 playerImage: 'https://api.sofascore.app/api/v1/player/354569/image',
-                teamLogo: 'https://api.sofascore.app/api/v1/team/3416/image', // Bucks
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3416/image',
                 sport: 'basketball',
                 type: 'rebounds',
                 count: 6,
                 value: 11.5,
                 trend: 'over',
                 lastMatch: '14 REB vs BOS',
-                confidenceScore: 8.9,
-                description: 'Dominio en la pintura: 6 dobles-dobles consecutivos.'
+                confidenceScore: 9.4,
+                description: 'Dominio en la pintura: 6 dobles-dobles consecutivos.',
+                last5Values: [14, 12, 15, 13, 12],
+                seasonAverage: 11.2
+            },
+            {
+                id: 'p-streak-dame',
+                playerId: '253907',
+                playerName: 'Damian Lillard',
+                playerImage: 'https://api.sofascore.app/api/v1/player/253907/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3416/image',
+                sport: 'basketball',
+                type: 'points',
+                count: 3,
+                value: 26.5,
+                trend: 'over',
+                lastMatch: '32 PTS vs MIA',
+                confidenceScore: 8.8,
+                description: 'Dame Time activado en el último cuarto.',
+                last5Values: [32, 29, 28, 24, 25],
+                seasonAverage: 25.1
+            },
+
+            // --- LAKERS ---
+            {
+                id: 'p-streak-lebron',
+                playerId: '3455',
+                playerName: 'LeBron James',
+                playerImage: 'https://api.sofascore.app/api/v1/player/3455/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3427/image',
+                sport: 'basketball',
+                type: 'points',
+                count: 4,
+                value: 24.5,
+                trend: 'over',
+                lastMatch: '28 PTS vs OKC',
+                confidenceScore: 9.3,
+                description: 'El Rey continúa desafiando el tiempo con +25 constantes.',
+                last5Values: [28, 25, 30, 26, 24],
+                seasonAverage: 25.2
+            },
+            {
+                id: 'p-streak-ad',
+                playerId: '239332',
+                playerName: 'Anthony Davis',
+                playerImage: 'https://api.sofascore.app/api/v1/player/239332/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3427/image',
+                sport: 'basketball',
+                type: 'rebounds',
+                count: 5,
+                value: 12.5,
+                trend: 'over',
+                lastMatch: '16 REB vs MEM',
+                confidenceScore: 9.1,
+                description: 'La Ceja está limpiando los tableros cada noche.',
+                last5Values: [16, 14, 13, 15, 11],
+                seasonAverage: 12.4
+            },
+
+            // --- BOSTON CELTICS ---
+            {
+                id: 'p-streak-tatum',
+                playerId: '847050',
+                playerName: 'Jayson Tatum',
+                playerImage: 'https://api.sofascore.app/api/v1/player/847050/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3422/image',
+                sport: 'basketball',
+                type: 'points',
+                count: 3,
+                value: 28.5,
+                trend: 'over',
+                lastMatch: '34 PTS vs BKN',
+                confidenceScore: 9.0,
+                description: 'Tatum liderando la ofensiva celta con autoridad.',
+                last5Values: [34, 30, 29, 26, 27],
+                seasonAverage: 27.1
+            },
+
+            // --- PHOENIX SUNS ---
+            {
+                id: 'p-streak-durant',
+                playerId: '136004',
+                playerName: 'Kevin Durant',
+                playerImage: 'https://api.sofascore.app/api/v1/player/136004/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3423/image',
+                sport: 'basketball',
+                type: 'points',
+                count: 5,
+                value: 27.5,
+                trend: 'over',
+                lastMatch: '30 PTS vs LAL',
+                confidenceScore: 9.6,
+                description: 'KD es la eficiencia personificada, anotando a voluntad.',
+                last5Values: [30, 29, 28, 31, 28],
+                seasonAverage: 28.3
+            },
+            {
+                id: 'p-streak-booker',
+                playerId: '786445',
+                playerName: 'Devin Booker',
+                playerImage: 'https://api.sofascore.app/api/v1/player/786445/image',
+                teamLogo: 'https://api.sofascore.app/api/v1/team/3423/image',
+                sport: 'basketball',
+                type: 'assists',
+                count: 4,
+                value: 6.5,
+                trend: 'over',
+                lastMatch: '9 AST vs SAC',
+                confidenceScore: 8.7,
+                description: 'Booker asumiendo roles de playmaker con éxito.',
+                last5Values: [9, 8, 7, 7, 5],
+                seasonAverage: 6.9
             }
         ];
     }

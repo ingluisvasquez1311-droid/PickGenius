@@ -105,7 +105,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             <div className="relative z-10">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                        <span className="text-3xl">🧙</span> PickGenius Oracle
+                        <span className="text-3xl">🧙</span> Oráculo PickGenius
                     </h2>
                     {!prediction && (
                         <button
@@ -267,8 +267,8 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                 <div
                                                     key={house.name}
                                                     className={`p-2 rounded-lg border ${isBest
-                                                            ? 'bg-green-500/20 border-green-400/50 ring-2 ring-green-400/30'
-                                                            : 'bg-white/5 border-white/10'
+                                                        ? 'bg-green-500/20 border-green-400/50 ring-2 ring-green-400/30'
+                                                        : 'bg-white/5 border-white/10'
                                                         } transition-all`}
                                                 >
                                                     <div className="text-[10px] text-gray-400 font-bold mb-0.5">{house.name}</div>

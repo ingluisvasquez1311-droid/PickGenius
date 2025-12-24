@@ -59,11 +59,22 @@ body {
   /* Prevent pull-to-refresh unless desired */
 }
 
-/* Allow selection in inputs */
+/* Allow selection in inputs & Prevent iOS Zoom */
 input,
-textarea {
+textarea,
+select {
   user-select: text !important;
   -webkit-user-select: text !important;
+}
+
+@media (max-width: 768px) {
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+    /* Prevents auto-zoom on iOS */
+  }
 }
 
 a {
@@ -408,6 +419,7 @@ h6 {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

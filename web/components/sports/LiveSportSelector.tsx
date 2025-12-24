@@ -24,13 +24,13 @@ export default function LiveSportSelector() {
                     <Link
                         key={sport.id}
                         href={sport.path}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all whitespace-nowrap ${isActive
-                                ? `bg-white/10 ${sport.border} ${sport.color}`
-                                : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10'
+                        className={`flex items-center justify-center gap-2 px-3 py-2 md:px-4 md:py-2 rounded-full border transition-all whitespace-nowrap ${isActive
+                            ? `bg-white/10 ${sport.border} ${sport.color}`
+                            : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10'
                             }`}
                     >
-                        <span className="text-lg">{sport.icon}</span>
-                        <span className="text-xs font-black uppercase tracking-wider">{sport.name}</span>
+                        <span className="text-xl md:text-lg">{sport.icon}</span>
+                        <span className="hidden md:block text-xs font-black uppercase tracking-wider">{sport.name}</span>
                     </Link>
                 );
             })}

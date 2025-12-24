@@ -179,22 +179,48 @@ export default function MatchStatsSummary({ match, sport, eventId }: MatchStatsS
 }
 
 function translateStatLabel(label: string): string {
-    const mapping: any = {
-        'Ball possession': 'Posesión',
-        'Total shots': 'Tiros Totales',
-        'Shots on target': 'Tiros al Arco',
-        'Corner kicks': 'Córners',
-        'Fouls': 'Faltas',
-        'Free throws %': 'Tiros Libres %',
+    const normalize = (s: string) => s.toLowerCase().trim();
+    const key = normalize(label);
+
+    const mapping: Record<string, string> = {
+        'ball possession': 'Posesión',
+        'total shots': 'Tiros Totales',
+        'shots on target': 'Tiros al Arco',
+        'shots off target': 'Tiros Desviados',
+        'corner kicks': 'Córners',
+        'fouls': 'Faltas',
+        'yellow cards': 'Tarjetas Amarillas',
+        'red cards': 'Tarjetas Rojas',
+        'offsides': 'Fueras de Juego',
+        'goalkeeper saves': 'Atajadas',
+
+        // Basketball
+        'free throws': 'Tiros Libres',
+        'free throws %': 'Tiros Libres %',
+        '2 points': 'Tiros de 2',
+        '2-pointers': 'Tiros de 2',
         '2-pointers %': 'Tiros de 2 %',
-        '3-pointers %': 'Tiros de 3 %',
-        'Rebounds': 'Rebotes',
-        'Assists': 'Asistencias',
-        'Turnovers': 'Pérdidas',
-        'Aces': 'Aces',
-        'Double faults': 'Dobles Faltas',
-        'Service games won': 'Juegos de Saque Ganados'
+        '3 points': 'Triples',
+        '3-pointers': 'Triples',
+        '3-pointers %': 'Triples %',
+        'field goals': 'Tiros de Campo',
+        'field goals %': 'Tiros de Campo %',
+        'rebounds': 'Rebotes',
+        'assists': 'Asistencias',
+        'turnovers': 'Pérdidas',
+        'steals': 'Robos',
+        'blocks': 'Bloqueos',
+        'personal fouls': 'Faltas Personales',
+
+        // Tennis
+        'aces': 'Aces',
+        'double faults': 'Dobles Faltas',
+        'service games won': 'Juegos de Saque',
+        'break points converted': 'Break Points',
+        'winners': 'Tiros Ganadores',
+        'unforced errors': 'Errores No Forzados'
     };
-    return mapping[label] || label;
+
+    return mapping[key] || label;
 }
 

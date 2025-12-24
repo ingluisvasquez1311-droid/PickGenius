@@ -58,7 +58,7 @@ const NotificationCenter = () => {
             {/* Bell Icon */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 rounded-full hover:bg-white/5 transition-colors group"
+                className="relative p-2 rounded-full hover:bg-white/5 transition-colors group mobile-haptic"
             >
                 <span className="text-xl group-hover:scale-110 transition-transform block">🔔</span>
                 {unreadCount > 0 && (
@@ -70,15 +70,15 @@ const NotificationCenter = () => {
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="fixed md:absolute right-2 md:right-0 mt-2 md:mt-4 w-[calc(100vw-1rem)] max-w-sm md:w-96 bg-[#111] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] overflow-hidden animate-in slide-in-from-top-2 duration-300">
+                <div className="fixed md:absolute right-2 md:right-0 mt-2 md:mt-4 w-[calc(100vw-1rem)] max-w-sm md:w-96 glass-card border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] overflow-hidden animate-in slide-in-from-top-2 duration-300 backdrop-blur-3xl bg-[#0a0a0a]/90">
                     <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                         <h3 className="font-black text-xs uppercase tracking-widest text-white/60">Notificaciones</h3>
                         {unreadCount > 0 && (
                             <button
                                 onClick={() => markAllRead()}
-                                className="text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase"
+                                className="text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest mobile-haptic"
                             >
-                                Marcar todo leído
+                                Marcar leído
                             </button>
                         )}
                     </div>
@@ -86,8 +86,8 @@ const NotificationCenter = () => {
                     <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                         {notifications.length === 0 ? (
                             <div className="p-10 text-center text-white/20 select-none">
-                                <div className="text-4xl mb-4">📭</div>
-                                <p className="text-xs font-bold uppercase tracking-widest">Sin notificaciones</p>
+                                <div className="text-4xl mb-4 grayscale opacity-50">📭</div>
+                                <p className="text-xs font-bold uppercase tracking-widest">Sin novedades</p>
                             </div>
                         ) : (
                             <div className="divide-y divide-white/5">
@@ -95,14 +95,14 @@ const NotificationCenter = () => {
                                     <div
                                         key={notif.id}
                                         onClick={() => !notif.read && markRead(notif.id)}
-                                        className={`p-4 transition-colors cursor-pointer relative group ${notif.read ? 'opacity-60 hover:opacity-100' : 'bg-white/[0.03] hover:bg-white/[0.05]'
+                                        className={`p-4 transition-colors cursor-pointer relative group mobile-haptic ${notif.read ? 'opacity-60 hover:opacity-100' : 'bg-white/[0.03] hover:bg-white/[0.05]'
                                             }`}
                                     >
                                         {!notif.read && (
-                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
                                         )}
                                         <div className="flex gap-3">
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getTypeStyles(notif.type)}`}>
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getTypeStyles(notif.type)} border border-white/5`}>
                                                 {getTypeIcon(notif.type)}
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -120,10 +120,10 @@ const NotificationCenter = () => {
                                                 {notif.link && (
                                                     <Link
                                                         href={notif.link}
-                                                        className="text-[9px] font-black text-blue-400 hover:underline uppercase tracking-widest"
+                                                        className="inline-flex items-center gap-1 text-[9px] font-black text-blue-400 hover:text-blue-300 uppercase tracking-widest group-hover:translate-x-1 transition-transform"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
-                                                        Ver detalle →
+                                                        VER DETALLE →
                                                     </Link>
                                                 )}
                                             </div>
@@ -138,9 +138,9 @@ const NotificationCenter = () => {
                         <Link
                             href="/profile"
                             onClick={() => setIsOpen(false)}
-                            className="text-[10px] font-black text-white/30 hover:text-white transition-colors uppercase tracking-[0.2em]"
+                            className="text-[10px] font-black text-white/30 hover:text-white transition-colors uppercase tracking-[0.2em] mobile-haptic"
                         >
-                            Ver todo en tu perfil
+                            Historial Completo
                         </Link>
                     </div>
                 </div>

@@ -158,7 +158,7 @@ export default function LoginPage() {
                                 onClick={handleGoogleSignIn}
                                 type="button"
                                 variant="secondary"
-                                className="w-full py-3.5 text-xs border-white/5 bg-white/5 hover:bg-white/10"
+                                className="w-full py-3.5 text-xs border-white/5 bg-white/5 hover:bg-white/10 mobile-haptic"
                                 disabled={loading || fbStatus === 'error'}
                             >
                                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -226,7 +226,7 @@ export default function LoginPage() {
 
                             <PremiumButton
                                 loading={loading}
-                                className="w-full py-4 text-sm"
+                                className="w-full py-4 text-sm mobile-haptic"
                                 disabled={fbStatus === 'error'}
                             >
                                 <LogIn className="w-4 h-4" />

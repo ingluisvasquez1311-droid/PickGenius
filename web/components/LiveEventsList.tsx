@@ -163,18 +163,40 @@ interface LiveEventsListProps {
 
 export default function LiveEventsList({ events, sport, title, loading }: LiveEventsListProps) {
     // Priority Leagues Configuration
-    const PRIORITY_LEAGUES = [
-        'UEFA Champions League',
-        'Premier League',
-        'LaLiga',
-        'Serie A',
-        'Bundesliga',
-        'Ligue 1',
-        'Primera Division', // Argentina/Chile etc
-        'Brasileirão Série A',
-        'Major League Soccer',
-        'Liga MX'
-    ];
+    // Priority Leagues Configuration
+    const getPriorityLeagues = (sportParam: 'basketball' | 'football') => {
+        if (sportParam === 'basketball') {
+            return [
+                'NBA',
+                'Euroleague',
+                'FIBA',
+                'World Cup',
+                'Liga Nacional', // Argentina
+                'LNB', // Argentina alt
+                'ACB', // Spain
+                'Basket League', // Greece
+                'Lega A' // Italy
+            ];
+        }
+        return [
+            'UEFA Champions League',
+            'Premier League',
+            'LaLiga',
+            'Serie A',
+            'Bundesliga',
+            'Ligue 1',
+            'Primera Division', // Argentina/Chile etc
+            'Liga Profesional de Fútbol', // Argentina formal
+            'Copa de la Liga Profesional', // Argentina
+            'Brasileirão Série A',
+            'Copa Libertadores',
+            'Copa Sudamericana',
+            'Major League Soccer',
+            'Liga MX'
+        ];
+    };
+
+    const PRIORITY_LEAGUES = getPriorityLeagues(sport);
 
     const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set());
 

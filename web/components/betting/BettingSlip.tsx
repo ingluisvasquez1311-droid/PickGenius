@@ -57,7 +57,7 @@ export default function BettingSlip() {
             {!isOpen && bets.length > 0 && (
                 <button
                     onClick={toggleSlip}
-                    className="fixed bottom-6 right-6 z-[60] group"
+                    className="fixed bottom-6 right-6 z-[60] group mobile-haptic"
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity animate-pulse"></div>
                     <div className="relative bg-[#0a0a0a] border border-white/20 text-white font-bold py-3 px-5 rounded-full shadow-2xl flex items-center gap-3 hover:scale-105 transition-transform active:scale-95">
@@ -167,8 +167,8 @@ export default function BettingSlip() {
                                             key={house.id}
                                             onClick={() => setSelectedHouse(house.id)}
                                             className={`p-3 rounded-xl font-bold text-sm transition-all border-2 ${selectedHouse === house.id
-                                                    ? `bg-gradient-to-r ${house.color} border-white/30 text-white scale-105`
-                                                    : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                                                ? `bg-gradient-to-r ${house.color} border-white/30 text-white scale-105`
+                                                : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
                                                 }`}
                                         >
                                             {house.name}
@@ -178,16 +178,35 @@ export default function BettingSlip() {
                             </div>
 
                             {/* Actions */}
-                            <div className="flex gap-3">
+                            <div className="flex gap-2">
                                 <button
                                     onClick={clearSlip}
-                                    className="p-3 rounded-xl bg-white/5 hover:bg-red-500/10 hover:text-red-400 text-gray-400 transition-colors"
+                                    className="p-3 rounded-xl bg-white/5 hover:bg-red-500/10 hover:text-red-400 text-gray-400 transition-colors mobile-haptic"
                                     title="Limpiar Ticket"
                                 >
                                     🗑️
                                 </button>
+
                                 <button
-                                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-green-900/20 active:scale-95 flex justify-center items-center gap-2 group"
+                                    onClick={() => {
+                                        const slipText = [
+                                            "🎫 *Ticket PickGenius*",
+                                            ...bets.map(b => `• ${b.selection} (@${b.odds.toFixed(2)}) - ${b.matchLabel}`),
+                                            `💰 *Cuota Total:* ${totalOdds.toFixed(2)}`,
+                                            `🎯 *Potencial:* $${potentialReturn.toFixed(2)}`
+                                        ].join("\n");
+
+                                        navigator.clipboard.writeText(slipText);
+                                        toast.success("¡Ticket copiado al portapapeles!", { icon: "📋" });
+                                    }}
+                                    className="p-3 rounded-xl bg-white/5 hover:bg-blue-500/10 hover:text-blue-400 text-gray-400 transition-colors mobile-haptic"
+                                    title="Copiar Ticket"
+                                >
+                                    📋
+                                </button>
+
+                                <button
+                                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-green-900/20 active:scale-95 flex justify-center items-center gap-2 group mobile-haptic"
                                     onClick={handlePlaceBet}
                                 >
                                     <span>Realizar Apuesta</span>

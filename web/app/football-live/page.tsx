@@ -131,33 +131,99 @@ export default function FootballLivePage() {
 
                     {/* Main Match List */}
                     <div className="lg:col-span-9">
-                        <div className="flex items-center justify-between mb-8 px-2">
-                            <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
-                                <span className="w-3 h-8 bg-emerald-500 rounded-full"></span>
-                                {title}
-                            </h2>
-                            <div className="text-[10px] font-black uppercase text-gray-500 flex items-center gap-2 tracking-widest">
-                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></span>
-                                Live Sync: OK
-                            </div>
-                        </div>
-
                         {loading ? (
                             <SkeletonLoader />
                         ) : (
-                            <div className="animate-in fade-in duration-700">
-                                <LiveEventsList
-                                    events={filteredEvents}
-                                    sport="football"
-                                    title=""
-                                    loading={loading}
-                                />
-                                {filteredEvents.length === 0 && (
-                                    <div className="glass-card p-32 text-center border-dashed border-2 border-white/5 rounded-[4rem] bg-white/[0.01]">
-                                        <div className="text-9xl mb-8 opacity-5">⚽</div>
-                                        <p className="text-gray-500 font-black uppercase tracking-[0.2em] text-sm">No se encontraron eventos</p>
-                                        <p className="text-gray-600 text-[10px] mt-4 uppercase">Explora otras ligas o vuelve más tarde</p>
-                                    </div>
+                            <div className="space-y-12 animate-in fade-in duration-700">
+                                {filter === 'all' ? (
+                                    <>
+                                        {/* SECTION 1: LIVE */}
+                                        {events.filter(e => e.status.type === 'inprogress').length > 0 && (
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between px-2">
+                                                    <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
+                                                        <span className="w-3 h-8 bg-red-500 rounded-full animate-pulse"></span>
+                                                        🔴 EN VIVO AHORA
+                                                    </h2>
+                                                </div>
+                                                <LiveEventsList
+                                                    events={events.filter(e => e.status.type === 'inprogress')}
+                                                    sport="football"
+                                                    title=""
+                                                    loading={false}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* SECTION 2: UPCOMING */}
+                                        {events.filter(e => e.status.type === 'notstarted' || e.status.type === 'scheduled').length > 0 && (
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between px-2">
+                                                    <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
+                                                        <span className="w-3 h-8 bg-emerald-500 rounded-full"></span>
+                                                        📅 PRÓXIMOS
+                                                    </h2>
+                                                </div>
+                                                <LiveEventsList
+                                                    events={events.filter(e => e.status.type === 'notstarted' || e.status.type === 'scheduled')}
+                                                    sport="football"
+                                                    title=""
+                                                    loading={false}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* SECTION 3: FINISHED */}
+                                        {events.filter(e => e.status.type === 'finished').length > 0 && (
+                                            <div className="space-y-6">
+                                                <div className="flex items-center justify-between px-2">
+                                                    <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
+                                                        <span className="w-3 h-8 bg-gray-500 rounded-full"></span>
+                                                        ✅ RESULTADOS
+                                                    </h2>
+                                                </div>
+                                                <LiveEventsList
+                                                    events={events.filter(e => e.status.type === 'finished')}
+                                                    sport="football"
+                                                    title=""
+                                                    loading={false}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {events.length === 0 && (
+                                            <div className="glass-card p-32 text-center border-dashed border-2 border-white/5 rounded-[4rem] bg-white/[0.01]">
+                                                <div className="text-9xl mb-8 opacity-5">⚽</div>
+                                                <p className="text-gray-500 font-black uppercase tracking-[0.2em] text-sm">No se encontraron eventos</p>
+                                                <p className="text-gray-600 text-[10px] mt-4 uppercase">Explora otras ligas o vuelve más tarde</p>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="flex items-center justify-between mb-8 px-2">
+                                            <h2 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-3">
+                                                <span className="w-3 h-8 bg-emerald-500 rounded-full"></span>
+                                                {title}
+                                            </h2>
+                                            <div className="text-[10px] font-black uppercase text-gray-500 flex items-center gap-2 tracking-widest">
+                                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></span>
+                                                Live Sync: OK
+                                            </div>
+                                        </div>
+                                        <LiveEventsList
+                                            events={filteredEvents}
+                                            sport="football"
+                                            title=""
+                                            loading={false}
+                                        />
+                                        {filteredEvents.length === 0 && (
+                                            <div className="glass-card p-32 text-center border-dashed border-2 border-white/5 rounded-[4rem] bg-white/[0.01]">
+                                                <div className="text-9xl mb-8 opacity-5">⚽</div>
+                                                <p className="text-gray-500 font-black uppercase tracking-[0.2em] text-sm">No se encontraron eventos</p>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )}

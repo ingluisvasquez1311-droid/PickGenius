@@ -231,20 +231,50 @@ export default function HomePage() {
         <div className="w-full bg-white/[0.01] border-y border-white/5 py-8 mb-40 overflow-hidden relative group">
           <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#050505] z-10 pointer-events-none"></div>
           <div className="flex gap-16 animate-scroll whitespace-nowrap px-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex items-center gap-10 min-w-max">
-                <div className="flex items-center gap-4 bg-orange-500/5 px-6 py-3 rounded-2xl border border-orange-500/10">
-                  <span className="text-[10px] font-black text-orange-500 tracking-widest uppercase italic">HOT TICKET</span>
-                  <span className="text-sm font-bold text-white/90">NBA Parley: Lakers ML + Over 220.5</span>
-                  <span className="flex items-center gap-1 text-xs font-black text-orange-400">91% ACC <TrendingUp className="w-3 h-3" /></span>
-                </div>
-                <div className="flex items-center gap-4 bg-emerald-500/5 px-6 py-3 rounded-2xl border border-emerald-500/10">
-                  <span className="text-[10px] font-black text-emerald-500 tracking-widest uppercase italic">GOAL IMPACT</span>
-                  <span className="text-sm font-bold text-white/90">Manchester City HT Result</span>
-                  <span className="flex items-center gap-1 text-xs font-black text-emerald-400">84% CONF <Star className="w-3 h-3 fill-emerald-500" /></span>
-                </div>
+            {/* Ticker Item 1: Football Parley */}
+            <div className="flex items-center gap-10 min-w-max">
+              <div className="flex items-center gap-4 bg-orange-500/5 px-6 py-3 rounded-2xl border border-orange-500/10 backdrop-blur-md">
+                <span className="text-[10px] font-black text-orange-500 tracking-widest uppercase italic">🔥 PARLEY PRO</span>
+                <span className="text-sm font-bold text-white/90">Lakers ML + Lebron James Over 25.5 Pts</span>
+                <span className="flex items-center gap-1 text-xs font-black text-orange-400">92% CONF <TrendingUp className="w-3 h-3" /></span>
               </div>
-            ))}
+            </div>
+
+            {/* Ticker Item 2: Football Value */}
+            <div className="flex items-center gap-10 min-w-max">
+              <div className="flex items-center gap-4 bg-emerald-500/5 px-6 py-3 rounded-2xl border border-emerald-500/10 backdrop-blur-md">
+                <span className="text-[10px] font-black text-emerald-500 tracking-widest uppercase italic">💎 VALUE BET</span>
+                <span className="text-sm font-bold text-white/90">Real Madrid vs Barcelona: Ambos Marcan (BTTS)</span>
+                <span className="flex items-center gap-1 text-xs font-black text-emerald-400">88% PROB <Star className="w-3 h-3 fill-emerald-500" /></span>
+              </div>
+            </div>
+
+            {/* Ticker Item 3: Tennis Live */}
+            <div className="flex items-center gap-10 min-w-max">
+              <div className="flex items-center gap-4 bg-blue-500/5 px-6 py-3 rounded-2xl border border-blue-500/10 backdrop-blur-md">
+                <span className="text-[10px] font-black text-blue-500 tracking-widest uppercase italic">🎾 ACE ALERT</span>
+                <span className="text-sm font-bold text-white/90">Alcaraz 2nd Set Winner @ 1.85</span>
+                <span className="flex items-center gap-1 text-xs font-black text-blue-400">LIVE ALPHA <Zap className="w-3 h-3 fill-blue-500" /></span>
+              </div>
+            </div>
+
+            {/* Ticker Item 4: High Odds */}
+            <div className="flex items-center gap-10 min-w-max">
+              <div className="flex items-center gap-4 bg-purple-500/5 px-6 py-3 rounded-2xl border border-purple-500/10 backdrop-blur-md">
+                <span className="text-[10px] font-black text-purple-500 tracking-widest uppercase italic">🚀 MOONSHOT</span>
+                <span className="text-sm font-bold text-white/90">Man City Correct Score 3-1</span>
+                <span className="flex items-center gap-1 text-xs font-black text-purple-400">CUOTA 12.0 <Trophy className="w-3 h-3 fill-purple-500" /></span>
+              </div>
+            </div>
+
+            {/* Duplicate for seamless loop effect (optional, or just rely on CSS) */}
+            <div className="flex items-center gap-10 min-w-max">
+              <div className="flex items-center gap-4 bg-orange-500/5 px-6 py-3 rounded-2xl border border-orange-500/10 backdrop-blur-md">
+                <span className="text-[10px] font-black text-orange-500 tracking-widest uppercase italic">🔥 PARLEY PRO</span>
+                <span className="text-sm font-bold text-white/90">Lakers ML + Lebron James Over 25.5 Pts</span>
+                <span className="flex items-center gap-1 text-xs font-black text-orange-400">92% CONF <TrendingUp className="w-3 h-3" /></span>
+              </div>
+            </div>
           </div>
         </div>
 
