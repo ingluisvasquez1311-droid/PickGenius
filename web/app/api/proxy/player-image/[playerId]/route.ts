@@ -12,47 +12,60 @@ export async function GET(
         return new NextResponse('Player ID required', { status: 400 });
     }
 
-    // Use weserv.nl as a caching proxy to bypass hotlink protection
-    // We try the two possible Sofascore image URLs
-    const primaryUrl = `https://api.sofascore.app/api/v1/player/${playerId}/image`;
-    const secondaryUrl = `https://www.sofascore.com/api/v1/player/${playerId}/image`;
+    const bridgeUrl = process.env.NEXT_PUBLIC_API_URL;
+    const isVercel = !!process.env.VERCEL;
 
-    // Construct the weserv.nl URL. We pass the primary URL as the main source, and handle errors if it fails.
-    // However, for simplicity and reliability, we will try to fetch the first valid one or redirect to weserv.nl
-    // pointing to the most likely valid URL.
+    // --- PRIORITY 1: BRIDGE (TUNNEL) ---
+    if (isVercel && bridgeUrl && bridgeUrl.startsWith('http')) {
+        const cleanBridgeUrl = bridgeUrl.trim().replace(/\/$/, "");
+        const bridgeFetchUrl = `${cleanBridgeUrl}/api/proxy/player-image/${playerId}`;
 
-    // Weserv is very reliable. We'll point it to the api.sofascore.app domain which is usually the mobile API.
-    const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(primaryUrl)}&w=200&h=200&fit=cover&a=top&output=webp&q=80`;
+        try {
+            console.log(`🔌 [Player Bridge] Routing to: ${bridgeFetchUrl}`);
+            const bridgeResponse = await fetch(bridgeFetchUrl, {
+                headers: {
+                    'User-Agent': 'PickGenius-Proxy-Bot',
+                    'ngrok-skip-browser-warning': 'true'
+                },
+                signal: AbortSignal.timeout(8000)
+            });
 
-    try {
-        console.log(`🖼️ [Player Proxy] Fetching from: ${proxyUrl}`);
-        const response = await fetch(proxyUrl);
-
-        if (!response.ok) {
-            // If the primary fails, try the secondary domain via weserv
-            const fallbackProxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(secondaryUrl)}&w=200&h=200&fit=cover&a=top&output=webp&q=80`;
-            const fallbackResponse = await fetch(fallbackProxyUrl);
-
-            if (fallbackResponse.ok) {
-                const buffer = await fallbackResponse.arrayBuffer();
+            if (bridgeResponse.ok) {
+                const buffer = await bridgeResponse.arrayBuffer();
                 return new NextResponse(buffer, {
                     headers: {
-                        'Content-Type': 'image/webp',
+                        'Content-Type': bridgeResponse.headers.get('Content-Type') || 'image/webp',
                         'Cache-Control': 'public, max-age=86400, immutable'
                     }
                 });
             }
-            return new NextResponse('Image not found', { status: 404 });
+        } catch (err: any) {
+            console.error(`❌ [Player Bridge] Logic failed: ${err.message}`);
         }
+    }
 
-        const buffer = await response.arrayBuffer();
-        return new NextResponse(buffer, {
+    // --- PRIORITY 2: DIRECT STEALTH (Weserv) ---
+    try {
+        const primaryUrl = `https://api.sofascore.app/api/v1/player/${playerId}/image`;
+        const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(primaryUrl)}&w=200&h=200&fit=cover&a=top&output=webp&q=80`;
+
+        const response = await fetch(proxyUrl, {
             headers: {
-                'Content-Type': 'image/webp',
-                'Cache-Control': 'public, max-age=86400, immutable'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             }
         });
 
+        if (response.ok) {
+            const buffer = await response.arrayBuffer();
+            return new NextResponse(buffer, {
+                headers: {
+                    'Content-Type': 'image/webp',
+                    'Cache-Control': 'public, max-age=86400, immutable'
+                }
+            });
+        }
+
+        return new NextResponse('Image not found', { status: 404 });
     } catch (error) {
         console.error('Error proxying player image:', error);
         return new NextResponse('Error fetching image', { status: 404 });

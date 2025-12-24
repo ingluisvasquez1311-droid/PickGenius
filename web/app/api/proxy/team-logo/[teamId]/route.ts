@@ -12,55 +12,56 @@ export async function GET(
         return new NextResponse('Team ID required', { status: 400 });
     }
 
-    try {
-        // Try multiple sources for team logos
-        const primaryUrl = `https://api.sofascore.com/api/v1/team/${teamId}/image`;
-        const secondaryUrl = `https://www.sofascore.com/api/v1/team/${teamId}/image`;
-        const tertiaryUrl = `https://api.sofascore.app/api/v1/team/${teamId}/image`;
+    const bridgeUrl = process.env.NEXT_PUBLIC_API_URL;
+    const isVercel = !!process.env.VERCEL;
 
-        // Use weserv.nl as a caching proxy to bypass hotlink protection
-        const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(primaryUrl)}&w=200&h=200&fit=contain&output=png&q=80`;
-
-        console.log(`🖼️ [Logo Proxy] Fetching from: ${proxyUrl}`);
+    // --- PRIORITY 1: BRIDGE (TUNNEL) ---
+    if (isVercel && bridgeUrl && bridgeUrl.startsWith('http')) {
+        const cleanBridgeUrl = bridgeUrl.trim().replace(/\/$/, "");
+        const bridgeFetchUrl = `${cleanBridgeUrl}/api/proxy/team-logo/${teamId}`;
 
         try {
-            const response = await fetch(proxyUrl, { next: { revalidate: 86400 } });
+            console.log(`🔌 [Logo Bridge] Routing to: ${bridgeFetchUrl}`);
+            const bridgeResponse = await fetch(bridgeFetchUrl, {
+                headers: {
+                    'User-Agent': 'PickGenius-Proxy-Bot',
+                    'ngrok-skip-browser-warning': 'true'
+                },
+                signal: AbortSignal.timeout(8000)
+            });
 
-            if (response.ok) {
-                const buffer = await response.arrayBuffer();
+            if (bridgeResponse.ok) {
+                const buffer = await bridgeResponse.arrayBuffer();
                 return new NextResponse(buffer, {
                     headers: {
-                        'Content-Type': 'image/png',
+                        'Content-Type': bridgeResponse.headers.get('Content-Type') || 'image/png',
                         'Cache-Control': 'public, max-age=86400, immutable'
                     }
                 });
             }
-        } catch (e) {
-            console.warn(`[Logo Proxy] Weserv failed for ${teamId}, trying direct...`);
+        } catch (err: any) {
+            console.error(`❌ [Logo Bridge] Logic failed: ${err.message}`);
         }
+    }
 
-        // Fallback 1: Direct URL from .com
-        console.log(`📡 [Logo Proxy] Fallback 1 (Direct) for ${teamId}`);
-        const directRes = await fetch(secondaryUrl, { next: { revalidate: 3600 } });
-        if (directRes.ok) {
-            const buffer = await directRes.arrayBuffer();
+    // --- PRIORITY 2: DIRECT STEALTH (Weserv) ---
+    try {
+        const primaryUrl = `https://api.sofascore.com/api/v1/team/${teamId}/image`;
+        const proxyUrl = `https://wsrv.nl/?url=${encodeURIComponent(primaryUrl)}&w=200&h=200&fit=contain&output=png&q=80`;
+
+        const response = await fetch(proxyUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            },
+            next: { revalidate: 86400 }
+        });
+
+        if (response.ok) {
+            const buffer = await response.arrayBuffer();
             return new NextResponse(buffer, {
                 headers: {
                     'Content-Type': 'image/png',
-                    'Cache-Control': 'public, max-age=3600'
-                }
-            });
-        }
-
-        // Fallback 2: Direct URL from .app
-        console.log(`📡 [Logo Proxy] Fallback 2 (.app) for ${teamId}`);
-        const appRes = await fetch(tertiaryUrl, { next: { revalidate: 3600 } });
-        if (appRes.ok) {
-            const buffer = await appRes.arrayBuffer();
-            return new NextResponse(buffer, {
-                headers: {
-                    'Content-Type': 'image/png',
-                    'Cache-Control': 'public, max-age=3600'
+                    'Cache-Control': 'public, max-age=86400, immutable'
                 }
             });
         }

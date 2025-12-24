@@ -88,6 +88,23 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
         <div className="min-h-screen bg-[#0b0b0b] pb-20">
             <div className="container pt-24 md:pt-28">
 
+                {/* Tournament Info & Flag */}
+                <div className="flex items-center justify-center gap-3 mb-4">
+                    {game.tournament?.category?.id && (
+                        <img
+                            src={`/api/proxy/category-image/${game.tournament.category.id}`}
+                            alt={game.tournament.category.name}
+                            className="w-6 h-4 object-cover rounded-sm shadow-sm"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                        />
+                    )}
+                    <h1 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">
+                        {game.tournament?.name}
+                    </h1>
+                </div>
+
                 {/* Header / Scoreboard */}
                 <div className="glass-card p-6 mb-6">
                     <div className="flex justify-between items-center text-center">
