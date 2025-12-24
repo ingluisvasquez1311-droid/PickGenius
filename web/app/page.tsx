@@ -281,47 +281,53 @@ export default function HomePage() {
         {/* FEATURES GRID - ELITE STYLE */}
         <section className="container mx-auto px-4 pb-48">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <motion.div
-              whileHover={{ y: -10 }}
-              className="glass-card p-12 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Target className="w-32 h-32" />
-              </div>
-              <div className="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-10 shadow-2xl shadow-purple-500/5">
-                <Zap className="w-8 h-8 fill-purple-400/20" />
-              </div>
-              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Criterio de Kelly (Parley)</h3>
-              <p className="text-gray-400 leading-tight text-lg">Optimización matemática de tus apuestas combinadas. No solo multiplicamos cuotas, calculamos tu stake ideal para maximizar el crecimiento del capital.</p>
-            </motion.div>
+            <Link href="/parley" className="block outline-none">
+              <motion.div
+                whileHover={{ y: -10 }}
+                className="glass-card h-full p-12 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Target className="w-32 h-32" />
+                </div>
+                <div className="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 mb-10 shadow-2xl shadow-purple-500/5">
+                  <Zap className="w-8 h-8 fill-purple-400/20" />
+                </div>
+                <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Criterio de Kelly (Parley)</h3>
+                <p className="text-gray-400 leading-tight text-lg">Optimización matemática de tus apuestas combinadas. No solo multiplicamos cuotas, calculamos tu stake ideal para maximizar el crecimiento del capital.</p>
+              </motion.div>
+            </Link>
 
-            <motion.div
-              whileHover={{ y: -10 }}
-              className="glass-card p-12 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Shield className="w-32 h-32" />
-              </div>
-              <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-10 shadow-2xl shadow-blue-500/5">
-                <TrendingUp className="w-8 h-8" />
-              </div>
-              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Bankroll Terminal</h3>
-              <p className="text-gray-400 leading-tight text-lg">Visualiza tu ROI, beneficio proyectado y distribución de riesgo por deporte. Una suite financiera profesional para el apostador disciplinado.</p>
-            </motion.div>
+            <Link href="/bankroll" className="block outline-none">
+              <motion.div
+                whileHover={{ y: -10 }}
+                className="glass-card h-full p-12 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Shield className="w-32 h-32" />
+                </div>
+                <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-10 shadow-2xl shadow-blue-500/5">
+                  <TrendingUp className="w-8 h-8" />
+                </div>
+                <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Bankroll Terminal</h3>
+                <p className="text-gray-400 leading-tight text-lg">Visualiza tu ROI, beneficio proyectado y distribución de riesgo por deporte. Una suite financiera profesional para el apostador disciplinado.</p>
+              </motion.div>
+            </Link>
 
-            <motion.div
-              whileHover={{ y: -10 }}
-              className="glass-card p-12 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Zap className="w-32 h-32" />
-              </div>
-              <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-10 shadow-2xl shadow-emerald-500/5">
-                <ArrowRight className="w-8 h-8" />
-              </div>
-              <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Alpha de Tiempo Real</h3>
-              <p className="text-gray-400 leading-tight text-lg">Alertas de "Peligro Crítico" (Grito de Gol) basadas en momentum de ataque en vivo. Recibe notificaciones antes de que el mercado reaccione.</p>
-            </motion.div>
+            <Link href="/football-live" className="block outline-none">
+              <motion.div
+                whileHover={{ y: -10 }}
+                className="glass-card h-full p-12 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Zap className="w-32 h-32" />
+                </div>
+                <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-10 shadow-2xl shadow-emerald-500/5">
+                  <ArrowRight className="w-8 h-8" />
+                </div>
+                <h3 className="text-3xl font-black mb-6 uppercase tracking-tighter italic">Alpha de Tiempo Real</h3>
+                <p className="text-gray-400 leading-tight text-lg">Alertas de "Peligro Crítico" (Grito de Gol) basadas en momentum de ataque en vivo. Recibe notificaciones antes de que el mercado reaccione.</p>
+              </motion.div>
+            </Link>
           </div>
         </section>
 
@@ -362,7 +368,7 @@ export default function HomePage() {
               </div>
 
               {/* Match Card Preview - Modern Brutal */}
-              <div className="relative group/card">
+              <Link href={`/football-live/${footballStats.featuredMatch?.id}`} className="relative group/card block outline-none">
                 <div className="absolute -inset-4 bg-emerald-500/10 blur-3xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-1000"></div>
                 <AnimatePresence mode="wait">
                   {footballStats.featuredMatch && (
@@ -411,14 +417,14 @@ export default function HomePage() {
                         </div>
                       </div>
 
-                      <div className="mt-16 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-center group-hover:bg-emerald-500/20 transition-all">
+                      <div className="mt-16 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-center group-hover/card:bg-emerald-500/20 transition-all">
                         <div className="text-emerald-400 font-black text-[10px] uppercase tracking-widest mb-2">PROYECCIÓN IA</div>
                         <div className="text-2xl font-black italic uppercase tracking-tighter text-white">PELIGRO CRÍTICO DETECTADO</div>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </Link>
             </div>
           </div>
         </section>
