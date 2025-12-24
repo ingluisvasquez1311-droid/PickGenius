@@ -437,9 +437,26 @@ function getCountryFlag(country: string): string {
         'Europe': '🇪🇺',
         'World': '🌍',
         'International': '🌍',
+        'Africa': '🌍',
         'Colombia': '🇨🇴',
-        'Mexico': '🇲🇽'
+        'Mexico': '🇲🇽',
+        'DR Congo': '🇨🇩',
+        'Congo DR': '🇨🇩',
+        'Ethiopia': '🇪🇹',
+        'Libya': '🇱🇾',
+        'Tanzania': '🇹🇿',
+        'Egypt': '🇪🇬',
+        'Nigeria': '🇳🇬',
+        'Morocco': '🇲🇦',
+        'Algeria': '🇩🇿',
+        'Tunisia': '🇹🇳',
+        'Uruguay': '🇺🇾',
+        'Chile': '🇨🇱',
+        'Ecuador': '🇪🇨',
+        'Peru': '🇵🇪',
+        'Paraguay': '🇵🇾',
+        'Venezuela': '🇻🇪'
     };
     // Fuzzy match or direct
-    return map[country] || map[Object.keys(map).find(k => country.includes(k)) || ''] || '';
+    return map[country] || map[Object.keys(map).find(k => country.toLowerCase().includes(k.toLowerCase())) || ''] || '';
 }

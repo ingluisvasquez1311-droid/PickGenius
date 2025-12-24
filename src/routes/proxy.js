@@ -47,6 +47,28 @@ router.get('/player-image/:playerId', async (req, res) => {
 });
 
 /**
+ * Proxy for category images (Flags)
+ * GET /api/proxy/category-image/:categoryId
+ */
+router.get('/category-image/:categoryId', async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const response = await generalizedSofaScoreService.getCategoryImage(categoryId);
+
+        if (response && response.data) {
+            res.set('Cache-Control', 'public, max-age=86400, immutable');
+            res.set('Content-Type', response.headers['content-type'] || 'image/png');
+            res.send(Buffer.from(response.data));
+        } else {
+            res.status(404).json({ success: false, error: 'Category image not found' });
+        }
+    } catch (error) {
+        console.error(`❌ Error in category-image proxy route:`, error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
  * Proxy for Raw Sports Data (Unified Bridge)
  * GET /api/proxy/sportsdata/*
  */
