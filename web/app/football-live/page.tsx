@@ -59,7 +59,7 @@ export default function FootballLivePage() {
     }, []);
 
     let filteredEvents = events;
-    let title = 'Fútbol: Hoy';
+    let title = 'Fútbol: Cartelera Proyectada';
 
     if (filter === 'live') {
         filteredEvents = events.filter(e => e.status.type === 'inprogress');

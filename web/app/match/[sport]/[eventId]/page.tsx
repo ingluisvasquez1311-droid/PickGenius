@@ -49,11 +49,13 @@ export default async function UniversalMatchPage({ params }: PageProps) {
     const { sport, eventId } = await params;
 
     // Map sport names if necessary (normalize to internal IDs)
-    // 'nba' -> 'basketball', etc.
-    const mappedSport = sport === 'nba' ? 'basketball' :
-        sport === 'mlb' ? 'baseball' :
-            sport === 'nhl' ? 'nhl' :
-                sport === 'tennis' ? 'tennis' : sport;
+    const s = sport.toLowerCase();
+    const mappedSport =
+        s === 'nba' ? 'basketball' :
+            s === 'mlb' ? 'baseball' :
+                s === 'nhl' ? 'ice-hockey' :
+                    s === 'nfl' ? 'american-football' :
+                        s === 'hockey' ? 'ice-hockey' : sport;
 
     return <MatchLiveView sport={mappedSport} eventId={eventId} />;
 }

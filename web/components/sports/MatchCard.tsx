@@ -127,7 +127,20 @@ export default function MatchCard({
                     ) : (
                         <div className="text-center">
                             <div className="text-sm font-black text-white/80">{time}</div>
-                            <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">Hoy</div>
+                            <div className="text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">
+                                {(() => {
+                                    const matchDate = new Date(date);
+                                    const today = new Date();
+                                    const isToday = matchDate.toDateString() === today.toDateString();
+                                    const tomorrow = new Date(today);
+                                    tomorrow.setDate(today.getDate() + 1);
+                                    const isTomorrow = matchDate.toDateString() === tomorrow.toDateString();
+
+                                    if (isToday) return 'Hoy';
+                                    if (isTomorrow) return 'Mañana';
+                                    return matchDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                                })()}
+                            </div>
                         </div>
                     )}
                 </div>

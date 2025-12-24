@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const SportSchema = z.enum(['football', 'basketball', 'tennis', 'baseball', 'american-football', 'hockey']);
+export const SportSchema = z.enum(['football', 'basketball', 'tennis', 'baseball', 'american-football', 'hockey', 'nhl', 'nfl', 'ice-hockey', 'icehockey']);
 
 export const MatchParamsSchema = z.object({
     sport: SportSchema,

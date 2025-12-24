@@ -76,7 +76,20 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
         statusContent = "FT";
         statusClass = "text-gray-500 font-bold";
     } else {
-        statusContent = matchTime;
+        const matchDate = new Date(event.startTimestamp! * 1000);
+        const today = new Date();
+        const isToday = matchDate.toDateString() === today.toDateString();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const isTomorrow = matchDate.toDateString() === tomorrow.toDateString();
+
+        const dayPrefix = isToday ? '' : isTomorrow ? 'MAÑ ' : `${matchDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} `;
+        statusContent = (
+            <div className="flex flex-col items-center">
+                {!isToday && <span className="text-[7px] text-gray-500 font-black mb-0.5">{dayPrefix}</span>}
+                <span>{matchTime}</span>
+            </div>
+        );
     }
 
     return (

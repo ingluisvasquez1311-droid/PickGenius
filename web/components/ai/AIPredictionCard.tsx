@@ -314,22 +314,44 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             </p>
                         </div>
 
-                        {/* UNLOCKED STATS FOR EVERYONE */}
+                        {/* UNLOCKED STATS FOR EVERYONE - FOCUS ON GOALS & SHOTS */}
                         {prediction.predictions && (
                             <div className="space-y-3 mt-4">
-                                <h4 className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">📈 Estadísticas del Partido</h4>
+                                <div className="flex items-center justify-between mb-2">
+                                    <h4 className="text-gray-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                                        <TrendingUp className="w-3 h-3" /> Análisis de Métricas (IA)
+                                    </h4>
+                                    <span className="text-[8px] text-purple-400 font-black uppercase tracking-widest bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                                        Historial + Vivo
+                                    </span>
+                                </div>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-gradient-to-br from-green-900/40 to-green-800/20 p-3 rounded-lg border border-green-500/20">
-                                        <p className="text-green-300 text-[10px] uppercase font-bold mb-1">{sport === 'basketball' ? 'Total Puntos' : 'Total Goles'}</p>
-                                        <p className="text-white font-bold text-lg">{sport === 'basketball' ? prediction.predictions.totalPoints : prediction.predictions.totalGoals}</p>
+                                    <div className="bg-gradient-to-br from-green-900/40 to-green-800/20 p-3 rounded-xl border border-green-500/20 group hover:border-green-500/40 transition-all">
+                                        <p className="text-green-300 text-[10px] uppercase font-black mb-1">{sport === 'basketball' ? 'Puntos Est.' : 'Goles Proy.'}</p>
+                                        <div className="flex items-end justify-between">
+                                            <p className="text-white font-black text-2xl italic">
+                                                {sport === 'basketball' ? prediction.predictions.totalPoints : prediction.predictions.totalGoals}
+                                            </p>
+                                            {prediction.predictions.overUnder && (
+                                                <span className="text-[9px] bg-green-500/20 text-green-400 font-black px-1.5 py-0.5 rounded uppercase">
+                                                    {prediction.predictions.overUnder.pick}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                     {sport !== 'basketball' && prediction.predictions.shots && (
-                                        <div className="bg-red-900/30 p-3 rounded-lg border border-red-500/20">
-                                            <p className="text-red-300 text-[10px] uppercase font-bold mb-1">Tiros al Arco</p>
-                                            <p className="text-white font-bold text-lg">{prediction.predictions.shots.onTarget}</p>
+                                        <div className="bg-red-900/30 p-3 rounded-xl border border-red-500/20 group hover:border-red-500/40 transition-all">
+                                            <p className="text-red-300 text-[10px] uppercase font-black mb-1">Tiros al Arco</p>
+                                            <div className="flex items-end justify-between">
+                                                <p className="text-white font-black text-2xl italic">{prediction.predictions.shots.onTarget}</p>
+                                                <span className="text-[9px] text-red-400/50 font-bold italic">Expectativa</span>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
+                                <p className="text-[9px] text-gray-500 italic mt-1 px-1">
+                                    * Proyecciones basadas en volumen histórico de partidos previos y ritmo de ataques peligrosos.
+                                </p>
                             </div>
                         )}
 

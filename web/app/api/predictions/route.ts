@@ -168,38 +168,37 @@ export async function POST(request: NextRequest) {
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
             ${matchContext.h2hHistory ? `**HISTORIAL H2H (Últimos 5):** ${JSON.stringify(matchContext.h2hHistory)}` : ''}
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
-            ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
+            ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (MAX VALUE):
-            - ANÁLISIS DE VOLUMEN: Revisa el historial H2H. Si suelen anotar muchos goles entre ellos, prioriza el "Ambos Anotan" o "Over 2.5".
-            - Win by 2+ goals (Ganará por 2+)
-            - Most Corners (Mayor número de córners)
-            - Both Teams to Score (Ambos equipos anotarán)
-            - Shots on Target (Remates a puerta) - e.g. "Player X: 2+ remates"
-            - VALUE BET ANALYSIS: Compara tu probabilidad calculada con el volumen histórico y las cuotas del mercado. Identifica picks donde el mercado subestima el desenlace.
+            - GOLES (UNDER/OVER): Analiza la línea de goles. Si es LIVE, considera el ritmo de juego y ataques peligrosos. Si es PRE, usa el promedio de goles en el H2H. Determina si el valor está en el Over o el Under.
+            - REMATES/TIROS: Basado en partidos anteriores (H2H) y estadísticas de temporada, proyecta el total de remates a puerta esperados.
+            - ANÁLISIS DE VOLUMEN: Prioriza mercado de "Ambos Anotan" o "Línea de Goles" si los datos muestran alta frecuencia.
+            - VALUE BET ANALYSIS: Compara tu probabilidad calculada con el volumen histórico y las cuotas del mercado.
+            - DEFINE DETALLES PREMIUM: Incluye proyecciones de jugadores (Goles o Tiros) específicamente masticadas.
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
-                "reasoning": "Análisis detallado en ESPAÑOL resaltando mercados de córners y remates...",
+                "reasoning": "Resumen táctico resaltando por qué los goles (U/O) y tiros seguirán la tendencia histórica o el pulso actual...",
                 "bettingTip": "Más de 2.5 Goles y Ambos Anotan",
                 "advancedMarkets": { "corners": "Benfica: Mayor número", "shots": "Luis Suarez: 2+ a puerta", "drawNoBet": "${matchContext.home}" },
                 "isValueBet": false,
-                "valueAnalysis": "Breve explicación del valor respecto a Bet365...",
+                "valueAnalysis": "Por qué la cuota de goles/tiros tiene valor hoy...",
                 "predictions": {
                     "finalScore": "2-1",
                     "totalGoals": "3",
                     "overUnder": { "line": 2.5, "pick": "Más de", "confidence": "Alta" },
                     "projections": [
-                        { "name": "Jugador Estrella", "team": "Home", "points": "1+", "description": "Goles esperados", "confidence": "Alta" },
-                        { "name": "Jugador Apoyo", "team": "Away", "points": "1.5+", "description": "Remates a puerta", "confidence": "Media" }
+                        { "name": "Delantero Estrella", "team": "Home", "points": "1+", "description": "Goles", "confidence": "Alta" },
+                        { "name": "Volante Ofensivo", "team": "Away", "points": "1.5+", "description": "Remates a puerta", "confidence": "Media" }
                     ],
                     "corners": { "home": 5, "away": 3, "total": 8 },
                     "shots": { "home": 12, "away": 8, "onTarget": "6" },
-                    "cards": { "yellowCards": 4, "redCards": 0, "details": "Partido intenso" }
+                    "cards": { "yellowCards": 4, "redCards": 0, "details": "Partido con tendencia a faltas tácticas" }
                 },
-                "keyFactors": ["Factor Clave 1", "Factor Clave 2", "Factor Clave 3"]
+                "keyFactors": ["Historial H2H goleador", "Ritmo de tiros actual", "Factor 3"]
             }
             `;
         } else if (sport.toLowerCase().includes('american') || sport.toLowerCase().includes('nfl')) {
@@ -274,35 +273,38 @@ export async function POST(request: NextRequest) {
             `;
         } else if (sport.toLowerCase().includes('hockey') || sport.toLowerCase().includes('nhl')) {
             prompt = `
-            You are an expert NHL/Ice Hockey analyst speaking SPANISH.
+            Eres un analista experto de la NHL/Hockey sobre hielo hablando en ESPAÑOL.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
-            **STATUS:** ${matchContext.status}
+            **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
+            ${matchContext.h2hHistory ? `**HISTORIAL H2H (Últimos 5):** ${JSON.stringify(matchContext.h2hHistory)}` : ''}
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
+            ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (NHL ELITE):
-            - 60 Minute Line (Resultado en tiempo regular)
-            - Puck Line (Hándicap -1.5/+1.5)
-            - Total Goals (Over/Under)
-            - Player Props: Tiros a puerta (Shots on Goal), Puntos de jugador.
-            
+            - GOLES (UNDER/OVER): Analiza la línea de goles totales. Considera el Power Play del equipo local y la eficiencia del portero visitante.
+            - TIROS A PUERTA (SHOTS ON GOAL): Proyecta el volumen de tiros basado en el historial H2H y la agresividad ofensiva reciente.
+            - Win by 2+ (Puck Line -1.5)
+            - PLAYER PROPS: Goles o Puntos de jugadores estrella.
+
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 78,
-                "reasoning": "Análisis de defensa, portería y Power Play en ESPAÑOL...",
+                "reasoning": "Resumen de portería y Power Play resaltando tendencias de goles y tiros...",
                 "bettingTip": "Puck Line ${matchContext.home} -1.5",
                 "advancedMarkets": { "shots": "Jugador X Over 3.5 tiros", "puckLine": "${matchContext.home} -1.5", "totalGoals": "Over 5.5" },
                 "predictions": {
                     "finalScore": "4-2",
                     "totalGoals": "6",
                     "spread": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Cubrir" },
-                    "overUnder": { "line": 6.0, "pick": "Más de", "confidence": "Media" },
+                    "overUnder": { "line": 5.5, "pick": "Más de", "confidence": "Media" },
                     "projections": [
-                        { "name": "Jugador Estrella", "team": "Home", "points": "3.5+", "description": "Shots on Goal", "confidence": "Alta" },
-                        { "name": "Portero Clave", "team": "Away", "points": "28.5+", "description": "Saves", "confidence": "Media" }
-                    ]
+                        { "name": "Jugador Estrella", "team": "Home", "points": "3.5+", "description": "Tiros a puerta", "confidence": "Alta" },
+                        { "name": "Portero Titular", "team": "Away", "points": "28.5+", "description": "Atajadas", "confidence": "Media" }
+                    ],
+                    "shots": { "home": 32, "away": 28, "onTarget": "30" }
                 },
-                "keyFactors": ["Eficiencia en Power Play", "Rendimiento del Portero", "Fisicalidad"]
+                "keyFactors": ["Eficacia en Power Play", "Historial de remates H2H", "Estadísticas del portero"]
             }
             `;
         } else if (sport.toLowerCase().includes('tennis')) {

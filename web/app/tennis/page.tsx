@@ -64,7 +64,7 @@ export default function TennisPage() {
                         {/* Stats Grid Brutalist */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
                             <div className="glass-card p-6 border border-white/5 bg-white/2 rounded-3xl">
-                                <div className="text-[10px] font-black uppercase text-gray-500 mb-2">Partidos Hoy</div>
+                                <div className="text-[10px] font-black uppercase text-gray-500 mb-2">Eventos Cargados</div>
                                 <div className="text-3xl font-black">{games.length}</div>
                             </div>
                             <div className="glass-card p-6 border border-white/5 bg-white/2 rounded-3xl">
@@ -84,7 +84,7 @@ export default function TennisPage() {
                         <div className="space-y-6">
                             <h3 className="text-xl font-black italic uppercase tracking-widest flex items-center gap-3 mb-8">
                                 <span className="w-2 h-8 bg-green-500 rounded-full"></span>
-                                Match Point: Jornada Actual
+                                Match Point: Cartelera Proyectada
                             </h3>
                             {loading ? (
                                 <SkeletonLoader />
