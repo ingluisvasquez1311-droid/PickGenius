@@ -566,6 +566,61 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                 </div>
                                             )}
 
+                                            {/* BASKETBALL ADVANCED MARKETS (NBA ELITE) */}
+                                            {sport === 'basketball' && (
+                                                <div className="bg-gradient-to-br from-orange-900/20 to-amber-900/20 p-4 rounded-xl border border-orange-500/20 space-y-3 mt-3">
+                                                    <p className="text-orange-400 text-[10px] uppercase font-black mb-3 flex items-center gap-2">
+                                                        🏀 Mercados NBA Elite (Player Props & Quarters)
+                                                    </p>
+
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        {/* TRIPLES (3PM) */}
+                                                        {prediction.predictions.playerProps?.threes && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-orange-500/10">
+                                                                <p className="text-orange-300 text-[9px] uppercase font-bold mb-1">Triples (3PM)</p>
+                                                                <p className="text-white font-black text-sm mb-1">{prediction.predictions.playerProps.threes.player}</p>
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="text-orange-500 font-bold text-lg">{prediction.predictions.playerProps.threes.pick} {prediction.predictions.playerProps.threes.line}</span>
+                                                                    <span className="text-[8px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">3PT</span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* PRA (Pts+Reb+Ast) */}
+                                                        {prediction.predictions.playerProps?.pra && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-purple-500/10">
+                                                                <p className="text-purple-300 text-[9px] uppercase font-bold mb-1">PRA (Pts+Reb+Ast)</p>
+                                                                <p className="text-white font-black text-sm mb-1">{prediction.predictions.playerProps.pra.player}</p>
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="text-purple-500 font-bold text-lg">{prediction.predictions.playerProps.pra.pick} {prediction.predictions.playerProps.pra.line}</span>
+                                                                    <span className="text-[8px] bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded">COMBO</span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* RACE TO 20 */}
+                                                        {prediction.predictions.quarterMarkets?.raceTo20 && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-blue-500/10">
+                                                                <p className="text-blue-300 text-[9px] uppercase font-bold mb-1">Carrera a 20 Puntos (Q1)</p>
+                                                                <p className="text-white font-black text-lg">
+                                                                    {prediction.predictions.quarterMarkets.raceTo20.pick}
+                                                                </p>
+                                                            </div>
+                                                        )}
+
+                                                        {/* 1ST QUARTER WINNER */}
+                                                        {prediction.predictions.quarterMarkets?.firstQuarter && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-green-500/10">
+                                                                <p className="text-green-300 text-[9px] uppercase font-bold mb-1">Ganador 1er Cuarto</p>
+                                                                <p className="text-white font-black text-sm">
+                                                                    {prediction.predictions.quarterMarkets.firstQuarter.pick}
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {/* PLAYER PROJECTIONS (PREMIUM) */}
                                             {prediction.predictions.projections && prediction.predictions.projections.length > 0 && (
                                                 <div className="bg-black/40 p-4 rounded-xl border border-yellow-500/20">

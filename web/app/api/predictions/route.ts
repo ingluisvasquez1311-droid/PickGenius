@@ -251,39 +251,6 @@ export async function POST(request: NextRequest) {
                 "keyFactors": ["Protección del QB", "Eficiencia en 3ra oportunidad", "Estrategia de juego terrestre"]
             }
             `;
-        } else if (sport === 'baseball') {
-            prompt = `
-            You are an expert MLB/Baseball analyst speaking SPANISH.
-            **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
-            **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
-            **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
-            ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
-            
-            ANALYZE SPECIAL MARKETS:
-            - TOTAL RUNS (CARRERAS): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
-            - PLAYER PROPS: Strikeouts del Pitcher. Indica SIEMPRE si es 'Más de' o 'Menos de'.
-            - COMBINACIÓN GANADORA (TICKET): Ejemplo: 'Ganador Local y Más de 8.5 Carreras'.
-            
-            RETURN JSON ONLY in SPANISH:
-            {
-                "winner": "${matchContext.home}",
-                "confidence": 80,
-                "reasoning": "Análisis detallado resaltando el pitcheo y bateo...",
-                "bettingTip": "Local y Más de 8.5 Carreras",
-                "advancedMarkets": { "totalRuns": "Más de 8.5", "strikeouts": "Pitcher: Más de 6.5" },
-                "predictions": {
-                    "finalScore": "5-3",
-                    "totalRuns": "8",
-                    "spread": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Ganador" },
-                    "overUnder": { "line": 8.5, "pick": "Más de", "confidence": "Media" },
-                    "projections": [
-                        { "name": "Pitcher A", "team": "Home", "points": "6.5+", "description": "Strikeouts (Más de)", "confidence": "Alta" },
-                        { "name": "Bateador X", "team": "Away", "points": "1.5+", "description": "Hits (Más de)", "confidence": "Media" }
-                    ]
-                },
-                "keyFactors": ["Pitcheo Abridor", "Eficiencia Bullpen", "Clima"]
-            }
-            `;
         } else if (sport.toLowerCase().includes('hockey') || sport.toLowerCase().includes('nhl')) {
             prompt = `
             Eres un analista experto de la NHL/Hockey sobre hielo hablando en ESPAÑOL.
@@ -457,6 +424,15 @@ export async function POST(request: NextRequest) {
             mockPrediction.predictions.topPlayers = {
                 homeTopScorer: { name: 'Jugador Estrella (Local)', predictedPoints: 24, predictedRebounds: 8, predictedAssists: 5 },
                 awayTopScorer: { name: 'Jugador Estrella (Visitante)', predictedPoints: 26, predictedRebounds: 6, predictedAssists: 4 }
+            };
+            // NEW: Christmas Props Mock
+            mockPrediction.predictions.playerProps = {
+                threes: { player: "Stephen Curry", line: 4.5, pick: "Más de" },
+                pra: { player: "LeBron James", line: 42.5, pick: "Menos de" }
+            };
+            mockPrediction.predictions.quarterMarkets = {
+                raceTo20: { pick: winner, confidence: "Media" },
+                firstQuarter: { pick: `${winner} -1.5`, confidence: "Alta" }
             };
         } else {
             mockPrediction.predictions.corners = { home: 6, away: 4, total: 10 };
