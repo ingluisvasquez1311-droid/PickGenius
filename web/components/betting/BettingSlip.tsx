@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react';
 import { useBettingSlip } from '@/contexts/BettingSlipContext';
+import { useAuth } from '@/contexts/AuthContext';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
 
 export default function BettingSlip() {
     const { bets, removeFromSlip, clearSlip, isOpen, toggleSlip } = useBettingSlip();
+    const { user, saveParley } = useAuth();
     const [wager, setWager] = useState<string>('10');
     const [selectedHouse, setSelectedHouse] = useState<string>('betano');
 
@@ -45,6 +47,18 @@ export default function BettingSlip() {
                 colors: ['#22c55e', '#ffffff', '#eab308'],
                 zIndex: 9999
             });
+
+            // --- NEW: Save Ticket to History ---
+            if (user) {
+                saveParley({
+                    selections: bets,
+                    totalOdds,
+                    wager,
+                    potentialReturn,
+                    house: selectedHouseData.name,
+                    status: 'active'
+                }).catch(err => console.error('Error saving parley:', err));
+            }
         }
 
         // NOTE: We do NOT clear the slip automatically

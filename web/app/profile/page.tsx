@@ -28,6 +28,7 @@ import { toast } from 'sonner';
 import PerformanceStats from '@/components/dashboard/PerformanceStats';
 import AchievementBadges from '@/components/dashboard/AchievementBadges';
 import ReferralCard from '@/components/dashboard/ReferralCard';
+import PredictionHistoryItem from '@/components/profile/PredictionHistoryItem';
 
 type TabType = 'overview' | 'stats' | 'badges' | 'referrals' | 'settings' | 'history' | 'security';
 
@@ -310,30 +311,7 @@ export default function ProfilePage() {
                                                 ) : history.length > 0 ? (
                                                     <div className="space-y-1">
                                                         {history.map((record, i) => (
-                                                            <div key={i} className="flex items-center justify-between p-4 hover:bg-white/5 rounded-2xl transition-all duration-300 group border-b border-white/5 last:border-0">
-                                                                <div className="flex items-center gap-4">
-                                                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-lg border border-white/5 group-hover:border-[var(--primary)]/30 group-hover:bg-[var(--primary)]/5 transition-all">
-                                                                        {record.sport === 'football' ? '⚽' : '🏀'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <div className="flex items-center gap-2 mb-0.5">
-                                                                            <span className="text-sm font-black italic uppercase tracking-tight group-hover:text-[var(--primary)] transition-colors">
-                                                                                {record.playerName}
-                                                                            </span>
-                                                                            <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border ${record.confidence === 'Alta' ? 'border-green-500/30 text-green-500' : 'border-yellow-500/30 text-yellow-500'}`}>
-                                                                                {record.confidence}
-                                                                            </span>
-                                                                        </div>
-                                                                        <div className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
-                                                                            {record.prediction} {record.line} • {new Date(record.timestamp).toLocaleDateString()}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                    <div className="text-xl font-black italic tracking-tighter">{record.probability}%</div>
-                                                                    <div className="text-[8px] text-gray-600 font-black uppercase tracking-widest">Probabilidad</div>
-                                                                </div>
-                                                            </div>
+                                                            <PredictionHistoryItem key={record.id || i} record={record} />
                                                         ))}
                                                     </div>
                                                 ) : (
@@ -375,23 +353,7 @@ export default function ProfilePage() {
                                         ) : history.length > 0 ? (
                                             <div className="grid grid-cols-1 gap-4">
                                                 {history.map((record, i) => (
-                                                    <div key={i} className="flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-all group">
-                                                        <div className="flex items-center gap-6">
-                                                            <div className="text-3xl filter grayscale group-hover:grayscale-0 transition-all">
-                                                                {record.sport === 'football' ? '⚽' : '🏀'}
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="text-sm font-black uppercase tracking-tight text-white group-hover:text-purple-400 transition-colors">{record.playerName}</h4>
-                                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                                                                    {record.prediction} {record.line} • {new Date(record.timestamp).toLocaleDateString()}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-2xl font-black italic tracking-tighter text-purple-500">{record.probability}%</p>
-                                                            <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest">Éxito Estimado</p>
-                                                        </div>
-                                                    </div>
+                                                    <PredictionHistoryItem key={record.id || i} record={record} />
                                                 ))}
                                             </div>
                                         ) : (

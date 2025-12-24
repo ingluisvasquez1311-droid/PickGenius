@@ -65,14 +65,29 @@ export interface UserProfile {
 export interface PredictionRecord {
     id?: string;
     uid: string;
-    playerName: string;
+    // For Player Props
+    playerName?: string;
+    propType?: string;
+    line?: number;
+    prediction?: string;
+    probability?: number;
+
+    // For Match Predictions (AI Oracle)
+    gameId?: string;
     sport: string;
-    propType: string;
-    line: number;
-    prediction: string;
-    probability: number;
-    confidence: string;
+    homeTeam?: string;
+    awayTeam?: string;
+    winner?: string;
+    bettingTip?: string;
+    confidence: string | number;
     reasoning: string;
+    predictions?: any; // Detailed stats (goals, corners, offsides)
+    keyFactors?: string[];
+
+    // Outcome tracking
+    status?: 'pending' | 'won' | 'lost' | 'void';
+    actualResult?: any;
+
     timestamp: any;
 }
 

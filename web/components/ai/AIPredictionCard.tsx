@@ -16,7 +16,7 @@ interface AIPredictionCardProps {
 }
 
 export default function AIPredictionCard({ eventId, sport }: AIPredictionCardProps) {
-    const { user, notify } = useAuth();
+    const { user, notify, saveToHistory } = useAuth();
     const { addToSlip } = useBettingSlip();
     const [prediction, setPrediction] = useState<any>(null);
     const [loading, setLoading] = useState(false);
@@ -64,6 +64,27 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                     : parseInt(result.confidence || '0');
 
                 setPrediction(result);
+
+                // --- NEW: Universal History Archiving ---
+                if (user?.uid) {
+                    try {
+                        await saveToHistory({
+                            gameId: eventId.toString(),
+                            sport: sport,
+                            winner: result.winner,
+                            bettingTip: result.bettingTip,
+                            confidence: result.confidence,
+                            reasoning: result.reasoning,
+                            predictions: result.predictions,
+                            keyFactors: result.keyFactors,
+                            status: 'pending'
+                        });
+                        console.log('✅ AI Oracle verdict archived');
+                    } catch (saveErr) {
+                        console.error('❌ Failed to archive prediction:', saveErr);
+                    }
+                }
+
                 toast.success('¡Revelación Estratégica Finalizada!', {
                     id: toastId,
                     description: `Veredicto: ${result.winner || 'Listo'} con ${confidenceVal}% de acierto.`,

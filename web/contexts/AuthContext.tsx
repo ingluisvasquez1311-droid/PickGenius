@@ -47,6 +47,7 @@ interface AuthContextType {
     refreshUser: () => Promise<void>;
     getHistory: (limit?: number) => Promise<PredictionRecord[]>;
     saveToHistory: (prediction: Omit<PredictionRecord, 'uid' | 'timestamp'>) => Promise<void>;
+    saveParley: (parleyData: any) => Promise<void>;
     updateUser: (updates: Partial<UserProfile>) => Promise<void>;
     notifications: AppNotification[];
     unreadCount: number;
@@ -121,6 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 isPremium: false,
                 predictionsUsed: 0,
                 predictionsLimit: 3,
+                totalPredictions: 0,
                 favoriteTeams: [],
                 favoritePlayers: [],
                 createdAt: new Date(),
@@ -233,6 +235,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await savePrediction(user.uid, prediction);
     };
 
+    const saveParley = async (parleyData: any) => {
+        if (!user) return;
+        const { saveParleyPrediction } = await import('@/lib/userService');
+        await saveParleyPrediction(user.uid, parleyData);
+    };
+
     const updateUser = async (updates: Partial<UserProfile>) => {
         if (!user) return;
         const { updateUserProfile } = await import('@/lib/userService');
@@ -316,6 +324,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             refreshUser,
             getHistory,
             saveToHistory,
+            saveParley,
             updateUser,
             notifications,
             unreadCount,
