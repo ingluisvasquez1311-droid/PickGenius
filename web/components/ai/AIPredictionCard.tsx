@@ -29,6 +29,9 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
     };
 
     const handlePredict = async () => {
+        let timeout1: NodeJS.Timeout | null = null;
+        let timeout2: NodeJS.Timeout | null = null;
+
         try {
             setLoading(true);
             setError(null);
@@ -38,11 +41,11 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
             });
 
             // Simulate steps for a more "pro" feeling
-            setTimeout(() => {
+            timeout1 = setTimeout(() => {
                 toast.loading('Analizando alineaciones y mística del campo...', { id: toastId });
             }, 1000);
 
-            setTimeout(() => {
+            timeout2 = setTimeout(() => {
                 toast.loading('Calculando probabilidades con el Motor Genius...', { id: toastId });
             }, 2500);
 
@@ -50,6 +53,10 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                 gameId: eventId.toString(),
                 sport: sport as any
             });
+
+            // Limpiar timeouts para que no sobrescriban el éxito
+            if (timeout1) clearTimeout(timeout1);
+            if (timeout2) clearTimeout(timeout2);
 
             if (result) {
                 const confidenceVal = typeof result.confidence === 'number'
@@ -85,6 +92,8 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                 toast.error('Fallo en la conexión mística', { id: toastId });
             }
         } catch (err: any) {
+            if (timeout1) clearTimeout(timeout1);
+            if (timeout2) clearTimeout(timeout2);
             console.error(err);
             setError(err.message || 'Error al generar predicción');
             toast.error('Error crítico en el Motor Genius');

@@ -142,9 +142,17 @@ export default function TopPlayersCard({ title, players, sport, teamColor = 'pur
                 })}
 
                 {topPlayers.length === 0 && (
-                    <div className="p-8 text-center">
-                        <div className="text-2xl mb-2">📊</div>
-                        <p className="text-gray-500 text-xs font-medium">Estadísticas por jugar</p>
+                    <div className="p-10 text-center flex flex-col items-center justify-center space-y-4">
+                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center relative">
+                            <div className="absolute inset-0 rounded-full border border-white/10 animate-ping opacity-20"></div>
+                            <span className="text-3xl grayscale opacity-60 group-hover:grayscale-0 transition-all">📈</span>
+                        </div>
+                        <div>
+                            <p className="text-white font-black text-xs uppercase tracking-widest mb-1 italic">Calculando Rendimiento</p>
+                            <p className="text-gray-500 text-[9px] font-bold uppercase tracking-tighter leading-tight max-w-[150px] mx-auto">
+                                Las estadísticas de jugadores {sport === 'basketball' ? 'de NBA' : 'en vivo'} se actualizan al iniciar el encuentro.
+                            </p>
+                        </div>
                     </div>
                 )}
             </div>

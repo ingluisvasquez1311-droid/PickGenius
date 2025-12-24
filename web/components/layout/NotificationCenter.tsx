@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Link from 'next/link';
+import { Bell, CheckCircle2, AlertTriangle, Info, BellOff } from 'lucide-react';
 
 const NotificationCenter = () => {
     const { notifications, unreadCount, markRead, markAllRead } = useAuth();
@@ -18,9 +19,6 @@ const NotificationCenter = () => {
             console.log(' - No leídas (badge):', unreadCount);
             console.log(' - Total cargadas:', notifications.length);
             console.log(' - Datos:', notifications);
-            if (notifications.length === 0 && unreadCount > 0) {
-                console.warn('⚠️ [NotificationCenter] ADVERTENCIA: Hay badge pero el array está vacío. Posible error de sincronización o permisos.');
-            }
         }
     }, [isOpen, notifications, unreadCount]);
 
@@ -46,24 +44,34 @@ const NotificationCenter = () => {
 
     const getTypeIcon = (type: string) => {
         switch (type) {
-            case 'success': return '✅';
-            case 'warning': return '⚠️';
-            case 'error': return '🚨';
-            default: return '📢';
+            case 'success': return <CheckCircle2 className="w-5 h-5" />;
+            case 'warning': return <AlertTriangle className="w-5 h-5" />;
+            case 'error': return <AlertTriangle className="w-5 h-5" />;
+            default: return <Info className="w-5 h-5" />;
         }
     };
 
     return (
         <div className="relative" ref={dropdownRef}>
-            {/* Bell Icon */}
+            {/* Bell Icon Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 rounded-full hover:bg-white/5 transition-colors group mobile-haptic"
+                className={`flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-300 group mobile-haptic border ${isOpen
+                        ? 'bg-white/20 border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
+                        : 'bg-white/10 border-white/10 hover:bg-white/20 hover:border-white/30 shadow-lg'
+                    }`}
+                title="Notificaciones"
             >
-                <span className="text-xl group-hover:scale-110 transition-transform block">🔔</span>
+                <Bell
+                    className={`w-5 h-5 transition-all duration-300 ${unreadCount > 0
+                            ? 'text-yellow-400 fill-yellow-400/40 animate-bounce'
+                            : 'text-white'
+                        } ${isOpen ? 'scale-110' : 'scale-100'}`}
+                />
+
                 {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-[#111] animate-in zoom-in">
-                        {unreadCount > 9 ? '+9' : unreadCount}
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-[#0a0a0a] shadow-[0_0_15px_rgba(239,68,68,0.7)] animate-pulse z-10">
+                        {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
             </button>
