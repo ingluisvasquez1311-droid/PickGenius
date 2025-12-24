@@ -28,39 +28,32 @@ export default function TeamLogo({ teamId, teamName, size = 'md', className = ''
     // Reset error when teamId changes by checking if prop changed (or rely on key upstream)
     // To fix lint error, we remove the sync setState in effect.
     // Instead we can use a key on the image component to force re-mount or just reset state in a harmless way?
-    // Better pattern: Use key={teamId} on the component itself when calling it.
-    // But inside here:
-    useEffect(() => {
-        setError(false);
-    }, [teamId]);
-
     const handleImageError = () => {
         setError(true);
     };
 
-    if (error) {
-        // Fallback: Show team initial in a circle
-        const initial = teamName ? teamName.charAt(0).toUpperCase() : '?';
-        return (
-            <div
-                className={`${sizeClasses[size]} ${className} rounded-full bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center border-2 border-purple-400/30 shadow-lg`}
-            >
-                <span className="text-white font-black text-lg">{initial}</span>
-            </div>
-        );
-    }
-
+    // Use key={teamId} on the wrapper div so that the entire component (including the error state) 
+    // resets whenever the teamId changes. This avoids the need for an effect and fixes the lint error.
     return (
-        <div className={`${sizeClasses[size]} ${className} relative`}>
-            <Image
-                key={teamId} // Force remount and state reset when team changes
-                src={imgSrc}
-                alt={`${teamName} logo`}
-                fill
-                className="object-contain"
-                onError={handleImageError}
-                unoptimized
-            />
+        <div key={teamId} className={`${sizeClasses[size]} ${className} relative`}>
+            {!error ? (
+                <Image
+                    src={imgSrc}
+                    alt={`${teamName} logo`}
+                    fill
+                    className="object-contain"
+                    onError={handleImageError}
+                    unoptimized
+                />
+            ) : (
+                <div
+                    className="w-full h-full rounded-full bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center border-2 border-purple-400/30 shadow-lg"
+                >
+                    <span className="text-white font-black text-lg">
+                        {teamName ? teamName.charAt(0).toUpperCase() : '?'}
+                    </span>
+                </div>
+            )}
         </div>
     );
 }
