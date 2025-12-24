@@ -466,6 +466,32 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                             <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🏈 TD Totales</p>
                                                             <p className="text-white font-bold text-lg">
                                                                 {prediction.predictions.touchdowns.total || (prediction.predictions.touchdowns.home + prediction.predictions.touchdowns.away)}
+                                                                {(prediction.predictions.touchdowns.pick || prediction.predictions.touchdowns.line) && (
+                                                                    <span className="block text-[10px] text-blue-400 font-black uppercase">
+                                                                        {prediction.predictions.touchdowns.pick} {prediction.predictions.touchdowns.line}
+                                                                    </span>
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    {prediction.predictions.yards && (
+                                                        <div className="bg-orange-900/30 p-3 rounded-lg border border-orange-500/20">
+                                                            <p className="text-orange-300 text-[10px] uppercase font-bold mb-1">📏 Yardas Totales</p>
+                                                            <p className="text-white font-bold text-lg">
+                                                                {prediction.predictions.yards.total}
+                                                                {(prediction.predictions.yards.pick || prediction.predictions.yards.line) && (
+                                                                    <span className="block text-[10px] text-orange-400 font-black uppercase">
+                                                                        {prediction.predictions.yards.pick} {prediction.predictions.yards.line}
+                                                                    </span>
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    {prediction.predictions.touchdowns && (
+                                                        <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-500/20">
+                                                            <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🏈 TD Totales</p>
+                                                            <p className="text-white font-bold text-lg">
+                                                                {prediction.predictions.touchdowns.total || (prediction.predictions.touchdowns.home + prediction.predictions.touchdowns.away)}
                                                                 {prediction.predictions.touchdowns.pick && <span className="text-[10px] ml-1 opacity-50 italic">({prediction.predictions.touchdowns.pick})</span>}
                                                             </p>
                                                         </div>

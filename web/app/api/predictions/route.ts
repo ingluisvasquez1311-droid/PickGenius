@@ -203,9 +203,9 @@ export async function POST(request: NextRequest) {
             ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (NFL ELITE):
-            - PUNTOS TOTALES (UNDER/OVER): Analiza el volumen de puntos esperado. Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
-            - YARDAS TOTALES: Proyecta yardas de pase/carrera. Indica SIEMPRE si es 'Más de' o 'Menos de'.
-            - TOUCHDOWNS: Total de anotaciones. Indica SIEMPRE si es 'Más de' o 'Menos de'.
+            - PUNTOS TOTALES (UNDER/OVER): Analiza el volumen de puntos esperado. Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under) y la línea (ej: 44.5).
+            - YARDAS TOTALES: Proyecta yardas. Indica SIEMPRE si es 'Más de' o 'Menos de' y la línea (ej: 350.5).
+            - TOUCHDOWNS: Total de anotaciones. Indica SIEMPRE si es 'Más de' o 'Menos de' y la línea (ej: 4.5).
             - COMBINACIÓN GANADORA (TICKET): Ejemplo: 'Ganador Local y Más de 45.5 Puntos'.
 
             RETURN JSON ONLY in SPANISH:
@@ -217,14 +217,14 @@ export async function POST(request: NextRequest) {
                 "advancedMarkets": { "touchdowns": "Más de 4.5", "yards": "QB: Más de 250.5 yardas" },
                 "predictions": {
                     "totalPoints": "48",
-                    "yards": { "total": 660, "pick": "Más de" },
+                    "yards": { "total": 660, "pick": "Más de", "line": 640.5 },
                     "spread": { "favorite": "${matchContext.home}", "line": -3.5, "recommendation": "Cubrir" },
                     "overUnder": { "line": 47.5, "pick": "Más de", "confidence": "Alta" },
                     "projections": [
                         { "name": "Quarterback Estrella", "team": "Home", "points": "250.5+", "description": "Yardas de Pase (Más de)", "confidence": "Alta" },
                         { "name": "Corredor Principal", "team": "Away", "points": "85.5+", "description": "Yardas Carrera (Más de)", "confidence": "Media" }
                     ],
-                    "touchdowns": { "total": 5, "pick": "Más de" }
+                    "touchdowns": { "total": 5, "pick": "Más de", "line": 4.5 }
                 },
                 "keyFactors": ["Protección del QB", "Eficiencia en 3ra oportunidad", "Estrategia de juego terrestre"]
             }
@@ -240,8 +240,8 @@ export async function POST(request: NextRequest) {
             ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (NHL ELITE):
-            - GOLES (UNDER/OVER): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
-            - TIROS A PUERTA: Proyecta el total. Indica SIEMPRE si es 'Más de' o 'Menos de'.
+            - GOLES (UNDER/OVER): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under) y la línea (ej: 5.5).
+            - TIROS A PUERTA: Proyecta el total. Indica SIEMPRE si es 'Más de' o 'Menos de' y la línea (ej: 58.5).
             - COMBINACIÓN GANADORA (TICKET): Ejemplo: 'Ganador Local y Más de 5.5 Goles'.
 
             RETURN JSON ONLY in SPANISH:
@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
                         { "name": "Jugador Estrella", "team": "Home", "points": "3.5+", "description": "Tiros (Más de)", "confidence": "Alta" },
                         { "name": "Portero Titular", "team": "Away", "points": "28.5+", "description": "Atajadas (Más de)", "confidence": "Media" }
                     ],
-                    "shots": { "total": 60, "pick": "Más de" }
+                    "shots": { "total": 60, "pick": "Más de", "line": 56.5 }
                 },
                 "keyFactors": ["Power Play", "Estadísticas del portero", "Ritmo de juego"]
             }
@@ -272,7 +272,7 @@ export async function POST(request: NextRequest) {
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
             
             ANALYZE SPECIAL MARKETS (TENNIS ELITE):
-            - TOTAL GAMES (OVER/UNDER): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
+            - TOTAL GAMES (OVER/UNDER): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under) y la línea (ej: 21.5).
             - COMBINACIÓN GANADORA (TICKET): Ejemplo: 'Ganador Local y Más de 20.5 Juegos'.
             
             RETURN JSON ONLY in SPANISH:
