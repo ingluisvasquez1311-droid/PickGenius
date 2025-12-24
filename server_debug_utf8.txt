@@ -1,0 +1,103 @@
+﻿Ô£à Firebase initialized successfully
+node : node:interna
+l/modules/cjs/loade
+r:1423
+En línea: 1 
+Carácter: 1
++ node server.js > 
+server_debug_log.tx
+t 2>&1
++ ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo 
+             : No  
+  tSpecified: (n   
+ ode:internal/m    
+odules/cjs/loa    
+der:1423:Strin    
+g) [], RemoteE    
+xception
+    + FullyQualifi 
+   edErrorId : Na  
+  tiveCommandErr   
+ or
+ 
+  throw err;
+  ^
+
+Error: Cannot find 
+module '@google/gen
+erative-ai'
+Require stack:
+- C:\Users\Daniel\P
+ickGenius\src\servi
+ces\GeminiService.j
+s
+- C:\Users\Daniel\P
+ickGenius\src\route
+s\sofascore.js
+- C:\Users\Daniel\P
+ickGenius\server.js
+    at Module._reso
+lveFilename (node:i
+nternal/modules/cjs
+/loader:1420:15)
+    at 
+defaultResolveImpl 
+(node:internal/modu
+les/cjs/loader:1058
+:19)
+    at resolveForCJ
+SWithHooks (node:in
+ternal/modules/cjs/
+loader:1063:22)
+    at 
+Module._load (node:
+internal/modules/cj
+s/loader:1226:37)
+    at TracingChann
+el.traceSync (node:
+diagnostics_channel
+:328:14)
+    at 
+wrapModuleLoad (nod
+e:internal/modules/
+cjs/loader:244:24)
+    at 
+Module.require (nod
+e:internal/modules/
+cjs/loader:1503:12)
+    at require (nod
+e:internal/modules/
+helpers:152:16)
+    at 
+Object.<anonymous> 
+(C:\Users\Daniel\Pi
+ckGenius\src\servic
+es\GeminiService.js
+:1:32)
+    at 
+Module._compile (no
+de:internal/modules
+/cjs/loader:1760:14
+) {
+  code: 
+'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\Dan
+iel\\PickGenius\\sr
+c\\services\\Gemini
+Service.js',
+    'C:\\Users\\Dan
+iel\\PickGenius\\sr
+c\\routes\\sofascor
+e.js',
+    'C:\\Users\\Dan
+iel\\PickGenius\\se
+rver.js'
+  ]
+}
+
+Node.js v24.11.0
+

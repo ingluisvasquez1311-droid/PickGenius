@@ -209,7 +209,8 @@ export async function POST(request: NextRequest) {
                   "reasoning": "Breve por qué..."
                 }
               ],
-              "analysis": "Resumen final detallado del parley..."
+              "analysis": "Resumen final detallado del parley...",
+              "riskLevel": "Medio"
             }
         `;
 
@@ -220,6 +221,7 @@ export async function POST(request: NextRequest) {
             ],
             model: "llama-3.1-8b-instant",
             temperature: 0.7,
+            max_tokens: 2000,
             schema: ParleyResponseSchema // Use the correct schema for Parley
         });
 

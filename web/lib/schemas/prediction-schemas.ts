@@ -95,11 +95,16 @@ export const NewsAnalysisSchema = z.object({
 
 export const ParleyResponseSchema = z.object({
     title: z.string(),
+    confidence: z.number().min(0).max(100),
     totalOdds: z.number().or(z.string()).transform(v => typeof v === 'string' ? parseFloat(v) : v),
+    isValueParley: z.boolean().optional(),
+    valueAnalysis: z.string().optional(),
     legs: z.array(z.object({
         matchName: z.string(),
         pick: z.string(),
-        confidence: z.number().min(0).max(100)
+        odds: z.string().or(z.number()).optional(),
+        confidence: z.number().min(0).max(100),
+        reasoning: z.string().optional()
     })),
     analysis: z.string(),
     riskLevel: z.string()
