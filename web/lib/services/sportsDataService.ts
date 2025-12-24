@@ -142,17 +142,21 @@ class SportsDataService {
                     const response = await fetch(fetchUrl, {
                         headers: {
                             ...this.headers,
-                            'Cache-Control': 'no-store',
-                            'ngrok-skip-browser-warning': 'true'
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache',
+                            'ngrok-skip-browser-warning': 'true',
+                            'X-Genius-Retry': 'true'
                         },
                         cache: 'no-store',
-                        signal: AbortSignal.timeout(8000) // Tighter timeout for Bridge
+                        signal: AbortSignal.timeout(15000) // Aumentado a 15s para mayor estabilidad
                     });
 
                     if (response.ok) {
                         const jsonData = await response.json();
                         console.log(`✅ [SportsData] Success from Bridge! (${cleanEndpoint})`);
                         return jsonData;
+                    } else if (response.status === 404) {
+                        console.warn(`⚠️ [SportsData] Endpoint not found on Bridge, falling back...`);
                     } else {
                         const errorMsg = await response.text().catch(() => "Unknown error");
                         console.warn(`⚠️ [SportsData] Bridge error ${response.status}: ${errorMsg.substring(0, 100)}`);
@@ -160,7 +164,7 @@ class SportsDataService {
                 } catch (bridgeError: any) {
                     console.error(`❌ [SportsData] Bridge Connection Failed (${cleanBridgeUrl}): ${bridgeError.message}`);
                     if (bridgeError.name === 'TimeoutError') {
-                        console.error(`⏳ [SportsData] Bridge TIMEOUT - Check if ngrok is running and responsive.`);
+                        console.error(`⏳ [SportsData] Bridge TIMEOUT - El túnel de Ngrok está lento o saturado.`);
                     }
                 }
             }

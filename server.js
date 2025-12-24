@@ -253,7 +253,7 @@ app.get('/', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log('='.repeat(60));
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
@@ -262,6 +262,10 @@ app.listen(PORT, () => {
     console.log('✅ All services ready - using Sofascore for live data');
     console.log('='.repeat(60));
 });
+
+// Aumentar timeouts para conexiones lentas de túneles (Ngrok/LocalTunnel)
+server.keepAliveTimeout = 65000; // 65 segundos
+server.headersTimeout = 66000;  // 66 segundos
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
