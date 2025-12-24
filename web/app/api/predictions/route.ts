@@ -149,9 +149,13 @@ export async function POST(request: NextRequest) {
                     "totalPoints": "${isNBA ? '217' : '160'}",
                     "spread": { "favorite": "${matchContext.home}", "line": -5.5, "recommendation": "Cubrir Hándicap" },
                     "overUnder": { "line": ${isLive ? (currentTotal + 50) : (isNBA ? 222.5 : 158.5)}, "pick": "...", "confidence": "Alta" },
+                    "projections": [
+                        { "name": "Jugador Estrella 1", "team": "Home", "points": "22.5+", "rebounds": "8.5+", "assists": "5.5+", "confidence": "Alta" },
+                        { "name": "Jugador Estrella 2", "team": "Away", "points": "28.5+", "rebounds": "4.5+", "assists": "4.5+", "confidence": "Media" }
+                    ],
                     "topPlayers": {
-                        "homeTopScorer": { "name": "...", "predictedPoints": ${isNBA ? 25 : 18} },
-                        "awayTopScorer": { "name": "...", "predictedPoints": ${isNBA ? 28 : 16} }
+                        "homeTopScorer": { "name": "...", "predictedPoints": ${isNBA ? 25 : 18}, "rebounds": 8, "assists": 5 },
+                        "awayTopScorer": { "name": "...", "predictedPoints": ${isNBA ? 28 : 16}, "rebounds": 6, "assists": 4 }
                     }
                 },
                 "keyFactors": ["Factor 1", "Factor 2", "Factor 3"]
@@ -186,10 +190,14 @@ export async function POST(request: NextRequest) {
                 "predictions": {
                     "finalScore": "2-1",
                     "totalGoals": "3",
+                    "overUnder": { "line": 2.5, "pick": "Más de", "confidence": "Alta" },
+                    "projections": [
+                        { "name": "Jugador Estrella", "team": "Home", "points": "1+", "description": "Goles esperados", "confidence": "Alta" },
+                        { "name": "Jugador Apoyo", "team": "Away", "points": "1.5+", "description": "Remates a puerta", "confidence": "Media" }
+                    ],
                     "corners": { "home": 5, "away": 3, "total": 8 },
                     "shots": { "home": 12, "away": 8, "onTarget": "6" },
-                    "cards": { "yellowCards": 4, "redCards": 0, "details": "Partido intenso" },
-                    "offsides": { "total": 4, "details": "2 por equipo" }
+                    "cards": { "yellowCards": 4, "redCards": 0, "details": "Partido intenso" }
                 },
                 "keyFactors": ["Factor Clave 1", "Factor Clave 2", "Factor Clave 3"]
             }

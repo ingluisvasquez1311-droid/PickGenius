@@ -360,13 +360,56 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                     <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">{sport === 'basketball' ? 'Est. Final' : 'Marcador Exacto'}</p>
                                                     <p className="text-white font-bold text-xl">{prediction.predictions.finalScore || '-'}</p>
                                                 </div>
-                                                {sport !== 'basketball' && prediction.predictions.cards && (
-                                                    <div className="bg-yellow-900/30 p-3 rounded-lg border border-yellow-500/20">
-                                                        <p className="text-yellow-300 text-[10px] uppercase font-bold mb-1">🟨 Tarjetas</p>
-                                                        <p className="text-white font-bold text-lg">{prediction.predictions.cards.yellowCards + prediction.predictions.cards.redCards} <span className="text-xs font-normal text-gray-400">Totales</span></p>
-                                                    </div>
-                                                )}
+                                                <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 p-3 rounded-lg border border-purple-500/20">
+                                                    <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">Mercado O/U (Total)</p>
+                                                    <p className="text-white font-bold text-xl">{prediction.predictions.totalPoints || prediction.predictions.overUnder?.line || '-'}</p>
+                                                    <p className="text-[9px] text-purple-200/50 font-bold uppercase">{prediction.predictions.overUnder?.pick || 'Analizado'}</p>
+                                                </div>
                                             </div>
+
+                                            {/* PLAYER PROJECTIONS (PREMIUM) */}
+                                            {prediction.predictions.projections && prediction.predictions.projections.length > 0 && (
+                                                <div className="bg-black/40 p-4 rounded-xl border border-yellow-500/20">
+                                                    <p className="text-[10px] text-yellow-500 uppercase font-black mb-3 flex items-center gap-2">
+                                                        <Crown className="w-3 h-3" /> Proyecciones de Jugadores Pro
+                                                    </p>
+                                                    <div className="grid grid-cols-1 gap-2">
+                                                        {prediction.predictions.projections.map((p: any, idx: number) => (
+                                                            <div key={idx} className="bg-white/5 p-3 rounded-lg border border-white/5 transition-all">
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <p className="text-white font-black text-sm italic">{p.name}</p>
+                                                                    <span className={`text-[8px] px-2 py-0.5 rounded-full font-black ${p.confidence === 'Alta' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                                                                        }`}>
+                                                                        CONF: {p.confidence}
+                                                                    </span>
+                                                                </div>
+                                                                {sport === 'basketball' ? (
+                                                                    <div className="grid grid-cols-3 gap-2">
+                                                                        <div className="text-center p-1 bg-black/20 rounded">
+                                                                            <p className="text-[7px] text-gray-500 font-bold uppercase">PTS</p>
+                                                                            <p className="text-xs font-black text-yellow-500">{p.points}</p>
+                                                                        </div>
+                                                                        <div className="text-center p-1 bg-black/20 rounded">
+                                                                            <p className="text-[7px] text-gray-500 font-bold uppercase">REB</p>
+                                                                            <p className="text-xs font-black text-white">{p.rebounds || '-'}</p>
+                                                                        </div>
+                                                                        <div className="text-center p-1 bg-black/20 rounded">
+                                                                            <p className="text-[7px] text-gray-500 font-bold uppercase">AST</p>
+                                                                            <p className="text-xs font-black text-white">{p.assists || '-'}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="bg-black/20 p-2 rounded flex justify-between items-center">
+                                                                        <p className="text-[9px] text-gray-400 font-bold uppercase">{p.description || 'Pronóstico'}</p>
+                                                                        <p className="text-xs font-black text-yellow-500">{p.points}</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {prediction.keyFactors && prediction.keyFactors.length > 0 && (
                                                 <div className="bg-black/40 p-4 rounded-lg border border-white/5">
                                                     <p className="text-purple-300 text-xs uppercase font-bold mb-2">🧠 Inteligencia Táctica</p>
