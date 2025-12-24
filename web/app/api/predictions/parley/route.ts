@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sportsDataService } from '@/lib/services/sportsDataService';
 import { groqService } from '@/lib/services/groqService';
 import { getUserProfile, saveParleyPrediction } from '@/lib/userService';
-import { globalCache } from '@/lib/utils/api-manager';
 import { ParleyResponseSchema } from '@/lib/schemas/prediction-schemas';
 
 export const maxDuration = 60;
@@ -11,30 +10,29 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json().catch(() => ({}));
         let strategyIndex = 0;
-        const { uid, sport = 'all' } = body;
+        const { uid, sport = 'all', mode = 'pre' } = body;
         if (body.strategyIndex !== undefined) strategyIndex = body.strategyIndex;
+
+        console.log(`📡 [Parley API] Mode: ${mode} | Sport: ${sport} | Strategy: ${strategyIndex}`);
 
         // --- AUTH/TIER CHECK ---
         let isPremiumUser = false;
         if (uid) {
             const profile = await getUserProfile(uid);
-            // OWNER/ADMIN is always premium regardless of Firestore flags
             const isOwner = profile?.email && (
                 profile.email.toLowerCase() === 'pickgenius@gmail.com' ||
                 profile.email.toLowerCase() === 'ingluisvasquez1311@gmail.com'
             );
             isPremiumUser = profile?.isPremium || profile?.role === 'admin' || isOwner || false;
-            console.log(`👤 [Parley API] User ${uid} | isPremium: ${isPremiumUser} | Role: ${profile?.role}`);
+            console.log(`👤 [Parley API] User ${uid} | isPremium: ${isPremiumUser}`);
         }
 
-        // Force "Safe" strategy for Free users
         if (!isPremiumUser) {
             console.log('🔒 [Parley API] Free user detected. Forcing SAFE strategy.');
-            strategyIndex = 0; // 0 is likely the safest
+            strategyIndex = 0;
         }
 
-        // 1. Fetch data from sportsDataService
-        // Fetching Football, Basketball, Baseball, NFL, NHL and Tennis
+        // 1. Fetch data
         const [footballEvents, basketballEvents, baseballEvents, nflEvents, nhlEvents, tennisEvents] = await Promise.all([
             sportsDataService.getEventsBySport('football').catch(() => []),
             sportsDataService.getEventsBySport('basketball').catch(() => []),
@@ -44,12 +42,16 @@ export async function POST(request: NextRequest) {
             sportsDataService.getEventsBySport('tennis').catch(() => [])
         ]);
 
-        // 2. Filter and Diversify
+        // 2. Filter by Sport AND Mode
         const allEventsRaw = [...footballEvents, ...basketballEvents, ...baseballEvents, ...nflEvents, ...nhlEvents, ...tennisEvents]
             .filter(e => {
                 if (!e.status || e.status.type === 'finished') return false;
 
-                // Sport filtering - be flexible with names
+                // Match Mode Filtering (Live vs Pre-match)
+                if (mode === 'live' && e.status.type !== 'inprogress') return false;
+                if (mode === 'pre' && e.status.type === 'inprogress') return false;
+
+                // Sport filtering
                 if (sport !== 'all') {
                     const eSport = e.tournament?.category?.sport?.name?.toLowerCase() || '';
                     const isFútbol = eSport === 'football' || eSport === 'soccer';
@@ -58,192 +60,124 @@ export async function POST(request: NextRequest) {
                     if (sport === 'basketball' && eSport !== 'basketball') return false;
                     if (sport === 'baseball' && eSport !== 'baseball') return false;
                     if (sport === 'tennis' && eSport !== 'tennis') return false;
-                    if (sport === 'american-football' && (eSport !== 'american-football' && eSport !== 'nfl' && eSport !== 'american football')) return false;
-                    if (sport === 'icehockey' && (eSport !== 'icehockey' && eSport !== 'ice hockey' && eSport !== 'nhl')) return false;
+                    if (sport === 'american-football' && (eSport !== 'american-football' && eSport !== 'nfl')) return false;
+                    if (sport === 'icehockey' && (eSport !== 'icehockey' && eSport !== 'nhl')) return false;
                 }
                 return true;
             });
 
-        // If sport is "all", let's make sure we have a mix, not just the first 40 by time
         let filteredEvents: any[] = [];
         if (sport === 'all') {
-            // Group by sport to ensure variety
             const groups: { [key: string]: any[] } = {};
             allEventsRaw.forEach(e => {
                 const sName = e.tournament.category.sport.slug || 'other';
                 if (!groups[sName]) groups[sName] = [];
                 groups[sName].push(e);
             });
-
-            // Take top 15 from each major sport, then sort result by time
             Object.values(groups).forEach(group => {
-                const sortedGroup = group.sort((a, b) => a.startTimestamp - b.startTimestamp);
-                filteredEvents.push(...sortedGroup.slice(0, 15));
+                filteredEvents.push(...group.sort((a, b) => a.startTimestamp - b.startTimestamp).slice(0, 15));
             });
-
             filteredEvents.sort((a, b) => a.startTimestamp - b.startTimestamp);
         } else {
-            filteredEvents = allEventsRaw
-                .sort((a, b) => a.startTimestamp - b.startTimestamp)
-                .slice(0, 60); // More room for the specific sport
+            filteredEvents = allEventsRaw.sort((a, b) => a.startTimestamp - b.startTimestamp).slice(0, 50);
         }
 
         if (filteredEvents.length < 2) {
-            console.log(`❌ [Parley API] Not enough events for ${sport}. Total found before final filter: ${allEventsRaw.length}`);
             return NextResponse.json({
                 success: false,
-                error: `No hay suficientes eventos de ${sport === 'all' ? 'deporte mixto' : sport} activos en este momento.`
+                error: `No hay suficientes eventos ${mode === 'live' ? 'en vivo' : 'por comenzar'} de ${sport === 'all' ? 'deporte mixto' : sport} actualmente.`
             });
         }
 
+        // Simplified data for AI
         const simplifiedEvents = await Promise.all(filteredEvents.map(async (e, idx) => {
             const oddsRes = await sportsDataService.getMatchOdds(e.id).catch(() => null);
-
-            // Fetch history for top events only to avoid overhead
             let historyContext = "";
-            if (idx < 10 && e.homeTeam && e.awayTeam) {
+            if (idx < 8) { // Only for top matches to save performance
                 try {
-                    const [homeHistory, awayHistory] = await Promise.all([
+                    const [homeH, awayH] = await Promise.all([
                         sportsDataService.getTeamLastResults(e.homeTeam.id),
                         sportsDataService.getTeamLastResults(e.awayTeam.id)
                     ]);
-
-                    const formatResults = (events: any[]) => events.slice(0, 3).map(ev =>
-                        `${ev.homeTeam.name} ${ev.homeScore?.current || 0}-${ev.awayScore?.current || 0} ${ev.awayTeam.name}`
-                    ).join(", ");
-
-                    historyContext = `Últimos de local: ${formatResults(homeHistory || [])} | Últimos de visita: ${formatResults(awayHistory || [])}`;
-                } catch (err) {
-                    console.warn(`[Parley API] History fetch failed for ${e.homeTeam.name}:`, err);
-                }
+                    historyContext = `Local: ${homeH.slice(0, 2).map((ev: any) => ev.homeScore?.current + "-" + ev.awayScore?.current).join(", ")} | Visita: ${awayH.slice(0, 2).map((ev: any) => ev.homeScore?.current + "-" + ev.awayScore?.current).join(", ")}`;
+                } catch (err) { }
             }
-
-            const topMarkets = oddsRes?.markets?.slice(0, 3).map((m: any) => ({
-                name: m.marketName,
-                odds: m.choices?.map((c: any) => `${c.name}: ${c.fraction}`)
-            })) || [];
 
             return {
                 id: e.id,
                 match: `${e.homeTeam.name} vs ${e.awayTeam.name}`,
                 score: `${e.homeScore?.current || 0}-${e.awayScore?.current || 0}`,
                 status: e.status.description,
+                startTime: new Date(e.startTimestamp * 1000).toLocaleString('es-ES', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
                 tournament: e.tournament.name,
                 sport: e.tournament.category.sport.name,
                 recentResults: historyContext,
-                realMarketOdds: topMarkets,
-                hasPlayerProps: oddsRes?.markets?.some((m: any) => m.marketName.toLowerCase().includes('player') || m.marketName.toLowerCase().includes('prop'))
+                realMarketOdds: oddsRes?.markets?.slice(0, 3).map((m: any) => ({
+                    name: m.marketName,
+                    odds: m.choices?.map((c: any) => `${c.name}: ${c.fraction}`)
+                })) || []
             };
         }));
 
         const strategyPrompts = [
             "CORRELACIÓN DE PROPS: Busca 3 eventos donde un favorito sólido tenga ventaja clara.",
-            "HEDGE DE VOLATILIDAD: Combina 2 apuestas seguras con 1 de alto valor.",
-            "DETECCIÓN DE RACHAS: Enfócate en equipos con rachas ganadoras recientes."
+            "HEDGE DE VOLATILIDAD: Combina apuestas seguras con alto valor.",
+            "DETECCIÓN DE RACHAS: Enfócate en equipos con momentum actual."
         ];
 
-        const aiSystemContent = `
-            Eres un experto en parleys y apuestas deportivas.
-            ${!isPremiumUser ? 'BLOQUEO: NO incluyas Player Props (apuestas de jugadores) en este parley, solo mercados de equipo (ganador, goles, etc).' : ''}
-            Genera un parley de 2 a 5 selecciones basado en los eventos proporcionados.
-        `;
-
         const prompt = `
-            Eres un experto tipster profesional de apuestas deportivas.
-            FOCO DEL USUARIO: El usuario desea un parley de ${sport === 'all' ? 'VARIOS DEPORTES (MIXTO)' : sport.toUpperCase()}.
-            ESTRATEGIA REQUERIDA: ${strategyPrompts[strategyIndex] || strategyPrompts[0]}
+            Eres un experto tipster profesional. Genera un parley de 2 a 5 selecciones.
+            MODALIDAD: ${mode === 'live' ? 'PARTIDOS EN VIVO' : 'PARTIDOS PROXIMOS'}.
+            DEPORTE: ${sport.toUpperCase()}.
+            ESTRATEGIA: ${strategyPrompts[strategyIndex] || strategyPrompts[0]}
             
-            EVENTOS DISPONIBLES EN ${sport.toUpperCase()}:
+            DATOS:
             ${JSON.stringify(simplifiedEvents, null, 2)}
 
-            INSTRUCCIONES CRÍTICAS PARA BALONCESTO:
-            - Si el torneo es NBA: Los partidos duran 48 min y los puntos totales suelen estar entre 200 y 240.
-            - Si NO es NBA (EuroLeague, ACB, LNB, etc.): Los partidos duran 40 min. El total de puntos suele oscilar entre 150 y 175. NO asumas automáticamente el "Under"; analiza si los equipos tienen tendencias ofensivas o defensivas basándote en 'recentResults' y las cuotas de mercado.
-            - CONSIDERAR MERCADOS: Puntos en 1er Cuarto, Hándicaps y Over/Under.
+            ${!isPremiumUser ? 'BLOQUEO: SOLO mercados de equipo (ganador, goles, handicaps). NO PLAYER PROPS.' : 'PREMIUM: Incluye PLAYER PROPS de alto valor.'}
 
-            VALOR DE APUESTA (VALUE BET):
-            - Compara 'realMarketOdds' (Bet365) con tu análisis de probabilidad.
-            - Si una selección tiene una probabilidad alta pero el mercado paga bien, identifícala como "Selección de Valor".
-
-            INSTRUCCIONES CRÍTICAS PARA FÚTBOL:
-            - PRIORIDAD PREMIUM: Los usuarios buscan mercados de CÓRNERS (más de X), TARJETAS (amarillas/rojas) y REMATES (Shots on target).
-            - Si hay datos de estos mercados en 'realMarketOdds', PRIORÍZALOS sobre el ganador del partido.
-
-            INSTRUCCIONES CRÍTICAS PARA BÉISBOL (MLB):
-            - ANALIZAR MERCADOS DE VALOR: Total de Carreras (Under/Over), Hándicap (Run Line), y especialmente PLAYER PROPS (Strikeouts del pitcher, Hits de bateadores).
-
-            INSTRUCCIONES CRÍTICAS PARA NFL:
-            - ANALIZAR MERCADOS DE ALTO IMPACTO: Touchdowns, Yardas de Pase/Rushing, Recepciones y Pases de Touchdown.
-
-            INSTRUCCIONES CRÍTICAS PARA NHL (HOCKEY):
-            - ANALIZAR MERCADOS: Ganador (60 min), Puck Line, Total de Goles (Over/Under) y Tiros a puerta de jugadores clave.
-
-            INSTRUCCIONES CRÍTICAS PARA TENIS:
-            - ANALIZAR MERCADOS: Ganador del partido, Ganador de Set, Hándicap de Juegos y Total de Juegos.
-
-            INSTRUCCIONES DE MERCADOS PRO (MÁXIMO ATRACTIVO):
-            - Los usuarios PREMIUM esperan picks de: "Más de 8.5 córners", "Equipo X: Más de 1.5 tarjetas", "Jugador Y: 1+ remate a puerta".
-            - SIEMPRE utiliza los nombres de los mercados reales que veas en 'realMarketOdds' para que coincidan con lo que el usuario ve en Bet365.
-            - Si detectas valor en un mercado de Córners o Prop de jugador, INTEGRÁLO en el parley.
-
-            INSTRUCCIONES GENERALES:
-            1. Selecciona EXACTAMENTE 3 eventos de la lista para formar un PARLEY.
-            2. Proporciona un pick específico para cada uno (Prioriza Córners, Tarjetas o Props de jugadores sobre el simple Ganador).
-            3. Explica brevemente por qué estos 3 eventos juntos maximizan el valor sincronizado con las cuotas de mercado.
-            4. Asigna un nivel de riesgo (Bajo, Medio, Alto, Extremo).
-
-            ESPECIFICACIONES DE RESPUESTA (JSON ÚNICAMENTE):
-            Debes devolver un JSON con esta estructura exacta:
+            JSON ÚNICAMENTE (Asegúrate de incluir 'startTime' para cada leg):
             {
-              "title": "Título del Parley",
+              "title": "Título",
               "confidence": 85,
               "totalOdds": 5.45,
               "isValueParley": true,
-              "valueAnalysis": "Explicación del valor en Bet365...",
-              "legs": [
-                {
-                  "matchName": "Equipo A vs Equipo B", 
-                  "pick": "Victoria Equipo A",
-                  "odds": "1.85",
-                  "confidence": 80,
-                  "reasoning": "Breve por qué..."
-                }
-              ],
-              "analysis": "Resumen final detallado del parley...",
+              "valueAnalysis": "Razonamiento...",
+              "legs": [{ 
+                "matchName": "A vs B", 
+                "pick": "Pick", 
+                "odds": "1.85", 
+                "confidence": 80, 
+                "startTime": "Mier, 24 Dic 18:00",
+                "reasoning": "Por qué..." 
+              }],
+              "analysis": "Análisis final...",
               "riskLevel": "Medio"
             }
         `;
 
         const parleyResult = await groqService.createPrediction({
-            messages: [
-                { role: "system", content: "Experto en análisis de parleys y apuestas combinadas." },
-                { role: "user", content: prompt }
-            ],
+            messages: [{ role: "user", content: prompt }],
             model: "llama-3.1-8b-instant",
             temperature: 0.7,
             max_tokens: 2000,
-            schema: ParleyResponseSchema // Use the correct schema for Parley
+            schema: ParleyResponseSchema
         });
 
-        // 4. Save to history (if uid provided)
         if (uid) {
-            await saveParleyPrediction(uid, {
-                ...parleyResult,
-                strategyIndex,
-                sport
-            }).catch(err => console.error('❌ Failed to save parley history:', err));
+            await saveParleyPrediction(uid, { ...parleyResult, strategyIndex, sport }).catch(() => { });
         }
 
-        return NextResponse.json({
-            success: true,
-            data: parleyResult
-        });
+        return NextResponse.json({ success: true, data: parleyResult });
 
     } catch (error: any) {
-        console.error('❌ Parley Optimizer Error:', error);
-        return NextResponse.json({
-            success: false,
-            error: "Error al generar el parley optimizado."
-        }, { status: 500 });
+        console.error('❌ Parley API Error:', error);
+        return NextResponse.json({ success: false, error: "Error interno al generar el parley." }, { status: 500 });
     }
 }

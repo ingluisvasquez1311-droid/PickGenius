@@ -104,11 +104,25 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                         </div>
 
                         <div className="px-4">
-                            <div className={`text-xs font-black uppercase tracking-widest mb-2 ${isLive ? 'text-red-500 animate-pulse' : 'text-gray-500'}`}>
-                                {isLive ? (game.status?.description || 'EN VIVO') : game.status?.description || 'PROGRAMADO'}
+                            <div className={`text-xs font-black uppercase tracking-widest mb-1 ${isLive ? 'text-red-500 animate-pulse' : 'text-gray-500'}`}>
+                                {isLive ? (() => {
+                                    if (game.status?.description?.includes("'") || game.status?.description?.includes(":")) {
+                                        return game.status.description;
+                                    }
+                                    if (sport === 'football' && game.time?.currentPeriodStartTimestamp) {
+                                        const now = Math.floor(Date.now() / 1000);
+                                        const elapsed = Math.floor((now - game.time.currentPeriodStartTimestamp) / 60);
+                                        const offset = (game.status?.description?.toLowerCase().includes('2nd') || game.status?.description?.toLowerCase().includes('2a')) ? 45 : 0;
+                                        return `${elapsed + offset}'`;
+                                    }
+                                    return game.status?.description || 'EN VIVO';
+                                })() : game.status?.description || 'PROGRAMADO'}
                             </div>
+                            {isLive && (
+                                <div className="text-[8px] font-black text-red-500/40 tracking-[0.3em] uppercase mb-2">LIVE MONITORING</div>
+                            )}
                             <div className="text-[10px] text-gray-500 font-bold">
-                                {new Date(game.startTimestamp * 1000).toLocaleString()}
+                                {new Date(game.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
                         </div>
 

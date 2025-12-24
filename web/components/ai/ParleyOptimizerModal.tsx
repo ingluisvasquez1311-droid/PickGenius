@@ -56,6 +56,7 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
     const { user } = useAuth();
     const [step, setStep] = useState<'sport' | 'selection' | 'loading' | 'result'>('sport');
     const [selectedSport, setSelectedSport] = useState('all');
+    const [selectedMode, setSelectedMode] = useState<'live' | 'pre'>('pre');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
@@ -71,6 +72,7 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
                 body: JSON.stringify({
                     strategyIndex: selectedIndex,
                     sport: selectedSport,
+                    mode: selectedMode,
                     uid: user?.uid
                 })
             });
@@ -146,9 +148,27 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
                                     >
-                                        <p className="text-gray-400 text-sm font-medium italic mb-6">
-                                            ¿En qué deporte quieres enfocar tu jugada hoy?
-                                        </p>
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                                            <p className="text-gray-400 text-sm font-medium italic">
+                                                ¿En qué deporte y modalidad quieres enfocar tu jugada hoy?
+                                            </p>
+
+                                            {/* Mode Toggle */}
+                                            <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
+                                                <button
+                                                    onClick={() => setSelectedMode('pre')}
+                                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedMode === 'pre' ? 'bg-orange-500 text-black shadow-lg shadow-orange-500/20' : 'text-gray-500 hover:text-white'}`}
+                                                >
+                                                    Próximos
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedMode('live')}
+                                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedMode === 'live' ? 'bg-red-500 text-black shadow-lg shadow-red-500/20' : 'text-gray-500 hover:text-white'}`}
+                                                >
+                                                    En Vivo
+                                                </button>
+                                            </div>
+                                        </div>
 
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                             {sportOptions.map((sport) => (
@@ -331,8 +351,13 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
                                                             {i + 1}
                                                         </div>
                                                         <div className="flex-1">
-                                                            <div className="flex items-center gap-2 mb-0.5">
-                                                                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{leg.matchName}</div>
+                                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-0.5">
+                                                                <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{leg.matchName}</div>
+                                                                {leg.startTime && (
+                                                                    <span className="text-[9px] font-bold text-gray-500 bg-white/5 px-2 py-0.5 rounded flex items-center gap-1">
+                                                                        <Loader2 className="w-2 h-2" /> {leg.startTime}
+                                                                    </span>
+                                                                )}
                                                                 {(leg.pick.toLowerCase().includes('puntos') || leg.pick.toLowerCase().includes('rebotes') || leg.pick.toLowerCase().includes('hits') || leg.pick.toLowerCase().includes('home run') || leg.pick.toLowerCase().includes('strikeout')) && (
                                                                     <span className="text-[8px] font-black bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">Player Prop</span>
                                                                 )}

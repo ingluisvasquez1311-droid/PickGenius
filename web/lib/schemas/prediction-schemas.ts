@@ -104,6 +104,7 @@ export const ParleyResponseSchema = z.object({
         pick: z.string(),
         odds: z.string().or(z.number()).optional(),
         confidence: z.number().min(0).max(100),
+        startTime: z.string().optional(),
         reasoning: z.string().optional()
     })),
     analysis: z.string(),

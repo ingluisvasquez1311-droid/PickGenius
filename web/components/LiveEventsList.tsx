@@ -39,6 +39,12 @@ interface LiveEvent {
         round?: number;
         name?: string;
     };
+    time?: {
+        currentPeriodStartTimestamp?: number;
+        initial?: number;
+        max?: number;
+        played?: number;
+    };
     startTimestamp?: number;
 }
 
@@ -52,7 +58,41 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
     const isFinished = event.status.type === 'finished';
     const isScheduled = event.status.type === 'scheduled' || event.status.type === 'notstarted';
 
-    // Format Match Time
+    // Helper to get formatted elapsed time
+    const getElapsedTime = () => {
+        if (!isLive) return null;
+
+        // If description already has time (e.g. 45', 90+2, Q1, HT)
+        if (event.status.description?.includes("'") ||
+            event.status.description?.includes(":") ||
+            event.status.description === 'HT') {
+            return event.status.description;
+        }
+
+        // Calculation fallback for football
+        if (sport === 'football' && event.time?.currentPeriodStartTimestamp) {
+            const now = Math.floor(Date.now() / 1000);
+            const elapsedSeconds = now - event.time.currentPeriodStartTimestamp;
+            let minutes = Math.floor(elapsedSeconds / 60);
+
+            // Basic logic for halves
+            if (event.status.description?.toLowerCase().includes('2nd') ||
+                event.status.description?.toLowerCase().includes('2a')) {
+                minutes += 45;
+            }
+
+            return `${minutes}'`;
+        }
+
+        // Fallback for basketball (usually in description, but if not)
+        if (sport === 'basketball' && event.status.description) {
+            return event.status.description;
+        }
+
+        return 'LIVE';
+    };
+
+    // Format Match Start Time
     const matchTime = event.startTimestamp
         ? new Date(event.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         : '';
@@ -62,19 +102,20 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
     let statusClass = "text-gray-400 font-mono";
 
     if (isLive) {
-        // Use description if it looks like time (contains ' or :)
-        const timeText = (event.status.description?.includes("'") || event.status.description?.includes(":"))
-            ? event.status.description
-            : 'LIVE';
+        const timeText = getElapsedTime();
         statusContent = (
-            <>
-                <span className="text-red-500 font-bold animate-pulse">{timeText}</span>
-                {/* Optional: Show Quarter for basketball if in description */}
-            </>
+            <div className="flex flex-col items-center">
+                <span className="text-red-500 font-black animate-pulse text-[10px] tracking-tighter">
+                    {timeText}
+                </span>
+                <span className="text-[7px] text-red-500/60 font-black uppercase tracking-widest leading-none mt-0.5">
+                    LIVE
+                </span>
+            </div>
         );
     } else if (isFinished) {
-        statusContent = "FT";
-        statusClass = "text-gray-500 font-bold";
+        statusContent = "Finalizado";
+        statusClass = "text-gray-500 font-bold text-[10px] uppercase";
     } else {
         const matchDate = new Date(event.startTimestamp! * 1000);
         const today = new Date();
@@ -83,11 +124,11 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
         tomorrow.setDate(today.getDate() + 1);
         const isTomorrow = matchDate.toDateString() === tomorrow.toDateString();
 
-        const dayPrefix = isToday ? '' : isTomorrow ? 'MAÑ ' : `${matchDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} `;
+        const dayPrefix = isToday ? 'HOY' : isTomorrow ? 'MAÑ' : `${matchDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }).toUpperCase()}`;
         statusContent = (
             <div className="flex flex-col items-center">
-                {!isToday && <span className="text-[7px] text-gray-500 font-black mb-0.5">{dayPrefix}</span>}
-                <span>{matchTime}</span>
+                <span className="text-[7px] text-gray-500 font-black mb-0.5 tracking-widest">{dayPrefix}</span>
+                <span className="font-bold text-white/70">{matchTime}</span>
             </div>
         );
     }

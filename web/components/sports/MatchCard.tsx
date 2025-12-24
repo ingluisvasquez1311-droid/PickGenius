@@ -47,6 +47,16 @@ export default function MatchCard({
     const isLive = status === 'En Vivo';
     const time = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    // Helper for live time
+    const getLiveTime = () => {
+        if (!isLive) return null;
+        if (statusDescription?.includes("'") || statusDescription?.includes(":") || statusDescription === 'HT') {
+            return statusDescription;
+        }
+        // If we have a generic "En Juego", return nothing yet but can be expanded
+        return statusDescription || 'LIVE';
+    };
+
     const handleCardClick = (e: React.MouseEvent) => {
         // Prevent navigation if clicking on interactive elements (buttons usually stop propagation, but just in case)
         if ((e.target as HTMLElement).closest('button')) {
@@ -117,11 +127,14 @@ export default function MatchCard({
                 <div className="w-20 col-span-1 flex flex-col items-center justify-center border-r border-white/5 pr-6">
                     {isLive ? (
                         <div className="text-center">
-                            <div className="text-xl font-black italic text-emerald-400 tabular-nums">
+                            <div className="text-xl font-black italic text-emerald-400 tabular-nums leading-none">
                                 {homeScore ?? 0} - {awayScore ?? 0}
                             </div>
-                            <div className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest mt-1">
-                                {statusDescription || 'En Juego'}
+                            <div className="text-[10px] font-black text-red-500 animate-pulse uppercase tracking-[0.2em] mt-1.5 flex flex-col items-center">
+                                <span className="text-[11px] mb-0.5">
+                                    {getLiveTime()}
+                                </span>
+                                <span className="text-[7px] text-emerald-500/40 tracking-[0.3em]">LIVE</span>
                             </div>
                         </div>
                     ) : (
