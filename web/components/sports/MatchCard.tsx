@@ -200,7 +200,14 @@ export default function MatchCard({
                         </button>
                     ) : (
                         <button
-                            onClick={onPredict}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (onPredict) {
+                                    onPredict(e);
+                                } else {
+                                    handleCardClick(e);
+                                }
+                            }}
                             className="group/ia w-full flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white hover:text-black transition-all duration-500"
                         >
                             <span className="text-[10px] font-black uppercase tracking-widest italic flex items-center gap-2">

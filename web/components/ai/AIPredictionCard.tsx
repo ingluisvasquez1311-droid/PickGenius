@@ -327,10 +327,12 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-gradient-to-br from-green-900/40 to-green-800/20 p-3 rounded-xl border border-green-500/20 group hover:border-green-500/40 transition-all">
-                                        <p className="text-green-300 text-[10px] uppercase font-black mb-1">{sport === 'basketball' ? 'Puntos Est.' : 'Goles Proy.'}</p>
+                                        <p className="text-green-300 text-[10px] uppercase font-black mb-1">
+                                            {(sport === 'basketball' || sport.includes('nfl') || sport.includes('american')) ? 'Puntos Proy.' : 'Goles Proy.'}
+                                        </p>
                                         <div className="flex items-end justify-between">
                                             <p className="text-white font-black text-2xl italic">
-                                                {sport === 'basketball' ? prediction.predictions.totalPoints : prediction.predictions.totalGoals}
+                                                {sport === 'basketball' ? prediction.predictions.totalPoints : (prediction.predictions.totalPoints || prediction.predictions.totalGoals)}
                                             </p>
                                             {prediction.predictions.overUnder && (
                                                 <span className="text-[9px] bg-green-500/20 text-green-400 font-black px-1.5 py-0.5 rounded uppercase">
@@ -339,18 +341,22 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                             )}
                                         </div>
                                     </div>
-                                    {sport !== 'basketball' && prediction.predictions.shots && (
+                                    {sport !== 'basketball' && (prediction.predictions.shots || prediction.predictions.yards) && (
                                         <div className="bg-red-900/30 p-3 rounded-xl border border-red-500/20 group hover:border-red-500/40 transition-all">
-                                            <p className="text-red-300 text-[10px] uppercase font-black mb-1">Tiros al Arco</p>
+                                            <p className="text-red-300 text-[10px] uppercase font-black mb-1">
+                                                {(sport.includes('nfl') || sport.includes('american')) ? 'Yardas Totales' : 'Tiros al Arco'}
+                                            </p>
                                             <div className="flex items-end justify-between">
-                                                <p className="text-white font-black text-2xl italic">{prediction.predictions.shots.onTarget}</p>
+                                                <p className="text-white font-black text-2xl italic">
+                                                    {(sport.includes('nfl') || sport.includes('american')) ? (prediction.predictions.yards?.total || '-') : prediction.predictions.shots.onTarget}
+                                                </p>
                                                 <span className="text-[9px] text-red-400/50 font-bold italic">Expectativa</span>
                                             </div>
                                         </div>
                                     )}
                                 </div>
                                 <p className="text-[9px] text-gray-500 italic mt-1 px-1">
-                                    * Proyecciones basadas en volumen histórico de partidos previos y ritmo de ataques peligrosos.
+                                    * Proyecciones basadas en volumen histórico de partidos previos y {sport === 'football' ? 'ritmo de ataques peligrosos' : 'ritmo de juego actual'}.
                                 </p>
                             </div>
                         )}
@@ -379,8 +385,12 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                         <>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 p-3 rounded-lg border border-blue-500/20">
-                                                    <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">{sport === 'basketball' ? 'Est. Final' : 'Marcador Exacto'}</p>
-                                                    <p className="text-white font-bold text-xl">{prediction.predictions.finalScore || '-'}</p>
+                                                    <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">
+                                                        {sport === 'basketball' ? 'Est. Final' : sport === 'football' ? '🚩 Fueras de Juego' : (sport.includes('hockey') || sport.includes('nhl')) ? '🏒 Puck Line' : 'Marcador Exacto'}
+                                                    </p>
+                                                    <p className="text-white font-bold text-xl">
+                                                        {sport === 'football' ? (prediction.predictions.offsides?.total || '-') : (sport.includes('hockey') || sport.includes('nhl')) ? (prediction.predictions.puckLine?.line || prediction.predictions.spread?.line || '-') : (prediction.predictions.finalScore || '-')}
+                                                    </p>
                                                 </div>
                                                 <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 p-3 rounded-lg border border-purple-500/20">
                                                     <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">Mercado O/U (Total)</p>
@@ -389,8 +399,8 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                 </div>
                                             </div>
 
-                                            {/* SPECIALIZED MARKETS (CORNERS, CARDS, TOUCHDOWNS) */}
-                                            {(prediction.predictions.corners || prediction.predictions.cards || prediction.predictions.touchdowns) && (
+                                            {/* SPECIALIZED MARKETS (CORNERS, CARDS, TOUCHDOWNS) - HIDE IF HOCKEY */}
+                                            {!sport.includes('hockey') && !sport.includes('nhl') && (prediction.predictions.corners || prediction.predictions.cards || prediction.predictions.touchdowns) && (
                                                 <div className="grid grid-cols-2 gap-3">
                                                     {prediction.predictions.corners && (
                                                         <div className="bg-emerald-900/30 p-3 rounded-lg border border-emerald-500/20">
@@ -406,7 +416,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                     )}
                                                     {prediction.predictions.touchdowns && (
                                                         <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-500/20">
-                                                            <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🏈 Touchdowns</p>
+                                                            <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🏈 TD Totales</p>
                                                             <p className="text-white font-bold text-lg">{prediction.predictions.touchdowns.total || (prediction.predictions.touchdowns.home + prediction.predictions.touchdowns.away)}</p>
                                                         </div>
                                                     )}

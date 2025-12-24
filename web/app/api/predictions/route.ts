@@ -181,14 +181,14 @@ export async function POST(request: NextRequest) {
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
-                "reasoning": "Resumen táctico resaltando por qué los goles (U/O) y tiros seguirán la tendencia histórica o el pulso actual...",
+                "reasoning": "Resumen táctico resaltando la tendencia de fueras de juego por la línea defensiva y el volumen de tiros...",
                 "bettingTip": "Más de 2.5 Goles y Ambos Anotan",
-                "advancedMarkets": { "corners": "Benfica: Mayor número", "shots": "Luis Suarez: 2+ a puerta", "drawNoBet": "${matchContext.home}" },
+                "advancedMarkets": { "corners": "Benfica: Mayor número", "shots": "Luis Suarez: 2+ a puerta", "offsides": "Over 3.5 fueras de juego" },
                 "isValueBet": false,
-                "valueAnalysis": "Por qué la cuota de goles/tiros tiene valor hoy...",
+                "valueAnalysis": "Por qué la cuota de fueras de juego o tiros tiene valor hoy...",
                 "predictions": {
-                    "finalScore": "2-1",
                     "totalGoals": "3",
+                    "offsides": { "home": 2, "away": 2, "total": 4 },
                     "overUnder": { "line": 2.5, "pick": "Más de", "confidence": "Alta" },
                     "projections": [
                         { "name": "Delantero Estrella", "team": "Home", "points": "1+", "description": "Goles", "confidence": "Alta" },
@@ -198,44 +198,43 @@ export async function POST(request: NextRequest) {
                     "shots": { "home": 12, "away": 8, "onTarget": "6" },
                     "cards": { "yellowCards": 4, "redCards": 0, "details": "Partido con tendencia a faltas tácticas" }
                 },
-                "keyFactors": ["Historial H2H goleador", "Ritmo de tiros actual", "Factor 3"]
+                "keyFactors": ["Línea defensiva adelantada (Fueras de juego)", "Historial de remates H2H", "Factor 3"]
             }
             `;
         } else if (sport.toLowerCase().includes('american') || sport.toLowerCase().includes('nfl')) {
             prompt = `
-            You are an expert NFL/American Football analyst speaking SPANISH.
+            Eres un analista experto de la NFL/Fútbol Americano hablando en ESPAÑOL.
+            IMPORTANTE: Estás analizando FÚTBOL AMERICANO. No menciones "Goles", "Corners" ni use términos de fútbol (soccer).
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
-            **STATUS:** ${matchContext.status}
+            **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
+            ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (NFL ELITE):
-            - Touchdown Scorers (Anotadores)
-            - Passing Yards (Yardas de pase)
-            - Touchdown Passes (Pases de touchdown)
-            - Completed Passes (Pases completarios)
-            - Receiving Yards (Yardas de recepción)
-            - Receptions (Recepciones)
-            - Rushing Yards (Yardas de rushing)
-            
+            - PUNTOS TOTALES (UNDER/OVER): Analiza el volumen de puntos esperado.
+            - YARDAS TOTALES: Proyecta el avance ofensivo (Passing + Rushing) basado en el historial y defensa rival.
+            - TOUCHDOWNS: Expectativa de anotaciones por equipo.
+            - PLAYER PROPS: Yardas de pase (QB), recepción o carrera.
+
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 82,
-                "reasoning": "Análisis táctico de yardas aéreas y terrestres en ESPAÑOL...",
+                "reasoning": "Análisis táctico basado en la ofensiva aérea, protección del QB y eficiencia en Zona Roja...",
                 "bettingTip": "${matchContext.home} -3.5 Hándicap",
-                "advancedMarkets": { "touchdowns": "Jugador X anotará", "yards": "QB Y Over 250.5 yardas", "receptions": "WR Z 5+ recepciones" },
+                "advancedMarkets": { "touchdowns": "Jugador X anotará", "yards": "QB Y Over 250.5 yardas pase", "handicap": "${matchContext.home} -3.5" },
                 "predictions": {
-                    "finalScore": "27-21",
                     "totalPoints": "48",
+                    "yards": { "home": 350, "away": 310, "total": 660 },
                     "spread": { "favorite": "${matchContext.home}", "line": -3.5, "recommendation": "Cubrir" },
                     "overUnder": { "line": 47.5, "pick": "Más de", "confidence": "Alta" },
                     "projections": [
                         { "name": "Quarterback Estrella", "team": "Home", "points": "250.5+", "description": "Yardas de Pase", "confidence": "Alta" },
-                        { "name": "Receptor Clave", "team": "Away", "points": "75.5+", "description": "Yardas Recibidas", "confidence": "Media" }
+                        { "name": "Corredor Principal", "team": "Away", "points": "85.5+", "description": "Yardas Carrera", "confidence": "Media" }
                     ],
                     "touchdowns": { "home": 3, "away": 2, "total": 5 }
                 },
-                "keyFactors": ["Defensa de zona", "Ataque terrestre", "Presión al QB"]
+                "keyFactors": ["Protección del QB", "Eficiencia en 3ra oportunidad", "Estrategia de juego terrestre"]
             }
             `;
         } else if (sport === 'baseball') {
@@ -274,6 +273,7 @@ export async function POST(request: NextRequest) {
         } else if (sport.toLowerCase().includes('hockey') || sport.toLowerCase().includes('nhl')) {
             prompt = `
             Eres un analista experto de la NHL/Hockey sobre hielo hablando en ESPAÑOL.
+            IMPORTANTE: Estás analizando HOCKEY SOBRE HIELO. No menciones "Fútbol" ni use términos de fútbol como corners o tarjetas.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
             ${matchContext.h2hHistory ? `**HISTORIAL H2H (Últimos 5):** ${JSON.stringify(matchContext.h2hHistory)}` : ''}
@@ -281,22 +281,21 @@ export async function POST(request: NextRequest) {
             ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (NHL ELITE):
-            - GOLES (UNDER/OVER): Analiza la línea de goles totales. Considera el Power Play del equipo local y la eficiencia del portero visitante.
-            - TIROS A PUERTA (SHOTS ON GOAL): Proyecta el volumen de tiros basado en el historial H2H y la agresividad ofensiva reciente.
-            - Win by 2+ (Puck Line -1.5)
-            - PLAYER PROPS: Goles o Puntos de jugadores estrella.
+            - GOLES (UNDER/OVER): Analiza la línea de goles totales. Considera la eficiencia del Portero y situaciones de Power Play.
+            - TIROS A PUERTA (SHOTS ON GOAL): Proyecta el volumen de tiros a puerta basado en el historial H2H y el ritmo ofensivo.
+            - Puck Line (-1.5 / +1.5).
+            - PLAYER PROPS: Goles o Puntos de jugadores clave.
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 78,
-                "reasoning": "Resumen de portería y Power Play resaltando tendencias de goles y tiros...",
+                "reasoning": "Resumen basado en el Power Play, tendencia de porteros y ritmo del puck...",
                 "bettingTip": "Puck Line ${matchContext.home} -1.5",
                 "advancedMarkets": { "shots": "Jugador X Over 3.5 tiros", "puckLine": "${matchContext.home} -1.5", "totalGoals": "Over 5.5" },
                 "predictions": {
-                    "finalScore": "4-2",
                     "totalGoals": "6",
-                    "spread": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Cubrir" },
+                    "puckLine": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Cubrir" },
                     "overUnder": { "line": 5.5, "pick": "Más de", "confidence": "Media" },
                     "projections": [
                         { "name": "Jugador Estrella", "team": "Home", "points": "3.5+", "description": "Tiros a puerta", "confidence": "Alta" },
