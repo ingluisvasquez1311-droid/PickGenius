@@ -116,13 +116,15 @@ class SportsDataService {
             const isServer = typeof window === 'undefined';
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 
-            // Priority 1: Backend Bridge (Production/Vercel -> Ngrok/Render)
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-            // Only use bridge if configured AND we are in the browser (client-side) OR if it's explicitly set
-            // In Vercel, this will be the ngrok/render URL
-            if (apiUrl && apiUrl.startsWith('http')) {
-                const bridgeUrl = apiUrl.replace(/\/$/, "");
-                const fetchUrl = `${bridgeUrl}/api/proxy/sportsdata${cleanEndpoint}`;
+            // Priority 1: Backend Bridge (Dual Strategy: Cloud First -> Local Backup)
+            const bridgeUrls = [
+                process.env.NEXT_PUBLIC_CLOUD_API_URL, // Render (Stabilized 24/7)
+                process.env.NEXT_PUBLIC_API_URL        // Local Ngrok (Developer Mode)
+            ].filter(url => url && url.startsWith('http')) as string[];
+
+            for (const bridgeUrl of bridgeUrls) {
+                const cleanBridge = bridgeUrl.replace(/\/$/, "");
+                const fetchUrl = `${cleanBridge}/api/proxy/sportsdata${cleanEndpoint}`;
 
                 try {
                     const response = await fetch(fetchUrl, {
@@ -133,15 +135,14 @@ class SportsDataService {
                             'Cache-Control': 'no-cache'
                         },
                         cache: 'no-store',
-                        signal: AbortSignal.timeout(15000)
+                        signal: AbortSignal.timeout(10000) // Lower timeout to switch faster
                     });
 
                     if (response.ok) {
                         return await response.json();
                     }
-                    console.warn(`⚠️ [SportsData] Bridge error ${response.status}`);
                 } catch (err) {
-                    // console.error(`❌ [SportsData] Bridge Connection Failed:`, err);
+                    console.warn(`⚠️ [SportsData] Failed bridge: ${bridgeUrl}. Trying next...`);
                 }
             }
 

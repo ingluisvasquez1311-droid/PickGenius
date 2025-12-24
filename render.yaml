@@ -2,8 +2,8 @@ services:
   - type: web
     name: pickgenius-backend
     runtime: node
-    region: oregon
-    plan: free
+    region: oregon # Change to your preferred region (e.g. oregon, frankfurt)
+    plan: free # Can be 'free' or 'starter' for more persistence
     branch: main
     buildCommand: npm install
     startCommand: node server.js
@@ -15,26 +15,14 @@ services:
       - key: USE_PROXY
         value: true
       - key: SCRAPER_API_KEY
-        value: ae195cbc8ba44b2bbd6e03daeb64b8150b3e4367688
+        sync: false # Set in Render Dashboard
       - key: GROQ_API_KEY
-        value: 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
-      # - NBA_API_KEY
-      # - FOOTBALL_API_KEY
+        sync: false # Set in Render Dashboard
+      - key: FIREBASE_CONFIG
+        sync: false # Set your Firebase JSON here
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://pickgenius-backend.onrender.com" # Self-reference or your Ngrok backup
 
-  - type: web
-    name: pickgenius-frontend
-    runtime: node
-    region: oregon
-    plan: free
-    branch: main
-    rootDir: web
-    buildCommand: npm install && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: NEXT_PUBLIC_BACKEND_HOST
-        fromService:
-          type: web
-          name: pickgenius-backend
-          property: host
+  # Local Backup Info:
+  # This backend will serve as the primary source when your PC is off.
+  # If you want to use the Dual System, set NEXT_PUBLIC_CLOUD_API_URL in Vercel.

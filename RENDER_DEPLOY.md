@@ -1,16 +1,24 @@
-# Render Deployment Configuration
-# This file tells Render how to build and run the backend server
+# Render Deployment Configuration (Dual System 2.0)
+This configuration allows for maximum uptime by using a Cloud Backend on Render and a Local Backup on your machine.
 
-# Build Command (run during deployment)
-# npm install
+## How it works:
+1. **Primary (Render):** Your server runs 24/7 on the cloud.
+2. **Secondary (Local):** If Render is down or sleeping, the web automatically tries to connect to your local Ngrok.
 
-# Start Command (run to start the server)
-# npm start
+## Steps to Deploy:
+1. Go to [Render Dashboard](https://dashboard.render.com).
+2. New -> Web Service.
+3. Connect your GitHub repository.
+4. Name: `pickgenius-backend`.
+5. Environment Variables:
+   - `SCRAPER_API_KEY`: (Your key)
+   - `GROQ_API_KEY`: (Your key)
+   - `NODE_ENV`: `production`
 
-# Environment Variables to set in Render Dashboard:
-# - SCRAPER_API_KEY: Your ScraperAPI key for bypassing rate limits
-# - PORT: 10000 (Render will set this automatically)
-# - NODE_ENV: production
+## Frontend Configuration (Vercel):
+Set these two variables in Vercel to activate the Dual System:
+- `NEXT_PUBLIC_CLOUD_API_URL`: Your Render URL (e.g. `https://pickgenius-backend.onrender.com`)
+- `NEXT_PUBLIC_API_URL`: Your current Ngrok URL (Backup).
 
-# Health Check Endpoint: /health
-# This endpoint returns server status and can be used by Render to monitor the service
+## Health Check:
+The server provides a health check at `/health` for monitoring.
