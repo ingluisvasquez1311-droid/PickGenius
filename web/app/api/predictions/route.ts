@@ -130,36 +130,31 @@ export async function POST(request: NextRequest) {
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
 
             CRITICAL CONTEXT & MARKETS:
-            - ANÁLISIS DE VOLUMEN (PRE-MATCH): Observa el historial H2H. Si los enfrentamientos previos suelen superar los 220 puntos (NBA) o 160 (FIBA), mantén esa tendencia a menos que haya bajas clave.
-            - SI ES NBA: Partidos de 48 min. Si el marcador actual ya es alto (ej. 120 total a mitad del partido), el "Under" es muy arriesgado a menos que el ritmo baje drásticamente.
-            - SI ES FIBA/LIGAS EUROPEAS: Partidos de 40 min. Ritmo más pausado.
-            - ANALIZA EL "PACE" (RITMO): Calcula la proyección final basándote en los puntos actuales vs tiempo transcurrido. NO predigas un total final menor al marcador actual.
-            - VALUE BET ANALYSIS: Si el mercado (Odds) ofrece una línea que no coincide con tu análisis de ritmo y volumen histórico, identifícalo como Value Bet.
+            - PUNTOS (TOTALES): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
+            - ANALIZA EL "PACE" (RITMO): Calcula la proyección final basándote en los puntos actuales vs tiempo transcurrido.
+            - COMBINACIÓN GANADORA (TICKET): Crea un 'bettingTip' profesional que combine varios factores si tiene sentido (ej: 'Ganador Local y Más de 220.5 Puntos').
+            - VALUE BET ANALYSIS: Si el mercado ofrece una línea desajustada con el ritmo actual, indícalo.
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}", 
                 "confidence": 85,
-                "reasoning": "Análisis táctico en ESPAÑOL resaltando el ritmo (pace) actual y la proyección de puntos...",
-                "bettingTip": "Pick recomendado ajustado al ritmo",
-                "advancedMarkets": { "firstQuarter": "...", "drawNoBet": "N/A" },
+                "reasoning": "Análisis táctico resaltando el ritmo (pace) actual y la proyección de puntos...",
+                "bettingTip": "Local y Más de 222.5 Puntos",
+                "advancedMarkets": { "totalPoints": "Más de 220.5", "playerProp": "Estrella: Más de 25.5 Puntos" },
                 "isValueBet": true,
-                "valueAnalysis": "Explicación del valor comparando el ritmo actual con las cuotas del mercado...",
+                "valueAnalysis": "El ritmo de anotación proyectado es superior a la línea de apuesta...",
                 "predictions": {
                     "finalScore": "${isNBA ? '112-105' : '82-78'}",
                     "totalPoints": "${isNBA ? '217' : '160'}",
                     "spread": { "favorite": "${matchContext.home}", "line": -5.5, "recommendation": "Cubrir Hándicap" },
-                    "overUnder": { "line": ${isLive ? (currentTotal + 50) : (isNBA ? 222.5 : 158.5)}, "pick": "...", "confidence": "Alta" },
+                    "overUnder": { "line": ${isLive ? (currentTotal + 50) : (isNBA ? 222.5 : 158.5)}, "pick": "Más de", "confidence": "Alta" },
                     "projections": [
-                        { "name": "Jugador Estrella 1", "team": "Home", "points": "22.5+", "rebounds": "8.5+", "assists": "5.5+", "confidence": "Alta" },
-                        { "name": "Jugador Estrella 2", "team": "Away", "points": "28.5+", "rebounds": "4.5+", "assists": "4.5+", "confidence": "Media" }
-                    ],
-                    "topPlayers": {
-                        "homeTopScorer": { "name": "...", "predictedPoints": ${isNBA ? 25 : 18}, "rebounds": 8, "assists": 5 },
-                        "awayTopScorer": { "name": "...", "predictedPoints": ${isNBA ? 28 : 16}, "rebounds": 6, "assists": 4 }
-                    }
+                        { "name": "Jugador Estrella 1", "team": "Home", "points": "22.5+", "description": "Puntos (Más de)", "confidence": "Alta" },
+                        { "name": "Jugador Estrella 2", "team": "Away", "points": "28.5+", "description": "Puntos (Más de)", "confidence": "Media" }
+                    ]
                 },
-                "keyFactors": ["Dominio en Puntos (PTS)", "Volumen de Asistencias (AST)", "Control de Rebotes (REB)"]
+                "keyFactors": ["Dominio en Puntos (PTS)", "Ritmo de Juego (PACE)", "Control de Rebotes (REB)"]
             }
             `;
         } else if (sport === 'football') {
@@ -171,35 +166,53 @@ export async function POST(request: NextRequest) {
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
             ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
-            ANALYZE SPECIAL MARKETS (MAX VALUE):
-            - GOLES (UNDER/OVER): Analiza la línea de goles. Si es LIVE, considera el ritmo de juego y ataques peligrosos. Si es PRE, usa el promedio de goles en el H2H. Determina si el valor está en el Over o el Under.
-            - REMATES/TIROS: Basado en partidos anteriores (H2H) y estadísticas de temporada, proyecta el total de remates a puerta esperados.
-            - ANÁLISIS DE VOLUMEN: Prioriza mercado de "Ambos Anotan" o "Línea de Goles" si los datos muestran alta frecuencia.
+            ANALYZE SPECIAL MARKETS (FOOTBALL ELITE - MERCADOS SECUNDARIOS):
+            - GOLES (UNDER/OVER): Analiza la línea de goles. Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
+            - AMBOS EQUIPOS ANOTAN (BTTS): Predice si ambos equipos anotarán al menos 1 gol (Sí/No). Analiza la efectividad ofensiva y defensiva.
+            - PRIMER GOL: Predice qué equipo anotará primero (Local/Visitante/Ninguno). Considera el dominio inicial y estadísticas de primeros minutos.
+            - RESULTADO AL DESCANSO/FINAL (HT/FT): Combinación de resultado al medio tiempo y final (ej: "Local/Local", "Empate/Visitante", "Visitante/Empate").
+            - TARJETAS TOTALES: Total de tarjetas amarillas + rojas. Indica SIEMPRE si es 'Más de' o 'Menos de'. Considera el árbitro y rivalidad.
+            - PENALES: Probabilidad de que haya al menos un penal en el partido (Sí/No).
+            - GOLES POR MITAD: Proyecta goles en Primera Mitad (1H) y Segunda Mitad (2H). Indica SIEMPRE 'Más de' o 'Menos de' para cada mitad.
+            - EQUIPO CON MÁS CÓRNERS: Predice qué equipo tendrá más córners (Local/Visitante) y el total aproximado.
+            - REMATES/TIROS: Proyecta el total de remates a puerta. Indica SIEMPRE si es 'Más de' o 'Menos de'.
+            - CÓRNERS: Proyecta el total de córners. Indica SIEMPRE si es 'Más de' o 'Menos de'.
+            - COMBINACIÓN GANADORA (TICKET): Para el 'bettingTip', crea una recomendación de ALTO VALOR que combine múltiples mercados (ej: 'Ganador Local + Ambos Anotan + Más de 2.5 Goles' o 'Empate + Menos de 9.5 Córners'). El usuario quiere ver un 'Ticket' profesional y completo.
             - VALUE BET ANALYSIS: Compara tu probabilidad calculada con el volumen histórico y las cuotas del mercado.
-            - DEFINE DETALLES PREMIUM: Incluye proyecciones de jugadores (Goles o Tiros) específicamente masticadas.
+            - DEFINE DETALLES PREMIUM: Incluye proyecciones de jugadores (Goles o Tiros) con claridad de si es 'Más de' o 'Menos de'.
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
                 "reasoning": "Resumen táctico resaltando la tendencia de fueras de juego por la línea defensiva y el volumen de tiros...",
-                "bettingTip": "Más de 2.5 Goles y Ambos Anotan",
-                "advancedMarkets": { "corners": "Benfica: Mayor número", "shots": "Luis Suarez: 2+ a puerta", "offsides": "Over 3.5 fueras de juego" },
+                "bettingTip": "Local + Ambos Anotan + Más de 2.5 Goles",
+                "advancedMarkets": { "corners": "Más de 8.5", "btts": "Sí", "htft": "Local/Local" },
                 "isValueBet": false,
                 "valueAnalysis": "Por qué la cuota de fueras de juego o tiros tiene valor hoy...",
                 "predictions": {
                     "totalGoals": "3",
-                    "offsides": { "home": 2, "away": 2, "total": 4 },
+                    "offsides": { "total": 4, "pick": "Más de" },
                     "overUnder": { "line": 2.5, "pick": "Más de", "confidence": "Alta" },
+                    "bothTeamsScore": { "pick": "Sí", "confidence": "Media", "reasoning": "Ambas ofensivas son efectivas y las defensas tienen debilidades" },
+                    "firstGoal": { "team": "Home", "confidence": "Alta", "reasoning": "Dominio local en primeros 15 minutos" },
+                    "halftimeFulltime": { "pick": "Local/Local", "confidence": "Media" },
+                    "totalCards": { "total": 5, "pick": "Más de", "line": 4.5, "reasoning": "Árbitro estricto y partido de alta intensidad" },
+                    "penalties": { "pick": "No", "confidence": "Alta", "reasoning": "Equipos disciplinados en el área" },
+                    "goalsByHalf": {
+                        "firstHalf": { "total": 1, "pick": "Más de", "line": 0.5 },
+                        "secondHalf": { "total": 2, "pick": "Más de", "line": 1.5 }
+                    },
+                    "cornersLeader": { "team": "Home", "total": 6, "reasoning": "Mayor dominio territorial" },
                     "projections": [
-                        { "name": "Delantero Estrella", "team": "Home", "points": "1+", "description": "Goles", "confidence": "Alta" },
-                        { "name": "Volante Ofensivo", "team": "Away", "points": "1.5+", "description": "Remates a puerta", "confidence": "Media" }
+                        { "name": "Delantero Estrella", "team": "Home", "points": "1+", "description": "Goles (Más de)", "confidence": "Alta" },
+                        { "name": "Volante Ofensivo", "team": "Away", "points": "1.5+", "description": "Remates a puerta (Más de)", "confidence": "Media" }
                     ],
-                    "corners": { "home": 5, "away": 3, "total": 8 },
-                    "shots": { "home": 12, "away": 8, "onTarget": "6" },
-                    "cards": { "yellowCards": 4, "redCards": 0, "details": "Partido con tendencia a faltas tácticas" }
+                    "corners": { "total": 10, "pick": "Más de" },
+                    "shots": { "total": 15, "onTarget": "8", "pick": "Más de" },
+                    "cards": { "yellowCards": 4, "redCards": 1, "pick": "Más de", "details": "Partido con tendencia a faltas tácticas" }
                 },
-                "keyFactors": ["Volumen de Remates a puerta", "Línea defensiva adelantada (Fueras de juego)", "Historial de remates H2H"]
+                "keyFactors": ["Volumen de Remates a puerta", "Línea defensiva adelantada (Fueras de juego)", "Historial de remates H2H", "Efectividad en córners"]
             }
             `;
         } else if (sport.toLowerCase().includes('american') || sport.toLowerCase().includes('nfl')) {
@@ -212,28 +225,28 @@ export async function POST(request: NextRequest) {
             ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (NFL ELITE):
-            - PUNTOS TOTALES (UNDER/OVER): Analiza el volumen de puntos esperado.
-            - YARDAS TOTALES: Proyecta el avance ofensivo (Passing + Rushing) basado en el historial y defensa rival.
-            - TOUCHDOWNS: Expectativa de anotaciones por equipo.
-            - PLAYER PROPS: Yardas de pase (QB), recepción o carrera.
+            - PUNTOS TOTALES (UNDER/OVER): Analiza el volumen de puntos esperado. Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
+            - YARDAS TOTALES: Proyecta yardas de pase/carrera. Indica SIEMPRE si es 'Más de' o 'Menos de'.
+            - TOUCHDOWNS: Total de anotaciones. Indica SIEMPRE si es 'Más de' o 'Menos de'.
+            - COMBINACIÓN GANADORA (TICKET): Ejemplo: 'Ganador Local y Más de 45.5 Puntos'.
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 82,
-                "reasoning": "Análisis táctico basado en la ofensiva aérea, protección del QB y eficiencia en Zona Roja...",
-                "bettingTip": "${matchContext.home} -3.5 Hándicap",
-                "advancedMarkets": { "touchdowns": "Jugador X anotará", "yards": "QB Y Over 250.5 yardas pase", "handicap": "${matchContext.home} -3.5" },
+                "reasoning": "Análisis táctico basado en la ofensiva aérea y eficiencia en Zona Roja...",
+                "bettingTip": "${matchContext.home} y Más de 44.5 Puntos",
+                "advancedMarkets": { "touchdowns": "Más de 4.5", "yards": "QB: Más de 250.5 yardas" },
                 "predictions": {
                     "totalPoints": "48",
-                    "yards": { "home": 350, "away": 310, "total": 660 },
+                    "yards": { "total": 660, "pick": "Más de" },
                     "spread": { "favorite": "${matchContext.home}", "line": -3.5, "recommendation": "Cubrir" },
                     "overUnder": { "line": 47.5, "pick": "Más de", "confidence": "Alta" },
                     "projections": [
-                        { "name": "Quarterback Estrella", "team": "Home", "points": "250.5+", "description": "Yardas de Pase", "confidence": "Alta" },
-                        { "name": "Corredor Principal", "team": "Away", "points": "85.5+", "description": "Yardas Carrera", "confidence": "Media" }
+                        { "name": "Quarterback Estrella", "team": "Home", "points": "250.5+", "description": "Yardas de Pase (Más de)", "confidence": "Alta" },
+                        { "name": "Corredor Principal", "team": "Away", "points": "85.5+", "description": "Yardas Carrera (Más de)", "confidence": "Media" }
                     ],
-                    "touchdowns": { "home": 3, "away": 2, "total": 5 }
+                    "touchdowns": { "total": 5, "pick": "Más de" }
                 },
                 "keyFactors": ["Protección del QB", "Eficiencia en 3ra oportunidad", "Estrategia de juego terrestre"]
             }
@@ -247,28 +260,28 @@ export async function POST(request: NextRequest) {
             ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS:
-            - Run Line (Hándicap)
-            - Total Runs (Over/Under)
-            - Player Props: Pitcher Strikeouts, Batter Hits/Home Runs.
+            - TOTAL RUNS (CARRERAS): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
+            - PLAYER PROPS: Strikeouts del Pitcher. Indica SIEMPRE si es 'Más de' o 'Menos de'.
+            - COMBINACIÓN GANADORA (TICKET): Ejemplo: 'Ganador Local y Más de 8.5 Carreras'.
             
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 80,
-                "reasoning": "Análisis detallado en ESPAÑOL resaltando el pitcheo y bateo...",
-                "bettingTip": "Under 8.5 Carreras",
-                "advancedMarkets": { "strikeouts": "Pitcher A Over 5.5", "homeRuns": "Player B to hit a Home Run", "runLine": "${matchContext.home} -1.5" },
+                "reasoning": "Análisis detallado resaltando el pitcheo y bateo...",
+                "bettingTip": "Local y Más de 8.5 Carreras",
+                "advancedMarkets": { "totalRuns": "Más de 8.5", "strikeouts": "Pitcher: Más de 6.5" },
                 "predictions": {
                     "finalScore": "5-3",
                     "totalRuns": "8",
-                    "spread": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Win by 2+" },
-                    "overUnder": { "line": 8.5, "pick": "Menos de", "confidence": "Media" },
+                    "spread": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Ganador" },
+                    "overUnder": { "line": 8.5, "pick": "Más de", "confidence": "Media" },
                     "projections": [
-                        { "name": "Pitcher A", "team": "Home", "points": "6.5+", "description": "Strikeouts", "confidence": "Alta" },
-                        { "name": "Bateador X", "team": "Away", "points": "1.5+", "description": "Hits/Bases Totales", "confidence": "Media" }
+                        { "name": "Pitcher A", "team": "Home", "points": "6.5+", "description": "Strikeouts (Más de)", "confidence": "Alta" },
+                        { "name": "Bateador X", "team": "Away", "points": "1.5+", "description": "Hits (Más de)", "confidence": "Media" }
                     ]
                 },
-                "keyFactors": ["Factor MLB 1", "Factor MLB 2", "Factor MLB 3"]
+                "keyFactors": ["Pitcheo Abridor", "Eficiencia Bullpen", "Clima"]
             }
             `;
         } else if (sport.toLowerCase().includes('hockey') || sport.toLowerCase().includes('nhl')) {
@@ -282,29 +295,28 @@ export async function POST(request: NextRequest) {
             ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (NHL ELITE):
-            - GOLES (UNDER/OVER): Analiza la línea de goles totales. Considera la eficiencia del Portero y situaciones de Power Play.
-            - TIROS A PUERTA (SHOTS ON GOAL): Proyecta el volumen de tiros a puerta basado en el historial H2H y el ritmo ofensivo.
-            - Puck Line (-1.5 / +1.5).
-            - PLAYER PROPS: Goles o Puntos de jugadores clave.
+            - GOLES (UNDER/OVER): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
+            - TIROS A PUERTA: Proyecta el total. Indica SIEMPRE si es 'Más de' o 'Menos de'.
+            - COMBINACIÓN GANADORA (TICKET): Ejemplo: 'Ganador Local y Más de 5.5 Goles'.
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 78,
-                "reasoning": "Resumen basado en el Power Play, tendencia de porteros y ritmo del puck...",
-                "bettingTip": "Puck Line ${matchContext.home} -1.5",
-                "advancedMarkets": { "shots": "Jugador X Over 3.5 tiros", "puckLine": "${matchContext.home} -1.5", "totalGoals": "Over 5.5" },
+                "reasoning": "Análisis basado en Power Play y eficiencia del portero...",
+                "bettingTip": "Local y Más de 5.5 Goles",
+                "advancedMarkets": { "totalGoals": "Más de 5.5", "shots": "Más de 30.5" },
                 "predictions": {
                     "totalGoals": "6",
                     "puckLine": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Cubrir" },
                     "overUnder": { "line": 5.5, "pick": "Más de", "confidence": "Media" },
                     "projections": [
-                        { "name": "Jugador Estrella", "team": "Home", "points": "3.5+", "description": "Tiros a puerta", "confidence": "Alta" },
-                        { "name": "Portero Titular", "team": "Away", "points": "28.5+", "description": "Atajadas", "confidence": "Media" }
+                        { "name": "Jugador Estrella", "team": "Home", "points": "3.5+", "description": "Tiros (Más de)", "confidence": "Alta" },
+                        { "name": "Portero Titular", "team": "Away", "points": "28.5+", "description": "Atajadas (Más de)", "confidence": "Media" }
                     ],
-                    "shots": { "home": 32, "away": 28, "onTarget": "30" }
+                    "shots": { "total": 60, "pick": "Más de" }
                 },
-                "keyFactors": ["Eficacia en Power Play", "Historial de remates H2H", "Estadísticas del portero"]
+                "keyFactors": ["Power Play", "Estadísticas del portero", "Ritmo de juego"]
             }
             `;
         } else if (sport.toLowerCase().includes('tennis')) {
@@ -315,25 +327,23 @@ export async function POST(request: NextRequest) {
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
             
             ANALYZE SPECIAL MARKETS (TENNIS ELITE):
-            - Match Winner (Ganador)
-            - Set Betting (Marcador exacto de sets)
-            - Game Handicap (Hándicap de juegos)
-            - Total Games (Over/Under juegos)
+            - TOTAL GAMES (OVER/UNDER): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
+            - COMBINACIÓN GANADORA (TICKET): Ejemplo: 'Ganador Local y Más de 20.5 Juegos'.
             
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 85,
-                "reasoning": "Análisis de superficie, h2h y momento actual en ESPAÑOL...",
-                "bettingTip": "${matchContext.home} gana 2-0",
-                "advancedMarkets": { "setBetting": "2-0", "gameHandicap": "${matchContext.home} -3.5", "totalGames": "Under 21.5" },
+                "reasoning": "Análisis de superficie y momento actual...",
+                "bettingTip": "Local y Menos de 21.5 Juegos",
+                "advancedMarkets": { "setBetting": "2-0", "totalGames": "Menos de 21.5" },
                 "predictions": {
                     "finalScore": "2-0",
                     "totalGames": "20",
-                    "spread": { "favorite": "${matchContext.home}", "line": -3.5, "recommendation": "Ganador sólido" },
+                    "spread": { "favorite": "${matchContext.home}", "line": -3.5, "recommendation": "Ganador" },
                     "overUnder": { "line": 21.5, "pick": "Menos de", "confidence": "Alta" }
                 },
-                "keyFactors": ["Efectividad del primer servicio", "Estadísticas de Break Points", "Adaptación a la superficie"]
+                "keyFactors": ["Servicio", "Adaptación a superficie", "H2H"]
             }
             `;
         } else {

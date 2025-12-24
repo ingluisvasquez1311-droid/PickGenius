@@ -11,34 +11,41 @@ export async function GET(request: NextRequest) {
         const response = await footballDataService.getScheduledEvents(date);
 
         if (!response.success || !response.data) {
-            console.warn('⚠️ Football Scheduled API Failed, returning mock data:', response.error);
-            // FAILOVER: Return Mock Data
+            const now = Math.floor(Date.now() / 1000);
             return NextResponse.json({
                 success: true,
                 data: [
                     {
                         id: 112233,
-                        tournament: {
-                            name: 'Premier League',
-                            category: { name: 'England', id: 1 },
-                            uniqueTournament: { name: 'Premier League' }
-                        },
+                        tournament: { name: 'Premier League', category: { name: 'England', id: 1 }, uniqueTournament: { name: 'Premier League' } },
                         homeTeam: { name: 'Manchester City', id: 17, logo: '/api/proxy/team-logo/17' },
                         awayTeam: { name: 'Liverpool', id: 44, logo: '/api/proxy/team-logo/44' },
-                        status: { description: '20:00', type: 'notstarted' },
-                        startTimestamp: Math.floor(Date.now() / 1000) + 3600
+                        status: { description: '15:00', type: 'notstarted' },
+                        startTimestamp: now + 3600
                     },
                     {
                         id: 445566,
-                        tournament: {
-                            name: 'La Liga',
-                            category: { name: 'Spain', id: 32 },
-                            uniqueTournament: { name: 'La Liga' }
-                        },
+                        tournament: { name: 'La Liga', category: { name: 'Spain', id: 32 }, uniqueTournament: { name: 'La Liga' } },
                         homeTeam: { name: 'Real Madrid', id: 2829, logo: '/api/proxy/team-logo/2829' },
                         awayTeam: { name: 'Barcelona', id: 2817, logo: '/api/proxy/team-logo/2817' },
-                        status: { description: '22:00', type: 'notstarted' },
-                        startTimestamp: Math.floor(Date.now() / 1000) + 7200
+                        status: { description: '17:00', type: 'notstarted' },
+                        startTimestamp: now + 7200
+                    },
+                    {
+                        id: 778899,
+                        tournament: { name: 'Serie A', category: { name: 'Italy', id: 31 }, uniqueTournament: { name: 'Serie A' } },
+                        homeTeam: { name: 'Juventus', id: 2687, logo: '/api/proxy/team-logo/2687' },
+                        awayTeam: { name: 'Inter Milan', id: 2697, logo: '/api/proxy/team-logo/2697' },
+                        status: { description: '19:00', type: 'notstarted' },
+                        startTimestamp: now + 14400
+                    },
+                    {
+                        id: 101112,
+                        tournament: { name: 'Premier League', category: { name: 'England', id: 1 }, uniqueTournament: { name: 'Premier League' } },
+                        homeTeam: { name: 'Arsenal', id: 42, logo: '/api/proxy/team-logo/42' },
+                        awayTeam: { name: 'Chelsea', id: 38, logo: '/api/proxy/team-logo/38' },
+                        status: { description: '21:00', type: 'notstarted' },
+                        startTimestamp: now + 21600
                     }
                 ],
                 source: 'fallback_mock'

@@ -233,20 +233,53 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
             ];
         }
         return [
+            // Tier 1: Top European Leagues
             'UEFA Champions League',
+            'UEFA Europa League',
             'Premier League',
             'LaLiga',
             'Serie A',
             'Bundesliga',
             'Ligue 1',
-            'Primera Division', // Argentina/Chile etc
+
+            // Tier 2: Strong European Secondary Leagues
+            'Championship', // England 2nd tier
+            'Eredivisie', // Netherlands
+            'Primeira Liga', // Portugal
+            'Belgian Pro League',
+            'Scottish Premiership',
+            'Turkish Super Lig',
+            'Russian Premier League',
+
+            // Tier 3: South American Leagues (High betting volume)
+            'Primera Division', // Argentina
             'Liga Profesional de Fútbol', // Argentina formal
             'Copa de la Liga Profesional', // Argentina
             'Brasileirão Série A',
+            'Brasileirão Série B', // Brazil 2nd tier (good markets)
             'Copa Libertadores',
             'Copa Sudamericana',
+            'Chilean Primera División',
+            'Colombian Primera A',
+            'Ecuadorian Serie A',
+
+            // Tier 4: North/Central America
             'Major League Soccer',
-            'Liga MX'
+            'Liga MX',
+            'Liga MX Apertura',
+            'Liga MX Clausura',
+
+            // Tier 5: Asian Leagues (Growing markets)
+            'J1 League', // Japan
+            'K League 1', // South Korea
+            'Chinese Super League',
+
+            // Tier 6: Other European Competitions
+            'UEFA Conference League',
+            'La Liga 2', // Spain 2nd tier
+            'Serie B', // Italy 2nd tier
+            '2. Bundesliga', // Germany 2nd tier
+            'Ligue 2' // France 2nd tier
         ];
     };
 
@@ -259,11 +292,29 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
         if (loading || events.length === 0) return;
 
         const initialExpanded = new Set<string>();
-        // We need to support the key format used in grouping
-        // This is a bit tricky since we act before grouping, but we can do it after.
-        // For now, let's just default expand nothing or all?
-        // Let's expand only Priority leagues.
-    }, [loading, events]);
+
+        events.forEach(event => {
+            const countryName = event.tournament.category?.name || 'Internacional';
+            const leagueName = event.tournament.name;
+            const key = `${countryName}|${leagueName}`;
+
+            const isPriority = PRIORITY_LEAGUES.some(pl => leagueName.includes(pl)) ||
+                PRIORITY_LEAGUES.some(pl => countryName.includes(pl));
+
+            if (isPriority) {
+                initialExpanded.add(key);
+            }
+        });
+
+        // Expand at least the first group if nothing is priority
+        if (initialExpanded.size === 0 && events.length > 0) {
+            const countryName = events[0].tournament.category?.name || 'Internacional';
+            const leagueName = events[0].tournament.name;
+            initialExpanded.add(`${countryName}|${leagueName}`);
+        }
+
+        setExpandedGroups(initialExpanded);
+    }, [loading, events.length]);
 
 
     const toggleGroup = (key: string) => {

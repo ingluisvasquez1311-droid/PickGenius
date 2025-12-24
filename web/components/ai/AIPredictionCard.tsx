@@ -352,6 +352,9 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                         <div className="flex items-end justify-between">
                                             <p className="text-white font-black text-2xl italic">
                                                 {sport === 'basketball' ? prediction.predictions.totalPoints : (prediction.predictions.totalPoints || prediction.predictions.totalGoals)}
+                                                {(prediction.predictions.overUnder?.pick || prediction.predictions.pick) && (
+                                                    <span className="text-[10px] ml-1 opacity-50 font-black italic">({prediction.predictions.overUnder?.pick || prediction.predictions.pick})</span>
+                                                )}
                                             </p>
                                             {prediction.predictions.overUnder && (
                                                 <span className="text-[9px] bg-green-500/20 text-green-400 font-black px-1.5 py-0.5 rounded uppercase">
@@ -367,7 +370,10 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                             </p>
                                             <div className="flex items-end justify-between">
                                                 <p className="text-white font-black text-2xl italic">
-                                                    {(sport.includes('nfl') || sport.includes('american')) ? (prediction.predictions.yards?.total || '-') : prediction.predictions.shots.onTarget}
+                                                    {(sport.includes('nfl') || sport.includes('american')) ? (prediction.predictions.yards?.total || '-') : (prediction.predictions.shots?.total || prediction.predictions.shots?.onTarget || '-')}
+                                                    {(prediction.predictions.yards?.pick || prediction.predictions.shots?.pick) && (
+                                                        <span className="text-[10px] ml-1 opacity-50 font-black italic">({prediction.predictions.yards?.pick || prediction.predictions.shots?.pick})</span>
+                                                    )}
                                                 </p>
                                                 <span className="text-[9px] text-red-400/50 font-bold italic">Expectativa</span>
                                             </div>
@@ -409,12 +415,16 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                     </p>
                                                     <p className="text-white font-bold text-xl">
                                                         {sport === 'football' ? (prediction.predictions.offsides?.total || '-') : (sport.includes('hockey') || sport.includes('nhl')) ? (prediction.predictions.puckLine?.line || prediction.predictions.spread?.line || '-') : (prediction.predictions.finalScore || '-')}
+                                                        {prediction.predictions.offsides?.pick && <span className="text-[10px] ml-1 opacity-50 font-black italic">({prediction.predictions.offsides.pick})</span>}
                                                     </p>
                                                 </div>
                                                 <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 p-3 rounded-lg border border-purple-500/20">
                                                     <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">Mercado O/U (Total)</p>
-                                                    <p className="text-white font-bold text-xl">{prediction.predictions.totalPoints || prediction.predictions.totalGoals || prediction.predictions.totalRuns || prediction.predictions.overUnder?.line || '-'}</p>
-                                                    <p className="text-[9px] text-purple-200/50 font-bold uppercase">{prediction.predictions.overUnder?.pick || 'Analizado'}</p>
+                                                    <p className="text-white font-bold text-xl">
+                                                        {prediction.predictions.totalPoints || prediction.predictions.totalGoals || prediction.predictions.totalRuns || prediction.predictions.overUnder?.line || '-'}
+                                                        <span className="text-[10px] ml-1 opacity-50 font-black italic">({prediction.predictions.overUnder?.pick || 'Veredicto'})</span>
+                                                    </p>
+                                                    <p className="text-[9px] text-purple-200/50 font-bold uppercase">Proyección Genio</p>
                                                 </div>
                                             </div>
 
@@ -424,19 +434,133 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                     {prediction.predictions.corners && (
                                                         <div className="bg-emerald-900/30 p-3 rounded-lg border border-emerald-500/20">
                                                             <p className="text-emerald-300 text-[10px] uppercase font-bold mb-1">⛳ Córners</p>
-                                                            <p className="text-white font-bold text-lg">{prediction.predictions.corners.total || (prediction.predictions.corners.home + prediction.predictions.corners.away)}</p>
+                                                            <p className="text-white font-bold text-lg">
+                                                                {prediction.predictions.corners.total || (prediction.predictions.corners.home + prediction.predictions.corners.away)}
+                                                                {prediction.predictions.corners.pick && <span className="text-[10px] ml-1 opacity-50 italic">({prediction.predictions.corners.pick})</span>}
+                                                            </p>
                                                         </div>
                                                     )}
                                                     {prediction.predictions.cards && (
                                                         <div className="bg-red-900/30 p-3 rounded-lg border border-red-500/20">
                                                             <p className="text-red-300 text-[10px] uppercase font-bold mb-1">🟨 Tarjetas</p>
-                                                            <p className="text-white font-bold text-lg">{prediction.predictions.cards.yellowCards + (prediction.predictions.cards.redCards || 0)}</p>
+                                                            <p className="text-white font-bold text-lg">
+                                                                {prediction.predictions.cards.yellowCards + (prediction.predictions.cards.redCards || 0)}
+                                                                {prediction.predictions.cards.pick && <span className="text-[10px] ml-1 opacity-50 italic">({prediction.predictions.cards.pick})</span>}
+                                                            </p>
                                                         </div>
                                                     )}
                                                     {prediction.predictions.touchdowns && (
                                                         <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-500/20">
                                                             <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🏈 TD Totales</p>
-                                                            <p className="text-white font-bold text-lg">{prediction.predictions.touchdowns.total || (prediction.predictions.touchdowns.home + prediction.predictions.touchdowns.away)}</p>
+                                                            <p className="text-white font-bold text-lg">
+                                                                {prediction.predictions.touchdowns.total || (prediction.predictions.touchdowns.home + prediction.predictions.touchdowns.away)}
+                                                                {prediction.predictions.touchdowns.pick && <span className="text-[10px] ml-1 opacity-50 italic">({prediction.predictions.touchdowns.pick})</span>}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* FOOTBALL SECONDARY MARKETS - PREMIUM ONLY */}
+                                            {sport === 'football' && (
+                                                <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 p-4 rounded-xl border border-green-500/20 space-y-3 mt-3">
+                                                    <p className="text-green-400 text-[10px] uppercase font-black mb-3 flex items-center gap-2">
+                                                        ⚽ Mercados Secundarios (Fútbol Elite)
+                                                    </p>
+
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        {/* BTTS - Both Teams Score */}
+                                                        {prediction.predictions.bothTeamsScore && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-green-500/10">
+                                                                <p className="text-green-300 text-[9px] uppercase font-bold mb-1">Ambos Anotan</p>
+                                                                <p className="text-white font-black text-lg">
+                                                                    {prediction.predictions.bothTeamsScore.pick}
+                                                                    <span className="text-[9px] ml-1 opacity-50">
+                                                                        ({prediction.predictions.bothTeamsScore.confidence})
+                                                                    </span>
+                                                                </p>
+                                                            </div>
+                                                        )}
+
+                                                        {/* First Goal */}
+                                                        {prediction.predictions.firstGoal && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-yellow-500/10">
+                                                                <p className="text-yellow-300 text-[9px] uppercase font-bold mb-1">Primer Gol</p>
+                                                                <p className="text-white font-black text-lg">
+                                                                    {prediction.predictions.firstGoal.team === 'Home' ? 'Local' : prediction.predictions.firstGoal.team === 'Away' ? 'Visitante' : 'Ninguno'}
+                                                                </p>
+                                                            </div>
+                                                        )}
+
+                                                        {/* HT/FT */}
+                                                        {prediction.predictions.halftimeFulltime && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-blue-500/10">
+                                                                <p className="text-blue-300 text-[9px] uppercase font-bold mb-1">HT/FT</p>
+                                                                <p className="text-white font-black text-sm">
+                                                                    {prediction.predictions.halftimeFulltime.pick}
+                                                                </p>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Total Cards */}
+                                                        {prediction.predictions.totalCards && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-red-500/10">
+                                                                <p className="text-red-300 text-[9px] uppercase font-bold mb-1">Tarjetas Totales</p>
+                                                                <p className="text-white font-black text-lg">
+                                                                    {prediction.predictions.totalCards.total}
+                                                                    <span className="text-[9px] ml-1 opacity-50">
+                                                                        ({prediction.predictions.totalCards.pick})
+                                                                    </span>
+                                                                </p>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Penalties */}
+                                                        {prediction.predictions.penalties && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-purple-500/10">
+                                                                <p className="text-purple-300 text-[9px] uppercase font-bold mb-1">Penales</p>
+                                                                <p className="text-white font-black text-lg">
+                                                                    {prediction.predictions.penalties.pick}
+                                                                </p>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Corners Leader */}
+                                                        {prediction.predictions.cornersLeader && (
+                                                            <div className="bg-black/40 p-3 rounded-lg border border-emerald-500/10">
+                                                                <p className="text-emerald-300 text-[9px] uppercase font-bold mb-1">Más Córners</p>
+                                                                <p className="text-white font-black text-lg">
+                                                                    {prediction.predictions.cornersLeader.team === 'Home' ? 'Local' : 'Visitante'}
+                                                                    <span className="text-[9px] ml-1 opacity-50">({prediction.predictions.cornersLeader.total})</span>
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Goals by Half */}
+                                                    {prediction.predictions.goalsByHalf && (
+                                                        <div className="bg-black/40 p-3 rounded-lg border border-orange-500/10">
+                                                            <p className="text-orange-300 text-[9px] uppercase font-bold mb-2">Goles por Mitad</p>
+                                                            <div className="grid grid-cols-2 gap-2">
+                                                                <div>
+                                                                    <p className="text-[8px] text-gray-400 mb-1">Primera Mitad</p>
+                                                                    <p className="text-white font-bold">
+                                                                        {prediction.predictions.goalsByHalf.firstHalf.total}
+                                                                        <span className="text-[9px] ml-1 opacity-50">
+                                                                            ({prediction.predictions.goalsByHalf.firstHalf.pick})
+                                                                        </span>
+                                                                    </p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[8px] text-gray-400 mb-1">Segunda Mitad</p>
+                                                                    <p className="text-white font-bold">
+                                                                        {prediction.predictions.goalsByHalf.secondHalf.total}
+                                                                        <span className="text-[9px] ml-1 opacity-50">
+                                                                            ({prediction.predictions.goalsByHalf.secondHalf.pick})
+                                                                        </span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
