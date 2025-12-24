@@ -167,52 +167,30 @@ export async function POST(request: NextRequest) {
             ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (FOOTBALL ELITE - MERCADOS SECUNDARIOS):
-            - GOLES (UNDER/OVER): Analiza la línea de goles. Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
-            - AMBOS EQUIPOS ANOTAN (BTTS): Predice si ambos equipos anotarán al menos 1 gol (Sí/No). Analiza la efectividad ofensiva y defensiva.
-            - PRIMER GOL: Predice qué equipo anotará primero (Local/Visitante/Ninguno). Considera el dominio inicial y estadísticas de primeros minutos.
-            - RESULTADO AL DESCANSO/FINAL (HT/FT): Combinación de resultado al medio tiempo y final (ej: "Local/Local", "Empate/Visitante", "Visitante/Empate").
-            - TARJETAS TOTALES: Total de tarjetas amarillas + rojas. Indica SIEMPRE si es 'Más de' o 'Menos de'. Considera el árbitro y rivalidad.
-            - PENALES: Probabilidad de que haya al menos un penal en el partido (Sí/No).
-            - GOLES POR MITAD: Proyecta goles en Primera Mitad (1H) y Segunda Mitad (2H). Indica SIEMPRE 'Más de' o 'Menos de' para cada mitad.
-            - EQUIPO CON MÁS CÓRNERS: Predice qué equipo tendrá más córners (Local/Visitante) y el total aproximado.
-            - REMATES/TIROS: Proyecta el total de remates a puerta. Indica SIEMPRE si es 'Más de' o 'Menos de'.
-            - CÓRNERS: Proyecta el total de córners. Indica SIEMPRE si es 'Más de' o 'Menos de'.
-            - COMBINACIÓN GANADORA (TICKET): Para el 'bettingTip', crea una recomendación de ALTO VALOR que combine múltiples mercados (ej: 'Ganador Local + Ambos Anotan + Más de 2.5 Goles' o 'Empate + Menos de 9.5 Córners'). El usuario quiere ver un 'Ticket' profesional y completo.
-            - VALUE BET ANALYSIS: Compara tu probabilidad calculada con el volumen histórico y las cuotas del mercado.
-            - DEFINE DETALLES PREMIUM: Incluye proyecciones de jugadores (Goles o Tiros) con claridad de si es 'Más de' o 'Menos de'.
+            - GOLES (UNDER/OVER): Analiza la línea de goles. Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under) y la línea (ej: 2.5).
+            - AMBOS EQUIPOS ANOTAN (BTTS): Predice si ambos equipos anotarán al menos 1 gol (Sí/No).
+            - PRIMER GOL: Predice qué equipo anotará primero (Local/Visitante/Ninguno).
+            - RESULTADO AL DESCANSO/FINAL (HT/FT): Combinación de resultado.
+            - TARJETAS TOTALES: Total de tarjetas. Indica SIEMPRE si es 'Más de' o 'Menos de' y la línea (ej: 4.5).
+            - CÓRNERS: Proyecta el total. Indica SIEMPRE si es 'Más de' o 'Menos de' y la línea (ej: 9.5).
+            - COMBINACIÓN GANADORA (TICKET): Crea una recomendación de ALTO VALOR.
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
-                "reasoning": "Resumen táctico resaltando la tendencia de fueras de juego por la línea defensiva y el volumen de tiros...",
-                "bettingTip": "Local + Ambos Anotan + Más de 2.5 Goles",
-                "advancedMarkets": { "corners": "Más de 8.5", "btts": "Sí", "htft": "Local/Local" },
-                "isValueBet": false,
-                "valueAnalysis": "Por qué la cuota de fueras de juego o tiros tiene valor hoy...",
+                "reasoning": "Resumen táctico...",
+                "bettingTip": "Local + Más de 2.5 Goles",
+                "advancedMarkets": { "corners": "Más de 9.5", "cards": "Menos de 4.5" },
                 "predictions": {
                     "totalGoals": "3",
                     "offsides": { "total": 4, "pick": "Más de" },
                     "overUnder": { "line": 2.5, "pick": "Más de", "confidence": "Alta" },
-                    "bothTeamsScore": { "pick": "Sí", "confidence": "Media", "reasoning": "Ambas ofensivas son efectivas y las defensas tienen debilidades" },
-                    "firstGoal": { "team": "Home", "confidence": "Alta", "reasoning": "Dominio local en primeros 15 minutos" },
-                    "halftimeFulltime": { "pick": "Local/Local", "confidence": "Media" },
-                    "totalCards": { "total": 5, "pick": "Más de", "line": 4.5, "reasoning": "Árbitro estricto y partido de alta intensidad" },
-                    "penalties": { "pick": "No", "confidence": "Alta", "reasoning": "Equipos disciplinados en el área" },
-                    "goalsByHalf": {
-                        "firstHalf": { "total": 1, "pick": "Más de", "line": 0.5 },
-                        "secondHalf": { "total": 2, "pick": "Más de", "line": 1.5 }
-                    },
-                    "cornersLeader": { "team": "Home", "total": 6, "reasoning": "Mayor dominio territorial" },
-                    "projections": [
-                        { "name": "Delantero Estrella", "team": "Home", "points": "1+", "description": "Goles (Más de)", "confidence": "Alta" },
-                        { "name": "Volante Ofensivo", "team": "Away", "points": "1.5+", "description": "Remates a puerta (Más de)", "confidence": "Media" }
-                    ],
-                    "corners": { "total": 10, "pick": "Más de" },
-                    "shots": { "total": 15, "onTarget": "8", "pick": "Más de" },
-                    "cards": { "yellowCards": 4, "redCards": 1, "pick": "Más de", "details": "Partido con tendencia a faltas tácticas" }
+                    "bothTeamsScore": { "pick": "Sí", "confidence": "Media" },
+                    "corners": { "total": 10, "pick": "Más de", "line": 9.5 },
+                    "cards": { "yellowCards": 4, "redCards": 0, "pick": "Menos de", "line": 4.5, "details": "Árbitro permisivo" }
                 },
-                "keyFactors": ["Volumen de Remates a puerta", "Línea defensiva adelantada (Fueras de juego)", "Historial de remates H2H", "Efectividad en córners"]
+                "keyFactors": ["Volumen de Remates", "Historial de Córners"]
             }
             `;
         } else if (sport.toLowerCase().includes('american') || sport.toLowerCase().includes('nfl')) {
@@ -435,9 +413,9 @@ export async function POST(request: NextRequest) {
                 firstQuarter: { pick: `${winner} -1.5`, confidence: "Alta" }
             };
         } else {
-            mockPrediction.predictions.corners = { home: 6, away: 4, total: 10 };
+            mockPrediction.predictions.corners = { home: 6, away: 4, total: 10, pick: 'Más de', line: 9.5 };
             mockPrediction.predictions.shots = { home: 14, away: 11, onTarget: '5' };
-            mockPrediction.predictions.cards = { yellowCards: 3, redCards: 0, details: 'Partido intenso' };
+            mockPrediction.predictions.cards = { yellowCards: 3, redCards: 0, pick: 'Menos de', line: 4.5, details: 'Partido intenso' };
             mockPrediction.predictions.offsides = { total: 4, details: 'Promedio' };
         }
 

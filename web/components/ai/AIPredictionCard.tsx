@@ -436,7 +436,11 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                             <p className="text-emerald-300 text-[10px] uppercase font-bold mb-1">⛳ Córners</p>
                                                             <p className="text-white font-bold text-lg">
                                                                 {prediction.predictions.corners.total || (prediction.predictions.corners.home + prediction.predictions.corners.away)}
-                                                                {prediction.predictions.corners.pick && <span className="text-[10px] ml-1 opacity-50 italic">({prediction.predictions.corners.pick})</span>}
+                                                                {(prediction.predictions.corners.pick || prediction.predictions.corners.line) && (
+                                                                    <span className="block text-[10px] text-emerald-400 font-black uppercase">
+                                                                        {prediction.predictions.corners.pick} {prediction.predictions.corners.line}
+                                                                    </span>
+                                                                )}
                                                             </p>
                                                         </div>
                                                     )}
@@ -445,7 +449,11 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                             <p className="text-red-300 text-[10px] uppercase font-bold mb-1">🟨 Tarjetas</p>
                                                             <p className="text-white font-bold text-lg">
                                                                 {prediction.predictions.cards.yellowCards + (prediction.predictions.cards.redCards || 0)}
-                                                                {prediction.predictions.cards.pick && <span className="text-[10px] ml-1 opacity-50 italic">({prediction.predictions.cards.pick})</span>}
+                                                                {(prediction.predictions.cards.pick || prediction.predictions.cards.line) && (
+                                                                    <span className="block text-[10px] text-red-400 font-black uppercase">
+                                                                        {prediction.predictions.cards.pick} {prediction.predictions.cards.line}
+                                                                    </span>
+                                                                )}
                                                             </p>
                                                         </div>
                                                     )}
