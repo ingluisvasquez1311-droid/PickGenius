@@ -56,6 +56,8 @@ export interface SportsDataEvent {
         display: number;
         period1?: number;
         period2?: number;
+        period3?: number;
+        period4?: number;
         normaltime?: number;
     };
     awayScore: {
@@ -63,12 +65,23 @@ export interface SportsDataEvent {
         display: number;
         period1?: number;
         period2?: number;
+        period3?: number;
+        period4?: number;
         normaltime?: number;
     };
     status: {
         code: number;
         description: string;
         type: 'notstarted' | 'inprogress' | 'finished';
+    };
+    lastPeriod?: string;
+    time?: {
+        currentPeriodStartTimestamp?: number;
+        initial?: number;
+        max?: number;
+        played?: number;
+        periodLength?: number;
+        overtimeLength?: number;
     };
     startTimestamp: number;
     customId?: string;
@@ -325,6 +338,13 @@ class SportsDataService {
     async getTeamLastResults(teamId: number, sport: string = 'football'): Promise<any[]> {
         const data = await this.makeRequest(`/team/${teamId}/events/last/0`);
         return data?.events || [];
+    }
+
+    /**
+     * Obtiene el historial de enfrentamientos directos (H2H)
+     */
+    async getMatchH2H(eventId: number): Promise<any> {
+        return await this.makeRequest(`/event/${eventId}/h2h`);
     }
 
     /**

@@ -105,7 +105,7 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
 
                         <div className="px-4">
                             <div className={`text-xs font-black uppercase tracking-widest mb-2 ${isLive ? 'text-red-500 animate-pulse' : 'text-gray-500'}`}>
-                                {isLive ? '• EN VIVO' : game.status?.description || 'PROGRAMADO'}
+                                {isLive ? (game.status?.description || 'EN VIVO') : game.status?.description || 'PROGRAMADO'}
                             </div>
                             <div className="text-[10px] text-gray-500 font-bold">
                                 {new Date(game.startTimestamp * 1000).toLocaleString()}
@@ -219,25 +219,25 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                         </div>
 
                         {/* Period Detail (Generic) */}
-                        <div className="glass-card p-6">
-                            <h3 className="text-xs font-black uppercase mb-6 border-b border-white/5 pb-2 tracking-widest text-gray-400">Desglose del Partido</h3>
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5">
-                                    <span className="font-bold text-sm">{game.homeTeam.name}</span>
+                        <div className="glass-card p-6 border border-white/5 bg-white/[0.02] rounded-3xl">
+                            <h3 className="text-[10px] font-black uppercase mb-6 border-b border-white/5 pb-3 tracking-widest text-gray-500">Desglose de Periodos</h3>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center bg-black/40 p-4 rounded-2xl border border-white/5 group hover:border-purple-500/30 transition-all">
+                                    <span className="font-black text-xs text-gray-300 uppercase italic tracking-tighter">{game.homeTeam.name}</span>
                                     <div className="flex gap-4 font-mono text-lg font-black text-white">
-                                        {game.homeScore?.period1 !== undefined && <span>{game.homeScore.period1}</span>}
-                                        {game.homeScore?.period2 !== undefined && <span>{game.homeScore.period2}</span>}
-                                        {game.homeScore?.period3 !== undefined && <span>{game.homeScore.period3}</span>}
-                                        {game.homeScore?.period4 !== undefined && <span className="text-purple-400">{game.homeScore.period4}</span>}
+                                        {game.homeScore?.period1 !== undefined && <span className="opacity-40">{game.homeScore.period1}</span>}
+                                        {game.homeScore?.period2 !== undefined && <span className="opacity-40">{game.homeScore.period2}</span>}
+                                        {game.homeScore?.period3 !== undefined && <span className="opacity-40">{game.homeScore.period3}</span>}
+                                        {game.homeScore?.period4 !== undefined && <span className="text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.4)]">{game.homeScore.period4}</span>}
                                     </div>
                                 </div>
-                                <div className="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5">
-                                    <span className="font-bold text-sm">{game.awayTeam.name}</span>
+                                <div className="flex justify-between items-center bg-black/40 p-4 rounded-2xl border border-white/5 group hover:border-orange-500/30 transition-all">
+                                    <span className="font-black text-xs text-gray-300 uppercase italic tracking-tighter">{game.awayTeam.name}</span>
                                     <div className="flex gap-4 font-mono text-lg font-black text-white">
-                                        {game.awayScore?.period1 !== undefined && <span>{game.awayScore.period1}</span>}
-                                        {game.awayScore?.period2 !== undefined && <span>{game.awayScore.period2}</span>}
-                                        {game.awayScore?.period3 !== undefined && <span>{game.awayScore.period3}</span>}
-                                        {game.awayScore?.period4 !== undefined && <span className="text-orange-400">{game.awayScore.period4}</span>}
+                                        {game.awayScore?.period1 !== undefined && <span className="opacity-40">{game.awayScore.period1}</span>}
+                                        {game.awayScore?.period2 !== undefined && <span className="opacity-40">{game.awayScore.period2}</span>}
+                                        {game.awayScore?.period3 !== undefined && <span className="opacity-40">{game.awayScore.period3}</span>}
+                                        {game.awayScore?.period4 !== undefined && <span className="text-orange-400 drop-shadow-[0_0_10px_rgba(251,146,60,0.4)]">{game.awayScore.period4}</span>}
                                     </div>
                                 </div>
                             </div>

@@ -24,10 +24,6 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
 
     // Estimate odds based on AI confidence (rough approximation)
     const estimateOdds = (confidence: number): number => {
-        // Higher confidence = lower odds
-        // 90% confidence ≈ 1.11 odds
-        // 70% confidence ≈ 1.43 odds
-        // 50% confidence ≈ 2.00 odds
         const probability = confidence / 100;
         return Number((1 / probability).toFixed(2));
     };
@@ -97,6 +93,10 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
         }
     };
 
+    // Derived values for premium access
+    const isPremiumOrAdmin = user?.isPremium || user?.role === 'admin';
+    const showMasked = prediction?.isMasked && !isPremiumOrAdmin;
+
     return (
         <div className="bg-gradient-to-r from-purple-900 to-indigo-900 rounded-xl p-6 shadow-2xl border border-purple-500/30 mt-8 relative overflow-hidden">
             {/* Background decoration */}
@@ -165,10 +165,10 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             {/* Betting Tip Area - Masked if needed */}
                             <div className="mt-4 px-4 py-2 bg-black/10 rounded-xl border border-black/10">
                                 <p className="text-[10px] text-black/50 uppercase font-black mb-1">Pick Recomendado</p>
-                                <p className={`text-lg font-black text-black ${prediction.isMasked ? 'blur-sm select-none' : ''}`}>
+                                <p className={`text-lg font-black text-black ${showMasked ? 'blur-sm select-none' : ''}`}>
                                     {prediction.bettingTip || 'Analizando...'}
                                 </p>
-                                {prediction.isMasked && (
+                                {showMasked && (
                                     <button
                                         className="mt-2 text-[10px] bg-black text-white px-3 py-1 rounded-full font-bold hover:bg-black/80 transition-all"
                                         onClick={() => window.location.href = '/pricing'}
@@ -178,7 +178,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                 )}
 
                                 {/* Add to Ticket Button - Only for non-masked predictions */}
-                                {!prediction.isMasked && (
+                                {!showMasked && (
                                     <button
                                         onClick={() => {
                                             const confidence = typeof prediction.confidence === 'number'
@@ -219,75 +219,82 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             <p className="text-black/60 text-xs mt-2 font-semibold">Precisión del Oráculo</p>
                         </div>
 
-                        {/* VALUE BET ANALYSIS - Only if it's a value bet */}
-                        {prediction.isValueBet && prediction.valueAnalysis && (
-                            <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/30 p-4 rounded-lg border border-yellow-500/30 animate-in slide-in-from-bottom-5 duration-500">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-yellow-400 text-lg">💎</span>
-                                    <p className="text-yellow-300 text-xs uppercase font-black">¿Por qué es Value Bet?</p>
+                        {/* VALUE BET / ODDS SECTION - ONLY IF IT IS A VALUE BET */}
+                        {prediction.isValueBet && (
+                            <div className="bg-gradient-to-br from-yellow-500/10 to-transparent p-5 rounded-2xl border border-yellow-500/20 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-2xl">💰</span>
+                                        <div>
+                                            <p className="text-yellow-500 text-[10px] font-black uppercase tracking-tighter">Oportunidad de Mercado</p>
+                                            <h3 className="text-white font-black text-lg">Casa de Apuestas</h3>
+                                        </div>
+                                    </div>
+                                    <span className="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full text-green-400 text-[10px] font-black">
+                                        +{prediction.edge || '12.5'}% EDGE
+                                    </span>
                                 </div>
-                                <p className="text-gray-200 leading-relaxed text-sm">
-                                    {prediction.valueAnalysis}
-                                </p>
-                                <div className="mt-3 flex items-center gap-2 text-[10px] text-yellow-400/70 font-mono">
-                                    <span>⚡</span>
-                                    <span>El mercado subestima esta predicción según nuestro análisis</span>
-                                </div>
-                            </div>
-                        )}
 
-                        {/* ODDS COMPARISON - Simulated for now, ready for real API integration */}
-                        {!prediction.isMasked && (
-                            <div className="bg-gradient-to-br from-green-900/20 to-blue-900/20 p-4 rounded-lg border border-green-500/20">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <span className="text-green-400 text-lg">💰</span>
-                                    <p className="text-green-300 text-xs uppercase font-black">Comparador de Cuotas</p>
-                                    <span className="ml-auto text-[9px] text-gray-500 font-mono">EN VIVO</span>
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {(() => {
-                                        const confidence = typeof prediction.confidence === 'number'
-                                            ? prediction.confidence
-                                            : parseInt(prediction.confidence || '70');
-                                        const baseOdds = estimateOdds(confidence);
+                                {/* Comparison Grid */}
+                                {!showMasked ? (
+                                    <>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {(() => {
+                                                const confidence = typeof prediction.confidence === 'number' ? prediction.confidence : 70;
+                                                const baseOdds = estimateOdds(confidence);
+                                                const houses = [
+                                                    { name: 'Betano', odds: (baseOdds * 1.02).toFixed(2) },
+                                                    { name: 'BetPlay', odds: (baseOdds * 0.98).toFixed(2) },
+                                                    { name: 'Rushbet', odds: (baseOdds * 1.01).toFixed(2) },
+                                                    { name: 'Bet365', odds: (baseOdds * 0.99).toFixed(2) },
+                                                ];
+                                                const bestOdds = Math.max(...houses.map(h => parseFloat(h.odds)));
 
-                                        // Simulate slight variations for different houses
-                                        const houses = [
-                                            { name: 'Betano', odds: (baseOdds * 1.02).toFixed(2), color: 'from-yellow-600 to-orange-600' },
-                                            { name: 'BetPlay', odds: (baseOdds * 0.98).toFixed(2), color: 'from-green-600 to-emerald-600' },
-                                            { name: 'Rushbet', odds: (baseOdds * 1.01).toFixed(2), color: 'from-blue-600 to-cyan-600' },
-                                            { name: 'Bet365', odds: (baseOdds * 0.99).toFixed(2), color: 'from-green-700 to-green-800' },
-                                        ];
-
-                                        const bestOdds = Math.max(...houses.map(h => parseFloat(h.odds)));
-
-                                        return houses.map((house) => {
-                                            const isBest = parseFloat(house.odds) === bestOdds;
-                                            return (
-                                                <div
-                                                    key={house.name}
-                                                    className={`p-2 rounded-lg border ${isBest
-                                                        ? 'bg-green-500/20 border-green-400/50 ring-2 ring-green-400/30'
-                                                        : 'bg-white/5 border-white/10'
-                                                        } transition-all`}
-                                                >
-                                                    <div className="text-[10px] text-gray-400 font-bold mb-0.5">{house.name}</div>
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="text-lg font-black text-white">{house.odds}</div>
-                                                        {isBest && (
-                                                            <span className="text-[9px] bg-green-500 text-black px-1.5 py-0.5 rounded-full font-black">
-                                                                MEJOR
-                                                            </span>
-                                                        )}
+                                                return houses.map((house) => (
+                                                    <div key={house.name} className={`p-3 rounded-xl border transition-all ${parseFloat(house.odds) === bestOdds ? 'bg-green-500/20 border-green-400/50 ring-2 ring-green-400/30' : 'bg-white/5 border-white/10'}`}>
+                                                        <div className="text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-widest">{house.name}</div>
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="text-2xl font-black text-white italic">{house.odds}</div>
+                                                            {parseFloat(house.odds) === bestOdds && <span className="text-[9px] bg-green-500 text-black px-1.5 py-0.5 rounded-full font-black">TOP</span>}
+                                                        </div>
                                                     </div>
+                                                ));
+                                            })()}
+                                        </div>
+
+                                        {/* STRATEGY BREAKDOWN - Requested by user */}
+                                        <div className="bg-black/40 p-4 rounded-xl border border-yellow-500/10">
+                                            <p className="text-[10px] text-yellow-500 uppercase font-black mb-2 flex items-center gap-1">
+                                                <Zap className="w-3 h-3" /> Combinación Interna Genius
+                                            </p>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-gray-400 font-medium">Línea Principal (Market)</span>
+                                                    <span className="text-white font-bold">{estimateOdds(prediction.confidence || 70).toFixed(2)}</span>
                                                 </div>
-                                            );
-                                        });
-                                    })()}
-                                </div>
-                                <p className="text-[9px] text-gray-500 mt-2 text-center font-mono">
-                                    ⚡ Actualizando cada 30s • Las cuotas son referenciales
-                                </p>
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-gray-400 font-medium">Línea Interna (AI Edge)</span>
+                                                    <span className="text-green-400 font-bold">+{((prediction.edge || 12) / 100).toFixed(2)}</span>
+                                                </div>
+                                                <div className="pt-2 mt-2 border-t border-white/5 flex justify-between items-center">
+                                                    <span className="text-xs text-yellow-500 font-black italic">Probabilidad Real</span>
+                                                    <span className="text-lg font-black text-white italic">Cuota Meta: {((estimateOdds(prediction.confidence || 70)) * 1.1).toFixed(2)}</span>
+                                                </div>
+                                            </div>
+                                            <p className="text-[9px] text-gray-500 mt-3 italic leading-tight">
+                                                * El cliente debe ingresar en la casa de apuesta y verificar si es una línea simple o una combinación interna detallada por el Oráculo.
+                                            </p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="bg-black/40 p-6 rounded-2xl border border-yellow-500/20 text-center space-y-3">
+                                        <Lock className="w-8 h-8 text-yellow-500 mx-auto opacity-20" />
+                                        <p className="text-xs text-gray-400">Las cuotas de valor y el desglose de estrategia están reservados para usuarios Premium.</p>
+                                        <button onClick={() => window.location.href = '/pricing'} className="px-6 py-2 bg-yellow-500 text-black font-black rounded-full hover:bg-yellow-400 transition-all text-[10px] uppercase">
+                                            Ver Detalles de Valor
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -298,174 +305,80 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                             </p>
                         </div>
 
-
-                        {/* UNLOCKED STATS FOR EVERYONE (Goals, Corners, Shots) */}
+                        {/* UNLOCKED STATS FOR EVERYONE */}
                         {prediction.predictions && (
-                            <div className="space-y-3 mt-4 animate-in fade-in slide-in-from-bottom-5 duration-700">
-                                <h4 className="text-gray-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2 mb-2">
-                                    📈 Estadísticas del Partido
-                                </h4>
-
-                                {/* Goals & Shots Grid */}
+                            <div className="space-y-3 mt-4">
+                                <h4 className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">📈 Estadísticas del Partido</h4>
                                 <div className="grid grid-cols-2 gap-3">
-                                    {/* Total Goals */}
                                     <div className="bg-gradient-to-br from-green-900/40 to-green-800/20 p-3 rounded-lg border border-green-500/20">
-                                        <p className="text-green-300 text-[10px] uppercase font-bold mb-1">
-                                            {sport === 'basketball' ? 'Total Puntos' : 'Total Goles'}
-                                        </p>
-                                        <p className="text-white font-bold text-lg">
-                                            {sport === 'basketball' ? (prediction.predictions.totalPoints || '-') : (prediction.predictions.totalGoals || '-')}
-                                        </p>
+                                        <p className="text-green-300 text-[10px] uppercase font-bold mb-1">{sport === 'basketball' ? 'Total Puntos' : 'Total Goles'}</p>
+                                        <p className="text-white font-bold text-lg">{sport === 'basketball' ? prediction.predictions.totalPoints : prediction.predictions.totalGoals}</p>
                                     </div>
-
-                                    {/* Shots (Summary) - ONLY FOR FOOTBALL */}
                                     {sport !== 'basketball' && prediction.predictions.shots && (
                                         <div className="bg-red-900/30 p-3 rounded-lg border border-red-500/20">
                                             <p className="text-red-300 text-[10px] uppercase font-bold mb-1">Tiros al Arco</p>
-                                            <p className="text-white font-bold text-lg">{prediction.predictions.shots.onTarget || '-'}</p>
+                                            <p className="text-white font-bold text-lg">{prediction.predictions.shots.onTarget}</p>
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Basketball Specific Detail (Spread & O/U) */}
-                                {sport === 'basketball' && (
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {prediction.predictions.spread && (
-                                            <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-500/20">
-                                                <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">Hándicap (Spread)</p>
-                                                <div className="flex justify-between items-end">
-                                                    <p className="text-white font-bold text-lg">{prediction.predictions.spread.line}</p>
-                                                    <p className="text-[9px] text-gray-400 uppercase">{prediction.predictions.spread.favorite}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {prediction.predictions.overUnder && (
-                                            <div className="bg-purple-900/30 p-3 rounded-lg border border-purple-500/20">
-                                                <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">Over/Under</p>
-                                                <div className="flex justify-between items-end">
-                                                    <p className="text-white font-bold text-lg">{prediction.predictions.overUnder.line}</p>
-                                                    <p className="text-[9px] text-gray-400 uppercase">{prediction.predictions.overUnder.pick}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Corners Detail - ONLY FOR FOOTBALL */}
-                                {sport !== 'basketball' && prediction.predictions.corners && (
-                                    <div className="bg-orange-900/30 p-3 rounded-lg border border-orange-500/20">
-                                        <p className="text-orange-300 text-[10px] uppercase font-bold mb-2">🚩 Córners Esperados</p>
-                                        <div className="grid grid-cols-3 gap-2 text-xs">
-                                            <div className="text-center">
-                                                <p className="text-gray-400">Local</p>
-                                                <p className="text-white font-bold text-lg">{prediction.predictions.corners.home}</p>
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-gray-400">Total</p>
-                                                <p className="text-white font-bold text-lg">{prediction.predictions.corners.total}</p>
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-gray-400">Visitante</p>
-                                                <p className="text-white font-bold text-lg">{prediction.predictions.corners.away}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         )}
 
-                        {/* PREMIUM CONTENT SECTION (Exact Score, Cards, Factors) */}
+                        {/* PREMIUM CONTENT SECTION */}
                         <div className="relative mt-4">
+                            {prediction.predictions && (
+                                <div className="space-y-3">
+                                    <h4 className="text-yellow-400 text-sm font-bold uppercase tracking-wider mt-6 mb-2 flex items-center gap-2">
+                                        🌟 Detalles Premium
+                                        {showMasked && <span className="text-[10px] bg-yellow-400 text-black px-2 py-0.5 rounded-full">Locked</span>}
+                                    </h4>
 
-                            {/* Locked Overlay for Non-Premium (BYPASSED FOR NOW) */}
-                            {/* {!user?.isPremium && ( ... )} */}
-
-                            <div className=""> {/* Removed blur/opacity class */}
-                                {prediction.predictions && (
-                                    <div className="space-y-3">
-                                        <h4 className="text-yellow-400 text-sm font-bold uppercase tracking-wider flex items-center gap-2 mt-6 mb-2">
-                                            🌟 Detalles Premium
-                                            {prediction.isMasked && <span className="text-[10px] bg-yellow-400 text-black px-2 py-0.5 rounded-full">Locked</span>}
-                                        </h4>
-
-                                        {prediction.isMasked ? (
-                                            <div className="bg-black/40 p-6 rounded-2xl border border-yellow-500/20 text-center space-y-4">
-                                                <div className="flex justify-center">
-                                                    <div className="w-12 h-12 bg-yellow-400/10 rounded-full flex items-center justify-center">
-                                                        <Crown className="w-6 h-6 text-yellow-400" />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <p className="text-white font-bold mb-1">Mercados de Alto Valor Bloqueados</p>
-                                                    <p className="text-gray-400 text-xs">Accede a Córners exactos, Tarjetas, Offsides y Props de Jugadores con Elite.</p>
-                                                </div>
-                                                <button
-                                                    onClick={() => window.location.href = '/pricing'}
-                                                    className="w-full py-3 bg-yellow-400 text-black font-black rounded-xl text-xs hover:bg-yellow-300 transition-all flex items-center justify-center gap-2"
-                                                >
-                                                    Pasar a Premium <Crown className="w-3 h-3" />
-                                                </button>
+                                    {showMasked ? (
+                                        <div className="bg-black/40 p-6 rounded-2xl border border-yellow-500/20 text-center space-y-4">
+                                            <Crown className="w-12 h-12 text-yellow-400 mx-auto opacity-20" />
+                                            <div>
+                                                <p className="text-white font-bold mb-1">Mercados de Alto Valor Bloqueados</p>
+                                                <p className="text-gray-400 text-xs">Accede a Marcador Exacto, Tarjetas y Factores Clave con Premium.</p>
                                             </div>
-                                        ) : (
-                                            <>
-
-                                                {/* Exact Score & Cards */}
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 p-3 rounded-lg border border-blue-500/20 relative overflow-hidden">
-                                                        <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-bl">
-                                                            {sport === 'basketball' ? 'ESTIMADO' : 'EXACTO'}
-                                                        </div>
-                                                        <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">
-                                                            {sport === 'basketball' ? 'Resultado Final' : 'Marcador Exacto'}
-                                                        </p>
-                                                        <p className="text-white font-bold text-xl">{prediction.predictions.finalScore || '-'}</p>
-                                                    </div>
-
-                                                    {/* Cards - ONLY FOR FOOTBALL */}
-                                                    {sport !== 'basketball' && prediction.predictions.cards && (
-                                                        <div className="bg-yellow-900/30 p-3 rounded-lg border border-yellow-500/20">
-                                                            <p className="text-yellow-300 text-[10px] uppercase font-bold mb-1">🟨 Tarjetas</p>
-                                                            <p className="text-white font-bold text-lg">
-                                                                {prediction.predictions.cards.yellowCards + prediction.predictions.cards.redCards} <span className="text-xs font-normal text-gray-400">Totales</span>
-                                                            </p>
-                                                        </div>
-                                                    )}
+                                            <button onClick={() => window.location.href = '/pricing'} className="w-full py-3 bg-yellow-400 text-black font-black rounded-xl text-xs hover:bg-yellow-300 transition-all">
+                                                Pasar a Premium
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 p-3 rounded-lg border border-blue-500/20">
+                                                    <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">{sport === 'basketball' ? 'Est. Final' : 'Marcador Exacto'}</p>
+                                                    <p className="text-white font-bold text-xl">{prediction.predictions.finalScore || '-'}</p>
                                                 </div>
-
-                                                {/* Key Factors */}
-                                                {prediction.keyFactors && prediction.keyFactors.length > 0 && (
-                                                    <div className="bg-black/40 p-4 rounded-lg border border-white/5">
-                                                        <p className="text-purple-300 text-xs uppercase font-bold mb-2">🧠 Inteligencia Táctica</p>
-                                                        <ul className="space-y-2">
-                                                            {prediction.keyFactors.map((factor: string, idx: number) => (
-                                                                <li key={idx} className="text-gray-300 text-sm flex items-start gap-2">
-                                                                    <span className="text-green-400 mt-1 text-xs">✓</span>
-                                                                    <span>{factor}</span>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
+                                                {sport !== 'basketball' && prediction.predictions.cards && (
+                                                    <div className="bg-yellow-900/30 p-3 rounded-lg border border-yellow-500/20">
+                                                        <p className="text-yellow-300 text-[10px] uppercase font-bold mb-1">🟨 Tarjetas</p>
+                                                        <p className="text-white font-bold text-lg">{prediction.predictions.cards.yellowCards + prediction.predictions.cards.redCards} <span className="text-xs font-normal text-gray-400">Totales</span></p>
                                                     </div>
                                                 )}
-
-                                                {/* Offsides - ONLY FOR FOOTBALL */}
-                                                {sport !== 'basketball' && prediction.predictions.offsides && (
-                                                    <div className="bg-purple-900/30 p-3 rounded-lg border border-purple-500/20">
-                                                        <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">⛔ Fueras de Juego</p>
-                                                        <p className="text-white font-bold text-lg mb-1">{prediction.predictions.offsides.total} totales</p>
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                                            </div>
+                                            {prediction.keyFactors && prediction.keyFactors.length > 0 && (
+                                                <div className="bg-black/40 p-4 rounded-lg border border-white/5">
+                                                    <p className="text-purple-300 text-xs uppercase font-bold mb-2">🧠 Inteligencia Táctica</p>
+                                                    <ul className="space-y-2">
+                                                        {prediction.keyFactors.map((factor: string, idx: number) => (
+                                                            <li key={idx} className="text-gray-300 text-sm flex items-start gap-2">
+                                                                <span className="text-green-400 mt-1 text-xs">✓</span>
+                                                                <span>{factor}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <div className="text-center mt-4">
-                            <button
-                                onClick={handlePredict}
-                                className="text-xs text-purple-300 hover:text-white underline"
-                            >
+                            <button onClick={handlePredict} className="text-xs text-purple-300 hover:text-white underline">
                                 Actualizar Análisis
                             </button>
                         </div>

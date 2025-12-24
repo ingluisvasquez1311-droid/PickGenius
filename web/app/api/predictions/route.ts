@@ -51,13 +51,14 @@ export async function POST(request: NextRequest) {
         // 1. Fetch real match data in PARALLEL
         console.log(`📡 [Prediction API] Fetching data for Game ${gameId}...`);
 
-        const [gameRes, statsRes, oddsRes] = await Promise.all([
+        const [gameRes, statsRes, oddsRes, h2hRes] = await Promise.all([
             sportsDataService.makeRequest(`/event/${gameId}`).catch(err => {
                 console.error("Error fetching game:", err);
                 return null;
             }),
             sportsDataService.makeRequest(`/event/${gameId}/statistics`).catch(() => null),
-            sportsDataService.getMatchOdds(Number(gameId)).catch(() => null)
+            sportsDataService.getMatchOdds(Number(gameId)).catch(() => null),
+            sportsDataService.getMatchH2H(Number(gameId)).catch(() => null)
         ]);
 
         if (!gameRes) {
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
         const event = gameRes.event || gameRes;
         const statistics = statsRes || {};
         const odds = oddsRes?.markets || [];
+        const h2h = h2hRes || {};
 
         console.log(`✅ [Prediction API] Data fetched for:`, event.name || gameId);
 
@@ -82,6 +84,18 @@ export async function POST(request: NextRequest) {
             status: event.status?.description || 'Scheduled',
             startTime: event.startTimestamp,
             tournament: event.tournament?.name,
+            lastPeriod: event.lastPeriod,
+            timeElapsed: event.time?.played,
+            remainingTime: (event.time?.max || 0) - (event.time?.played || 0),
+            periodScores: {
+                home: event.homeScore,
+                away: event.awayScore
+            },
+            h2hHistory: h2h.events?.slice(0, 5).map((e: any) => ({
+                score: `${e.homeScore?.current}-${e.awayScore?.current}`,
+                winner: e.winnerCode === 1 ? 'Home' : (e.winnerCode === 2 ? 'Away' : 'Draw'),
+                date: new Date(e.startTimestamp * 1000).toLocaleDateString()
+            })),
             statistics: statistics,
             marketOdds: odds.map((m: any) => ({
                 marketName: m.marketName,
@@ -99,58 +113,66 @@ export async function POST(request: NextRequest) {
 
         if (sport === 'basketball') {
             const isNBA = matchContext.tournament?.toLowerCase().includes('nba');
+            const totalMinutes = isNBA ? 48 : 40;
+            const currentTotal = homeScore + awayScore;
+
             prompt = `
-            You are an expert NBA and International Basketball analyst speaking SPANISH.
+            Eres un experto analista de NBA y Baloncesto Internacional (FIBA) hablando en ESPAÑOL.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
-            **TOURNAMENT:** ${matchContext.tournament}
+            **TORNEO:** ${matchContext.tournament}
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
+            ${matchContext.h2hHistory ? `**HISTORIAL H2H (Últimos 5):** ${JSON.stringify(matchContext.h2hHistory)}` : ''}
+            ${isLive ? `**TIEMPO JUGADO:** ${Math.floor((matchContext.timeElapsed || 0) / 60)} min de ${totalMinutes}
+            **PROGRESIÓN POR PERIODOS:**
+            Local: Q1:${matchContext.periodScores.home?.period1 || 0}, Q2:${matchContext.periodScores.home?.period2 || 0}, Q3:${matchContext.periodScores.home?.period3 || 0}, Q4:${matchContext.periodScores.home?.period4 || 0}
+            Visitante: Q1:${matchContext.periodScores.away?.period1 || 0}, Q2:${matchContext.periodScores.away?.period2 || 0}, Q3:${matchContext.periodScores.away?.period3 || 0}, Q4:${matchContext.periodScores.away?.period4 || 0}` : ''}
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
-            ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
 
             CRITICAL CONTEXT & MARKETS:
-            - If this is NBA: Matches are 48 minutes. Scores usually range from 190 to 240 total points.
-            - If this is NOT NBA (FIBA, EuroLeague, ACB, etc.): Matches are 40 minutes. Scores vary but ALMOST NEVER exceed 180 total points.
-            - ANALYZE SPECIAL MARKETS: 1st Quarter points, Player Props, and Total Points.
-            - VALUE BET ANALYSIS: Compare your calculated probability with the provided MARKET ODDS. If the odds are higher than your probability suggests (e.g. you see 70% win but odds are 2.50), identify it as a "Value Bet".
-            - Current Tournament is: ${matchContext.tournament}. Use ONLY realistic lines for this specific league.
+            - ANÁLISIS DE VOLUMEN (PRE-MATCH): Observa el historial H2H. Si los enfrentamientos previos suelen superar los 220 puntos (NBA) o 160 (FIBA), mantén esa tendencia a menos que haya bajas clave.
+            - SI ES NBA: Partidos de 48 min. Si el marcador actual ya es alto (ej. 120 total a mitad del partido), el "Under" es muy arriesgado a menos que el ritmo baje drásticamente.
+            - SI ES FIBA/LIGAS EUROPEAS: Partidos de 40 min. Ritmo más pausado.
+            - ANALIZA EL "PACE" (RITMO): Calcula la proyección final basándote en los puntos actuales vs tiempo transcurrido. NO predigas un total final menor al marcador actual.
+            - VALUE BET ANALYSIS: Si el mercado (Odds) ofrece una línea que no coincide con tu análisis de ritmo y volumen histórico, identifícalo como Value Bet.
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}", 
                 "confidence": 85,
-                "reasoning": "Análisis detallado en ESPAÑOL explicando por qué ganará el equipo...",
-                "bettingTip": "${matchContext.home} -5.5",
-                "advancedMarkets": { "firstQuarter": "Over 52.5", "drawNoBet": "N/A - Basketball" },
+                "reasoning": "Análisis táctico en ESPAÑOL resaltando el ritmo (pace) actual y la proyección de puntos...",
+                "bettingTip": "Pick recomendado ajustado al ritmo",
+                "advancedMarkets": { "firstQuarter": "...", "drawNoBet": "N/A" },
                 "isValueBet": true,
-                "valueAnalysis": "Explicación de por qué este pick tiene valor según las cuotas de Bet365...",
+                "valueAnalysis": "Explicación del valor comparando el ritmo actual con las cuotas del mercado...",
                 "predictions": {
                     "finalScore": "${isNBA ? '112-105' : '82-78'}",
                     "totalPoints": "${isNBA ? '217' : '160'}",
                     "spread": { "favorite": "${matchContext.home}", "line": -5.5, "recommendation": "Cubrir Hándicap" },
-                    "overUnder": { "line": ${isNBA ? '222.5' : '158.5'}, "pick": "Menos de", "confidence": "Alta" },
+                    "overUnder": { "line": ${isLive ? (currentTotal + 50) : (isNBA ? 222.5 : 158.5)}, "pick": "...", "confidence": "Alta" },
                     "topPlayers": {
-                        "homeTopScorer": { "name": "Jugador A", "predictedPoints": ${isNBA ? 25 : 18}, "predictedRebounds": 8, "predictedAssists": 5 },
-                        "awayTopScorer": { "name": "Jugador B", "predictedPoints": ${isNBA ? 28 : 16}, "predictedRebounds": 6, "predictedAssists": 4 }
+                        "homeTopScorer": { "name": "...", "predictedPoints": ${isNBA ? 25 : 18} },
+                        "awayTopScorer": { "name": "...", "predictedPoints": ${isNBA ? 28 : 16} }
                     }
                 },
-                "keyFactors": ["Factor en Español 1", "Factor en Español 2", "Factor en Español 3"]
+                "keyFactors": ["Factor 1", "Factor 2", "Factor 3"]
             }
             `;
         } else if (sport === 'football') {
             prompt = `
-            You are an expert Football/Soccer analyst speaking SPANISH.
+            Eres un analista experto de Fútbol/Soccer hablando en ESPAÑOL.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
+            ${matchContext.h2hHistory ? `**HISTORIAL H2H (Últimos 5):** ${JSON.stringify(matchContext.h2hHistory)}` : ''}
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
             ${isLive ? `STATS: ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
             ANALYZE SPECIAL MARKETS (MAX VALUE):
+            - ANÁLISIS DE VOLUMEN: Revisa el historial H2H. Si suelen anotar muchos goles entre ellos, prioriza el "Ambos Anotan" o "Over 2.5".
             - Win by 2+ goals (Ganará por 2+)
             - Most Corners (Mayor número de córners)
             - Both Teams to Score (Ambos equipos anotarán)
             - Shots on Target (Remates a puerta) - e.g. "Player X: 2+ remates"
-            - Player to score 2+ (Anotará 2+)
-            - VALUE BET ANALYSIS: Compare your calculated probability with the provided MARKET ODDS. Identify picks where the market is underestimating the outcome.
+            - VALUE BET ANALYSIS: Compara tu probabilidad calculada con el volumen histórico y las cuotas del mercado. Identifica picks donde el mercado subestima el desenlace.
 
             RETURN JSON ONLY in SPANISH:
             {

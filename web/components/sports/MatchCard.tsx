@@ -13,6 +13,7 @@ interface MatchCardProps {
     homeScore?: number | null;
     awayScore?: number | null;
     status?: 'Programado' | 'En Vivo' | 'Finalizado';
+    statusDescription?: string;
     prediction?: {
         pick: string;
         odds?: string;
@@ -33,6 +34,7 @@ export default function MatchCard({
     homeScore,
     awayScore,
     status = 'Programado',
+    statusDescription,
     prediction,
     eventId,
     sport,
@@ -97,7 +99,9 @@ export default function MatchCard({
                     {isLive && (
                         <span className="flex items-center gap-1.5 px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded-full">
                             <span className="w-1 h-1 rounded-full bg-red-500 animate-ping"></span>
-                            <span className="text-[8px] font-black text-red-500 uppercase">Live</span>
+                            <span className="text-[8px] font-black text-red-500 uppercase">
+                                {statusDescription || 'Live'}
+                            </span>
                         </span>
                     )}
                 </div>
@@ -110,13 +114,15 @@ export default function MatchCard({
 
             <div className="flex items-center p-5 gap-6">
                 {/* Time / Score Status Column */}
-                <div className="w-20 flex flex-col items-center justify-center border-r border-white/5 pr-6">
+                <div className="w-20 col-span-1 flex flex-col items-center justify-center border-r border-white/5 pr-6">
                     {isLive ? (
                         <div className="text-center">
-                            <div className="text-xl font-black italic text-emerald-400">
+                            <div className="text-xl font-black italic text-emerald-400 tabular-nums">
                                 {homeScore ?? 0} - {awayScore ?? 0}
                             </div>
-                            <div className="text-[8px] font-black text-gray-500 uppercase tracking-widest mt-1">En Juego</div>
+                            <div className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest mt-1">
+                                {statusDescription || 'En Juego'}
+                            </div>
                         </div>
                     ) : (
                         <div className="text-center">
