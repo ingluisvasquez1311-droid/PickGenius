@@ -362,10 +362,34 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                 </div>
                                                 <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 p-3 rounded-lg border border-purple-500/20">
                                                     <p className="text-purple-300 text-[10px] uppercase font-bold mb-1">Mercado O/U (Total)</p>
-                                                    <p className="text-white font-bold text-xl">{prediction.predictions.totalPoints || prediction.predictions.overUnder?.line || '-'}</p>
+                                                    <p className="text-white font-bold text-xl">{prediction.predictions.totalPoints || prediction.predictions.totalGoals || prediction.predictions.totalRuns || prediction.predictions.overUnder?.line || '-'}</p>
                                                     <p className="text-[9px] text-purple-200/50 font-bold uppercase">{prediction.predictions.overUnder?.pick || 'Analizado'}</p>
                                                 </div>
                                             </div>
+
+                                            {/* SPECIALIZED MARKETS (CORNERS, CARDS, TOUCHDOWNS) */}
+                                            {(prediction.predictions.corners || prediction.predictions.cards || prediction.predictions.touchdowns) && (
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {prediction.predictions.corners && (
+                                                        <div className="bg-emerald-900/30 p-3 rounded-lg border border-emerald-500/20">
+                                                            <p className="text-emerald-300 text-[10px] uppercase font-bold mb-1">⛳ Córners</p>
+                                                            <p className="text-white font-bold text-lg">{prediction.predictions.corners.total || (prediction.predictions.corners.home + prediction.predictions.corners.away)}</p>
+                                                        </div>
+                                                    )}
+                                                    {prediction.predictions.cards && (
+                                                        <div className="bg-red-900/30 p-3 rounded-lg border border-red-500/20">
+                                                            <p className="text-red-300 text-[10px] uppercase font-bold mb-1">🟨 Tarjetas</p>
+                                                            <p className="text-white font-bold text-lg">{prediction.predictions.cards.yellowCards + (prediction.predictions.cards.redCards || 0)}</p>
+                                                        </div>
+                                                    )}
+                                                    {prediction.predictions.touchdowns && (
+                                                        <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-500/20">
+                                                            <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🏈 Touchdowns</p>
+                                                            <p className="text-white font-bold text-lg">{prediction.predictions.touchdowns.total || (prediction.predictions.touchdowns.home + prediction.predictions.touchdowns.away)}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
 
                                             {/* PLAYER PROJECTIONS (PREMIUM) */}
                                             {prediction.predictions.projections && prediction.predictions.projections.length > 0 && (

@@ -230,10 +230,11 @@ export async function POST(request: NextRequest) {
                     "totalPoints": "48",
                     "spread": { "favorite": "${matchContext.home}", "line": -3.5, "recommendation": "Cubrir" },
                     "overUnder": { "line": 47.5, "pick": "Más de", "confidence": "Alta" },
-                    "topPlayers": {
-                        "homeStat": { "name": "Player A", "yards": 110, "touchdowns": 1 },
-                        "awayStat": { "name": "Player B", "yards": 95, "touchdowns": 1 }
-                    }
+                    "projections": [
+                        { "name": "Quarterback Estrella", "team": "Home", "points": "250.5+", "description": "Yardas de Pase", "confidence": "Alta" },
+                        { "name": "Receptor Clave", "team": "Away", "points": "75.5+", "description": "Yardas Recibidas", "confidence": "Media" }
+                    ],
+                    "touchdowns": { "home": 3, "away": 2, "total": 5 }
                 },
                 "keyFactors": ["Defensa de zona", "Ataque terrestre", "Presión al QB"]
             }
@@ -263,10 +264,10 @@ export async function POST(request: NextRequest) {
                     "totalRuns": "8",
                     "spread": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Win by 2+" },
                     "overUnder": { "line": 8.5, "pick": "Menos de", "confidence": "Media" },
-                    "topPlayers": {
-                        "homeStarter": { "name": "Pitcher A", "predictedStrikeouts": 6, "inningsPitched": 6 },
-                        "awayStarter": { "name": "Pitcher B", "predictedStrikeouts": 4, "inningsPitched": 5 }
-                    }
+                    "projections": [
+                        { "name": "Pitcher A", "team": "Home", "points": "6.5+", "description": "Strikeouts", "confidence": "Alta" },
+                        { "name": "Bateador X", "team": "Away", "points": "1.5+", "description": "Hits/Bases Totales", "confidence": "Media" }
+                    ]
                 },
                 "keyFactors": ["Factor MLB 1", "Factor MLB 2", "Factor MLB 3"]
             }
@@ -295,7 +296,11 @@ export async function POST(request: NextRequest) {
                     "finalScore": "4-2",
                     "totalGoals": "6",
                     "spread": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Cubrir" },
-                    "overUnder": { "line": 6.0, "pick": "Más de", "confidence": "Media" }
+                    "overUnder": { "line": 6.0, "pick": "Más de", "confidence": "Media" },
+                    "projections": [
+                        { "name": "Jugador Estrella", "team": "Home", "points": "3.5+", "description": "Shots on Goal", "confidence": "Alta" },
+                        { "name": "Portero Clave", "team": "Away", "points": "28.5+", "description": "Saves", "confidence": "Media" }
+                    ]
                 },
                 "keyFactors": ["Eficiencia en Power Play", "Rendimiento del Portero", "Fisicalidad"]
             }
