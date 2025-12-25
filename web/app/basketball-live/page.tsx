@@ -1,78 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
 import LiveEventsList from '@/components/LiveEventsList';
 import { toast } from 'sonner';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import Link from 'next/link';
 import ParleyOptimizerBanner from '@/components/ai/ParleyOptimizerBanner';
 import SportHeader from '@/components/sports/SportHeader';
+import { useSportsEvents } from '@/lib/hooks/useSportsEvents';
 
 export default function BasketballLivePage() {
-    const [liveEvents, setLiveEvents] = useState<any[]>([]);
-    const [scheduledEvents, setScheduledEvents] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data: allEvents = [], isLoading: loading, error } = useSportsEvents('basketball');
     const [filter, setFilter] = useState<'all' | 'live' | 'upcoming'>('all');
 
-    useEffect(() => {
-        async function fetchAllEvents() {
-            try {
-                setLoading(true);
-                const now = Date.now();
-                const twelveHoursFromNow = now + (12 * 60 * 60 * 1000); // 12 horas en milisegundos
-                const today = new Date().toISOString().split('T')[0];
-                const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    const { liveEvents, scheduledEvents } = useMemo(() => {
+        return {
+            liveEvents: allEvents.filter(e => e.status.type === 'inprogress'),
+            scheduledEvents: allEvents.filter(e => e.status.type !== 'inprogress')
+        };
+    }, [allEvents]);
 
-                const [liveRes, scheduledTodayRes, scheduledTomorrowRes] = await Promise.all([
-                    fetch('/api/basketball/live'),
-                    fetch(`/api/basketball/scheduled?date=${today}`),
-                    fetch(`/api/basketball/scheduled?date=${tomorrow}`)
-                ]);
-
-                const liveData = await liveRes.json();
-                const scheduledTodayData = await scheduledTodayRes.json();
-                const scheduledTomorrowData = await scheduledTomorrowRes.json();
-
-                if (liveData.success && liveData.data) setLiveEvents(liveData.data);
-
-                let combinedScheduled: any[] = [];
-                if (scheduledTodayData.success && Array.isArray(scheduledTodayData.data)) {
-                    combinedScheduled = [...scheduledTodayData.data];
-                }
-                if (scheduledTomorrowData.success && Array.isArray(scheduledTomorrowData.data)) {
-                    combinedScheduled = [...combinedScheduled, ...scheduledTomorrowData.data];
-                }
-
-                // 🔥 NUEVO: Filtrar para mostrar solo eventos en las próximas 12 horas
-                const filteredScheduled = combinedScheduled.filter((event: any) => {
-                    // Mantener todos los eventos en vivo y finalizados
-                    if (event.status.type === 'inprogress' || event.status.type === 'finished') {
-                        return true;
-                    }
-
-                    // Para eventos "notstarted", verificar que empiecen en las próximas 12 horas
-                    if (event.status.type === 'notstarted') {
-                        const eventStartTime = event.startTimestamp * 1000; // convertir a ms
-                        return eventStartTime <= twelveHoursFromNow;
-                    }
-
-                    return true;
-                });
-
-                console.log(`🏀 [Basketball] Filtered ${combinedScheduled.length} events → ${filteredScheduled.length} within 12 hours`);
-                setScheduledEvents(filteredScheduled);
-
-            } catch (err: any) {
-                console.error("Error fetching events:", err);
-                toast.error("Error al cargar eventos de baloncesto");
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchAllEvents();
-        const interval = setInterval(fetchAllEvents, 60000);
-        return () => clearInterval(interval);
-    }, []);
+    if (error) {
+        toast.error("Error al cargar eventos de baloncesto");
+    }
 
     const featuredMatch = liveEvents.length > 0 ? liveEvents[0] : scheduledEvents[0];
 

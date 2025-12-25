@@ -1,81 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import LiveEventsList from '@/components/LiveEventsList';
 import ParleyOptimizerBanner from '@/components/ai/ParleyOptimizerBanner';
 import SportHeader from '@/components/sports/SportHeader';
 import LiveSportSelector from '@/components/sports/LiveSportSelector';
+import { useSportsEvents } from '@/lib/hooks/useSportsEvents';
 
 export default function FootballLivePage() {
-    const [events, setEvents] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data: events = [], isLoading: loading, error } = useSportsEvents('football');
     const [filter, setFilter] = useState<'all' | 'live' | 'upcoming' | 'finished'>('all');
-
-    useEffect(() => {
-        async function fetchLiveEvents() {
-            try {
-                setLoading(true);
-                const now = Date.now();
-                const twelveHoursFromNow = now + (12 * 60 * 60 * 1000); // 12 horas en milisegundos
-                const today = new Date().toISOString().split('T')[0];
-                const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-
-                const [liveRes, scheduledTodayRes, scheduledTomorrowRes] = await Promise.all([
-                    fetch('/api/football/live'),
-                    fetch(`/api/football/scheduled?date=${today}`),
-                    fetch(`/api/football/scheduled?date=${tomorrow}`)
-                ]);
-
-                const liveData = await liveRes.json();
-                const scheduledTodayData = await scheduledTodayRes.json();
-                const scheduledTomorrowData = await scheduledTomorrowRes.json();
-
-                let allEvents: any[] = [];
-                if (liveData.success && Array.isArray(liveData.data)) allEvents = [...liveData.data];
-
-                const processScheduled = (data: any) => {
-                    if (data.success && Array.isArray(data.data)) {
-                        const scheduledEvents = data.data;
-                        const liveIds = new Set(allEvents.map(e => e.id));
-                        const newScheduled = scheduledEvents.filter((e: any) => !liveIds.has(e.id));
-                        allEvents = [...allEvents, ...newScheduled];
-                    }
-                };
-
-                processScheduled(scheduledTodayData);
-                processScheduled(scheduledTomorrowData);
-
-                // 🔥 NUEVO: Filtrar para mostrar solo eventos en las próximas 12 horas
-                const filteredEvents = allEvents.filter((event: any) => {
-                    // Mantener todos los eventos en vivo y finalizados
-                    if (event.status.type === 'inprogress' || event.status.type === 'finished') {
-                        return true;
-                    }
-
-                    // Para eventos "notstarted", verificar que empiecen en las próximas 12 horas
-                    if (event.status.type === 'notstarted') {
-                        const eventStartTime = event.startTimestamp * 1000; // convertir a ms
-                        return eventStartTime <= twelveHoursFromNow;
-                    }
-
-                    return true;
-                });
-
-                console.log(`⚽ [Football] Filtered ${allEvents.length} events → ${filteredEvents.length} within 12 hours`);
-                setEvents(filteredEvents);
-            } catch (err: any) {
-                console.error('Fetch error:', err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchLiveEvents();
-        const interval = setInterval(fetchLiveEvents, 60000);
-        return () => clearInterval(interval);
-    }, []);
 
     let filteredEvents = events;
     let title = 'Fútbol: Cartelera Proyectada';

@@ -11,6 +11,7 @@ class GeneralizedSofaScoreService {
             'soccer': 1,
             'basketball': 2,
             'tennis': 3,
+            'ice-hockey': 4,
             'icehockey': 4,
             'nhl': 4,
             'baseball': 16,
@@ -94,8 +95,9 @@ class GeneralizedSofaScoreService {
     /**
      * Obtener eventos programados para las próximas 12 horas
      */
-    async getScheduledEvents(sport, dateString) {
+    async getScheduledEvents(sport, dateString, windowHours = 12) {
         const sportId = this.getSportId(sport);
+        // Find the "canonical" name for Sofascore (usually the first key with that ID)
         const sportName = Object.keys(this.sportsMap).find(key => this.sportsMap[key] === sportId) || sport;
         const date = dateString || new Date().toISOString().split('T')[0];
 
@@ -107,12 +109,14 @@ class GeneralizedSofaScoreService {
 
         if (result.success && result.data && result.data.events) {
             const now = Math.floor(Date.now() / 1000);
-            const twelveHoursLater = now + (12 * 60 * 60);
+            const windowLimit = now + (windowHours * 60 * 60);
 
-            // Filtrar solo los que empiezan en las próximas 12 horas
+            // Filtrar solo los que empiezan en el futuro y dentro de la ventana
             result.data.events = result.data.events.filter(event => {
                 const startTimestamp = event.startTimestamp || 0;
-                return startTimestamp > now && startTimestamp <= twelveHoursLater;
+                // Excluir eventos que ya pasaron o que están muy lejos
+                // También excluimos los que ya están en vivo (para evitar duplicidad si se juntan listas)
+                return startTimestamp > now && startTimestamp <= windowLimit;
             });
         }
 

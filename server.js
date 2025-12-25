@@ -13,6 +13,14 @@ const sofascoreRoutes = require('./src/routes/sofascore');
 const nbaPlayerPropsRoutes = require('./src/routes/nbaPlayerProps');
 const universalSportsRoutes = require('./src/routes/universalSports');
 const proxyRoutes = require('./src/routes/proxy');
+const footballRoutes = require('./src/routes/football');
+const basketballRoutes = require('./src/routes/basketball');
+const tennisRoutes = require('./src/routes/tennis');
+const americanFootballRoutes = require('./src/routes/americanFootball');
+const iceHockeyRoutes = require('./src/routes/iceHockey');
+const baseballRoutes = require('./src/routes/baseball');
+const errorHandler = require('./src/middleware/errorHandler');
+const rateLimiter = require('./src/middleware/rateLimiter');
 
 
 
@@ -21,6 +29,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
+app.use(rateLimiter(100, 15 * 60 * 1000)); // Limite de 100 peticiones cada 15 min
 
 // CORS middleware
 app.use((req, res, next) => {
@@ -177,6 +186,16 @@ app.use('/api/nba/players', nbaPlayerPropsRoutes);
 // Universal Sports API (Baseball, NHL, Tennis, etc.)
 app.use('/api/sports', universalSportsRoutes);
 
+// Specific Sport Routes
+app.use('/api/football', footballRoutes);
+app.use('/api/basketball', basketballRoutes);
+app.use('/api/tennis', tennisRoutes);
+app.use('/api/american-football', americanFootballRoutes);
+app.use('/api/nfl', americanFootballRoutes);
+app.use('/api/ice-hockey', iceHockeyRoutes);
+app.use('/api/nhl', iceHockeyRoutes);
+app.use('/api/baseball', baseballRoutes);
+
 // General Proxy API
 app.use('/api/proxy', proxyRoutes);
 
@@ -257,7 +276,29 @@ app.get('/', (req, res) => {
                 sync: 'POST /api/sync'
             },
             basketball: {
-                live: 'GET /api/sofascore/proxy/sport/basketball/events/live'
+                live: 'GET /api/basketball/live',
+                scheduled: 'GET /api/basketball/scheduled',
+                finished: 'GET /api/basketball/finished'
+            },
+            tennis: {
+                live: 'GET /api/tennis/live',
+                scheduled: 'GET /api/tennis/scheduled',
+                finished: 'GET /api/tennis/finished'
+            },
+            nhl: {
+                live: 'GET /api/ice-hockey/live',
+                scheduled: 'GET /api/ice-hockey/scheduled',
+                finished: 'GET /api/ice-hockey/finished'
+            },
+            nfl: {
+                live: 'GET /api/american-football/live',
+                scheduled: 'GET /api/american-football/scheduled',
+                finished: 'GET /api/american-football/finished'
+            },
+            baseball: {
+                live: 'GET /api/baseball/live',
+                scheduled: 'GET /api/baseball/scheduled',
+                finished: 'GET /api/baseball/finished'
             },
             cache: {
                 stats: 'GET /api/cache/stats',
@@ -276,13 +317,25 @@ const server = app.listen(PORT, () => {
     if (process.env.SCRAPER_API_KEY) console.log('🔍 [Startup Check] SCRAPER_API_KEY found (Single): Yes');
 
     console.log('='.repeat(60));
+    console.log('   ✅ PICKGENIUSPRO - ALL SPORTS READY');
+    console.log('='.repeat(60));
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
-    console.log(`📖 API docs: http://localhost:${PORT}/`);
+    console.log('');
+    console.log('   🔥 Sports Available:');
+    console.log('   ⚽ Football    - /api/football/[live|scheduled|finished]');
+    console.log('   🏀 Basketball - /api/basketball/[live|scheduled|finished]');
+    console.log('   🎾 Tennis     - /api/tennis/[live|scheduled|finished]');
+    console.log('   🏈 NFL        - /api/american-football/[live|scheduled|finished]');
+    console.log('   🏒 NHL        - /api/ice-hockey/[live|scheduled|finished]');
+    console.log('   ⚾ Baseball   - /api/baseball/[live|scheduled|finished]');
     console.log('='.repeat(60));
     console.log('✅ All services ready - using Sofascore for live data');
     console.log('='.repeat(60));
 });
+
+// Global Error Handler (Must be the last middleware)
+app.use(errorHandler);
 
 // Aumentar timeouts para conexiones lentas de túneles (Ngrok/LocalTunnel)
 server.keepAliveTimeout = 65000; // 65 segundos

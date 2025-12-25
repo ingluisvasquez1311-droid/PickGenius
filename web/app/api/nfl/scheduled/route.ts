@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sportsDataService } from '@/lib/services/sportsDataService';
+import { dateParamSchema } from '@/lib/schemas/paramSchema';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+        const dateRaw = searchParams.get('date') || new Date().toISOString().split('T')[0];
+
+        const dateValidation = dateParamSchema.safeParse(dateRaw);
+        if (!dateValidation.success) {
+            return NextResponse.json({ success: false, message: 'Formato de fecha inválido' }, { status: 400 });
+        }
+
+        const date = dateValidation.data;
 
         const events = await sportsDataService.getScheduledEventsBySport('nfl', date);
 

@@ -1,42 +1,14 @@
-// web/app/american-football/page.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import GroupedMatchesList from '@/components/sports/GroupedMatchesList';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { sportsDataService, type SportsDataEvent } from '@/lib/services/sportsDataService';
 import PlayerPropsPredictor from '@/components/basketball/PlayerPropsPredictor';
 import ParleyOptimizerBanner from '@/components/ai/ParleyOptimizerBanner';
+import { useSportsEvents } from '@/lib/hooks/useSportsEvents';
 
 export default function AmericanFootballPage() {
-    const [games, setGames] = useState<SportsDataEvent[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchGames() {
-            setLoading(true);
-            try {
-                if (typeof sportsDataService.getEventsBySport === 'function') {
-                    const allGames = await sportsDataService.getEventsBySport('american-football');
-                    // Filter specifically for NFL games (and maybe NCAA top tier if needed, but sticking to NFL for now)
-                    const nflGames = allGames ? allGames.filter(g =>
-                        g.tournament.name.includes('NFL') ||
-                        g.tournament.uniqueTournament?.name.includes('NFL')
-                    ) : [];
-                    setGames(nflGames);
-                } else {
-                    console.warn('getEventsBySport not implemented yet, showing empty state');
-                    setGames([]);
-                }
-            } catch (error) {
-                console.error('Error fetching american football games:', error);
-                setGames([]);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchGames();
-    }, []);
+    const { data: games = [], isLoading: loading } = useSportsEvents('american-football');
 
     return (
         <main className="min-h-screen pb-20 bg-[#050505] text-white">

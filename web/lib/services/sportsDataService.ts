@@ -73,7 +73,7 @@ export interface SportsDataEvent {
     status: {
         code: number;
         description: string;
-        type: 'notstarted' | 'inprogress' | 'finished';
+        type: 'notstarted' | 'inprogress' | 'finished' | 'scheduled' | 'canceled' | 'postponed';
     };
     lastPeriod?: string;
     time?: {
@@ -166,9 +166,10 @@ class SportsDataService {
     async getScheduledEventsBySport(sport: string, date?: string): Promise<SportsDataEvent[]> {
         try {
             const isServer = typeof window === 'undefined';
+            // Use sport-specific route (e.g., /api/football/scheduled)
             const apiUrl = isServer
-                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/sports/${sport}/scheduled`
-                : `/api/sports/${sport}/scheduled`;
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/${sport}/scheduled`
+                : `/api/${sport}/scheduled`;
 
             const queryParams = date ? `?date=${date}` : '';
             const response = await fetch(`${apiUrl}${queryParams}`, {
@@ -177,7 +178,7 @@ class SportsDataService {
 
             if (!response.ok) return [];
             const result = await response.json();
-            return result.data || [];
+            return result.events || result.data || [];
         } catch (error) {
             console.error(`❌ Error fetching scheduled ${sport}:`, error);
             return [];
@@ -400,38 +401,45 @@ class SportsDataService {
             this.getScheduledEventsBySport(sport, tomorrow)
         ]);
 
+        const liveEvents = liveData?.events || [];
+        const liveIds = new Set(liveEvents.map(e => e.id));
+
+        // Filter out matches that are already LIVE from the scheduled lists
+        const cleanToday = (Array.isArray(scheduledToday) ? scheduledToday : [])
+            .filter(e => !liveIds.has(e.id));
+
+        const cleanTomorrow = (Array.isArray(scheduledTomorrow) ? scheduledTomorrow : [])
+            .filter(e => !liveIds.has(e.id));
+
         const allEvents = [
-            ...(liveData?.events || []),
-            ...(Array.isArray(scheduledToday) ? scheduledToday : []),
-            ...(Array.isArray(scheduledTomorrow) ? scheduledTomorrow : [])
+            ...liveEvents,
+            ...cleanToday,
+            ...cleanTomorrow
         ];
 
-        // Remove duplicates
+        // Final deduplication (just in case there's overlap between today and tomorrow or live)
         const uniqueEvents = allEvents.filter((event, index, self) =>
             index === self.findIndex(e => e.id === event.id)
         );
 
         // Filter out old finished matches (older than 2 hours) AND future matches (more than 12 hours away)
-        const now = Date.now() / 1000; // Current time in seconds
-        const twoHoursAgo = now - (2 * 60 * 60); // 2 hours ago in seconds
-        const twelveHoursFromNow = now + (12 * 60 * 60); // 12 hours from now in seconds
+        const now = Date.now() / 1000;
+        const twoHoursAgo = now - (2 * 60 * 60);
+        const twelveHoursFromNow = now + (12 * 60 * 60);
 
         const recentEvents = uniqueEvents.filter((event) => {
-            // For finished events, only keep if they finished within last 2 hours
             if (event.status?.type === 'finished') {
                 return event.startTimestamp > twoHoursAgo;
             }
 
-            // For upcoming events, only keep if they start within next 12 hours
-            if (event.status?.type === 'notstarted') {
+            if (event.status?.type === 'notstarted' || event.status?.type === 'scheduled') {
                 return event.startTimestamp <= twelveHoursFromNow;
             }
 
-            // Keep all in-progress events
             return true;
         });
 
-        console.log(`📊 [${sport.toUpperCase()}] Filtered ${uniqueEvents.length} events → ${recentEvents.length} (recent: 2h past, upcoming: 12h future)`);
+        console.log(`📊 [${sport.toUpperCase()}] Filtered ${uniqueEvents.length} events → ${recentEvents.length} (deduplicated and windowed)`);
 
         return recentEvents;
     }

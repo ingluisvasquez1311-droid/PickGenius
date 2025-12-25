@@ -1,45 +1,16 @@
-// web/app/nhl/page.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import MatchCard from '@/components/sports/MatchCard';
 import GroupedMatchesList from '@/components/sports/GroupedMatchesList';
 import StatWidget from '@/components/sports/StatWidget';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { sportsDataService, type SportsDataEvent } from '@/lib/services/sportsDataService';
 import PlayerPropsPredictor from '@/components/basketball/PlayerPropsPredictor';
 import ParleyOptimizerBanner from '@/components/ai/ParleyOptimizerBanner';
+import { useSportsEvents } from '@/lib/hooks/useSportsEvents';
 
 export default function NHLPage() {
-    const [games, setGames] = useState<SportsDataEvent[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchGames() {
-            setLoading(true);
-            try {
-                // Try to fetch games - method may not exist yet
-                if (typeof sportsDataService.getEventsBySport === 'function') {
-                    const allGames = await sportsDataService.getEventsBySport('ice-hockey');
-                    // Filter specifically for NHL games to avoid clutter
-                    const nhlGames = allGames ? allGames.filter(g =>
-                        g.tournament.name.includes('NHL') ||
-                        g.tournament.uniqueTournament?.name.includes('NHL')
-                    ) : [];
-                    setGames(nhlGames);
-                } else {
-                    console.warn('getEventsBySport not implemented yet, showing empty state');
-                    setGames([]);
-                }
-            } catch (error) {
-                console.error('Error fetching nhl games:', error);
-                setGames([]); // Ensure we set empty array instead of leaving it undefined
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchGames();
-    }, []);
+    const { data: games = [], isLoading: loading } = useSportsEvents('nhl');
 
     return (
         <main className="min-h-screen pb-20 bg-[#050505] text-white">

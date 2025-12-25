@@ -1,32 +1,15 @@
-// web/app/baseball/page.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import MatchCard from '@/components/sports/MatchCard';
 import GroupedMatchesList from '@/components/sports/GroupedMatchesList';
 import StatWidget from '@/components/sports/StatWidget';
 import SkeletonLoader from '@/components/ui/SkeletonLoader';
-import { sportsDataService, type SportsDataEvent } from '@/lib/services/sportsDataService';
 import PlayerPropsPredictor from '@/components/basketball/PlayerPropsPredictor';
+import { useSportsEvents } from '@/lib/hooks/useSportsEvents';
 
 export default function BaseballPage() {
-    const [games, setGames] = useState<SportsDataEvent[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchGames() {
-            setLoading(true);
-            try {
-                const allGames = await sportsDataService.getEventsBySport('baseball');
-                setGames(allGames);
-            } catch (error) {
-                console.error('Error fetching baseball games:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchGames();
-    }, []);
+    const { data: games = [], isLoading: loading } = useSportsEvents('baseball');
 
     return (
         <main className="min-h-screen pb-20 bg-[#050505] text-white">
