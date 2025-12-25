@@ -21,6 +21,7 @@ import {
     canMakePrediction,
     savePrediction,
     getUserPredictions,
+    calculateUserStats,
     type UserProfile,
     type PredictionRecord
 } from '@/lib/userService';
@@ -50,6 +51,7 @@ interface AuthContextType {
     saveToHistory: (prediction: Omit<PredictionRecord, 'uid' | 'timestamp'>) => Promise<void>;
     saveParley: (parleyData: any) => Promise<void>;
     updateUser: (updates: Partial<UserProfile>) => Promise<void>;
+    recalculateStats: () => Promise<void>;
     notifications: AppNotification[];
     unreadCount: number;
     refreshNotifications: () => Promise<void>;
@@ -250,8 +252,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { updateUserProfile } = await import('@/lib/userService');
         await updateUserProfile(user.uid, updates);
 
-        // Optimistic local update
         setUser(prev => prev ? { ...prev, ...updates } : null);
+    };
+
+    const recalculateStats = async () => {
+        if (!user) return;
+        const stats = await calculateUserStats(user.uid);
+        if (stats) {
+            setUser(prev => prev ? { ...prev, stats } : null);
+        }
     };
 
     const refreshNotifications = async () => {
@@ -331,6 +340,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             saveToHistory,
             saveParley,
             updateUser,
+            recalculateStats,
             notifications,
             unreadCount,
             refreshNotifications,

@@ -36,26 +36,21 @@ export default function PerformanceStats() {
         try {
             const history = await getHistory(100);
 
-            // Calculate stats
-            const total = history.length;
-            // TODO: Add result tracking to PredictionRecord
-            // const wins = history.filter(p => p.result === 'win').length;
-            const wins = 0; // Placeholder until result tracking is implemented
-            const winRate = total > 0 ? (wins / total) * 100 : 0;
-            const hotPicks = history.filter(p => p.probability >= 75).length;
+            // Calculate stats using the profile data as source of truth if available
+            const total = user.totalPredictions || history.length;
+            const winRate = user.stats?.winRate || 0;
+            const hotPicks = history.filter(p => (p.probability || p.confidence || 0) >= 75).length;
 
-            // Calculate current streak
-            const streak = 0;
-            // TODO: Implement when result tracking is added
-            // for (let i = 0; i < history.length; i++) {
-            //     if (history[i].result === 'win') streak++;
-            //     else break;
-            // }
+            // Calculate current streak from history
+            let streak = 0;
+            const streakStr = user.stats?.streak || '0w';
+            streak = parseInt(streakStr.replace(/\D/g, '')) || 0;
 
-            // Find best sport (by count for now)
+            // Find best sport
             const sportCounts: Record<string, number> = {};
             history.forEach(p => {
-                sportCounts[p.sport] = (sportCounts[p.sport] || 0) + 1;
+                const sport = p.sport === 'football' ? 'Fútbol' : p.sport === 'basketball' ? 'Básquet' : p.sport;
+                sportCounts[sport] = (sportCounts[sport] || 0) + 1;
             });
 
             let bestSport = 'N/A';
@@ -74,7 +69,7 @@ export default function PerformanceStats() {
                 const dateStr = date.toLocaleDateString('es', { month: 'short', day: 'numeric' });
 
                 const dayPredictions = history.filter(p => {
-                    const pDate = p.timestamp.toDate();
+                    const pDate = p.timestamp instanceof Date ? p.timestamp : (p.timestamp as any)?.toDate?.() || new Date(p.timestamp);
                     return pDate.toDateString() === date.toDateString();
                 }).length;
 

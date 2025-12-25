@@ -33,7 +33,7 @@ import PredictionHistoryItem from '@/components/profile/PredictionHistoryItem';
 type TabType = 'overview' | 'stats' | 'badges' | 'referrals' | 'settings' | 'history' | 'security';
 
 export default function ProfilePage() {
-    const { user, loading, getHistory, signOut, updateUser } = useAuth();
+    const { user, loading, getHistory, signOut, updateUser, recalculateStats } = useAuth();
     const [history, setHistory] = useState<PredictionRecord[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -41,7 +41,15 @@ export default function ProfilePage() {
     const [editData, setEditData] = useState({
         displayName: '',
         bio: '',
-        phoneNumber: ''
+        phoneNumber: '',
+        preferences: {
+            pushAlerts: {
+                hotPicks: true,
+                matchResults: true,
+                valueHunter: false,
+                bankrollAlerts: false
+            }
+        }
     });
     const [isSaving, setIsSaving] = useState(false);
     const router = useRouter();
@@ -53,7 +61,15 @@ export default function ProfilePage() {
             setEditData({
                 displayName: user.displayName || '',
                 bio: user.bio || '',
-                phoneNumber: user.phoneNumber || ''
+                phoneNumber: user.phoneNumber || '',
+                preferences: user.preferences || {
+                    pushAlerts: {
+                        hotPicks: true,
+                        matchResults: true,
+                        valueHunter: false,
+                        bankrollAlerts: false
+                    }
+                }
             });
         }
     }, [user, loading, router]);
@@ -73,6 +89,26 @@ export default function ProfilePage() {
         }
         if (user && activeTab === 'overview') fetchHistory();
     }, [user, getHistory, activeTab]);
+
+    useEffect(() => {
+        if (user) {
+            recalculateStats().catch(console.error);
+        }
+    }, [user]);
+
+    const handleRefreshStats = async () => {
+        setIsSaving(true);
+        try {
+            await recalculateStats();
+            const data = await getHistory(10);
+            setHistory(data);
+            toast.success('Estadísticas sincronizadas');
+        } catch (error) {
+            toast.error('Error al sincronizar estadísticas');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const handleSaveProfile = async () => {
         if (!user) return;
@@ -258,7 +294,12 @@ export default function ProfilePage() {
                                                     <p className="text-gray-500 text-xs font-mono uppercase tracking-widest">Análisis de precisión de los últimos 7 días</p>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-[10px] font-black uppercase tracking-widest">Actualizado en Vivo</div>
+                                                    <button
+                                                        onClick={handleRefreshStats}
+                                                        className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/20 transition-all"
+                                                    >
+                                                        {isSaving ? 'Sincronizando...' : 'Sincronizar Datos'}
+                                                    </button>
                                                 </div>
                                             </div>
                                             <PerformanceChart />
@@ -403,6 +444,46 @@ export default function ProfilePage() {
                                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
                                                     placeholder="+1 234 567 890"
                                                 />
+                                            </div>
+
+                                            {/* Notificaciones Granulares */}
+                                            <div className="pt-6 border-t border-white/5 mt-6">
+                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-purple-400 mb-6 flex items-center gap-2">
+                                                    <Zap className="w-3 h-3" /> Preferencias de Alertas
+                                                </h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {[
+                                                        { key: 'hotPicks', label: 'Hot Picks AI', desc: 'Alertas de alta probabilidad' },
+                                                        { key: 'matchResults', label: 'Resultados Finales', desc: 'Resumen de tus apuestas' },
+                                                        { key: 'valueHunter', label: 'Value Hunter', desc: 'Detección de cuotas desajustadas' },
+                                                        { key: 'bankrollAlerts', label: 'Gestión Bankroll', desc: 'Alertas de riesgo y stake' }
+                                                    ].map((item) => (
+                                                        <label key={item.key} className="flex items-center gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/5 transition-colors group">
+                                                            <div className="flex-1">
+                                                                <div className="text-xs font-bold text-white group-hover:text-purple-400 transition-colors">{item.label}</div>
+                                                                <div className="text-[9px] text-gray-500 uppercase font-medium">{item.desc}</div>
+                                                            </div>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={(editData.preferences.pushAlerts as any)?.[item.key]}
+                                                                onChange={(e) => {
+                                                                    const newPushAlerts = {
+                                                                        ...(editData.preferences.pushAlerts || {}),
+                                                                        [item.key]: e.target.checked
+                                                                    };
+                                                                    setEditData({
+                                                                        ...editData,
+                                                                        preferences: {
+                                                                            ...editData.preferences,
+                                                                            pushAlerts: newPushAlerts as any
+                                                                        }
+                                                                    });
+                                                                }}
+                                                                className="w-5 h-5 rounded-md border-white/10 bg-white/5 text-purple-500 focus:ring-purple-500/50 transition-all accent-purple-500"
+                                                            />
+                                                        </label>
+                                                    ))}
+                                                </div>
                                             </div>
                                             <div className="pt-4">
                                                 <PremiumButton

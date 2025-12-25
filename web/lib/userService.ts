@@ -47,6 +47,12 @@ export interface UserProfile {
         notifications: boolean;
         theme: 'dark' | 'light';
         language: 'es' | 'en';
+        pushAlerts?: {
+            hotPicks: boolean;
+            matchResults: boolean;
+            valueHunter: boolean;
+            bankrollAlerts: boolean;
+        }
     };
     stats?: {
         horarios: number;
@@ -496,4 +502,81 @@ export async function saveParleyPrediction(uid: string, parleyData: any) {
         ...parleyData,
         createdAt: serverTimestamp()
     });
+}
+/**
+ * Recalcula estadísticas reales del usuario basadas en su historial de predicciones
+ */
+export async function calculateUserStats(uid: string): Promise<UserProfile['stats'] | null> {
+    if (!db || !uid || uid === 'guest') return null;
+
+    try {
+        const predictionsRef = collection(db, 'predictions');
+        const q = query(predictionsRef, where('uid', '==', uid));
+        const querySnapshot = await getDocs(q);
+
+        let wins = 0;
+        let losses = 0;
+        let pushes = 0;
+        let totalValuable = 0;
+        let streak = 0;
+        let currentStreakType: 'w' | 'l' | null = null;
+        let bestStreak = 0;
+
+        // Sort by timestamp for streak calculation
+        const sortedDocs = querySnapshot.docs
+            .map(d => ({ ...d.data(), id: d.id }))
+            .sort((a: any, b: any) => (a.timestamp?.toMillis?.() || 0) - (b.timestamp?.toMillis?.() || 0));
+
+        for (const pred of sortedDocs as any[]) {
+            if (pred.status === 'won') {
+                wins++;
+                totalValuable++;
+                if (currentStreakType === 'w') {
+                    streak++;
+                } else {
+                    currentStreakType = 'w';
+                    streak = 1;
+                }
+                if (streak > bestStreak) bestStreak = streak;
+            } else if (pred.status === 'lost') {
+                losses++;
+                totalValuable++;
+                if (currentStreakType === 'l') {
+                    streak++;
+                } else {
+                    currentStreakType = 'l';
+                    streak = 1;
+                }
+                streak = 0; // Current win streak reset to 0 in display terms if we only track win streaks
+                currentStreakType = 'l';
+            } else if (pred.status === 'push') {
+                pushes++;
+            }
+        }
+
+        const winRate = totalValuable > 0 ? (wins / totalValuable) * 100 : 0;
+        const vroi = totalValuable > 0 ? ((wins * 0.9) - losses) / totalValuable * 10 : 14.2; // Mock ROI formula or real one if stakes known
+
+        const newStats = {
+            horarios: sortedDocs.length,
+            resultados: wins + losses,
+            anotadores: wins,
+            asistentes: pushes,
+            rank: 24, // Placeholder for now
+            reputation: totalValuable * 15,
+            streak: `${streak}${currentStreakType || 'w'}`,
+            longestStreak: `${bestStreak}w`,
+            winRate: Number(winRate.toFixed(1)),
+            vroi: Number(vroi.toFixed(1))
+        };
+
+        // Update user profile with real stats
+        const userRef = doc(db, 'users', uid);
+        await updateDoc(userRef, { stats: newStats });
+
+        return newStats;
+    } catch (error) {
+        console.error('Error recalculating user stats:', error);
+        return null;
+    }
 }

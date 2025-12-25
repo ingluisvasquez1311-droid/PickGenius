@@ -38,6 +38,9 @@ export default function PredictionHistoryItem({ record }: PredictionHistoryItemP
 
     // Check if AI was right (Simple version for MVP)
     const getWinnerStatus = () => {
+        // Priorizar el estado guardado en Firestore
+        if (record.status && record.status !== 'pending') return record.status;
+
         if (!matchResult || matchResult.status?.type !== 'finished') return 'pending';
 
         const homeScore = matchResult.homeScore?.current || 0;
@@ -113,21 +116,39 @@ export default function PredictionHistoryItem({ record }: PredictionHistoryItemP
                                 <div className="space-y-1">
                                     {record.keyFactors.slice(0, 3).map((f, i) => (
                                         <div key={i} className="flex items-center gap-2 text-[10px] text-gray-500">
-                                            <span className="text-green-500">✓</span> {f}
+                                            <span className="text-purple-500">✦</span> {f}
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
 
-                        {/* Detailed Targets vs Results */}
+                        {/* Player Prop Details or Detailed match targets */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 text-yellow-500">
                                 <Target className="w-4 h-4" />
-                                <span className="text-[10px] font-black uppercase tracking-widest">Objetivos vs Realidad</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest">
+                                    {isMatchPrediction ? 'Objetivos vs Realidad' : 'Análisis del Prop'}
+                                </span>
                             </div>
 
                             <div className="space-y-3">
+                                {!isMatchPrediction && (
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-gray-500 uppercase font-bold text-[9px]">Categoría</span>
+                                            <span className="text-white font-black">{record.propType || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-gray-500 uppercase font-bold text-[9px]">Línea Proyectada</span>
+                                            <span className="text-white font-black">{record.line || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-gray-500 uppercase font-bold text-[9px]">Predicción</span>
+                                            <span className="text-purple-400 font-black uppercase">{record.prediction}</span>
+                                        </div>
+                                    </div>
+                                )}
                                 {record.predictions && (
                                     <>
                                         {/* Goals/Score */}
