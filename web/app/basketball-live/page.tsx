@@ -18,6 +18,8 @@ export default function BasketballLivePage() {
         async function fetchAllEvents() {
             try {
                 setLoading(true);
+                const now = Date.now();
+                const twelveHoursFromNow = now + (12 * 60 * 60 * 1000); // 12 horas en milisegundos
                 const today = new Date().toISOString().split('T')[0];
                 const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
@@ -40,7 +42,25 @@ export default function BasketballLivePage() {
                 if (scheduledTomorrowData.success && Array.isArray(scheduledTomorrowData.data)) {
                     combinedScheduled = [...combinedScheduled, ...scheduledTomorrowData.data];
                 }
-                setScheduledEvents(combinedScheduled);
+
+                // 🔥 NUEVO: Filtrar para mostrar solo eventos en las próximas 12 horas
+                const filteredScheduled = combinedScheduled.filter((event: any) => {
+                    // Mantener todos los eventos en vivo y finalizados
+                    if (event.status.type === 'inprogress' || event.status.type === 'finished') {
+                        return true;
+                    }
+
+                    // Para eventos "notstarted", verificar que empiecen en las próximas 12 horas
+                    if (event.status.type === 'notstarted') {
+                        const eventStartTime = event.startTimestamp * 1000; // convertir a ms
+                        return eventStartTime <= twelveHoursFromNow;
+                    }
+
+                    return true;
+                });
+
+                console.log(`🏀 [Basketball] Filtered ${combinedScheduled.length} events → ${filteredScheduled.length} within 12 hours`);
+                setScheduledEvents(filteredScheduled);
 
             } catch (err: any) {
                 console.error("Error fetching events:", err);

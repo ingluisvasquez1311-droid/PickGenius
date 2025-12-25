@@ -373,6 +373,7 @@ class SportsDataService {
     /**
      * Obtiene eventos para un deporte específico (en vivo + programados)
      * FILTERS OUT finished matches older than 2 hours
+     * FILTERS OUT upcoming matches starting more than 12 hours from now
      */
     async getEventsBySport(sport: string, date?: string): Promise<SportsDataEvent[]> {
         const today = date || new Date().toISOString().split('T')[0];
@@ -398,20 +399,27 @@ class SportsDataService {
             index === self.findIndex(e => e.id === event.id)
         );
 
-        // Filter out old finished matches (older than 2 hours)
+        // Filter out old finished matches (older than 2 hours) AND future matches (more than 12 hours away)
         const now = Date.now() / 1000; // Current time in seconds
         const twoHoursAgo = now - (2 * 60 * 60); // 2 hours ago in seconds
+        const twelveHoursFromNow = now + (12 * 60 * 60); // 12 hours from now in seconds
 
         const recentEvents = uniqueEvents.filter((event) => {
-            // Keep all non-finished events
-            if (event.status?.type !== 'finished') {
-                return true;
-            }
             // For finished events, only keep if they finished within last 2 hours
-            return event.startTimestamp > twoHoursAgo;
+            if (event.status?.type === 'finished') {
+                return event.startTimestamp > twoHoursAgo;
+            }
+
+            // For upcoming events, only keep if they start within next 12 hours
+            if (event.status?.type === 'notstarted') {
+                return event.startTimestamp <= twelveHoursFromNow;
+            }
+
+            // Keep all in-progress events
+            return true;
         });
 
-        // console.log(`📊 [${sport.toUpperCase()}] Filtered ${uniqueEvents.length} events → ${recentEvents.length} recent (removed old finished)`);
+        console.log(`📊 [${sport.toUpperCase()}] Filtered ${uniqueEvents.length} events → ${recentEvents.length} (recent: 2h past, upcoming: 12h future)`);
 
         return recentEvents;
     }

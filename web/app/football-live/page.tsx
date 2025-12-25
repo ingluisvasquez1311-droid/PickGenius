@@ -17,6 +17,8 @@ export default function FootballLivePage() {
         async function fetchLiveEvents() {
             try {
                 setLoading(true);
+                const now = Date.now();
+                const twelveHoursFromNow = now + (12 * 60 * 60 * 1000); // 12 horas en milisegundos
                 const today = new Date().toISOString().split('T')[0];
                 const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
@@ -45,7 +47,24 @@ export default function FootballLivePage() {
                 processScheduled(scheduledTodayData);
                 processScheduled(scheduledTomorrowData);
 
-                setEvents(allEvents);
+                // 🔥 NUEVO: Filtrar para mostrar solo eventos en las próximas 12 horas
+                const filteredEvents = allEvents.filter((event: any) => {
+                    // Mantener todos los eventos en vivo y finalizados
+                    if (event.status.type === 'inprogress' || event.status.type === 'finished') {
+                        return true;
+                    }
+
+                    // Para eventos "notstarted", verificar que empiecen en las próximas 12 horas
+                    if (event.status.type === 'notstarted') {
+                        const eventStartTime = event.startTimestamp * 1000; // convertir a ms
+                        return eventStartTime <= twelveHoursFromNow;
+                    }
+
+                    return true;
+                });
+
+                console.log(`⚽ [Football] Filtered ${allEvents.length} events → ${filteredEvents.length} within 12 hours`);
+                setEvents(filteredEvents);
             } catch (err: any) {
                 console.error('Fetch error:', err);
                 setError(err.message);

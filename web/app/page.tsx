@@ -36,6 +36,8 @@ export default function HomePage() {
 
         if (!basketballFeatured) {
           try {
+            const now = Date.now();
+            const twelveHoursFromNow = now + (12 * 60 * 60 * 1000); // 12 horas
             const today = new Date().toISOString().split('T')[0];
             const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
@@ -48,21 +50,29 @@ export default function HomePage() {
             }
 
             if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-              const nextGame = data.data[0];
-              const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
-              basketballFeatured = {
-                id: nextGame.id,
-                homeTeam: nextGame.homeTeam,
-                awayTeam: nextGame.awayTeam,
-                homeScore: { current: 0 },
-                awayScore: { current: 0 },
-                tournament: nextGame.tournament,
-                status: {
-                  description: `${isTomorrow ? 'Mañana ' : ''}${new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-                  type: 'scheduled'
-                },
-                isScheduled: true
-              };
+              // 🔥 Filtrar solo eventos en las próximas 12 horas
+              const upcomingGames = data.data.filter((game: any) => {
+                const eventStartTime = game.startTimestamp * 1000;
+                return eventStartTime <= twelveHoursFromNow;
+              });
+
+              const nextGame = upcomingGames[0];
+              if (nextGame) {
+                const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
+                basketballFeatured = {
+                  id: nextGame.id,
+                  homeTeam: nextGame.homeTeam,
+                  awayTeam: nextGame.awayTeam,
+                  homeScore: { current: 0 },
+                  awayScore: { current: 0 },
+                  tournament: nextGame.tournament,
+                  status: {
+                    description: `${isTomorrow ? 'Mañana ' : ''}${new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                    type: 'scheduled'
+                  },
+                  isScheduled: true
+                };
+              }
             }
           } catch (e) {
             console.error("Error fetching scheduled basketball", e);
@@ -86,6 +96,8 @@ export default function HomePage() {
 
         if (!footballFeatured) {
           try {
+            const now = Date.now();
+            const twelveHoursFromNow = now + (12 * 60 * 60 * 1000); // 12 horas
             const today = new Date().toISOString().split('T')[0];
             const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
@@ -98,21 +110,29 @@ export default function HomePage() {
             }
 
             if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-              const nextGame = data.data[0];
-              const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
-              footballFeatured = {
-                id: nextGame.id,
-                tournament: nextGame.tournament,
-                homeTeam: nextGame.homeTeam,
-                awayTeam: nextGame.awayTeam,
-                homeScore: { current: 0 },
-                awayScore: { current: 0 },
-                status: {
-                  description: `${isTomorrow ? 'Mañana ' : ''}${new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-                  type: 'scheduled'
-                },
-                isScheduled: true
-              };
+              // 🔥 Filtrar solo eventos en las próximas 12 horas
+              const upcomingGames = data.data.filter((game: any) => {
+                const eventStartTime = game.startTimestamp * 1000;
+                return eventStartTime <= twelveHoursFromNow;
+              });
+
+              const nextGame = upcomingGames[0];
+              if (nextGame) {
+                const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
+                footballFeatured = {
+                  id: nextGame.id,
+                  tournament: nextGame.tournament,
+                  homeTeam: nextGame.homeTeam,
+                  awayTeam: nextGame.awayTeam,
+                  homeScore: { current: 0 },
+                  awayScore: { current: 0 },
+                  status: {
+                    description: `${isTomorrow ? 'Mañana ' : ''}${new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                    type: 'scheduled'
+                  },
+                  isScheduled: true
+                };
+              }
             }
           } catch (e) {
             console.error("Error fetching scheduled football", e);

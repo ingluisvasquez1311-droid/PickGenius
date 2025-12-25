@@ -55,6 +55,11 @@ class ScraperService {
         this.queue = new RequestQueue(5); // Concurrencia local
         this.breaker = new CircuitBreaker(10, 60000);
 
+        // Enhanced logging for ScraperAPI keys
+        console.log(`\n🔑 [ScraperService] Initialized with ${this.keys.length} API keys`);
+        this.keys.forEach((key, idx) => {
+            console.log(`   Key ${idx + 1}: ${key.substring(0, 8)}...${key.substring(key.length - 4)} (${key.length} chars)`);
+        });
         this.logger.info(`🔑 [ScraperService] Ready with ${this.keys.length} keys`);
     }
 

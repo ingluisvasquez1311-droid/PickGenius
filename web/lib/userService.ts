@@ -164,20 +164,28 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
     // Auto-promote if in whitelist but has user role
     if (role !== 'admin' && ADMIN_EMAILS.includes(data.email?.toLowerCase())) {
         role = 'admin';
-        updateDoc(userRef, { role: 'admin' }).catch(console.error);
+        // Force admin users to have premium access
+        updateDoc(userRef, {
+            role: 'admin',
+            isPremium: true,
+            subscriptionType: 'admin',
+            predictionsLimit: -1 // Unlimited
+        }).catch(console.error);
     }
+
+    // Force premium status for all admins
+    const isAdmin = role === 'admin';
 
     return {
         uid: data.uid,
         email: data.email,
-        // Admins are always premium
-        // Users are premium if they have a flag OR if their subscription is still valid (Trial/Paid)
-        isPremium: data.isPremium || role === 'admin' || (data.subscriptionEnd && data.subscriptionEnd.toDate() > new Date()),
-        subscriptionType: data.subscriptionType || (role === 'admin' ? 'admin' : (data.isPremium ? 'paid' : 'trial')),
+        // Admins are ALWAYS premium, no exceptions
+        isPremium: isAdmin || data.isPremium || (data.subscriptionEnd && data.subscriptionEnd.toDate() > new Date()),
+        subscriptionType: isAdmin ? 'admin' : (data.subscriptionType || (data.isPremium ? 'paid' : 'trial')),
         subscriptionEnd: data.subscriptionEnd?.toDate(),
         lastActive: data.lastActive?.toDate(),
         predictionsUsed: data.predictionsUsed || 0,
-        predictionsLimit: data.predictionsLimit || 3,
+        predictionsLimit: isAdmin ? -1 : (data.predictionsLimit || 3), // Admins have unlimited
         totalPredictions: data.totalPredictions || 0,
         favoriteTeams: data.favoriteTeams || [],
         favoritePlayers: data.favoritePlayers || [],
