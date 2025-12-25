@@ -1,31 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { basketballDataService } from '@/lib/services/basketballDataService';
+import { sportsDataService } from '@/lib/services/sportsDataService';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const date = searchParams.get('date') || new Date().toISOString().split('T')[0]; // Default to today
+        const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
 
-        const response = await basketballDataService.getFilteredScheduledEvents(date);
+        const events = await sportsDataService.getScheduledEventsBySport('nfl', date);
 
-        if (!response.success || !response.data) {
-            return NextResponse.json(response, { status: 500 });
-        }
-
-        const events = response.data.events || [];
         const transformedData = events.map((game: any) => ({
             id: game.id,
             tournament: {
-                name: game.tournament?.name || 'Unknown League',
+                name: game.tournament?.name || 'NFL',
                 uniqueTournament: {
-                    name: game.tournament?.uniqueTournament?.name || game.tournament?.name || 'Unknown'
+                    name: 'NFL'
                 },
                 category: {
-                    name: game.tournament?.category?.name || 'International',
-                    flag: game.tournament?.category?.flag || '',
-                    id: game.tournament?.category?.id
+                    name: 'USA',
+                    flag: 'usa',
                 }
             },
             homeTeam: {

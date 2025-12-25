@@ -289,6 +289,14 @@ class BasketballDataService {
             300 // 5 minutes cache
         );
     }
+
+    /**
+     * Get filtered scheduled events (next 12h) via Local Backend
+     */
+    async getFilteredScheduledEvents(date?: string): Promise<ApiResponse> {
+        const events = await sportsDataService.getScheduledEventsBySport('basketball', date);
+        return { success: true, data: { events } };
+    }
 }
 
 // Export singleton instance

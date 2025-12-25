@@ -161,6 +161,30 @@ class SportsDataService {
     }
 
     /**
+     * Obtiene eventos programados de forma filtrada (Backend Local)
+     */
+    async getScheduledEventsBySport(sport: string, date?: string): Promise<SportsDataEvent[]> {
+        try {
+            const isServer = typeof window === 'undefined';
+            const apiUrl = isServer
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/sports/${sport}/scheduled`
+                : `/api/sports/${sport}/scheduled`;
+
+            const queryParams = date ? `?date=${date}` : '';
+            const response = await fetch(`${apiUrl}${queryParams}`, {
+                headers: this.headers
+            });
+
+            if (!response.ok) return [];
+            const result = await response.json();
+            return result.data || [];
+        } catch (error) {
+            console.error(`❌ Error fetching scheduled ${sport}:`, error);
+            return [];
+        }
+    }
+
+    /**
      * Obtiene todos los partidos de fútbol (en vivo + programados)
      */
     async getAllFootballMatches(date?: string): Promise<SportsDataEvent[]> {
@@ -367,21 +391,19 @@ class SportsDataService {
      */
     async getEventsBySport(sport: string, date?: string): Promise<SportsDataEvent[]> {
         const today = date || new Date().toISOString().split('T')[0];
-        const yesterday = new Date(new Date(today).getTime() - 86400000).toISOString().split('T')[0];
         const tomorrow = new Date(new Date(today).getTime() + 86400000).toISOString().split('T')[0];
 
-        const [liveData, scheduledYesterday, scheduledToday, scheduledTomorrow] = await Promise.all([
+        // Fetch using our standard methods
+        const [liveData, scheduledToday, scheduledTomorrow] = await Promise.all([
             this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/live`),
-            this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/${yesterday}`),
-            this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/${today}`),
-            this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/${tomorrow}`)
+            this.getScheduledEventsBySport(sport, today),
+            this.getScheduledEventsBySport(sport, tomorrow)
         ]);
 
         const allEvents = [
             ...(liveData?.events || []),
-            ...(scheduledYesterday?.events || []),
-            ...(scheduledToday?.events || []),
-            ...(scheduledTomorrow?.events || [])
+            ...(Array.isArray(scheduledToday) ? scheduledToday : []),
+            ...(Array.isArray(scheduledTomorrow) ? scheduledTomorrow : [])
         ];
 
         // Remove duplicates

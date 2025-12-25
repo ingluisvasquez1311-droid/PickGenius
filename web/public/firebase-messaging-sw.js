@@ -7,12 +7,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 // your app's Firebase config object.
 // https://firebase.google.com/docs/web/setup#config-object
 firebase.initializeApp({
-    apiKey: "REPLACE_WITH_YOUR_API_KEY", // Need to inject this or read from URL params? Usually hardcoded or injected during build
-    authDomain: "pickgenius-ai.firebaseapp.com",
-    projectId: "pickgenius-ai",
-    storageBucket: "pickgenius-ai.appspot.com",
-    messagingSenderId: "174780695027", // From Env Var
-    appId: "1:174780695027:web:2a81831c2d9e6e15de59d9"
+    apiKey: "AIzaSyBecBVzQehrAiBsdNrupZpHi0FZth9AKHM",
+    authDomain: "pickgenius.firebaseapp.com",
+    projectId: "pickgenius",
+    storageBucket: "pickgenius.firebasestorage.app",
+    messagingSenderId: "294108420478",
+    appId: "1:294108420478:web:b9123d7b7b7ee08a73fb2f"
 });
 
 // Retrieve an instance of Firebase Messaging so that it can handle background

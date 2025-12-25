@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const date = searchParams.get('date') || new Date().toISOString().split('T')[0]; // Default to today
 
-        const response = await footballDataService.getScheduledEvents(date);
+        const response = await footballDataService.getFilteredScheduledEvents(date);
 
         if (!response.success || !response.data) {
             return NextResponse.json({

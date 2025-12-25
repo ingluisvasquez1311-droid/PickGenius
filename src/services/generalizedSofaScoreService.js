@@ -91,6 +91,34 @@ class GeneralizedSofaScoreService {
         );
     }
 
+    /**
+     * Obtener eventos programados para las próximas 12 horas
+     */
+    async getScheduledEvents(sport, dateString) {
+        const sportId = this.getSportId(sport);
+        const sportName = Object.keys(this.sportsMap).find(key => this.sportsMap[key] === sportId) || sport;
+        const date = dateString || new Date().toISOString().split('T')[0];
+
+        const result = await this.makeRequest(
+            `/sport/${sportName}/scheduled-events/${date}`,
+            `scheduled_events_${sportId}_${date}`,
+            300
+        );
+
+        if (result.success && result.data && result.data.events) {
+            const now = Math.floor(Date.now() / 1000);
+            const twelveHoursLater = now + (12 * 60 * 60);
+
+            // Filtrar solo los que empiezan en las próximas 12 horas
+            result.data.events = result.data.events.filter(event => {
+                const startTimestamp = event.startTimestamp || 0;
+                return startTimestamp > now && startTimestamp <= twelveHoursLater;
+            });
+        }
+
+        return result;
+    }
+
     async getEventDetails(eventId) {
         return this.makeRequest(`/event/${eventId}`, `event_details_${eventId}`, 300);
     }

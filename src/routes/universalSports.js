@@ -124,4 +124,31 @@ router.get('/:sport/live', async (req, res) => {
     }
 });
 
+/**
+ * @route   GET /api/sports/:sport/scheduled
+ */
+router.get('/:sport/scheduled', async (req, res) => {
+    try {
+        const { sport } = req.params;
+        const { date } = req.query;
+        const result = await generalizedSofaScoreService.getScheduledEvents(sport, date);
+
+        if (result.success) {
+            res.json({
+                success: true,
+                data: result.data.events || [],
+                _metadata: {
+                    count: result.data.events?.length || 0,
+                    sport: sport,
+                    date: date || new Date().toISOString().split('T')[0]
+                }
+            });
+        } else {
+            res.status(500).json(result);
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 module.exports = router;
