@@ -67,29 +67,47 @@ class ScraperService {
         const keys: string[] = [];
         if (typeof process === 'undefined') return [];
 
-        // Helper for strict cleaning (Alphanumeric only)
-        const cleanKey = (k: string) => k.replace(/[^a-zA-Z0-9]/g, '');
+        console.log('🔍 [ScraperService] Diagnostic: Loading Keys...');
 
-        // Prioritize SCRAPER_API_KEYS (comma separated list)
-        if (process.env.SCRAPER_API_KEYS) {
-            const list = process.env.SCRAPER_API_KEYS.split(',')
-                .map(cleanKey)
-                .filter(k => k && k.length > 20); // ScraperAPI keys are 32 chars
+        // Helper for strict cleaning (Alphanumeric only)
+        const cleanKey = (k: string) => k ? k.trim().replace(/[^a-zA-Z0-9]/g, '') : '';
+
+        // 1. Check SCRAPER_API_KEYS
+        const rawListEnv = process.env.SCRAPER_API_KEYS;
+        if (rawListEnv) {
+            console.log(`   Found SCRAPER_API_KEYS (Length: ${rawListEnv.length})`);
+            const list = rawListEnv.split(',')
+                .map(k => {
+                    const clean = cleanKey(k);
+                    if (clean.length !== 32) {
+                        console.warn(`   ⚠️ Warning: Key segment length ${clean.length} (expected 32). Content: ${clean.substring(0, 5)}...`);
+                    }
+                    return clean;
+                })
+                .filter(k => k && k.length >= 20); // Allow verifying even if slightly weird, but filter mostly garbage
+
             keys.push(...list);
-            console.log(`🔑 [ScraperService] Loaded ${list.length} keys from SCRAPER_API_KEYS`);
+            console.log(`   ✅ Loaded ${list.length} valid keys from list.`);
+        } else {
+            console.log('   ❌ SCRAPER_API_KEYS not found in environment.');
         }
 
-        // Add SCRAPER_API_KEY if not already present
-        if (process.env.SCRAPER_API_KEY) {
-            const singleKey = cleanKey(process.env.SCRAPER_API_KEY);
+        // 2. Check SCRAPER_API_KEY
+        const rawSingleEnv = process.env.SCRAPER_API_KEY;
+        if (rawSingleEnv) {
+            console.log(`   Found SCRAPER_API_KEY (Length: ${rawSingleEnv.length})`);
+            const singleKey = cleanKey(rawSingleEnv);
             if (singleKey && !keys.includes(singleKey)) {
                 keys.push(singleKey);
-                console.log(`🔑 [ScraperService] Added primary SCRAPER_API_KEY`);
+                console.log(`   ✅ Added primary SCRAPER_API_KEY.`);
             }
+        } else {
+            console.log('   ❌ SCRAPER_API_KEY not found in environment.');
         }
 
         if (keys.length === 0) {
-            console.warn('⚠️ [ScraperService] No API keys found! Data fetching will likely fail.');
+            console.error('🚨 [ScraperService] CRITICAL: No ScraperAPI keys found! Check Render/Vercel Env Vars.');
+            // Add a placeholder to prevent immediate crash, but requests will fail.
             return [];
         }
 

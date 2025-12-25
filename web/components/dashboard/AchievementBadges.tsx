@@ -29,25 +29,31 @@ export default function AchievementBadges() {
         if (!user) return;
 
         try {
-            const history = await getHistory(100);
-            const total = history.length;
-            // TODO: Add result tracking to PredictionRecord
-            // const wins = history.filter(p => p.result === 'win').length;
-            const wins = 0; // Placeholder
-            const winRate = total > 0 ? (wins / total) * 100 : 0;
-            const hotPicks = history.filter(p => p.probability >= 75).length;
+            // Fetch history for Hot Picks calculation
+            const history = await getHistory(50);
 
-            // Calculate streak - TODO: Implement when result tracking is added
-            const maxStreak = 0;
-            // let currentStreak = 0;
-            // history.forEach(p => {
-            //     if (p.result === 'win') {
-            //         currentStreak++;
-            //         maxStreak = Math.max(maxStreak, currentStreak);
-            //     } else {
-            //         currentStreak = 0;
-            //     }
-            // });
+            // Real Stats from User Profile
+            const total = user.totalPredictions || 0;
+            const stats = user.stats || {
+                totalWins: 0,
+                totalLosses: 0,
+                currentStreak: 0,
+                bestStreak: 0,
+                winRate: 0,
+                vroi: 0
+            };
+
+            // Safe access for potentially missing properties in older profiles
+            const safeStats = stats as any;
+            const bestStreak = safeStats.bestStreak || safeStats.longestStreak || 0;
+            const winRate = safeStats.winRate || 0;
+
+            // Calculate metrics
+            // Note: Hot Picks logic would ideally come from a specific counter in DB, 
+            // but for now we can approximate or use history if needed. 
+            // For efficiency we'll skip complex history filtering for this specific badge unless critical.
+            // Let's rely on history for Hot Picks count if available, otherwise 0.
+            const hotPicks = history.filter((p: any) => (p.probability || 0) >= 75).length;
 
             const allBadges: Badge[] = [
                 {
@@ -82,22 +88,22 @@ export default function AchievementBadges() {
                 },
                 {
                     id: 'sharp_shooter',
-                    name: 'Sharp Shooter',
-                    description: 'Alcanza 50% de Win Rate',
+                    name: 'Francotirador',
+                    description: 'Win Rate > 55% (min 5)',
                     icon: Target,
-                    unlocked: winRate >= 50,
-                    progress: Math.min(winRate, 50),
-                    requirement: 50,
+                    unlocked: total >= 5 && winRate >= 55,
+                    progress: Math.min(winRate, 55),
+                    requirement: 55,
                     color: 'text-green-400',
                 },
                 {
                     id: 'streak_master',
-                    name: 'Streak Master',
-                    description: 'Consigue 5 victorias seguidas',
+                    name: 'En Racha',
+                    description: 'Racha de 3 victorias',
                     icon: TrendingUp,
-                    unlocked: maxStreak >= 5,
-                    progress: Math.min(maxStreak, 5),
-                    requirement: 5,
+                    unlocked: bestStreak >= 3,
+                    progress: Math.min(bestStreak, 3),
+                    requirement: 3,
                     color: 'text-yellow-400',
                 },
                 {

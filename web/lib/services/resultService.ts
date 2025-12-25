@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, updateDoc, doc, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc, increment, serverTimestamp, Timestamp, getDoc } from 'firebase/firestore';
 import { sportsDataService } from './sportsDataService';
 import { getUserProfile } from '../userService';
 
@@ -71,20 +71,66 @@ export async function checkPendingPredictions(uid: string): Promise<number> {
                     verifiedAt: serverTimestamp()
                 });
 
-                // 4. Actualizar estadísticas del usuario
+                // 4. Actualizar estadísticas del usuario (con lógica de Rachas)
                 const userRef = doc(db, 'users', uid);
 
-                const statsUpdate: any = {};
-                if (result.status === 'won') {
-                    statsUpdate['stats.wins'] = increment(1);
-                    // Si tenemos odds, podríamos calcular ROI aquí
-                } else if (result.status === 'lost') {
-                    statsUpdate['stats.losses'] = increment(1);
-                } else {
-                    statsUpdate['stats.pushes'] = increment(1);
-                }
+                // Leemos el usuario para calcular rachas correctamente
+                // (No podemos hacer lógica condicional compleja solo con increment)
+                try {
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        const currentStats = userData.stats || {
+                            wins: 0, losses: 0, pushes: 0,
+                            currentStreak: 0, bestStreak: 0
+                        };
 
-                await updateDoc(userRef, statsUpdate);
+                        let newCurrentStreak = currentStats.currentStreak || 0;
+                        let newBestStreak = currentStats.bestStreak || 0;
+
+                        const statsUpdate: any = {};
+
+                        if (result.status === 'won') {
+                            statsUpdate['stats.wins'] = increment(1);
+
+                            // Lógica de Racha
+                            newCurrentStreak++;
+                            if (newCurrentStreak > newBestStreak) {
+                                newBestStreak = newCurrentStreak;
+                                statsUpdate['stats.bestStreak'] = newBestStreak;
+                            }
+                            statsUpdate['stats.currentStreak'] = newCurrentStreak;
+
+                        } else if (result.status === 'lost') {
+                            statsUpdate['stats.losses'] = increment(1);
+                            // Romper Racha
+                            statsUpdate['stats.currentStreak'] = 0;
+                        } else {
+                            statsUpdate['stats.pushes'] = increment(1);
+                            // Push mantiene la racha? Generalmente en apuestas sí, o no la rompe.
+                            // La dejaremos igual.
+                        }
+
+                        // Recalcular Win Rate
+                        // Nota: Usamos los valores "previos + 1" para el cálculo aproximado o dejamos que la UI lo calcule.
+                        // Para guardar el dato histórico, lo calculamos:
+                        const totalDecided = (currentStats.wins || 0) + (currentStats.losses || 0) + (currentStats.pushes || 0) + 1;
+                        const newWins = (currentStats.wins || 0) + (result.status === 'won' ? 1 : 0);
+                        const newWinRate = totalDecided > 0 ? (newWins / totalDecided) * 100 : 0;
+
+                        statsUpdate['stats.winRate'] = Number(newWinRate.toFixed(1));
+
+                        await updateDoc(userRef, statsUpdate);
+                    }
+                } catch (statsErr) {
+                    console.error("Error updating user stats logic:", statsErr);
+                    // Fallback a incremento simple si falla la lectura
+                    const simpleUpdate: any = {};
+                    if (result.status === 'won') simpleUpdate['stats.wins'] = increment(1);
+                    else if (result.status === 'lost') simpleUpdate['stats.losses'] = increment(1);
+                    else simpleUpdate['stats.pushes'] = increment(1);
+                    await updateDoc(userRef, simpleUpdate);
+                }
                 processedCount++;
             }
         }

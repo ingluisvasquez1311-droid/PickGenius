@@ -10,8 +10,12 @@ import { getUserPredictions } from '@/lib/userService';
 import { Trophy, TrendingUp, Target, RotateCcw, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import AchievementBadges from '@/components/dashboard/AchievementBadges';
+
 export default function MyStatsPage() {
     const { user } = useAuth();
+    // ... rest of state declarations ...
+
     const [verifying, setVerifying] = useState(false);
     const [verificationCount, setVerificationCount] = useState(0);
     const [predictions, setPredictions] = useState<any[]>([]);
@@ -117,6 +121,13 @@ export default function MyStatsPage() {
                         icon={RotateCcw}
                         color="purple"
                     />
+                </div>
+
+
+
+                {/* Gamification / Badges Section */}
+                <div className="mb-10">
+                    <AchievementBadges />
                 </div>
 
                 {/* History Section */}
