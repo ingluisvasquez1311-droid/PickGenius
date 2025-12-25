@@ -23,9 +23,10 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
     const router = useRouter();
     const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
     const [isAlertsEnabled, setIsAlertsEnabled] = useState(false);
-    const [now, setNow] = useState(Math.floor(Date.now() / 1000));
+    const [now, setNow] = useState(0);
 
     useEffect(() => {
+        setNow(Math.floor(Date.now() / 1000));
         const interval = setInterval(() => {
             setNow(Math.floor(Date.now() / 1000));
         }, 30000); // 30s update
@@ -201,7 +202,7 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                     if (game.status?.description?.includes("'") || game.status?.description?.includes(":")) {
                                         return game.status.description;
                                     }
-                                    if (sport === 'football' && game.time?.currentPeriodStartTimestamp) {
+                                    if (sport === 'football' && game.time?.currentPeriodStartTimestamp && now > 0) {
                                         const elapsed = Math.floor((now - game.time.currentPeriodStartTimestamp) / 60);
                                         const offset = (game.status?.description?.toLowerCase().includes('2nd') || game.status?.description?.toLowerCase().includes('2a')) ? 45 : 0;
                                         return `${elapsed + offset}'`;

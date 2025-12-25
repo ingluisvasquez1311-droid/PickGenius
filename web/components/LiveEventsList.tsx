@@ -58,9 +58,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
     const isFinished = event.status.type === 'finished';
     const isScheduled = event.status.type === 'scheduled' || event.status.type === 'notstarted';
 
-    const [now, setNow] = React.useState(Math.floor(Date.now() / 1000));
+    const [now, setNow] = React.useState(0);
 
     React.useEffect(() => {
+        setNow(Math.floor(Date.now() / 1000));
         const interval = setInterval(() => {
             setNow(Math.floor(Date.now() / 1000));
         }, 30000); // Actualizar cada 30 segundos
@@ -79,7 +80,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
         }
 
         // Calculation fallback for football
-        if (sport === 'football' && event.time?.currentPeriodStartTimestamp) {
+        if (sport === 'football' && event.time?.currentPeriodStartTimestamp && now > 0) {
             const elapsedSeconds = now - event.time.currentPeriodStartTimestamp;
             let minutes = Math.floor(elapsedSeconds / 60);
 
