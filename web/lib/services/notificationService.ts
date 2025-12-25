@@ -1,111 +1,74 @@
-import { db } from '../firebase';
-import {
-    collection,
-    doc,
-    addDoc,
-    getDocs,
-    updateDoc,
-    query,
-    where,
-    orderBy,
-    limit,
-    onSnapshot,
-    serverTimestamp,
-    type Timestamp,
-    type QuerySnapshot,
-    type DocumentData
-} from 'firebase/firestore';
+import { messaging, db } from '../firebase';
+import { getToken, onMessage } from 'firebase/messaging';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 
-export interface AppNotification {
-    id: string;
-    uid: string;
-    title: string;
-    message: string;
-    type: 'info' | 'success' | 'warning' | 'error';
-    read: boolean;
-    timestamp: Date;
-    link?: string;
+// You need to generate a VAPID key in Firebase Console -> Project Settings -> Cloud Messaging -> Web Configuration
+// And paste it here or in .env.local
+const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'YOUR_VAPID_KEY_HERE';
+
+export interface NotificationPermissionStatus {
+    permission: NotificationPermission;
+    token?: string;
+    error?: string;
 }
 
-/**
- * Crear una nueva notificación para un usuario
- */
-export async function createNotification(uid: string, data: Omit<AppNotification, 'id' | 'uid' | 'read' | 'timestamp'>): Promise<void> {
-    if (!db) return;
+export const requestNotificationPermission = async (userId?: string): Promise<NotificationPermissionStatus> => {
+    if (!messaging) {
+        return { permission: 'denied', error: 'Messaging not initialized' };
+    }
 
-    const notificationsRef = collection(db!, 'notifications');
-    await addDoc(notificationsRef, {
-        ...data,
-        uid,
-        read: false,
-        timestamp: serverTimestamp()
-    });
-}
+    try {
+        const permission = await Notification.requestPermission();
 
-/**
- * Obtener las notificaciones de un usuario en tiempo real
- */
-export function subscribeToNotifications(uid: string, callback: (notifications: AppNotification[]) => void) {
-    if (!db) return () => { };
+        if (permission === 'granted') {
+            const token = await getToken(messaging, {
+                vapidKey: VAPID_KEY
+            });
 
-    const notificationsRef = collection(db!, 'notifications');
-    // OPTIMIZATION: Removed orderBy to avoid need for composite index
-    // We sort the results in memory (client-side) which is fine for <50 notifications
-    const q = query(
-        notificationsRef,
-        where('uid', '==', uid),
-        limit(50)
-    );
+            if (token) {
+                console.log('🔥 FCM Token generated:', token);
 
-    return onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
-        const notifications = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                uid: data.uid,
-                title: data.title,
-                message: data.message,
-                type: data.type,
-                read: data.read,
-                timestamp: (data.timestamp as Timestamp)?.toDate() || new Date(),
-                link: data.link
-            } as AppNotification;
+                // Save token to user profile if logged in
+                if (userId && db) {
+                    await saveTokenToUser(userId, token);
+                }
+
+                return { permission, token };
+            }
+        }
+
+        return { permission };
+    } catch (error: any) {
+        console.error('❌ Error requesting notification permission:', error);
+        return { permission: 'denied', error: error.message };
+    }
+};
+
+export const saveTokenToUser = async (userId: string, token: string) => {
+    if (!db) {
+        console.error('❌ Firestore not initialized');
+        return;
+    }
+
+    try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, {
+            fcmTokens: arrayUnion(token),
+            lastTokenUpdate: new Date().toISOString()
         });
+        console.log('✅ Token saved to user profile');
+    } catch (error) {
+        console.error('❌ Error saving token to user:', error);
+    }
+};
 
-        // Sort in memory (Newest first)
-        notifications.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+export const onMessageListener = () => {
+    if (!messaging) return Promise.resolve(null);
 
-        callback(notifications);
-    }, (error) => {
-        console.error('❌ [NotificationService] Subscription error:', error);
+    return new Promise((resolve) => {
+        onMessage(messaging!, (payload) => {
+            console.log('📩 Foreground Message received:', payload);
+            resolve(payload);
+        });
     });
-}
-
-/**
- * Marcar una notificación como leída
- */
-export async function markAsRead(notificationId: string): Promise<void> {
-    if (!db) return;
-
-    const notificationRef = doc(db!, 'notifications', notificationId);
-    await updateDoc(notificationRef, {
-        read: true
-    });
-}
-
-/**
- * Marcar todas las notificaciones de un usuario como leídas
- */
-export async function markAllAsRead(uid: string): Promise<void> {
-    if (!db) return;
-
-    const notificationsRef = collection(db!, 'notifications');
-    const q = query(notificationsRef, where('uid', '==', uid), where('read', '==', false));
-    const querySnapshot = await getDocs(q);
-
-    const promises = querySnapshot.docs.map(notificationDoc =>
-        updateDoc(doc(db!, 'notifications', notificationDoc.id), { read: true })
-    );
-
-    await Promise.all(promises);
-}
+};

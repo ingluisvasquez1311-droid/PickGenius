@@ -6,7 +6,9 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import NotificationManager from '@/components/notifications/NotificationManager';
 import NotificationCenter from './NotificationCenter';
+
 
 export default function Navbar() {
     const { user, signOut, loading } = useAuth();
@@ -158,6 +160,7 @@ export default function Navbar() {
                                                 </Link>
                                             )}
 
+                                            <NotificationManager />
                                             <NotificationCenter />
 
                                             {/* User Dropdown */}

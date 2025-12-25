@@ -16,6 +16,14 @@ interface Badge {
     color: string;
 }
 
+const LEVELS = [
+    { name: 'Novato', min: 0, color: 'text-gray-400' },
+    { name: 'Amateur', min: 5, color: 'text-blue-400' },
+    { name: 'Pro', min: 20, color: 'text-purple-400' },
+    { name: 'Elite', min: 50, color: 'text-orange-400' },
+    { name: 'Leyenda', min: 100, color: 'text-yellow-400' }
+];
+
 export default function AchievementBadges() {
     const { user, getHistory } = useAuth();
     const [badges, setBadges] = useState<Badge[]>([]);
@@ -140,8 +148,49 @@ export default function AchievementBadges() {
         );
     }
 
+    // Calculate Level
+    const totalPredictions = user?.totalPredictions || 0;
+    const currentLevelIndex = LEVELS.slice().reverse().findIndex(l => totalPredictions >= l.min);
+    const levelIndex = currentLevelIndex === -1 ? 0 : LEVELS.length - 1 - currentLevelIndex;
+    const currentLevel = LEVELS[levelIndex];
+    const nextLevel = LEVELS[levelIndex + 1];
+
+    const progressToNext = nextLevel
+        ? ((totalPredictions - currentLevel.min) / (nextLevel.min - currentLevel.min)) * 100
+        : 100;
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
+            {/* Level Section */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-6 border border-white/10 shadow-xl">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Nivel Actual</p>
+                        <h2 className={`text-3xl font-black italic tracking-tighter ${currentLevel.color}`}>
+                            {currentLevel.name.toUpperCase()}
+                        </h2>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-2xl font-bold text-white">{totalPredictions} <span className="text-sm text-gray-500 font-normal">XP</span></div>
+                        {nextLevel && (
+                            <p className="text-xs text-gray-400">Próximo: {nextLevel.name} ({nextLevel.min} XP)</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="h-3 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                    <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(progressToNext, 100)}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className={`h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full relative`}
+                    >
+                        <div className="absolute inset-0 bg-white/20 animate-pulse-fast"></div>
+                    </motion.div>
+                </div>
+            </div>
+
             <div className="flex items-center justify-between">
                 <h3 className="text-xl font-black uppercase tracking-wider text-white">
                     Logros Desbloqueados

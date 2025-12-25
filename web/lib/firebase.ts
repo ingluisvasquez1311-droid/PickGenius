@@ -1,6 +1,7 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
+import { getMessaging, Messaging } from 'firebase/messaging';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim(),
@@ -18,12 +19,24 @@ const hasValidConfig = !!(firebaseConfig.apiKey && firebaseConfig.projectId);
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
+let messaging: Messaging | null = null;
 const googleProvider = new GoogleAuthProvider();
 
 if (hasValidConfig) {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
     auth = getAuth(app);
     db = getFirestore(app);
+
+    // Initialize Messaging only on client-side
+    if (typeof window !== 'undefined') {
+        try {
+            messaging = getMessaging(app);
+            console.log('[Firebase] Messaging initialized');
+        } catch (msgErr) {
+            console.warn('[Firebase] Messaging failed to initialize (likely due to Service Worker issues or incompatible browser):', msgErr);
+        }
+    }
+
     console.log('[Firebase] Initialized successfully');
 } else {
     console.warn('[Firebase] Not initialized - missing config');
@@ -36,6 +49,7 @@ const missingVars = Object.entries(firebaseConfig)
 
 console.log('[Firebase Diagnostic]', {
     hasApp: !!app,
+    hasMessaging: !!messaging,
     env: process.env.NODE_ENV,
     config: {
         apiKey: firebaseConfig.apiKey ? `${firebaseConfig.apiKey.substring(0, 5)}...${firebaseConfig.apiKey.substring(firebaseConfig.apiKey.length - 5)}` : 'MISSING',
@@ -49,4 +63,4 @@ if (missingVars.length > 0) {
     console.error('❌ CONFIGURACIÓN DE FIREBASE INCOMPLETA. Revisa .env.local');
 }
 
-export { auth, db, app, googleProvider };
+export { auth, db, app, googleProvider, messaging };
