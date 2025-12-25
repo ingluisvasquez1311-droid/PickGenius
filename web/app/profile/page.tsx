@@ -43,12 +43,19 @@ export default function ProfilePage() {
         bio: '',
         phoneNumber: '',
         preferences: {
+            notifications: true,
+            theme: 'dark' as 'dark' | 'light',
+            language: 'es' as 'es' | 'en',
             pushAlerts: {
                 hotPicks: true,
                 matchResults: true,
                 valueHunter: false,
-                bankrollAlerts: false
-            }
+                bankrollAlerts: false,
+                discord: false,
+                telegram: false
+            },
+            discordId: '',
+            telegramId: ''
         }
     });
     const [isSaving, setIsSaving] = useState(false);
@@ -62,13 +69,20 @@ export default function ProfilePage() {
                 displayName: user.displayName || '',
                 bio: user.bio || '',
                 phoneNumber: user.phoneNumber || '',
-                preferences: user.preferences || {
+                preferences: {
+                    notifications: user.preferences?.notifications ?? true,
+                    theme: user.preferences?.theme ?? 'dark',
+                    language: user.preferences?.language ?? 'es',
                     pushAlerts: {
-                        hotPicks: true,
-                        matchResults: true,
-                        valueHunter: false,
-                        bankrollAlerts: false
-                    }
+                        hotPicks: user.preferences?.pushAlerts?.hotPicks ?? true,
+                        matchResults: user.preferences?.pushAlerts?.matchResults ?? true,
+                        valueHunter: user.preferences?.pushAlerts?.valueHunter ?? false,
+                        bankrollAlerts: user.preferences?.pushAlerts?.bankrollAlerts ?? false,
+                        discord: user.preferences?.pushAlerts?.discord ?? false,
+                        telegram: user.preferences?.pushAlerts?.telegram ?? false
+                    },
+                    discordId: user.preferences?.discordId || '',
+                    telegramId: user.preferences?.telegramId || ''
                 }
             });
         }
@@ -114,7 +128,7 @@ export default function ProfilePage() {
         if (!user) return;
         setIsSaving(true);
         try {
-            await updateUser(editData);
+            await updateUser(editData as any);
             toast.success('Perfil actualizado correctamente');
             setIsEditing(false);
         } catch (error) {
@@ -456,7 +470,9 @@ export default function ProfilePage() {
                                                         { key: 'hotPicks', label: 'Hot Picks AI', desc: 'Alertas de alta probabilidad' },
                                                         { key: 'matchResults', label: 'Resultados Finales', desc: 'Resumen de tus apuestas' },
                                                         { key: 'valueHunter', label: 'Value Hunter', desc: 'Detección de cuotas desajustadas' },
-                                                        { key: 'bankrollAlerts', label: 'Gestión Bankroll', desc: 'Alertas de riesgo y stake' }
+                                                        { key: 'bankrollAlerts', label: 'Gestión Bankroll', desc: 'Alertas de riesgo y stake' },
+                                                        { key: 'discord', label: 'Discord Sync', desc: 'Enviar alertas a Discord' },
+                                                        { key: 'telegram', label: 'Telegram Sync', desc: 'Enviar alertas a Telegram' }
                                                     ].map((item) => (
                                                         <label key={item.key} className="flex items-center gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/5 transition-colors group">
                                                             <div className="flex-1">
@@ -483,6 +499,35 @@ export default function ProfilePage() {
                                                             />
                                                         </label>
                                                     ))}
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                                    <div className="space-y-2">
+                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Discord User ID</label>
+                                                        <input
+                                                            type="text"
+                                                            value={editData.preferences.discordId || ''}
+                                                            onChange={(e) => setEditData({
+                                                                ...editData,
+                                                                preferences: { ...editData.preferences, discordId: e.target.value }
+                                                            })}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
+                                                            placeholder="1234567890..."
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Telegram Chat ID</label>
+                                                        <input
+                                                            type="text"
+                                                            value={editData.preferences.telegramId || ''}
+                                                            onChange={(e) => setEditData({
+                                                                ...editData,
+                                                                preferences: { ...editData.preferences, telegramId: e.target.value }
+                                                            })}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
+                                                            placeholder="@usuario o ID..."
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="pt-4">

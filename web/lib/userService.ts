@@ -52,7 +52,11 @@ export interface UserProfile {
             matchResults: boolean;
             valueHunter: boolean;
             bankrollAlerts: boolean;
-        }
+            discord: boolean;
+            telegram: boolean;
+        };
+        discordId?: string;
+        telegramId?: string;
     };
     stats?: {
         horarios: number;

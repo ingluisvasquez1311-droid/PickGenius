@@ -23,10 +23,9 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
     const router = useRouter();
     const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
     const [isAlertsEnabled, setIsAlertsEnabled] = useState(false);
-    const [now, setNow] = useState(0);
+    const [now, setNow] = useState<number>(() => Math.floor(Date.now() / 1000));
 
     useEffect(() => {
-        setNow(Math.floor(Date.now() / 1000));
         const interval = setInterval(() => {
             setNow(Math.floor(Date.now() / 1000));
         }, 30000); // 30s update
