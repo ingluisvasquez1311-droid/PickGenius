@@ -24,13 +24,14 @@ import {
     type UserProfile,
     type PredictionRecord
 } from '@/lib/userService';
-import {
-    subscribeToNotifications,
-    createNotification,
-    markAsRead,
-    markAllAsRead,
-    type AppNotification
-} from '@/lib/services/notificationService';
+// TODO: Phase 4 - Re-enable when notification system is fully implemented
+// import {
+//     subscribeToNotifications,
+//     createNotification,
+//     markAsRead,
+//     markAllAsRead,
+//     type AppNotification
+// } from '@/lib/services/notificationService';
 import { trackSignup, trackLogin, trackTrialStart } from '@/lib/analytics';
 
 interface AuthContextType {
