@@ -109,8 +109,8 @@ export default function MatchCard({
                     {isLive && (
                         <span className="flex items-center gap-1.5 px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded-full">
                             <span className="w-1 h-1 rounded-full bg-red-500 animate-ping"></span>
-                            <span className="text-[8px] font-black text-red-500 uppercase">
-                                {statusDescription || 'Live'}
+                            <span className="text-[9px] font-black text-red-500 uppercase tracking-tight">
+                                {getLiveTime() || 'LIVE'}
                             </span>
                         </span>
                     )}
@@ -130,11 +130,12 @@ export default function MatchCard({
                             <div className="text-xl font-black italic text-emerald-400 tabular-nums leading-none">
                                 {homeScore ?? 0} - {awayScore ?? 0}
                             </div>
-                            <div className="text-[10px] font-black text-red-500 animate-pulse uppercase tracking-[0.2em] mt-1.5 flex flex-col items-center">
-                                <span className="text-[11px] mb-0.5">
+                            {/* 🔥 TIEMPO DE JUEGO MÁS PROMINENTE */}
+                            <div className="text-[13px] font-black text-red-500 uppercase tracking-wide mt-2 flex flex-col items-center">
+                                <span className="text-white bg-red-500 px-2 py-0.5 rounded-md mb-1">
                                     {getLiveTime()}
                                 </span>
-                                <span className="text-[7px] text-emerald-500/40 tracking-[0.3em]">LIVE</span>
+                                <span className="text-[7px] text-emerald-500/60 tracking-[0.3em] animate-pulse">LIVE</span>
                             </div>
                         </div>
                     ) : (

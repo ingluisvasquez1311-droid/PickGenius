@@ -190,7 +190,10 @@ export default function Navbar() {
                                                         </p>
                                                     </div>
                                                     <Link href="/profile" className="flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-white/5 transition-all text-xs font-bold text-gray-400 hover:text-white">
-                                                        <span>📊</span> Dashboard
+                                                        <span>👤</span> Mi Perfil
+                                                    </Link>
+                                                    <Link href="/my-stats" className="flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-white/5 transition-all text-xs font-bold text-gray-400 hover:text-white">
+                                                        <span>📈</span> Mi Rendimiento
                                                     </Link>
                                                     <Link href="/profile?tab=settings" className="flex items-center gap-3 px-4 py-4 rounded-xl hover:bg-white/5 transition-all text-xs font-bold text-gray-400 hover:text-white">
                                                         <span>⚙️</span> Ajustes

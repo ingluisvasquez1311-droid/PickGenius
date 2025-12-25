@@ -176,6 +176,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const uid = result.user.uid;
         const profile = await getUserProfile(uid);
 
+        // 🔥 NUEVO: Sincronizar perfil con datos de Google
+        const { syncGoogleProfile } = await import('@/lib/services/googleProfileSync');
+        await syncGoogleProfile(result.user);
+
         if (!profile) {
             // New user - track signup
             trackSignup('google');

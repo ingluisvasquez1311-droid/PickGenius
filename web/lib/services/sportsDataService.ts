@@ -244,6 +244,17 @@ class SportsDataService {
         });
     }
 
+    /**
+     * Obtiene un evento específico por ID
+     */
+    async getEventById(eventId: string | number): Promise<SportsDataEvent | null> {
+        const data = await this.makeRequest<{ event: SportsDataEvent }>(`/event/${eventId}`);
+        return data?.event || null;
+    }
+
+    /**
+     * Obtiene estadísticas detalladas de un evento
+     */
     async getMatchBestPlayers(eventId: number): Promise<any> {
         try {
             const data = await this.makeRequest(`/event/${eventId}/best-players`);

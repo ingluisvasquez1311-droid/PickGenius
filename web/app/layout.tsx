@@ -13,6 +13,7 @@ import { BettingSlipProvider } from "@/contexts/BettingSlipContext";
 import BettingSlip from "@/components/betting/BettingSlip";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
+import WelcomeToast from "@/components/auth/WelcomeToast";
 
 
 export const viewport: Viewport = {
@@ -72,6 +73,7 @@ export default function RootLayout({
       <body>
         <GoogleAnalytics />
         <AuthProvider>
+          <WelcomeToast /> {/* 🔥 NUEVO: Toast de bienvenida */}
           <QueryProvider>
             <BettingSlipProvider>
               <Navbar />
