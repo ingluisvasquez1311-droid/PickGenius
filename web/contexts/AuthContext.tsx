@@ -297,21 +297,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    useEffect(() => {
-        if (user) {
-            console.log('🔔 [Auth] Estabilizando canal de notificaciones en tiempo real...');
-            const unsubscribe = subscribeToNotifications(user.uid, (data: AppNotification[]) => {
-                const unread = data.filter((n: AppNotification) => !n.read).length;
-                console.log(`🔔 [Auth] Notificaciones actualizadas: ${data.length} totales, ${unread} sin leer`);
-                setNotifications(data);
-                setUnreadCount(unread);
-            });
-            return () => unsubscribe();
-        } else {
-            setNotifications([]);
-            setUnreadCount(0);
-        }
-    }, [user]);
+    // TODO: Phase 4 - Re-enable notification subscription
+    // useEffect(() => {
+    //     if (user) {
+    //         console.log('🔔 [Auth] Estabilizando canal de notificaciones en tiempo real...');
+    //         const unsubscribe = subscribeToNotifications(user.uid, (data: AppNotification[]) => {
+    //             const unread = data.filter((n: AppNotification) => !n.read).length;
+    //             console.log(`🔔 [Auth] Notificaciones actualizadas: ${data.length} totales, ${unread} sin leer`);
+    //             setNotifications(data);
+    //             setUnreadCount(unread);
+    //         });
+    //         return () => unsubscribe();
+    //     } else {
+    //         setNotifications([]);
+    //         setUnreadCount(0);
+    //     }
+    // }, [user]);
 
     return (
         <AuthContext.Provider value={{
