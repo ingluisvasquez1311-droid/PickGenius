@@ -90,30 +90,13 @@ export async function GET(request: NextRequest) {
     } catch (error: any) {
         console.error('❌ Football API Route Error:', error);
 
-        // FALLBACK: Mock Data for Football
-        const mockEvents = [
-            {
-                id: 1,
-                tournament: {
-                    name: 'La Liga',
-                    category: { name: 'Spain', id: 32 },
-                    uniqueTournament: { name: 'La Liga' }
-                },
-                homeTeam: { id: 2829, name: 'Real Madrid', logo: '/api/proxy/team-logo/2829' },
-                awayTeam: { id: 2817, name: 'Barcelona', logo: '/api/proxy/team-logo/2817' },
-                homeScore: { current: 1, display: 1 },
-                awayScore: { current: 0, display: 0 },
-                status: { type: 'inprogress', description: '75\'', code: 100 },
-                startTimestamp: Date.now() / 1000 - 4500
-            }
-        ];
-
+        // Return actual error state instead of misleading Mock Data
         return NextResponse.json({
-            success: true,
-            data: mockEvents,
-            count: mockEvents.length,
-            source: 'fallback_mock',
-            error: error.message
-        });
+            success: false,
+            data: [],
+            count: 0,
+            source: 'error_fallback',
+            error: error.message || 'Internal Server Error'
+        }, { status: 500 });
     }
 }

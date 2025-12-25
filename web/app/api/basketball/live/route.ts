@@ -93,45 +93,14 @@ export async function GET(request: NextRequest) {
         const err = error as Error;
         console.error('❌ Basketball API Route Error:', err);
 
-        // FALLBACK: Return Mock Data so the site looks alive even if blocked
-        const mockEvents = [
-            {
-                id: 11223344,
-                tournament: {
-                    name: 'NBA',
-                    category: { name: 'USA', id: 2 },
-                    uniqueTournament: { name: 'NBA' }
-                },
-                homeTeam: { id: 3416, name: 'Boston Celtics', logo: '/api/proxy/team-logo/3416' },
-                awayTeam: { id: 3412, name: 'LA Lakers', logo: '/api/proxy/team-logo/3412' },
-                homeScore: { current: 102, display: 102, period1: 28, period2: 24, period3: 25, period4: 25 },
-                awayScore: { current: 98, display: 98, period1: 22, period2: 30, period3: 20, period4: 26 },
-                status: { type: 'inprogress', description: 'Q4 - 2:30', code: 100 },
-                startTimestamp: Math.floor(Date.now() / 1000) - 7200
-            },
-            {
-                id: 22334455,
-                tournament: {
-                    name: 'NBA',
-                    category: { name: 'USA', id: 2 },
-                    uniqueTournament: { name: 'NBA' }
-                },
-                homeTeam: { id: 3420, name: 'Golden State Warriors', logo: '/api/proxy/team-logo/3420' },
-                awayTeam: { id: 3422, name: 'Phoenix Suns', logo: '/api/proxy/team-logo/3422' },
-                homeScore: { current: 0, display: 0 },
-                awayScore: { current: 0, display: 0 },
-                status: { type: 'notstarted', description: '22:00', code: 0 },
-                startTimestamp: Math.floor(Date.now() / 1000) + 3600
-            }
-        ];
-
+        // Return actual error state to avoid misleading "NBA Mock Games"
         return NextResponse.json({
-            success: true,
-            data: mockEvents,
-            count: mockEvents.length,
-            source: 'fallback_mock',
-            error: (error as Error).message || 'Unknown error'
-        });
+            success: false,
+            data: [],
+            count: 0,
+            source: 'error_fallback',
+            error: err.message || 'Internal Server Error'
+        }, { status: 500 });
     }
 }
 

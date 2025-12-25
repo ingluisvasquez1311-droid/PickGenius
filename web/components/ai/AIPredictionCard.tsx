@@ -608,7 +608,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                             {sport === 'basketball' && (
                                                 <div className="bg-gradient-to-br from-orange-900/20 to-amber-900/20 p-4 rounded-xl border border-orange-500/20 space-y-3 mt-3">
                                                     <p className="text-orange-400 text-[10px] uppercase font-black mb-3 flex items-center gap-2">
-                                                        🏀 Mercados NBA Elite (Player Props & Quarters)
+                                                        🏀 Mercados Elite (Player Props & Quarters)
                                                     </p>
 
                                                     <div className="grid grid-cols-2 gap-3">

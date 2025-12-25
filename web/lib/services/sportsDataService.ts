@@ -116,51 +116,36 @@ class SportsDataService {
             const isServer = typeof window === 'undefined';
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 
-            // Priority 1: Backend Bridge (Dual Strategy: Cloud First -> Local Backup)
-            const bridgeUrls = [
-                process.env.NEXT_PUBLIC_API_URL,        // Local Ngrok (Primary for today's tests)
-                process.env.NEXT_PUBLIC_CLOUD_API_URL  // Render (Fallback/Cloud)
-            ].filter(url => url && url.startsWith('http')) as string[];
-
-            for (const bridgeUrl of bridgeUrls) {
-                const cleanBridge = bridgeUrl.replace(/\/$/, "");
-                const fetchUrl = `${cleanBridge}/api/proxy/sportsdata${cleanEndpoint}`;
-
+            // 1. CLIENT-SIDE: Use Local Proxy (Next.js rewrites to our route.ts)
+            if (!isServer) {
+                const proxyUrl = `/api/proxy/sportsdata${cleanEndpoint}`;
                 try {
-                    const response = await fetch(fetchUrl, {
-                        headers: {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                            'Accept': 'application/json, text/plain, */*',
-                            'ngrok-skip-browser-warning': 'true',
-                            'Cache-Control': 'no-cache'
-                        },
-                        cache: 'no-store',
-                        signal: AbortSignal.timeout(10000) // Lower timeout to switch faster
-                    });
-
-                    if (response.ok) {
-                        return await response.json();
-                    }
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error(`Proxy error: ${response.status}`);
+                    return await response.json();
                 } catch (err) {
-                    console.warn(`⚠️ [SportsData] Failed bridge: ${bridgeUrl}. Trying next...`);
+                    console.error("Client fetch error:", err);
+                    return null;
                 }
             }
 
-            // Priority 2: Local Proxy (Development) or Fallback
-            const baseUrl = isServer
-                ? 'https://api.sofascore.com/api/v1'
-                : '/api/proxy/sportsdata';
+            // 2. SERVER-SIDE (Render/Vercel Server): Use ScraperService DIRECTLY
+            // This ensures we use Rotator Keys / Direct Fetch as configured
+            const BASE_URL = 'https://www.sofascore.com/api/v1';
+            const targetUrl = `${BASE_URL}${cleanEndpoint}`;
 
-            const url = `${baseUrl}${cleanEndpoint}`;
+            // Dynamic import to avoid circular deps if any (though scraperService is safe)
+            const { scraperService } = await import('@/lib/services/scraperService');
 
-            const response = await axios.get(url, {
-                timeout: 10000,
-                headers: this.headers
+            const data = await scraperService.makeRequest(targetUrl, {
+                useCache: !endpoint.includes('live'),
+                cacheTTL: endpoint.includes('live') ? 30 : 300
             });
 
-            return response.data;
+            return data;
+
         } catch (error: any) {
-            // console.error(`Error fetching ${endpoint}:`, error.message);
+            console.error(`Error fetching ${endpoint}:`, error.message);
             return null;
         }
     }

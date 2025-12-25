@@ -403,10 +403,10 @@ export async function POST(request: NextRequest) {
                 homeTopScorer: { name: 'Jugador Estrella (Local)', predictedPoints: 24, predictedRebounds: 8, predictedAssists: 5 },
                 awayTopScorer: { name: 'Jugador Estrella (Visitante)', predictedPoints: 26, predictedRebounds: 6, predictedAssists: 4 }
             };
-            // NEW: Christmas Props Mock
+            // NEW: Christmas Props Mock - GENERIC FALLBACK
             mockPrediction.predictions.playerProps = {
-                threes: { player: "Stephen Curry", line: 4.5, pick: "Más de" },
-                pra: { player: "LeBron James", line: 42.5, pick: "Menos de" }
+                threes: { player: "Jugador Estrella (Local)", line: 2.5, pick: "Más de" },
+                pra: { player: "Jugador Estrella (Visitante)", line: 20.5, pick: "Menos de" }
             };
             mockPrediction.predictions.quarterMarkets = {
                 raceTo20: { pick: winner, confidence: "Media" },
