@@ -19,6 +19,7 @@ const tennisRoutes = require('./src/routes/tennis');
 const americanFootballRoutes = require('./src/routes/americanFootball');
 const iceHockeyRoutes = require('./src/routes/iceHockey');
 const baseballRoutes = require('./src/routes/baseball');
+const adminRoutes = require('./src/routes/admin');
 const errorHandler = require('./src/middleware/errorHandler');
 const rateLimiter = require('./src/middleware/rateLimiter');
 
@@ -195,6 +196,7 @@ app.use('/api/nfl', americanFootballRoutes);
 app.use('/api/ice-hockey', iceHockeyRoutes);
 app.use('/api/nhl', iceHockeyRoutes);
 app.use('/api/baseball', baseballRoutes);
+app.use('/api/admin', adminRoutes);
 
 // General Proxy API
 app.use('/api/proxy', proxyRoutes);

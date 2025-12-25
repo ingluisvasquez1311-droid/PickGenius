@@ -8,14 +8,15 @@ import { toast } from 'sonner';
 
 export default function NotificationManager() {
     const { user } = useAuth();
-    const [permission, setPermission] = useState<NotificationPermission>('default');
+    const [permission, setPermission] = useState<NotificationPermission>(() => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            return Notification.permission;
+        }
+        return 'default';
+    });
     const [isSubscribed, setIsSubscribed] = useState(false);
 
     useEffect(() => {
-        if ('Notification' in window) {
-            setPermission(Notification.permission);
-        }
-
         // Listen for foreground messages
         onMessageListener()
             .then((payload: any) => {

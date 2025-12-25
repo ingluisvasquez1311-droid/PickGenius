@@ -58,6 +58,15 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
     const isFinished = event.status.type === 'finished';
     const isScheduled = event.status.type === 'scheduled' || event.status.type === 'notstarted';
 
+    const [now, setNow] = React.useState(Math.floor(Date.now() / 1000));
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setNow(Math.floor(Date.now() / 1000));
+        }, 30000); // Actualizar cada 30 segundos
+        return () => clearInterval(interval);
+    }, []);
+
     // Helper to get formatted elapsed time
     const getElapsedTime = () => {
         if (!isLive) return null;
@@ -71,7 +80,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
 
         // Calculation fallback for football
         if (sport === 'football' && event.time?.currentPeriodStartTimestamp) {
-            const now = Math.floor(Date.now() / 1000);
             const elapsedSeconds = now - event.time.currentPeriodStartTimestamp;
             let minutes = Math.floor(elapsedSeconds / 60);
 
@@ -118,11 +126,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
         statusClass = "text-gray-500 font-bold text-[10px] uppercase";
     } else {
         const matchDate = new Date(event.startTimestamp! * 1000);
-        const today = new Date();
-        const isToday = matchDate.toDateString() === today.toDateString();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-        const isTomorrow = matchDate.toDateString() === tomorrow.toDateString();
+        const todayDate = new Date(now * 1000);
+        const isToday = matchDate.toDateString() === todayDate.toDateString();
+        const tomorrowDate = new Date((now + 86400) * 1000);
+        const isTomorrow = matchDate.toDateString() === tomorrowDate.toDateString();
 
         const dayPrefix = isToday ? 'HOY' : isTomorrow ? 'MAÑ' : `${matchDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }).toUpperCase()}`;
         statusContent = (

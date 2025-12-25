@@ -13,18 +13,24 @@ export default function WelcomeToast() {
     useEffect(() => {
         if (user && user.displayName) {
             // Verificar si es usuario nuevo (cuenta creada recientemente)
-            const accountAge = Date.now() - new Date(user.createdAt).getTime();
-            const isNew = accountAge < 60000; // Menos de 1 minuto = nuevo registro
+            const currentTime = new Date().getTime();
+            const accountTime = new Date(user.createdAt).getTime();
+            const isNew = (currentTime - accountTime) < 60000;
 
-            setIsNewUser(isNew);
-            setShowToast(true);
-
-            // Auto-cerrar después de 5 segundos
             const timer = setTimeout(() => {
-                setShowToast(false);
-            }, isNew ? 6000 : 4000);
+                setIsNewUser(isNew);
+                setShowToast(true);
+            }, 100);
 
-            return () => clearTimeout(timer);
+            // Auto-cerrar después de 5-7 segundos
+            const closeTimer = setTimeout(() => {
+                setShowToast(false);
+            }, isNew ? 7000 : 5000);
+
+            return () => {
+                clearTimeout(timer);
+                clearTimeout(closeTimer);
+            };
         }
     }, [user]);
 
