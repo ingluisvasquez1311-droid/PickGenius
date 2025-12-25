@@ -59,6 +59,22 @@ app.get('/api/status', (req, res) => {
     });
 });
 
+// Debug Endpoint for Scraper Keys
+app.get('/api/debug/keys', (req, res) => {
+    const scraperKeys = process.env.SCRAPER_API_KEYS ? process.env.SCRAPER_API_KEYS.split(',') : [];
+    const singleKey = process.env.SCRAPER_API_KEY;
+
+    res.json({
+        hasList: !!process.env.SCRAPER_API_KEYS,
+        listLength: scraperKeys.length,
+        listSegments: scraperKeys.map(k => ({ length: k.length, preview: k.substring(0, 5) + '...' })),
+        hasSingle: !!singleKey,
+        singleLength: singleKey ? singleKey.length : 0,
+        envKeys: Object.keys(process.env).filter(k => k.includes('API')),
+        nodeEnv: process.env.NODE_ENV
+    });
+});
+
 // ========================================
 // FOOTBALL API ENDPOINTS (with Cache)
 // ========================================
@@ -254,6 +270,11 @@ app.get('/', (req, res) => {
 
 // Start server
 const server = app.listen(PORT, () => {
+    // Diagnostic Logs
+    const scraperKeys = process.env.SCRAPER_API_KEYS ? process.env.SCRAPER_API_KEYS.split(',') : [];
+    console.log('🔍 [Startup Check] SCRAPER_API_KEYS found:', scraperKeys.length);
+    if (process.env.SCRAPER_API_KEY) console.log('🔍 [Startup Check] SCRAPER_API_KEY found (Single): Yes');
+
     console.log('='.repeat(60));
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
