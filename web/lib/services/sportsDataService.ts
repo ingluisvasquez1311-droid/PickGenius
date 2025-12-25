@@ -129,19 +129,24 @@ class SportsDataService {
                 }
             }
 
-            // 2. SERVER-SIDE (Render/Vercel Server): Use ScraperService DIRECTLY
-            // This ensures we use Rotator Keys / Direct Fetch as configured
-            const BASE_URL = 'https://www.sofascore.com/api/v1';
+            // 2. SERVER-SIDE: Direct fetch to Sofascore
+            const BASE_URL = 'https://api.sofascore.com/api/v1';
             const targetUrl = `${BASE_URL}${cleanEndpoint}`;
 
-            // Dynamic import to avoid circular deps if any (though scraperService is safe)
-            const { scraperService } = await import('@/lib/services/scraperService');
-
-            const data = await scraperService.makeRequest(targetUrl, {
-                useCache: !endpoint.includes('live'),
-                cacheTTL: endpoint.includes('live') ? 30 : 300
+            const response = await fetch(targetUrl, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Accept': 'application/json',
+                    'Origin': 'https://www.sofascore.com',
+                    'Referer': 'https://www.sofascore.com/'
+                }
             });
 
+            if (!response.ok) {
+                throw new Error(`Sofascore API returned ${response.status}`);
+            }
+
+            const data = await response.json();
             return data;
 
         } catch (error: any) {
