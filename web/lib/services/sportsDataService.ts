@@ -110,44 +110,33 @@ class SportsDataService {
 
     /**
      * Generic method to make requests
+     * CRITICAL: All requests MUST go through /api/proxy to use residential IP via Ngrok
      */
     async makeRequest<T = any>(endpoint: string): Promise<T | null> {
         try {
             const isServer = typeof window === 'undefined';
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 
-            // 1. CLIENT-SIDE: Use Local Proxy (Next.js rewrites to our route.ts)
-            if (!isServer) {
-                const proxyUrl = `/api/proxy/sportsdata${cleanEndpoint}`;
-                try {
-                    const response = await fetch(proxyUrl);
-                    if (!response.ok) throw new Error(`Proxy error: ${response.status}`);
-                    return await response.json();
-                } catch (err) {
-                    console.error("Client fetch error:", err);
-                    return null;
+            // ALWAYS use proxy for all requests (client and server)
+            // This ensures Vercel → Ngrok → localhost:3000 → Sofascore (residential IP)
+            const proxyUrl = isServer
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/proxy/sportsdata${cleanEndpoint}`
+                : `/api/proxy/sportsdata${cleanEndpoint}`;
+
+            try {
+                const response = await fetch(proxyUrl, {
+                    headers: this.headers
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Proxy error: ${response.status}`);
                 }
+
+                return await response.json();
+            } catch (err: any) {
+                console.error(`❌ Request failed for ${endpoint}:`, err.message);
+                return null;
             }
-
-            // 2. SERVER-SIDE: Direct fetch to Sofascore
-            const BASE_URL = 'https://api.sofascore.com/api/v1';
-            const targetUrl = `${BASE_URL}${cleanEndpoint}`;
-
-            const response = await fetch(targetUrl, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                    'Accept': 'application/json',
-                    'Origin': 'https://www.sofascore.com',
-                    'Referer': 'https://www.sofascore.com/'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Sofascore API returned ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data;
 
         } catch (error: any) {
             console.error(`Error fetching ${endpoint}:`, error.message);
