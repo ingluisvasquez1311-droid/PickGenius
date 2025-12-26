@@ -80,7 +80,7 @@ export default async function SystemStatusPage() {
             </div>
 
         </div>
-        </div >
+        </div>
     );
 }
 
