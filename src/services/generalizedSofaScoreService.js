@@ -133,11 +133,11 @@ class GeneralizedSofaScoreService {
     }
 
     async getEventDetails(eventId) {
-        return this.makeRequest(`/ event / ${eventId} `, `event_details_${eventId} `, 300);
+        return this.makeRequest(`/event/${eventId}`, `event_details_${eventId}`, 300);
     }
 
     async getEventStatistics(eventId) {
-        return this.makeRequest(`/ event / ${eventId}/statistics`, `event_stats_${eventId}`, 60);
+        return this.makeRequest(`/event/${eventId}/statistics`, `event_stats_${eventId}`, 60);
     }
 
     async getEventOdds(eventId) {
