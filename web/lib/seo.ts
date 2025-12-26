@@ -60,5 +60,16 @@ export function constructMetadata({
                 'max-snippet': -1,
             },
         },
+        manifest: '/manifest.json',
+        appleWebApp: {
+            capable: true,
+            statusBarStyle: 'default',
+            title: 'PickGenius',
+        },
+        icons: {
+            apple: [
+                { url: '/icon-192.png', sizes: '192x192' },
+            ],
+        },
     };
 }

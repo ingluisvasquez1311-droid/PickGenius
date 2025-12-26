@@ -15,7 +15,8 @@ export default function MobileBottomNav() {
     const navItems = [
         { label: 'Inicio', path: '/', icon: Home },
         { label: 'En Vivo', path: '/football-live', icon: Zap },
-        { label: 'IA Picks', path: '/ai-picks', icon: Bot }, // Asumiendo ruta, si no existe redirige a home o una específica
+        { label: 'IA Picks', path: '/ai-picks', icon: Bot },
+        { label: 'Blog', path: '/blog', icon: Trophy }, // Trophy icon temporary or custom icon
         { label: 'Perfil', path: '/profile', icon: User },
     ];
 

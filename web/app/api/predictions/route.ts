@@ -40,13 +40,21 @@ export async function POST(request: NextRequest) {
             console.log(`👤 [Prediction API] User ${uid} | isPremium: ${isPremiumUser} | Role: ${profile?.role}`);
         }
 
-        // --- CACHE LAYER ---
+        // --- CACHE LAYER (REDUCED FOR VARIABILITY) ---
+        // NOTE: Cache reduced to allow AI to generate fresh predictions more frequently
         const cacheKey = `prediction:${sport}:${gameId}`;
         const cachedPrediction = await globalCache.get(cacheKey);
 
-        if (cachedPrediction) {
-            console.log(`🎯 [Prediction API] Returning CACHED prediction for ${gameId}`);
+        // Only use cache if it's very recent (< 5 minutes) to ensure fresh AI analysis
+        const cacheAge = (cachedPrediction as any)?.generatedAt
+            ? Date.now() - new Date((cachedPrediction as any).generatedAt).getTime()
+            : Infinity;
+
+        if (cachedPrediction && cacheAge < 5 * 60 * 1000) { // 5 minutes
+            console.log(`🎯 [Prediction API] Returning CACHED prediction for ${gameId} (age: ${Math.round(cacheAge / 1000)}s)`);
             return NextResponse.json(cachedPrediction);
+        } else if (cachedPrediction) {
+            console.log(`🔄 [Prediction API] Cache expired for ${gameId}, generating fresh prediction`);
         }
 
         // 1. Fetch real match data in PARALLEL
@@ -116,159 +124,297 @@ export async function POST(request: NextRequest) {
             const isNBA = matchContext.tournament?.toLowerCase().includes('nba');
             const totalMinutes = isNBA ? 48 : 40;
             const currentTotal = homeScore + awayScore;
+            const minutesPlayed = Math.floor((matchContext.timeElapsed || 0) / 60);
+
+            // Calculate H2H average total points
+            const h2hTotals = matchContext.h2hHistory?.map((game: any) => {
+                const scores = game.score?.split('-') || [];
+                return parseInt(scores[0] || '0') + parseInt(scores[1] || '0');
+            }).filter((total: number) => !isNaN(total)) || [];
+
+            const h2hAverage = h2hTotals.length > 0
+                ? Math.round(h2hTotals.reduce((a: number, b: number) => a + b, 0) / h2hTotals.length)
+                : (isNBA ? 215 : 160);
+
+            // Projected final score based on current pace
+            const projectedTotal = minutesPlayed > 5 && isLive
+                ? Math.round((currentTotal / minutesPlayed) * totalMinutes)
+                : h2hAverage;
 
             prompt = `
             Eres un experto analista de NBA y Baloncesto Internacional (FIBA) hablando en ESPAÑOL.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
             **TORNEO:** ${matchContext.tournament}
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
-            ${matchContext.h2hHistory ? `**HISTORIAL H2H (Últimos 5):** ${JSON.stringify(matchContext.h2hHistory)}` : ''}
-            ${isLive ? `**TIEMPO JUGADO:** ${Math.floor((matchContext.timeElapsed || 0) / 60)} min de ${totalMinutes}
+            
+            **ANÁLISIS HISTÓRICO (H2H - ÚLTIMOS ${matchContext.h2hHistory?.length || 0} ENFRENTAMIENTOS):**
+            ${matchContext.h2hHistory ? JSON.stringify(matchContext.h2hHistory) : 'No disponible'}
+            **PROMEDIO DE PUNTOS TOTALES EN H2H:** ${h2hAverage} puntos
+            **TOTALES INDIVIDUALES EN H2H:** ${h2hTotals.join(', ')} puntos
+            
+            ${isLive ? `
+            **ANÁLISIS EN VIVO - RITMO DE JUEGO (PACE):**
+            - **Tiempo Jugado:** ${minutesPlayed} min de ${totalMinutes}
+            - **Puntos Actuales:** ${currentTotal} (${homeScore}-${awayScore})
+            - **Ritmo de Puntos por Minuto:** ${(currentTotal / Math.max(minutesPlayed, 1)).toFixed(2)} pts/min
+            - **PROYECCIÓN FINAL (basada en ritmo actual):** ${projectedTotal} puntos totales
+            - **COMPARACIÓN CON PROMEDIO H2H:** ${projectedTotal > h2hAverage ? `+${projectedTotal - h2hAverage}` : projectedTotal - h2hAverage} puntos vs histórico
+            
             **PROGRESIÓN POR PERIODOS:**
             Local: Q1:${matchContext.periodScores.home?.period1 || 0}, Q2:${matchContext.periodScores.home?.period2 || 0}, Q3:${matchContext.periodScores.home?.period3 || 0}, Q4:${matchContext.periodScores.home?.period4 || 0}
-            Visitante: Q1:${matchContext.periodScores.away?.period1 || 0}, Q2:${matchContext.periodScores.away?.period2 || 0}, Q3:${matchContext.periodScores.away?.period3 || 0}, Q4:${matchContext.periodScores.away?.period4 || 0}` : ''}
+            Visitante: Q1:${matchContext.periodScores.away?.period1 || 0}, Q2:${matchContext.periodScores.away?.period2 || 0}, Q3:${matchContext.periodScores.away?.period3 || 0}, Q4:${matchContext.periodScores.away?.period4 || 0}
+            ` : ''}
+            
             **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
 
-            CRITICAL CONTEXT & MARKETS:
-            - PUNTOS (TOTALES): Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under).
-            - ANALIZA EL "PACE" (RITMO): Calcula la proyección final basándote en los puntos actuales vs tiempo transcurrido.
-            - COMBINACIÓN GANADORA (TICKET): Crea un 'bettingTip' profesional que combine varios factores si tiene sentido (ej: 'Ganador Local y Más de 220.5 Puntos').
-            - VALUE BET ANALYSIS: Si el mercado ofrece una línea desajustada con el ritmo actual, indícalo.
+            **INSTRUCCIONES CRÍTICAS PARA OVER/UNDER:**
+            
+            1. **VERIFICACIÓN OBLIGATORIA DE RESULTADOS PREVIOS:**
+               - Analiza CADA resultado del H2H
+               - Identifica si estos equipos tienden a juegos de MUCHOS o POCOS puntos
+               - Considera el promedio histórico: ${h2hAverage} puntos
+            
+            2. **CÁLCULO DE RITMO (PACE) ${isLive ? '- EN VIVO' : ''}:**
+               ${isLive ? `
+               - Ritmo actual: ${(currentTotal / Math.max(minutesPlayed, 1)).toFixed(2)} pts/min
+               - Proyección final: ${projectedTotal} puntos
+               - Si la proyección es >10 puntos MAYOR que el promedio H2H → Tendencia OVER
+               - Si la proyección es >10 puntos MENOR que el promedio H2H → Tendencia UNDER
+               ` : `
+               - Usa el promedio H2H como base: ${h2hAverage} puntos
+               - Ajusta según forma reciente y estadísticas defensivas
+               `}
+            
+            3. **DECISIÓN FINAL OVER/UNDER:**
+               - Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under)
+               - La línea típica es: ${Math.round(h2hAverage / 5) * 5 - 2.5} puntos
+               - Justifica tu decisión con el análisis H2H y el ritmo actual
+            
+            4. **COMBINACIÓN GANADORA (TICKET):**
+               - Crea un 'bettingTip' profesional que combine ganador + OVER/UNDER si tiene sentido
+               - Ejemplo: 'Local gana y Más de 220.5 Puntos'
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}", 
                 "confidence": 85,
-                "reasoning": "Análisis táctico resaltando el ritmo (pace) actual y la proyección de puntos...",
+                "reasoning": "Análisis táctico MENCIONANDO OBLIGATORIAMENTE: 1) Promedio H2H de ${h2hAverage} puntos, 2) ${isLive ? `Ritmo actual proyecta ${projectedTotal} puntos` : 'Tendencia histórica de estos equipos'}, 3) Recomendación OVER/UNDER justificada...",
                 "bettingTip": "Local y Más de 222.5 Puntos",
                 "advancedMarkets": { "totalPoints": "Más de 220.5", "playerProp": "Estrella: Más de 25.5 Puntos" },
+                "h2hAnalysis": {
+                    "averageTotalPoints": ${h2hAverage},
+                    "recentTotals": ${JSON.stringify(h2hTotals)},
+                    "trend": "OVER" o "UNDER",
+                    "confidence": "Alta/Media/Baja"
+                },
+                ${isLive ? `"liveAnalysis": {
+                    "currentPace": ${(currentTotal / Math.max(minutesPlayed, 1)).toFixed(2)},
+                    "projectedTotal": ${projectedTotal},
+                    "recommendation": "Basado en el ritmo actual..."
+                },` : ''}
                 "isValueBet": true,
-                "valueAnalysis": "El ritmo de anotación proyectado es superior a la línea de apuesta...",
+                "valueAnalysis": "El ritmo de anotación proyectado es superior/inferior a la línea de apuesta...",
                 "predictions": {
                     "finalScore": "${isNBA ? '112-105' : '82-78'}",
-                    "totalPoints": "${isNBA ? '217' : '160'}",
+                    "totalPoints": "${projectedTotal}",
                     "spread": { "favorite": "${matchContext.home}", "line": -5.5, "recommendation": "Cubrir Hándicap" },
-                    "overUnder": { "line": ${isLive ? (currentTotal + 50) : (isNBA ? 222.5 : 158.5)}, "pick": "Más de", "confidence": "Alta" },
+                    "overUnder": { 
+                        "line": ${Math.round(h2hAverage / 5) * 5 - 2.5}, 
+                        "pick": "Más de" o "Menos de" (DECIDE basándote en H2H y ritmo), 
+                        "confidence": "Alta/Media",
+                        "rationale": "El promedio H2H es ${h2hAverage}, ${isLive ? `y el ritmo actual proyecta ${projectedTotal}` : 'y la forma reciente sugiere...'}"
+                    },
                     "projections": [
                         { "name": "Jugador Estrella 1", "team": "Home", "points": "22.5+", "description": "Puntos (Más de)", "confidence": "Alta" },
                         { "name": "Jugador Estrella 2", "team": "Away", "points": "28.5+", "description": "Puntos (Más de)", "confidence": "Media" }
                     ]
                 },
-                "keyFactors": ["Dominio en Puntos (PTS)", "Ritmo de Juego (PACE)", "Control de Rebotes (REB)"]
+                "keyFactors": ["Promedio H2H: ${h2hAverage} pts", ${isLive ? `"Ritmo Actual: ${(currentTotal / Math.max(minutesPlayed, 1)).toFixed(2)} pts/min"` : '"Análisis Defensivo"'}, "Tendencia Over/Under en Enfrentamientos Directos"]
             }
             `;
         } else if (sport === 'football') {
+            // Calculate H2H average goals
+            const h2hGoals = matchContext.h2hHistory?.map((game: any) => {
+                const scores = game.score?.split('-') || [];
+                return parseInt(scores[0] || '0') + parseInt(scores[1] || '0');
+            }).filter((total: number) => !isNaN(total)) || [];
+
+            const h2hAvgGoals = h2hGoals.length > 0
+                ? (h2hGoals.reduce((a: number, b: number) => a + b, 0) / h2hGoals.length).toFixed(1)
+                : '2.5';
+
+            const currentGoals = homeScore + awayScore;
+            const minutesPlayed = Math.floor((matchContext.timeElapsed || 0) / 60);
+            const projectedGoals = minutesPlayed > 10 && isLive
+                ? ((currentGoals / minutesPlayed) * 90).toFixed(1)
+                : h2hAvgGoals;
+
             prompt = `
             Eres un analista experto de Fútbol/Soccer hablando en ESPAÑOL.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
-            ${matchContext.h2hHistory ? `**HISTORIAL H2H (Últimos 5):** ${JSON.stringify(matchContext.h2hHistory)}` : ''}
-            **MARKET ODDS (Bet365/Real):** ${JSON.stringify(matchContext.marketOdds)}
-            ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
-            ANALYZE SPECIAL MARKETS (FOOTBALL ELITE - MERCADOS SECUNDARIOS):
-            - GOLES (UNDER/OVER): Analiza la línea de goles. Indica SIEMPRE si es 'Más de' (Over) o 'Menos de' (Under) y la línea (ej: 2.5).
-            - AMBOS EQUIPOS ANOTAN (BTTS): Predice si ambos equipos anotarán al menos 1 gol (Sí/No).
-            - PRIMER GOL: Predice qué equipo anotará primero (Local/Visitante/Ninguno).
-            - RESULTADO AL DESCANSO/FINAL (HT/FT): Combinación de resultado.
-            - TARJETAS TOTALES: Total de tarjetas. Indica SIEMPRE si es 'Más de' o 'Menos de' y la línea (ej: 4.5).
-            - CÓRNERS: Proyecta el total. Indica SIEMPRE si es 'Más de' o 'Menos de' y la línea (ej: 9.5).
-            - COMBINACIÓN GANADORA (TICKET): Crea una recomendación de ALTO VALOR.
+            **ANÁLISIS HISTÓRICO H2H:**
+            ${matchContext.h2hHistory ? JSON.stringify(matchContext.h2hHistory) : 'No disponible'}
+            **PROMEDIO DE GOLES EN H2H:** ${h2hAvgGoals} goles
+            **GOLES INDIVIDUALES EN H2H:** ${h2hGoals.join(', ')}
+            
+            ${isLive ? `**ANÁLISIS EN VIVO:**
+            - Minutos: ${minutesPlayed}'
+            - Goles actuales: ${currentGoals}
+            - Ritmo: ${(currentGoals / Math.max(minutesPlayed, 1) * 90).toFixed(2)} goles/90min
+            - **PROYECCIÓN:** ${projectedGoals} goles totales
+            - **VS PROMEDIO H2H:** ${parseFloat(projectedGoals) > parseFloat(h2hAvgGoals) ? 'OVER' : 'UNDER'} tendencia
+            ` : ''}
+            **MARKET ODDS:** ${JSON.stringify(matchContext.marketOdds)}
+            ${isLive ? `**STATS:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
+            
+            **INSTRUCCIONES CRÍTICAS:**
+            1. **VERIFICAR H2H:** Promedio ${h2hAvgGoals} goles → tendencia histórica
+            2. **GOLES OVER/UNDER:** Línea típica 2.5. Decide basándote en H2H ${isLive ? `y ritmo actual (${projectedGoals} proyectados)` : ''}
+            3. **CÓRNERS:** Analiza histórico y proyecta total
+            4. **AMBOS ANOTAN (BTTS):** Verifica patrones en H2H
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
-                "reasoning": "Resumen táctico...",
+                "reasoning": "MENCIONAR: 1) Promedio H2H ${h2hAvgGoals} goles, 2) ${isLive ? `Proyección ${projectedGoals} goles` : 'Tendencia histórica'}, 3) Justificación OVER/UNDER...",
                 "bettingTip": "Local + Más de 2.5 Goles",
+                "h2hAnalysis": {
+                    "averageGoals": ${h2hAvgGoals},
+                    "recentTotals": ${JSON.stringify(h2hGoals)},
+                    "trend": "OVER o UNDER"
+                },
                 "advancedMarkets": { "corners": "Más de 9.5", "cards": "Menos de 4.5" },
                 "predictions": {
-                    "totalGoals": "3",
-                    "offsides": { "total": 4, "pick": "Más de" },
-                    "overUnder": { "line": 2.5, "pick": "Más de", "confidence": "Alta" },
-                    "bothTeamsScore": { "pick": "Sí", "confidence": "Media" },
+                    "totalGoals": "${projectedGoals}",
+                    "overUnder": { 
+                        "line": 2.5, 
+                        "pick": "Decide basado en ${h2hAvgGoals} (H2H) ${isLive ? `y ${projectedGoals} (proyección)` : ''}", 
+                        "confidence": "Alta/Media",
+                        "rationale": "Promedio H2H: ${h2hAvgGoals}, ${isLive ? `Proyección actual: ${projectedGoals}` : 'tendencia sugiere...'}"
+                    },
+                    "bothTeamsScore": { "pick": "Sí/No", "confidence": "Media" },
                     "corners": { "total": 10, "pick": "Más de", "line": 9.5 },
-                    "cards": { "yellowCards": 4, "redCards": 0, "pick": "Menos de", "line": 4.5, "details": "Árbitro permisivo" }
+                    "cards": { "yellowCards": 4, "redCards": 0, "pick": "Menos de", "line": 4.5 }
                 },
-                "keyFactors": ["Volumen de Remates", "Historial de Córners"]
+                "keyFactors": ["Promedio H2H: ${h2hAvgGoals} goles", ${isLive ? `"Ritmo: ${(currentGoals / Math.max(minutesPlayed, 1) * 90).toFixed(1)} goles/90'"` : '"Análisis Ofensivo"'}, "Tendencia Over/Under Histórica"]
             }
             `;
         } else if (sport.toLowerCase().includes('american') || sport.toLowerCase().includes('nfl')) {
-            prompt = `
-            Eres un analista ELITE de la NFL/Fútbol Americano (American Football) hablando en ESPAÑOL.
-            IMPORTANTE: Estás analizando FÚTBOL AMERICANO. 
-            PROHIBIDO: No menciones "Goles", "Corners", "Pelota de cristal", ni términos de soccer.
-            USA TÉRMINOS TÉCNICOS: Touchdowns (TD), field goals, yardas aéreas/terrestres, intercepciones, fumbles, sacks, conversión de 3ra down.
+            // Calculate H2H average points for NFL
+            const h2hPoints = matchContext.h2hHistory?.map((game: any) => {
+                const scores = game.score?.split('-') || [];
+                return parseInt(scores[0] || '0') + parseInt(scores[1] || '0');
+            }).filter((total: number) => !isNaN(total)) || [];
 
+            const h2hAvgPoints = h2hPoints.length > 0
+                ? Math.round(h2hPoints.reduce((a: number, b: number) => a + b, 0) / h2hPoints.length)
+                : 45;
+
+            const currentPoints = homeScore + awayScore;
+            const projectedPoints = isLive && currentPoints > 0
+                ? Math.round((currentPoints / ((matchContext.timeElapsed || 0) / 3600)) * 1) // 1 hour game
+                : h2hAvgPoints;
+
+            prompt = `
+            Eres un analista ELITE de la NFL/Fútbol Americano hablando en ESPAÑOL.
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
-            **MARKET ODDS (Real):** ${JSON.stringify(matchContext.marketOdds)}
-            ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
-            ANALYZE ELITE NFL MARKETS:
-            - PUNTOS TOTALES (UNDER/OVER): Analiza el volumen de puntos esperado. Indica SIEMPRE si es 'Más de' o 'Menos de' y la línea (ej: 44.5).
-            - PROP DE JUGADOR (QB/RB/WR): Basado en el match-up secundario.
-            - SPREAD (HÁNDICAP): ¿Cubrirá el favorito la línea de puntos?
-            - COMBINACIÓN GANADORA: Ejemplo: 'Ganador Local y Over 45.5 Puntos'.
+            **ANÁLISIS H2H:**
+            ${matchContext.h2hHistory ? JSON.stringify(matchContext.h2hHistory) : 'No disponible'}
+            **PROMEDIO PUNTOS H2H:** ${h2hAvgPoints} puntos
+            **TOTALES H2H:** ${h2hPoints.join(', ')}
+            ${isLive ? `**PROYECCIÓN ACTUAL:** ${projectedPoints} puntos` : ''}
+            
+            **INSTRUCCIONES:**
+            1. Verificar H2H: ${h2hAvgPoints} puntos promedio
+            2. OVER/UNDER: Línea típica 44.5-47.5, decidir con H2H ${isLive ? `+ proyección (${projectedPoints})` : ''}
+            3. Prohibido mencionar "Goles" o "Corners"
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 82,
-                "reasoning": "Análisis basado en la presión al QB rival y la debilidad en la defensa secundaria...",
+                "reasoning": "INCLUIR: 1) Promedio H2H ${h2hAvgPoints} pts, 2) ${isLive ? `Proyección ${projectedPoints} pts` : 'Análisis defensivo'}, 3) Recomendación...",
                 "bettingTip": "${matchContext.home} y Más de 44.5 Puntos",
-                "advancedMarkets": { "touchdowns": "Más de 4.5", "yards": "QB: Más de 265.5 yardas aéreas" },
+                "h2hAnalysis": {
+                    "averagePoints": ${h2hAvgPoints},
+                    "recentTotals": ${JSON.stringify(h2hPoints)},
+                    "trend": "OVER o UNDER"
+                },
+                "advancedMarkets": { "touchdowns": "Más de 4.5", "yards": "QB: Más de 265.5 yardas" },
                 "predictions": {
-                    "totalPoints": "48",
-                    "yards": { "total": 660, "pick": "Más de", "line": 640.5 },
-                    "spread": { "favorite": "${matchContext.home}", "line": -3.5, "recommendation": "Cubrir" },
-                    "overUnder": { "line": 47.5, "pick": "Más de", "confidence": "Alta" },
-                    "projections": [
-                        { "name": "Jugador Clave 1", "team": "Home", "points": "250.5+", "description": "Yardas de Pase", "confidence": "Alta" },
-                        { "name": "Jugador Clave 2", "team": "Away", "points": "85.5+", "description": "Yardas de Carrera", "confidence": "Media" }
-                    ],
+                    "totalPoints": "${projectedPoints}",
+                    "overUnder": { 
+                        "line": ${Math.round(h2hAvgPoints / 5) * 5 - 2.5}, 
+                        "pick": "Decide con H2H (${h2hAvgPoints}) ${isLive ? `+ proyección (${projectedPoints})` : ''}", 
+                        "confidence": "Alta",
+                        "rationale": "H2H: ${h2hAvgPoints} pts${isLive ? `, proyección: ${projectedPoints} pts` : ''}"
+                    },
                     "touchdowns": { "total": 5, "pick": "Más de", "line": 4.5 }
                 },
-                "keyFactors": ["Presión al Quarterback (Pass Rush)", "Eficiencia en Zona Roja (Red Zone)", "Control del Reloj (Time of Possession)"]
+                "keyFactors": ["Promedio H2H: ${h2hAvgPoints} pts", "Presión al QB", "Eficiencia Zona Roja"]
             }
             `;
         } else if (sport.toLowerCase().includes('hockey') || sport.toLowerCase().includes('nhl')) {
+            // Calculate H2H average goals for Hockey
+            const h2hGoals = matchContext.h2hHistory?.map((game: any) => {
+                const scores = game.score?.split('-') || [];
+                return parseInt(scores[0] || '0') + parseInt(scores[1] || '0');
+            }).filter((total: number) => !isNaN(total)) || [];
+
+            const h2hAvgGoals = h2hGoals.length > 0
+                ? (h2hGoals.reduce((a: number, b: number) => a + b, 0) / h2hGoals.length).toFixed(1)
+                : '5.5';
+
+            const currentGoals = homeScore + awayScore;
+            const projectedGoals = isLive && currentGoals > 0
+                ? (currentGoals * 1.2).toFixed(1) // Simple projection
+                : h2hAvgGoals;
+
             prompt = `
             Eres un analista experto de la NHL y Hockey sobre hielo hablando en ESPAÑOL.
-            IMPORTANTE: Estás analizando HOCKEY. 
-            PROHIBIDO: No menciones "Fútbol", "Corners" o "Penalties" de fútbol.
-            USA TÉRMINOS TÉCNICOS: Puck, Power Play, Penalty Kill, Shot on Goal (SOG), Save Percentage, Periodos (no tiempos), Vacíos (Empty Net).
-
             **MATCH:** ${matchContext.home} vs ${matchContext.away} (${matchContext.score})
             **STATUS:** ${matchContext.status} ${isLive ? '(LIVE)' : '(PRE-MATCH)'}
-            ${matchContext.h2hHistory ? `**HISTORIAL H2H:** ${JSON.stringify(matchContext.h2hHistory)}` : ''}
-            **MARKET ODDS (Real):** ${JSON.stringify(matchContext.marketOdds)}
-            ${isLive ? `STATS ACTUALES:** ${JSON.stringify(matchContext.statistics || {})}` : ''}
             
-            ANALYZE NHL PERFORMANCE:
-            - GOLES TOTALES (UNDER/OVER): Típicamente línea 5.5 o 6.5. Indica 'Más de' o 'Menos de'.
-            - PUCK LINE: Hándicap de -1.5 o +1.5.
-            - TIROS A PUERTA (SOG): Basado en el volumen ofensivo.
-            - COMBINACIÓN GANADORA: Ejemplo: 'Local gana y Under 6.5 Goles'.
+            **ANÁLISIS H2H:**
+            ${matchContext.h2hHistory ? JSON.stringify(matchContext.h2hHistory) : 'No disponible'}
+            **PROMEDIO GOLES H2H:** ${h2hAvgGoals} goles
+            **TOTALES H2H:** ${h2hGoals.join(', ')}
+            ${isLive ? `**PROYECCIÓN:** ${projectedGoals} goles` : ''}
+            
+            **INSTRUCCIONES:**
+            1. Verificar H2H: ${h2hAvgGoals} goles promedio
+            2. OVER/UNDER: Línea típica 5.5-6.5, decidir con H2H ${isLive ? `+ proyección (${projectedGoals})` : ''}
+            3. Prohibido mencionar "Fútbol" o "Corners"
 
             RETURN JSON ONLY in SPANISH:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 78,
-                "reasoning": "Sólido Power Play y un portero que mantiene un .920 de porcentaje de paradas...",
+                "reasoning": "INCLUIR: 1) Promedio H2H ${h2hAvgGoals} goles, 2) ${isLive ? `Proyección ${projectedGoals}` : 'Power Play'}, 3) Recomendación...",
                 "bettingTip": "Local y Más de 5.5 Goles",
+                "h2hAnalysis": {
+                    "averageGoals": ${h2hAvgGoals},
+                    "recentTotals": ${JSON.stringify(h2hGoals)},
+                    "trend": "OVER o UNDER"
+                },
                 "advancedMarkets": { "totalGoals": "Más de 5.5", "shots": "SOG: Más de 31.5" },
                 "predictions": {
-                    "totalGoals": "6",
+                    "totalGoals": "${projectedGoals}",
                     "puckLine": { "favorite": "${matchContext.home}", "line": -1.5, "recommendation": "Cubrir" },
-                    "overUnder": { "line": 5.5, "pick": "Más de", "confidence": "Media" },
-                    "projections": [
-                        { "name": "Jugador Estrella", "team": "Home", "points": "3.5+", "description": "Tiros (Más de)", "confidence": "Alta" },
-                        { "name": "Portero", "team": "Away", "points": "28.5+", "description": "Atajadas (Más de)", "confidence": "Media" }
-                    ],
+                    "overUnder": { 
+                        "line": ${parseFloat(h2hAvgGoals) > 6 ? 6.5 : 5.5}, 
+                        "pick": "Decide con H2H (${h2hAvgGoals})${isLive ? ` + proyección (${projectedGoals})` : ''}", 
+                        "confidence": "Media",
+                        "rationale": "H2H: ${h2hAvgGoals} goles${isLive ? `, proyección: ${projectedGoals}` : ''}"
+                    },
                     "shots": { "total": 62, "pick": "Más de", "line": 58.5 }
                 },
-                "keyFactors": ["Efectividad en Power Play", "Forma del Portero (GAA)", "Fuerza del Penalty Kill"]
+                "keyFactors": ["Promedio H2H: ${h2hAvgGoals} goles", "Power Play", "Forma del Portero"]
             }
             `;
         } else if (sport.toLowerCase().includes('tennis')) {
@@ -353,22 +499,26 @@ export async function POST(request: NextRequest) {
             `;
         }
 
-        // 2. Call Groq using centralized service
+        // 2. Call Groq using centralized service with INCREASED VARIABILITY
         console.log('🤖 Calling Groq (FAST MODEL) for prediction...');
+
+        // Add temporal context for uniqueness in each request
+        const requestTimestamp = new Date().toISOString();
+        const enhancedPrompt = `${prompt}\n\n**ANALYSIS TIMESTAMP:** ${requestTimestamp}\n**INSTRUCTION:** Provide a UNIQUE and FRESH analysis. Vary your perspective and betting recommendations even for the same match.`;
 
         const prediction = await groqService.createPrediction({
             messages: [
                 {
                     role: "system",
-                    content: "Eres un experto analista deportivo. Responde SIEMPRE en JSON válido y en ESPAÑOL. Sé breve, preciso y profesional."
+                    content: "Eres un experto analista deportivo. Responde SIEMPRE en JSON válido y en ESPAÑOL. Sé breve, preciso y profesional. IMPORTANTE: Genera análisis ÚNICOS y VARIADOS incluso para el mismo partido, considerando diferentes ángulos tácticos y factores contextuales."
                 },
                 {
                     role: "user",
-                    content: prompt
+                    content: enhancedPrompt
                 }
             ],
             model: "llama-3.1-8b-instant",
-            temperature: 0.6,
+            temperature: 0.8, // Increased from 0.6 for more variation
             max_tokens: 800,
             response_format: { type: "json_object" }
         });
@@ -393,13 +543,7 @@ export async function POST(request: NextRequest) {
             incrementPredictionsUsed(uid).catch((err: any) => console.error('❌ Error incrementing usage:', err));
         }
 
-        // 4. CACHE the result
-        const ttl = isLive ? (3 * 60 * 1000) : (60 * 60 * 1000); // 3m for live, 1h for pre-match
-        await globalCache.set(cacheKey, prediction, ttl).catch(err => {
-            console.error('❌ [Prediction API] Cache set error:', err);
-        });
-
-        // SMART RANKING: Detect Value
+        // SMART RANKING: Detect Value (BEFORE finalResponse creation)
         let isValueBet = false;
         let valueScore = 0;
 
@@ -433,6 +577,12 @@ export async function POST(request: NextRequest) {
             isRealTime: isLive,
             generatedAt: new Date().toISOString()
         };
+
+        // 4. CACHE the result (REDUCED TTL for more variability)
+        const ttl = isLive ? (2 * 60 * 1000) : (10 * 60 * 1000); // 2m for live, 10m for pre-match
+        await globalCache.set(cacheKey, finalResponse, ttl).catch(err => {
+            console.error('❌ [Prediction API] Cache set error:', err);
+        });
 
         // 4. MASKING FOR FREE USERS
         if (!isPremiumUser) {

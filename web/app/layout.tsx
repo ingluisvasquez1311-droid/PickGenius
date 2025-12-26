@@ -14,6 +14,7 @@ import BettingSlip from "@/components/betting/BettingSlip";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import WelcomeToast from "@/components/auth/WelcomeToast";
+import PWAInstallPrompt from "@/components/layout/PWAInstallPrompt";
 
 
 import { constructMetadata } from "@/lib/seo";
@@ -24,6 +25,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 }
 
 export const metadata: Metadata = constructMetadata({
@@ -61,6 +63,7 @@ export default function RootLayout({
               <ToastProvider />
               <BettingSlip />
               <MobileBottomNav />
+              <PWAInstallPrompt />
             </BettingSlipProvider>
           </QueryProvider>
         </AuthProvider>

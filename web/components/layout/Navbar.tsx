@@ -41,6 +41,7 @@ export default function Navbar() {
         { href: '/value-bets', label: 'Value Bets', shortLabel: 'Value', icon: '💎', color: 'bg-emerald-600', textColor: 'text-emerald-400' },
         { href: '/parley', label: 'Smart Parley', shortLabel: 'Parley', icon: '🎯', color: 'bg-purple-600', textColor: 'text-purple-400' },
         { href: '/streaks', label: 'Rachas', shortLabel: 'Rachas', icon: '🔥', color: 'bg-orange-600', textColor: 'text-orange-400' },
+        { href: '/blog', label: 'Blog', shortLabel: 'Blog', icon: '📰', color: 'bg-blue-600', textColor: 'text-blue-400' },
     ];
 
     const otrosDeportes = [
