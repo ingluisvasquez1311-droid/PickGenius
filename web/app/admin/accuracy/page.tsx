@@ -146,8 +146,13 @@ export default function AccuracyDashboard() {
     );
 }
 
-function KPICard({ title, value, icon: Icon, trend }: any) {
-    const trendColors = {
+function KPICard({ title, value, icon: Icon, trend }: {
+    title: string;
+    value: string;
+    icon: any;
+    trend: 'up' | 'down' | 'stable';
+}) {
+    const trendColors: Record<'up' | 'down' | 'stable', string> = {
         up: 'text-green-400',
         down: 'text-red-400',
         stable: 'text-blue-400',

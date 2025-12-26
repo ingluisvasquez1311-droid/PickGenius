@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -95,7 +95,7 @@ export function withPremiumGuard<P extends object>(
                 <div className= "min-h-screen bg-[#0b0b0b] flex items-center justify-center" >
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" > </div>
                     </div>
-      );
+            );
         }
 
         return <Component { ...props } />;
