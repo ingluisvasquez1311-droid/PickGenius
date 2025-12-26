@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { API_URL } from '@/lib/api';
 
 interface PlayerDetailModalProps {
     player: any;
@@ -21,7 +22,7 @@ export default function PlayerDetailModal({ player, isOpen, onClose, teamColor =
     const pRating = player.rating || player.player?.rating;
 
     const imageUrl = pId
-        ? `/api/proxy/player-image/${pId}`
+        ? `${API_URL}/api/proxy/player-image/${pId}`
         : null;
 
     const borderColor = teamColor === 'orange' ? 'border-orange-500' : 'border-purple-500';

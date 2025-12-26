@@ -9,6 +9,7 @@ import Link from 'next/link';
 import PlayerPredictionShowcase from '@/components/ai/PlayerPredictionShowcase';
 import { LineChart, Line, ResponsiveContainer, YAxis, Tooltip } from 'recharts';
 import { TrendingUp, Activity, Zap, Brain, Target, Star, ChevronRight } from 'lucide-react';
+import { API_URL } from '@/lib/api';
 
 type Sport = 'basketball' | 'baseball' | 'nhl' | 'tennis' | 'american-football' | 'football';
 
@@ -35,10 +36,6 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
 
     const thinkingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
-    const BACKEND_HOST = process.env.NEXT_PUBLIC_BACKEND_HOST;
-    const API_BASE = API_URL || (BACKEND_HOST ? `https://${BACKEND_HOST}` : 'http://localhost:3001');
-
     useEffect(() => {
         async function fetchPlayerStats() {
             if (!selectedPlayer) {
@@ -48,7 +45,7 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
 
             setLoadingStats(true);
             try {
-                const res = await axios.get(`${API_BASE}/api/sports/${currentSport}/player/${selectedPlayer.id}/stats`);
+                const res = await axios.get(`${API_URL}/api/sports/${currentSport}/player/${selectedPlayer.id}/stats`);
                 if (res.data.success) {
                     setPlayerStats(res.data.data);
                 }
@@ -60,7 +57,7 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
         }
 
         fetchPlayerStats();
-    }, [selectedPlayer, currentSport, API_BASE]);
+    }, [selectedPlayer, currentSport]);
 
     const sports = [
         { id: 'basketball', label: 'NBA', icon: '🏀' },
@@ -132,7 +129,7 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
         try {
             setLoading(true);
             setTopPlayers([]);
-            const response = await axios.get(`${API_BASE}/api/sports/${currentSport}/top-players`, { timeout: 8000 });
+            const response = await axios.get(`${API_URL}/api/sports/${currentSport}/top-players`, { timeout: 8000 });
             if (response.data && response.data.success && response.data.data.length > 0) {
                 setTopPlayers(response.data.data);
             } else {
@@ -195,7 +192,7 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
             const element = document.getElementById('predictor-container');
             if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-            const apiPromise = axios.post(`${API_BASE}/api/sports/${currentSport}/predict`, {
+            const apiPromise = axios.post(`${API_URL}/api/sports/${currentSport}/predict`, {
                 playerId: selectedPlayer.id,
                 playerName: selectedPlayer.name,
                 propType,
@@ -305,7 +302,7 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
                         <button key={p.id} onClick={() => setSelectedPlayer(p)} className={`p-3 rounded-2xl border transition-all text-left relative overflow-hidden group flex items-center gap-3 ${selectedPlayer?.id === p.id ? 'border-purple-500 bg-purple-500/10' : 'border-white/5 bg-white/2 hover:border-white/10'}`}>
                             <div className="w-10 h-10 rounded-xl bg-white/5 overflow-hidden flex-shrink-0 border border-white/5 relative">
                                 <img
-                                    src={`${API_BASE}/api/proxy/player-image/${p.id}`}
+                                    src={`${API_URL}/api/proxy/player-image/${p.id}`}
                                     className="w-full h-full object-cover"
                                     alt={p.name}
                                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://www.sofascore.com/static/images/placeholders/player.png'; }}
@@ -340,7 +337,7 @@ const PlayerPropsPredictor = ({ defaultSport = 'basketball', fixedSport }: Playe
                                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 p-0.5 shadow-lg shadow-purple-500/20">
                                     <div className="w-full h-full rounded-[0.85rem] bg-black overflow-hidden">
                                         <img
-                                            src={`${API_BASE}/api/proxy/player-image/${selectedPlayer.id}`}
+                                            src={`${API_URL}/api/proxy/player-image/${selectedPlayer.id}`}
                                             className="w-full h-full object-cover scale-110"
                                             alt={selectedPlayer.name}
                                         />

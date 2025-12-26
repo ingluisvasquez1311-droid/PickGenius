@@ -13,6 +13,7 @@ import MatchStatsSummary from '@/components/sports/MatchStatsSummary';
 import { toast } from 'sonner';
 import { ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Zap, Bell, ShieldCheck } from 'lucide-react';
+import { API_URL } from '@/lib/api';
 
 interface MatchLiveViewProps {
     sport: string;
@@ -167,7 +168,7 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                 <div className="flex items-center justify-center gap-3 mb-4">
                     {game.tournament?.category?.id && (
                         <img
-                            src={`/api/proxy/category-image/${game.tournament.category.id}`}
+                            src={`${API_URL}/api/proxy/category-image/${game.tournament.category.id}`}
                             alt={game.tournament.category.name}
                             className="w-6 h-4 object-cover rounded-sm shadow-sm"
                             onError={(e) => {
@@ -409,7 +410,11 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                 <div className="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-black px-3 py-1 rounded-bl-lg z-10">MVP</div>
                                 <div className="p-4 flex flex-col gap-4">
                                     <div className="aspect-square w-full rounded-2xl bg-gradient-to-br from-yellow-500/20 to-amber-500/10 border border-yellow-500/30 relative overflow-hidden">
-                                        <img src={bestPlayers.mvp.imageUrl} alt={bestPlayers.mvp.name} className="w-full h-full object-cover" />
+                                        <img
+                                            src={`${API_URL}/api/proxy/player-image/${bestPlayers.mvp.id || bestPlayers.mvp.player?.id}`}
+                                            alt={bestPlayers.mvp.name}
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div>
                                     <div>
                                         <p className="text-yellow-500 text-[10px] font-black uppercase tracking-widest">{bestPlayers.ai?.title || 'DOMINIO'}</p>

@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import TeamLogo from './ui/TeamLogo';
+import { API_URL } from '@/lib/api';
 
 interface LiveEvent {
     id: number;
@@ -143,7 +144,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
 
     return (
         <Link
-            href={`/${sport}-live/${event.id}`}
+            href={`/match/${sport}/${event.id}`}
             className="group flex items-center gap-2 sm:gap-4 p-3 bg-[#111] border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
         >
             {/* Time / Status Column */}
@@ -421,7 +422,7 @@ export default function LiveEventsList({ events, sport, title, loading }: LiveEv
                                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg overflow-hidden border border-white/5">
                                     {group.countryId ? (
                                         <img
-                                            src={`/api/proxy/category-image/${group.countryId}`}
+                                            src={`${API_URL}/api/proxy/category-image/${group.countryId}`}
                                             className="w-full h-full object-cover"
                                             alt={group.country}
                                             onError={(e) => {

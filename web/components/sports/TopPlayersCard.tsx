@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { API_URL } from '@/lib/api';
 
 interface TopPlayer {
     name: string;
@@ -113,7 +114,7 @@ export default function TopPlayersCard({ title, players, sport, teamColor = 'pur
                 {topPlayers.map((player, index) => {
                     const pData = player.player || player;
                     const imageUrl = pData.id
-                        ? `/api/proxy/player-image/${pData.id}`
+                        ? `${API_URL}/api/proxy/player-image/${pData.id}`
                         : null;
                     const rating = (player.statistics?.rating || player.rating || 0).toFixed(1);
                     const isMvp = index === 0 && parseFloat(rating) >= 8.0;

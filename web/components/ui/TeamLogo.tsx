@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { API_URL } from '@/lib/api';
 
 interface TeamLogoProps {
     teamId: number;
@@ -23,7 +24,7 @@ export default function TeamLogo({ teamId, teamName, size = 'md', className = ''
     };
 
     // Use our internal proxy endpoint
-    const imgSrc = `/api/proxy/team-logo/${teamId}`;
+    const imgSrc = `${API_URL}/api/proxy/team-logo/${teamId}`;
 
     // Reset error when teamId changes by checking if prop changed (or rely on key upstream)
     // To fix lint error, we remove the sync setState in effect.

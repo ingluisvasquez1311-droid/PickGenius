@@ -41,8 +41,8 @@ start "PickGenius Frontend" cmd /k "npm run dev"
 cd ..
 
 REM Iniciar Ngrok (Tunnel para acceso externo)
-echo [EXTRA] Iniciando Ngrok en puerto 3000 con dominio personalizado...
-start "Ngrok Tunnel" cmd /k "ngrok http --domain=unconsultative-lore-unlovely.ngrok-free.dev 3000"
+echo [EXTRA] Iniciando Ngrok en puerto 3001 con dominio personalizado...
+start "Ngrok Tunnel" cmd /k "ngrok http --domain=unconsultative-lore-unlovely.ngrok-free.dev 3001"
 
 echo.
 echo ====================================
