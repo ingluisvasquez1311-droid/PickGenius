@@ -1,3 +1,5 @@
+/**
+ * Servicio de Notificaciones Omnicanal
  * Maneja el envío de alertas a Telegram y Discord.
  */
 import { messaging } from '@/lib/firebase';
