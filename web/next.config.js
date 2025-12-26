@@ -1,18 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    swcMinify: true,
 
     // Optimización de imágenes
     images: {
-        domains: [
-            'api.sofascore.com',
-            'api.sofascore.app',
-            'localhost',
-            'pickgeniuspro.vercel.app',
+        remotePatterns: [
+            { protocol: 'https', hostname: 'api.sofascore.com' },
+            { protocol: 'https', hostname: 'api.sofascore.app' },
         ],
         formats: ['image/webp', 'image/avif'],
-        minimumCacheTTL: 60 * 60 * 24, // 24 horas
+        minimumCacheTTL: 60 * 60 * 24,
     },
 
     // Optimización de compilación

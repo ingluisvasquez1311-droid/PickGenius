@@ -3,7 +3,7 @@
  */
 
 import { db } from '@/lib/firebase';
-import { doc, getDoc, updateDoc, increment, collection, query, where, orderBy, limit, getDocs } from 'firestore';
+import { doc, getDoc, updateDoc, increment, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 
 // Definición de niveles
 export const LEVELS = {
@@ -39,6 +39,7 @@ class GamificationService {
      */
     async getUserGamification(userId: string) {
         try {
+            if (!db) return this.getDefaultGamification();
             const userRef = doc(db, 'users', userId);
             const userSnap = await getDoc(userRef);
 
@@ -74,6 +75,7 @@ class GamificationService {
      */
     async awardPoints(userId: string, action: keyof typeof POINT_ACTIONS, metadata?: any) {
         try {
+            if (!db) return { success: false, error: 'Firebase not initialized' };
             const points = POINT_ACTIONS[action];
             const userRef = doc(db, 'users', userId);
 
@@ -102,6 +104,7 @@ class GamificationService {
      */
     private async checkBadges(userId: string) {
         try {
+            if (!db) return;
             const gamification = await this.getUserGamification(userId);
             const userRef = doc(db, 'users', userId);
             const newBadges: string[] = [];
@@ -176,6 +179,7 @@ class GamificationService {
      */
     async getLeaderboard(limitCount = 50) {
         try {
+            if (!db) return [];
             const usersRef = collection(db, 'users');
             const q = query(
                 usersRef,
