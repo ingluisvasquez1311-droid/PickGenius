@@ -1,7 +1,6 @@
 const axios = require('axios');
 const memoryCache = require('../memoryCache');
 const historyService = require('../HistoryService');
-const proxyService = require('../proxyService');
 
 class SofaScoreService {
     constructor() {
@@ -54,7 +53,7 @@ class SofaScoreService {
     /**
      * Generic method to make requests with caching
      */
-    async makeRequest(endpoint, cacheKey, ttlSeconds = 60) {
+    async makeRequest(endpoint, cacheKey, ttlSeconds = 60, retries = 2) {
         try {
             // Check cache first
             const cachedData = memoryCache.get(cacheKey);
@@ -68,21 +67,29 @@ class SofaScoreService {
             // Build request with rotated User-Agent
             const headers = {
                 ...this.baseHeaders,
-                'User-Agent': this.getRandomUserAgent()
+                'User-Agent': this.getRandomUserAgent(),
+                'Cache-Control': 'no-cache'
             };
 
             const url = `${this.baseUrl}${endpoint}`;
             console.log(`🌐 SofaScore Football API: Fetching ${endpoint}...`);
 
-            // Use proxy service with retry logic
-            const response = await proxyService.makeRequestWithRetry(url, { headers }, 3);
-
-            // Cache the successful response
-            if (response.data) {
-                memoryCache.set(cacheKey, response.data, ttlSeconds);
+            let lastError;
+            for (let i = 0; i <= retries; i++) {
+                try {
+                    const response = await axios.get(url, { headers, timeout: 8000 });
+                    if (response.data) {
+                        memoryCache.set(cacheKey, response.data, ttlSeconds);
+                        return { success: true, data: response.data, fromCache: false };
+                    }
+                } catch (err) {
+                    lastError = err;
+                    if (err.response?.status === 404) break;
+                    console.warn(`⚠️ Intento ${i + 1}/${retries + 1} fallido para ${endpoint}: ${err.message}`);
+                    await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+                }
             }
-
-            return { success: true, data: response.data, fromCache: false };
+            throw lastError;
         } catch (error) {
             const statusCode = error.response?.status || 'Unknown';
             console.error(`❌ SofaScore Football API Error (${endpoint}): HTTP ${statusCode}: ${error.message}`);

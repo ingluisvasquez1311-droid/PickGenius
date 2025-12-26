@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
   },
 
+  // ✅ Configuración de variables de entorno públicas
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  },
+
   // Existing Config
   reactCompiler: true,
   // outputFileTracingRoot: path.join(__dirname, "../"), // Comentado temporalmente si causa problemas en Vercel
@@ -45,13 +50,13 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const isDev = process.env.NODE_ENV === 'development';
-    return isDev ? [
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*', // Proxy to Backend only in local dev
+        destination: `${apiUrl}/api/:path*`,
       },
-    ] : [];
+    ];
   },
 };
 

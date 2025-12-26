@@ -34,8 +34,19 @@ app.use(rateLimiter(100, 15 * 60 * 1000)); // Limite de 100 peticiones cada 15 m
 
 // CORS middleware
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    const allowedOrigins = [
+        'http://localhost:3000',
+        'https://pickgeniuspro.vercel.app',
+        'https://pick-genius.vercel.app'
+    ];
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+    } else {
+        res.header('Access-Control-Allow-Origin', '*');
+    }
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
     next();
 });
 
@@ -60,28 +71,11 @@ app.get('/api/status', (req, res) => {
         version: '3.0.0',
         features: [
             'Intelligent Firestore caching',
-            'Automatic API key rotation',
             'Auto-cleanup of played matches',
             '90%+ reduction in API calls'
         ],
         uptime: process.uptime(),
         timestamp: new Date().toISOString()
-    });
-});
-
-// Debug Endpoint for Scraper Keys
-app.get('/api/debug/keys', (req, res) => {
-    const scraperKeys = process.env.SCRAPER_API_KEYS ? process.env.SCRAPER_API_KEYS.split(',') : [];
-    const singleKey = process.env.SCRAPER_API_KEY;
-
-    res.json({
-        hasList: !!process.env.SCRAPER_API_KEYS,
-        listLength: scraperKeys.length,
-        listSegments: scraperKeys.map(k => ({ length: k.length, preview: k.substring(0, 5) + '...' })),
-        hasSingle: !!singleKey,
-        singleLength: singleKey ? singleKey.length : 0,
-        envKeys: Object.keys(process.env).filter(k => k.includes('API')),
-        nodeEnv: process.env.NODE_ENV
     });
 });
 

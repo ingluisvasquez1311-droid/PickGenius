@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import PlayerStreakCard from '@/components/streaks/PlayerStreakCard';
 import { Streak, PlayerStreak } from '@/lib/services/streakService';
+import { fetchAPI } from '@/lib/api';
 
 export default function StreaksPage() {
     const [streaks, setStreaks] = useState<Streak[]>([]);
@@ -13,9 +14,8 @@ export default function StreaksPage() {
     useEffect(() => {
         const fetchStreaks = async () => {
             try {
-                const res = await fetch('/api/analytics/streaks');
-                const json = await res.json();
-                if (json.success) {
+                const json = await fetchAPI('/api/analytics/streaks');
+                if (json && json.success) {
                     setStreaks(json.data);
                     setPlayerStreaks(json.players || []);
                 }

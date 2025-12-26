@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0",
-    "dev:turbo": "next dev --turbo -H 0.0.0.0",
+    "dev": "cross-env NODE_OPTIONS='--max-old-space-size=8192' next dev -H 0.0.0.0",
+    "dev:turbo": "cross-env NODE_OPTIONS='--max-old-space-size=8192' next dev --turbo -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "babel-plugin-react-compiler": "1.0.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.0-canary.12"
   }

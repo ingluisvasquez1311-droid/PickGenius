@@ -24,15 +24,12 @@ npm run dev
 
 Visita: http://localhost:3000
 
-## Paso 4: Desplegar en Render
+## Paso 4: Desplegar en la Nube
 
-1. Ve a https://render.com
-2. Conecta tu repositorio GitHub
-3. Agrega las variables de entorno
-4. Deploy
+1. Conecta tu repositorio GitHub a tu hosting preferido (e.g., Vercel)
+2. Agrega las variables de entorno necesarias del `.env`
+3. Realiza el despliegue
 
 ## Paso 5: GitHub Actions
 
-Agrega en GitHub Settings > Secrets:
-- RENDER_API_KEY
-- RENDER_SERVICE_ID
+Agrega en GitHub Settings > Secrets las claves necesarias para tu flujo de CI/CD.

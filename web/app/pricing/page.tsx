@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { fetchAPI } from '@/lib/api';
 
 export default function PricingPage() {
     const { user, refreshUser } = useAuth();
@@ -18,17 +19,14 @@ export default function PricingPage() {
 
         try {
             // Call Stripe checkout API
-            const res = await fetch('/api/stripe/checkout', {
+            const { url, error } = await fetchAPI('/api/stripe/checkout', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userId: user.uid,
                     email: user.email,
                     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID, // Monthly plan
                 }),
             });
-
-            const { url, error } = await res.json();
 
             toast.dismiss(loadingToast);
 

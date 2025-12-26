@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { fetchAPI } from '@/lib/api';
 
 interface BasketballPredictionProps {
     eventId: string;
@@ -17,12 +18,10 @@ export default function BasketballPredictionPremium({ eventId, homeTeam, awayTea
     const handlePredict = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/predictions', {
+            const data = await fetchAPI('/api/predictions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ gameId: eventId, sport: 'basketball' })
             });
-            const data = await res.json();
             setPrediction(data);
         } catch (error) {
             console.error(error);

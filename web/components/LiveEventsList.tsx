@@ -5,7 +5,7 @@ import Link from 'next/link';
 import TeamLogo from './ui/TeamLogo';
 
 interface LiveEvent {
-    id: string;
+    id: number;
     homeTeam: {
         name: string;
         id: number;
@@ -50,7 +50,7 @@ interface LiveEvent {
 
 interface EventCardProps {
     event: LiveEvent;
-    sport: 'basketball' | 'football';
+    sport: 'basketball' | 'football' | 'tennis' | 'baseball' | 'nhl' | 'american-football';
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
@@ -218,7 +218,7 @@ import SkeletonLoader from './ui/SkeletonLoader';
 
 interface LiveEventsListProps {
     events: LiveEvent[];
-    sport: 'basketball' | 'football';
+    sport: 'basketball' | 'football' | 'tennis' | 'baseball' | 'nhl' | 'american-football';
     title: string;
     loading?: boolean;
 }
@@ -226,7 +226,7 @@ interface LiveEventsListProps {
 export default function LiveEventsList({ events, sport, title, loading }: LiveEventsListProps) {
     // Priority Leagues Configuration
     // Priority Leagues Configuration
-    const getPriorityLeagues = (sportParam: 'basketball' | 'football') => {
+    const getPriorityLeagues = (sportParam: 'basketball' | 'football' | 'tennis' | 'baseball' | 'nhl' | 'american-football') => {
         if (sportParam === 'basketball') {
             return [
                 'NBA',

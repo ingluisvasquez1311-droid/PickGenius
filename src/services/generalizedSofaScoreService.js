@@ -1,7 +1,6 @@
 // src/services/generalizedSofaScoreService.js
 const axios = require('axios');
 const memoryCache = require('./memoryCache');
-const proxyService = require('./proxyService');
 
 class GeneralizedSofaScoreService {
     constructor() {
@@ -23,9 +22,9 @@ class GeneralizedSofaScoreService {
         };
 
         this.userAgents = [
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
         ];
     }
 
@@ -33,28 +32,38 @@ class GeneralizedSofaScoreService {
         return this.userAgents[Math.floor(Math.random() * this.userAgents.length)];
     }
 
-    async makeRequest(endpoint, cacheKey, ttlSeconds = 60) {
+    async makeRequest(endpoint, cacheKey, ttlSeconds = 60, retries = 2) {
         try {
             const cachedData = memoryCache.get(cacheKey);
             if (cachedData) return { success: true, data: cachedData, fromCache: true };
 
             const headers = {
-                'Accept': '*/*',
+                'Accept': 'application/json, text/plain, */*',
                 'User-Agent': this.getRandomUserAgent(),
                 'Referer': 'https://www.sofascore.com/',
-                'Origin': 'https://www.sofascore.com'
+                'Origin': 'https://www.sofascore.com',
+                'Cache-Control': 'no-cache'
             };
 
-            const url = `${this.baseUrl}${endpoint}`;
-            const response = await proxyService.makeRequestWithRetry(url, { headers }, 3);
+            const url = `${this.baseUrl}${endpoint} `;
 
-            if (response.data) {
-                memoryCache.set(cacheKey, response.data, ttlSeconds);
+            let lastError;
+            for (let i = 0; i <= retries; i++) {
+                try {
+                    const response = await axios.get(url, { headers, timeout: 8000 });
+                    if (response.data) {
+                        memoryCache.set(cacheKey, response.data, ttlSeconds);
+                        return { success: true, data: response.data, fromCache: false };
+                    }
+                } catch (err) {
+                    lastError = err;
+                    if (err.response?.status === 404) break;
+                    await new Promise(r => setTimeout(r, 1000 * (i + 1))); // Simple backoff
+                }
             }
-
-            return { success: true, data: response.data, fromCache: false };
+            throw lastError;
         } catch (error) {
-            console.error(`❌ SofaScore General API Error (${endpoint}): ${error.message}`);
+            console.error(`❌ SofaScore General API Error(${endpoint}): ${error.message} `);
             return { success: false, error: error.message };
         }
     }
@@ -71,8 +80,8 @@ class GeneralizedSofaScoreService {
         const sportName = Object.keys(this.sportsMap).find(key => this.sportsMap[key] === sportId) || sport;
 
         return this.makeRequest(
-            `/sport/${sportName}/events/live`,
-            `live_events_${sportId}`,
+            `/ sport / ${sportName} /events/live`,
+            `live_events_${sportId} `,
             30
         );
     }
@@ -86,8 +95,8 @@ class GeneralizedSofaScoreService {
         const sportName = Object.keys(this.sportsMap).find(key => this.sportsMap[key] === sportId) || sport;
 
         return this.makeRequest(
-            `/sport/${sportName}/events/${dateString}`,
-            `events_${sportId}_${dateString}`,
+            `/ sport / ${sportName} /events/${dateString} `,
+            `events_${sportId}_${dateString} `,
             300
         );
     }
@@ -102,8 +111,8 @@ class GeneralizedSofaScoreService {
         const date = dateString || new Date().toISOString().split('T')[0];
 
         const result = await this.makeRequest(
-            `/sport/${sportName}/scheduled-events/${date}`,
-            `scheduled_events_${sportId}_${date}`,
+            `/ sport / ${sportName} /scheduled-events/${date} `,
+            `scheduled_events_${sportId}_${date} `,
             300
         );
 
@@ -124,11 +133,11 @@ class GeneralizedSofaScoreService {
     }
 
     async getEventDetails(eventId) {
-        return this.makeRequest(`/event/${eventId}`, `event_details_${eventId}`, 300);
+        return this.makeRequest(`/ event / ${eventId} `, `event_details_${eventId} `, 300);
     }
 
     async getEventStatistics(eventId) {
-        return this.makeRequest(`/event/${eventId}/statistics`, `event_stats_${eventId}`, 60);
+        return this.makeRequest(`/ event / ${eventId}/statistics`, `event_stats_${eventId}`, 60);
     }
 
     async getEventOdds(eventId) {
@@ -146,15 +155,12 @@ class GeneralizedSofaScoreService {
     async getTeamLogo(teamId) {
         const sources = [
             `https://api.sofascore.app/api/v1/team/${teamId}/image`,
-            `https://api.sofascore.com/api/v1/team/${teamId}/image`,
-            `https://img.sofascore.com/api/v1/team/${teamId}/image`,
-            `https://images.weserv.nl/?url=api.sofascore.app/api/v1/team/${teamId}/image`,
-            `https://images.weserv.nl/?url=api.sofascore.com/api/v1/team/${teamId}/image`
+            `https://api.sofascore.com/api/v1/team/${teamId}/image`
         ];
 
         for (const url of sources) {
             try {
-                const response = await proxyService.makeRequest(url, {
+                const response = await axios.get(url, {
                     responseType: 'arraybuffer',
                     headers: {
                         'Referer': 'https://www.sofascore.com/',
@@ -176,24 +182,19 @@ class GeneralizedSofaScoreService {
     }
 
     async getPlayerImage(playerId) {
-        const sources = [
-            `https://api.sofascore.app/api/v1/player/${playerId}/image`,
-            `https://api.sofascore.com/api/v1/player/${playerId}/image`,
-            `https://images.weserv.nl/?url=api.sofascore.app/api/v1/player/${playerId}/image`
-        ];
-
-        for (const url of sources) {
-            try {
-                const response = await proxyService.makeRequest(url, {
-                    responseType: 'arraybuffer',
-                    headers: {
-                        'Referer': 'https://www.sofascore.com/',
-                        'User-Agent': this.getRandomUserAgent()
-                    },
-                    timeout: 5000
-                });
-                if (response && response.status === 200 && response.data) return response;
-            } catch (e) { continue; }
+        const url = `https://api.sofascore.app/api/v1/player/${playerId}/image`;
+        try {
+            const response = await axios.get(url, {
+                responseType: 'arraybuffer',
+                headers: {
+                    'Referer': 'https://www.sofascore.com/',
+                    'User-Agent': this.getRandomUserAgent()
+                },
+                timeout: 5000
+            });
+            if (response && response.status === 200 && response.data) return response;
+        } catch (e) {
+            return null;
         }
         return null;
     }
@@ -201,7 +202,7 @@ class GeneralizedSofaScoreService {
     async getCategoryImage(categoryId) {
         const url = `https://api.sofascore.app/api/v1/category/${categoryId}/image`;
         try {
-            const response = await proxyService.makeRequest(url, {
+            const response = await axios.get(url, {
                 responseType: 'arraybuffer',
                 headers: {
                     'Referer': 'https://www.sofascore.com/',

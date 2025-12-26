@@ -7,6 +7,8 @@ import { Rocket, Shield, Zap, TrendingUp, Trophy, BarChart3, Star, ArrowRight, P
 import NewsSection from '@/components/home/NewsSection';
 import SportsGrid from '@/components/home/SportsGrid';
 import { useAuth } from '@/contexts/AuthContext';
+import { fetchAPI } from '@/lib/api';
+import { sportsDataService } from '@/lib/services/sportsDataService';
 
 interface SportStats {
   liveEvents: number;
@@ -17,6 +19,7 @@ interface SportStats {
 export default function HomePage() {
   const [basketballStats, setBasketballStats] = useState<SportStats>({ liveEvents: 0, loading: true });
   const [footballStats, setFootballStats] = useState<SportStats>({ liveEvents: 0, loading: true });
+  const [otherSportsStats, setOtherSportsStats] = useState<{ [key: string]: number }>({});
   const [isRedirectingStripe, setIsRedirectingStripe] = useState(false);
   const { user } = useAuth();
 
@@ -24,122 +27,42 @@ export default function HomePage() {
     async function fetchStats() {
       try {
         // --- BASKETBALL FETCH ---
-        const basketballRes = await fetch('/api/basketball/live');
-        const basketballData = await basketballRes.json();
-        let basketballFeatured = null;
-        let basketballCount = 0;
+        // getEventsBySport now handles live + windowed scheduled
+        const basketballEvents = await sportsDataService.getEventsBySport('basketball');
+        const basketballLiveCount = basketballEvents.filter(e => e.status?.type === 'inprogress').length;
+        const basketballFeatured = basketballEvents.length > 0 ? basketballEvents[0] : null;
 
-        if (basketballData.success && basketballData.data) {
-          basketballCount = basketballData.data.length;
-          if (basketballData.data.length > 0) basketballFeatured = basketballData.data[0];
-        }
-
-        if (!basketballFeatured) {
-          try {
-            const now = Date.now();
-            const twelveHoursFromNow = now + (12 * 60 * 60 * 1000); // 12 horas
-            const today = new Date().toISOString().split('T')[0];
-            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-
-            let res = await fetch(`/api/basketball/scheduled?date=${today}`);
-            let data = await res.json();
-
-            if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
-              res = await fetch(`/api/basketball/scheduled?date=${tomorrow}`);
-              data = await res.json();
-            }
-
-            if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-              // 🔥 Filtrar solo eventos en las próximas 12 horas
-              const upcomingGames = data.data.filter((game: any) => {
-                const eventStartTime = game.startTimestamp * 1000;
-                return eventStartTime <= twelveHoursFromNow;
-              });
-
-              const nextGame = upcomingGames[0];
-              if (nextGame) {
-                const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
-                basketballFeatured = {
-                  id: nextGame.id,
-                  homeTeam: nextGame.homeTeam,
-                  awayTeam: nextGame.awayTeam,
-                  homeScore: { current: 0 },
-                  awayScore: { current: 0 },
-                  tournament: nextGame.tournament,
-                  status: {
-                    description: `${isTomorrow ? 'Mañana ' : ''}${new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-                    type: 'scheduled'
-                  },
-                  isScheduled: true
-                };
-              }
-            }
-          } catch (e) {
-            console.error("Error fetching scheduled basketball", e);
-          }
-        }
-
-        setBasketballStats({ liveEvents: basketballCount, featuredMatch: basketballFeatured, loading: false });
+        setBasketballStats({
+          liveEvents: basketballLiveCount,
+          featuredMatch: basketballFeatured,
+          loading: false
+        });
 
         // --- FOOTBALL FETCH ---
-        const footballRes = await fetch('/api/football/live');
-        const footballData = await footballRes.json();
-        let footballFeatured = null;
-        let footballCount = 0;
+        const footballEvents = await sportsDataService.getEventsBySport('football');
+        const footballLiveCount = footballEvents.filter(e => e.status?.type === 'inprogress').length;
+        const footballFeatured = footballEvents.length > 0 ? footballEvents[0] : null;
 
-        if (footballData.success && footballData.data) {
-          footballCount = footballData.data.length;
-          if (footballData.data.length > 0) {
-            footballFeatured = footballData.data[0];
-          }
-        }
+        setFootballStats({
+          liveEvents: footballLiveCount,
+          featuredMatch: footballFeatured,
+          loading: false
+        });
 
-        if (!footballFeatured) {
-          try {
-            const now = Date.now();
-            const twelveHoursFromNow = now + (12 * 60 * 60 * 1000); // 12 horas
-            const today = new Date().toISOString().split('T')[0];
-            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+        // --- OTHER SPORTS FETCH (Batch) ---
+        const [tennisEvents, baseballEvents, nhlEvents, nflEvents] = await Promise.all([
+          sportsDataService.getEventsBySport('tennis'),
+          sportsDataService.getEventsBySport('baseball'),
+          sportsDataService.getEventsBySport('nhl'),
+          sportsDataService.getEventsBySport('nfl'),
+        ]);
 
-            let res = await fetch(`/api/football/scheduled?date=${today}`);
-            let data = await res.json();
-
-            if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
-              res = await fetch(`/api/football/scheduled?date=${tomorrow}`);
-              data = await res.json();
-            }
-
-            if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-              // 🔥 Filtrar solo eventos en las próximas 12 horas
-              const upcomingGames = data.data.filter((game: any) => {
-                const eventStartTime = game.startTimestamp * 1000;
-                return eventStartTime <= twelveHoursFromNow;
-              });
-
-              const nextGame = upcomingGames[0];
-              if (nextGame) {
-                const isTomorrow = new Date(nextGame.startTimestamp * 1000).getDate() !== new Date().getDate();
-                footballFeatured = {
-                  id: nextGame.id,
-                  tournament: nextGame.tournament,
-                  homeTeam: nextGame.homeTeam,
-                  awayTeam: nextGame.awayTeam,
-                  homeScore: { current: 0 },
-                  awayScore: { current: 0 },
-                  status: {
-                    description: `${isTomorrow ? 'Mañana ' : ''}${new Date(nextGame.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-                    type: 'scheduled'
-                  },
-                  isScheduled: true
-                };
-              }
-            }
-          } catch (e) {
-            console.error("Error fetching scheduled football", e);
-          }
-        }
-
-        setFootballStats({ liveEvents: footballCount, featuredMatch: footballFeatured, loading: false });
+        setOtherSportsStats({
+          tennis: tennisEvents.filter(e => e.status?.type === 'inprogress').length,
+          baseball: baseballEvents.filter(e => e.status?.type === 'inprogress').length,
+          nhl: nhlEvents.filter(e => e.status?.type === 'inprogress').length,
+          nfl: nflEvents.filter(e => e.status?.type === 'inprogress').length,
+        });
 
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -160,16 +83,13 @@ export default function HomePage() {
     }
     setIsRedirectingStripe(true);
     try {
-      const response = await fetch('/api/stripe/checkout', {
+      const data = await fetchAPI('/api/stripe/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.uid,
           email: user.email,
         }),
       });
-
-      const data = await response.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -524,6 +444,7 @@ export default function HomePage() {
         </section>
 
         {/* NEWS SECTION - KEEP EXISTING BUT WRAP */}
+        <SportsGrid liveStats={otherSportsStats} />
         <div className="border-t border-white/5 py-32 bg-white/[0.01]">
           <div className="container mx-auto px-4">
             <NewsSection />

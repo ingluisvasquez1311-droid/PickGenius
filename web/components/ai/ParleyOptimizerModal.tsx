@@ -6,6 +6,7 @@ import { Zap, Shield, TrendingUp, Target, X, Star, Crown, Loader2, CheckCircle2,
 import PremiumButton from '@/components/ui/PremiumButton';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { fetchAPI } from '@/lib/api';
 
 interface StrategyModalProps {
     isOpen: boolean;
@@ -66,9 +67,8 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
             setLoading(true);
             setStep('loading');
 
-            const response = await fetch('/api/predictions/parley', {
+            const data = await fetchAPI('/api/predictions/parley', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     strategyIndex: selectedIndex,
                     sport: selectedSport,
@@ -77,9 +77,7 @@ export default function ParleyOptimizerModal({ isOpen, onClose }: StrategyModalP
                 })
             });
 
-            const data = await response.json();
-
-            if (data.success && data.data) {
+            if (data && data.success && data.data) {
                 setResult(data.data);
                 setStep('result');
             } else {

@@ -1,4 +1,5 @@
 import { db } from './firebase';
+import { fetchAPI } from './api';
 import {
     collection,
     addDoc,
@@ -124,12 +125,10 @@ export async function getAdminAlerts(limitCount: number = 10) {
  */
 export async function recalculateScores() {
     try {
-        const response = await fetch('/api/admin/actions', {
+        return await fetchAPI('/api/admin/actions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'RECALCULATE' })
         });
-        return await response.json();
     } catch (error) {
         throw new Error('Error al recalcular puntuaciones');
     }
@@ -140,12 +139,10 @@ export async function recalculateScores() {
  */
 export async function resetCache() {
     try {
-        const response = await fetch('/api/admin/actions', {
+        return await fetchAPI('/api/admin/actions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'CLEAR_CACHE' })
         });
-        return await response.json();
     } catch (error) {
         throw new Error('Error al reiniciar cache');
     }
@@ -156,12 +153,10 @@ export async function resetCache() {
  */
 export async function broadcastNotification(message: string) {
     try {
-        const response = await fetch('/api/admin/actions', {
+        return await fetchAPI('/api/admin/actions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'NOTIFY_ALL', payload: { message } })
         });
-        return await response.json();
     } catch (error) {
         throw new Error('Error al enviar notificación masiva');
     }

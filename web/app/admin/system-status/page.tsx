@@ -1,5 +1,4 @@
 import { groqService } from '@/lib/services/groqService';
-// import { scraperService } from '@/lib/services/scraperService'; // No longer used in local architecture
 import { globalBudget, globalAnalytics } from '@/lib/utils/api-manager';
 
 export const dynamic = 'force-dynamic'; // Asegurar que no se cachee estáticamente
@@ -7,7 +6,6 @@ export const dynamic = 'force-dynamic'; // Asegurar que no se cachee estáticame
 export default async function SystemStatusPage() {
     // Obtener stats actuales
     const groqStats = groqService.getStats();
-    // const scraperStats = scraperService.getStats(); // Disabled for local architecture
     const budgetReport = globalBudget.getReport();
     const analytics = globalAnalytics.getDashboard();
 
@@ -64,14 +62,6 @@ export default async function SystemStatusPage() {
                 {/* Services Grid */}
                 <h2 className="text-xl font-semibold text-slate-300 mt-8">Active Services</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* ScraperAPI Stats - Disabled for local architecture */}
-                    {/* <ServiceCard
-                        name="ScraperAPI (Sofascore)"
-                        status={scraperStats.circuit}
-                        stats={scraperStats.rotator}
-                        apiName="ScraperAPI"
-                    /> */}
-
                     {/* Groq Stats */}
                     <ServiceCard
                         name="Groq AI Engine"
@@ -80,9 +70,17 @@ export default async function SystemStatusPage() {
                         apiName="Groq"
                     />
                 </div>
-
+                {/* Groq Stats */}
+                <ServiceCard
+                    name="Groq AI Engine"
+                    status={groqStats.circuit}
+                    stats={groqStats.rotator}
+                    apiName="Groq"
+                />
             </div>
+
         </div>
+        </div >
     );
 }
 

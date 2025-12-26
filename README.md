@@ -26,14 +26,12 @@
 
 ## 🌐 URLs de Producción
 
-- **API Backend**: https://pickgenius-api.onrender.com
-- **Web Frontend**: https://pickgenius-web.onrender.com
+- **API Backend**: https://pickgenius-api.ejemplo.com
+- **Web Frontend**: https://pickgenius.ejemplo.com
 
 ## 📚 Documentación
 
 - [**Guía del Sistema de Cache**](CACHE_SYSTEM_GUIDE.md) - Documentación completa del cache
-- [**Guía de Despliegue en Render**](DEPLOYMENT_GUIDE_RENDER.md) - Cómo desplegar
-- [**Configuración de Variables de Entorno**](RENDER_ENV_SETUP.md) - Setup de env vars
 
 ## 🚀 Inicio Rápido
 
@@ -143,8 +141,6 @@ Reducción:  90%+ 🎉
 
 ## 🔐 Variables de Entorno
 
-Ver [RENDER_ENV_SETUP.md](RENDER_ENV_SETUP.md) para la lista completa.
-
 Mínimas requeridas:
 
 ```env
@@ -191,7 +187,7 @@ Este proyecto está bajo la Licencia MIT.
 
 - API-Football por los datos deportivos
 - Firebase por la infraestructura
-- Render por el hosting gratuito
+- Hosting y API deportivas por los recursos
 
 ---
 

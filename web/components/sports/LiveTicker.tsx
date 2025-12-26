@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { fetchAPI } from '@/lib/api';
 
 export default function LiveTicker() {
   const [tickerItems, setTickerItems] = useState<any[]>([]);
@@ -10,14 +11,15 @@ export default function LiveTicker() {
   useEffect(() => {
     async function fetchTickerData() {
       try {
-        // Fetch simplified data for the ticker
-        const [footballRes, basketballRes] = await Promise.all([
-          fetch('/api/football/live'),
-          fetch('/api/basketball/live')
+        // Fetch simplified data for the ticker for all major sports
+        const [footballData, basketballData, tennisData, baseballData, hockeyData, amFootballData] = await Promise.all([
+          fetchAPI('/api/football/live'),
+          fetchAPI('/api/basketball/live'),
+          fetchAPI('/api/tennis/live'),
+          fetchAPI('/api/baseball/live'),
+          fetchAPI('/api/ice-hockey/live'),
+          fetchAPI('/api/american-football/live')
         ]);
-
-        const footballData = await footballRes.json();
-        const basketballData = await basketballRes.json();
 
         let items: any[] = [];
 
@@ -35,10 +37,62 @@ export default function LiveTicker() {
         }
 
         if (basketballData.success && Array.isArray(basketballData.data)) {
-          items = [...items, ...basketballData.data.slice(0, 5).map((e: any) => ({
+          items = [...items, ...basketballData.data.slice(0, 3).map((e: any) => ({
             id: e.id,
             sport: '🏀',
             sportSlug: 'basketball',
+            home: e.homeTeam.name,
+            away: e.awayTeam.name,
+            score: `${e.homeScore.current}-${e.awayScore.current}`,
+            time: e.status?.description || 'LIVE',
+            isLive: true
+          }))];
+        }
+
+        if (tennisData.success && Array.isArray(tennisData.data)) {
+          items = [...items, ...tennisData.data.slice(0, 3).map((e: any) => ({
+            id: e.id,
+            sport: '🎾',
+            sportSlug: 'tennis',
+            home: e.homeTeam.name,
+            away: e.awayTeam.name,
+            score: `${e.homeScore.current}-${e.awayScore.current}`,
+            time: e.status?.description || 'LIVE',
+            isLive: true
+          }))];
+        }
+
+        if (baseballData.success && Array.isArray(baseballData.data)) {
+          items = [...items, ...baseballData.data.slice(0, 3).map((e: any) => ({
+            id: e.id,
+            sport: '⚾',
+            sportSlug: 'baseball',
+            home: e.homeTeam.name,
+            away: e.awayTeam.name,
+            score: `${e.homeScore.current}-${e.awayScore.current}`,
+            time: e.status?.description || 'LIVE',
+            isLive: true
+          }))];
+        }
+
+        if (hockeyData.success && Array.isArray(hockeyData.data)) {
+          items = [...items, ...hockeyData.data.slice(0, 3).map((e: any) => ({
+            id: e.id,
+            sport: '🏒',
+            sportSlug: 'nhl',
+            home: e.homeTeam.name,
+            away: e.awayTeam.name,
+            score: `${e.homeScore.current}-${e.awayScore.current}`,
+            time: e.status?.description || 'LIVE',
+            isLive: true
+          }))];
+        }
+
+        if (amFootballData.success && Array.isArray(amFootballData.data)) {
+          items = [...items, ...amFootballData.data.slice(0, 3).map((e: any) => ({
+            id: e.id,
+            sport: '🏈',
+            sportSlug: 'nfl',
             home: e.homeTeam.name,
             away: e.awayTeam.name,
             score: `${e.homeScore.current}-${e.awayScore.current}`,

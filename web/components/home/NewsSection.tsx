@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { getLatestNews, NewsItem } from '@/lib/newsService';
+import { fetchAPI } from '@/lib/api';
 
 export default function NewsSection() {
     const [news, setNews] = useState<NewsItem[]>([]);
@@ -11,8 +12,7 @@ export default function NewsSection() {
         const fetchNews = async () => {
             try {
                 // Fetch from our new internal API which handles RSS + AI
-                const response = await fetch('/api/news/live');
-                const result = await response.json();
+                const result = await fetchAPI('/api/news/live');
 
                 if (result.success && Array.isArray(result.data)) {
                     setNews(result.data);

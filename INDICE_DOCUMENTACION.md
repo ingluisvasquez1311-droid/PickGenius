@@ -22,7 +22,7 @@
 4. **[SETUP.md](SETUP.md)** - Configuración inicial del proyecto
    - Variables de entorno
    - Firebase credentials
-   - Deployment
+   - Deployment a la nube
 
 ### Verificación y Monitoreo
 5. **[GUIA_VERIFICACION.md](GUIA_VERIFICACION.md)** - Verificación de datos

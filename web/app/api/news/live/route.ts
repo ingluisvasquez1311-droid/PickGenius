@@ -36,10 +36,18 @@ export async function GET() {
                 let imageUrl = "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1000&auto=format&fit=crop"; // Generic Sport
                 const LowerTitle = item.title?.toLowerCase() || "";
 
-                if (LowerTitle.includes('nba') || LowerTitle.includes('lakers') || LowerTitle.includes('lebron')) {
+                if (LowerTitle.includes('nba') || LowerTitle.includes('lakers') || LowerTitle.includes('lebron') || LowerTitle.includes('basketball')) {
                     imageUrl = "https://images.unsplash.com/photo-1546519638-68e109498ee2?q=80&w=1000&auto=format&fit=crop";
-                } else if (LowerTitle.includes('soccer') || LowerTitle.includes('football') || LowerTitle.includes('madrid') || LowerTitle.includes('messi')) {
+                } else if (LowerTitle.includes('soccer') || LowerTitle.includes('football') || LowerTitle.includes('madrid') || LowerTitle.includes('messi') || LowerTitle.includes('laliga') || LowerTitle.includes('premier')) {
                     imageUrl = "https://images.unsplash.com/photo-1510660603728-40a256df2e7b?q=80&w=1000&auto=format&fit=crop";
+                } else if (LowerTitle.includes('nfl') || LowerTitle.includes('super bowl') || LowerTitle.includes('quarterback')) {
+                    imageUrl = "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?q=80&w=1000&auto=format&fit=crop";
+                } else if (LowerTitle.includes('mlb') || LowerTitle.includes('baseball') || LowerTitle.includes('yankees')) {
+                    imageUrl = "https://images.unsplash.com/photo-1508344928928-71657adc0c80?q=80&w=1000&auto=format&fit=crop";
+                } else if (LowerTitle.includes('nhl') || LowerTitle.includes('hockey') || LowerTitle.includes('puck')) {
+                    imageUrl = "https://images.unsplash.com/photo-1515285769212-700938229f21?q=80&w=1000&auto=format&fit=crop";
+                } else if (LowerTitle.includes('tennis') || LowerTitle.includes('grand slam') || LowerTitle.includes('atp')) {
+                    imageUrl = "https://images.unsplash.com/photo-1595435064222-45103bbc86b5?q=80&w=1000&auto=format&fit=crop";
                 }
 
                 // AI Analysis usando groqService

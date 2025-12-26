@@ -19,43 +19,10 @@ git remote add origin https://github.com/TU-USUARIO/tiren-parleys.git
 git push -u origin main
 ```
 
-## 2. Deploy en Render
-
-1. Ve a https://render.com/
-2. Sign up/Login con GitHub
-3. New + → Web Service
-4. Conecta el repositorio `tiren-parleys`
-5. Configuración:
-   - **Name**: `tiren-parleys-nba`
-   - **Build**: `npm install`
-   - **Start**: `npm start`
-   - **Plan**: Free
-
-6. Variables de entorno (Environment):
-   ```
-   NBA_API_KEY=tu-key-de-balldontlie
-   GOOGLE_CLOUD_PROJECT=tu-proyecto-id
-   FIREBASE_API_KEY=tu-firebase-key
-   GEMINI_API_KEY=tu-gemini-key
-   NODE_ENV=production
-   ```
-
-7. Secret Files:
-   - Filename: `firebase-credentials.json`
-   - Content: (pegar contenido del archivo)
-
-8. Click "Create Web Service"
-
 ## 3. Verificar Deployment
 
-```powershell
-# Una vez deployado, prueba:
-curl https://tu-servicio.onrender.com/health
-curl https://tu-servicio.onrender.com/api/status
-
-# Trigger manual sync
-curl -X POST https://tu-servicio.onrender.com/api/sync
-```
+1. Ve a tu plataforma de hosting (e.g., Vercel)
+2. Verifica que el servicio esté corriendo en `/health` o `/api/status`
 
 ## 4. Deploy Dashboard (Opcional)
 

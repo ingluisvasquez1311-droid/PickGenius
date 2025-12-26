@@ -7,6 +7,7 @@ const BASE_URL = typeof window === 'undefined'
 
 import { logApiCall } from '@/lib/adminService';
 import axios from 'axios';
+import { fetchAPI } from '../api';
 
 export interface SportsDataTeam {
     id: number;
@@ -110,36 +111,18 @@ class SportsDataService {
 
     /**
      * Generic method to make requests
-     * CRITICAL: All requests MUST go through /api/proxy to use residential IP via Ngrok
+     * Using fetchAPI for centralized URL and error handling
      */
     async makeRequest<T = any>(endpoint: string): Promise<T | null> {
         try {
-            const isServer = typeof window === 'undefined';
             const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+            const proxyEndpoint = `/api/proxy/sportsdata${cleanEndpoint}`;
 
-            // ALWAYS use proxy for all requests (client and server)
-            // This ensures Vercel → Ngrok → localhost:3000 → Sofascore (residential IP)
-            const proxyUrl = isServer
-                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/proxy/sportsdata${cleanEndpoint}`
-                : `/api/proxy/sportsdata${cleanEndpoint}`;
-
-            try {
-                const response = await fetch(proxyUrl, {
-                    headers: this.headers
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Proxy error: ${response.status}`);
-                }
-
-                return await response.json();
-            } catch (err: any) {
-                console.error(`❌ Request failed for ${endpoint}:`, err.message);
-                return null;
-            }
-
+            return await fetchAPI(proxyEndpoint, {
+                headers: this.headers
+            });
         } catch (error: any) {
-            console.error(`Error fetching ${endpoint}:`, error.message);
+            console.error(`❌ [SportsDataService] Request failed for ${endpoint}:`, error.message);
             return null;
         }
     }
@@ -165,22 +148,16 @@ class SportsDataService {
      */
     async getScheduledEventsBySport(sport: string, date?: string): Promise<SportsDataEvent[]> {
         try {
-            const isServer = typeof window === 'undefined';
-            // Use sport-specific route (e.g., /api/football/scheduled)
-            const apiUrl = isServer
-                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/${sport}/scheduled`
-                : `/api/${sport}/scheduled`;
-
             const queryParams = date ? `?date=${date}` : '';
-            const response = await fetch(`${apiUrl}${queryParams}`, {
+            const endpoint = `/api/${sport}/scheduled${queryParams}`;
+
+            const result = await fetchAPI(endpoint, {
                 headers: this.headers
             });
 
-            if (!response.ok) return [];
-            const result = await response.json();
             return result.events || result.data || [];
         } catch (error) {
-            console.error(`❌ Error fetching scheduled ${sport}:`, error);
+            console.error(`❌ [SportsDataService] Error fetching scheduled ${sport}:`, error);
             return [];
         }
     }
@@ -394,14 +371,14 @@ class SportsDataService {
         const today = date || new Date().toISOString().split('T')[0];
         const tomorrow = new Date(new Date(today).getTime() + 86400000).toISOString().split('T')[0];
 
-        // Fetch using our standard methods
-        const [liveData, scheduledToday, scheduledTomorrow] = await Promise.all([
-            this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/live`),
+        // Fetch using our backend API routes
+        const [liveResult, scheduledToday, scheduledTomorrow] = await Promise.all([
+            fetchAPI(`/api/${sport}/live`).catch(() => ({ data: [] })),
             this.getScheduledEventsBySport(sport, today),
             this.getScheduledEventsBySport(sport, tomorrow)
         ]);
 
-        const liveEvents = liveData?.events || [];
+        const liveEvents = liveResult?.data || [];
         const liveIds = new Set(liveEvents.map(e => e.id));
 
         // Filter out matches that are already LIVE from the scheduled lists

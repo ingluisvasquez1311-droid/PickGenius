@@ -1,63 +1,32 @@
-const getApiUrl = () => {
-    // Since we're now using Next.js API routes, we use relative paths
-    // This works both in development and production on Netlify
-    // Force relative paths for Next.js API routes
-    return '';
-};
+// Configuración centralizada de la API
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-export const API_URL = getApiUrl();
+export async function fetchAPI(endpoint: string, options?: RequestInit) {
+    // Ensure endpoint starts with /
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = `${API_URL}${cleanEndpoint}`;
 
-export async function getStatus() {
+    console.log('🔍 [API] Fetching:', url);
+
     try {
-        const res = await fetch(`${API_URL}/api/status`, { cache: 'no-store' });
-        return res.json();
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options?.headers,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ [API] Response received from:', url);
+
+        return data;
     } catch (error) {
-        console.error('Error fetching status:', error);
-        return null;
+        console.error('❌ [API] Error fetching:', url, error);
+        throw error;
     }
 }
-
-export async function getFootballStats(league?: string) {
-    try {
-        const url = league
-            ? `${API_URL}/api/football/stats/${encodeURIComponent(league)}`
-            : `${API_URL}/api/football/stats`;
-
-        const res = await fetch(url, { cache: 'no-store' });
-        return res.json();
-    } catch (error) {
-        console.error('Error fetching football stats:', error);
-        return null;
-    }
-}
-
-export async function getNBAGames() {
-    try {
-        const res = await fetch(`${API_URL}/api/nba/games`, { cache: 'no-store' });
-        const data = await res.json();
-        return data.success ? data.games : [];
-    } catch (error) {
-        console.error('Error fetching NBA games:', error);
-        return [];
-    }
-}
-
-// Mock data for development when backend is offline or empty
-export const MOCK_MATCHES = [
-    {
-        id: '1',
-        homeTeam: 'Lakers',
-        awayTeam: 'Warriors',
-        date: '2024-11-24T20:00:00',
-        league: 'NBA',
-        prediction: { pick: 'Lakers -5.5', confidence: 85 }
-    },
-    {
-        id: '2',
-        homeTeam: 'Real Madrid',
-        awayTeam: 'Barcelona',
-        date: '2024-11-25T15:00:00',
-        league: 'La Liga',
-        prediction: { pick: 'Ambos Marcan', confidence: 78 }
-    }
-];

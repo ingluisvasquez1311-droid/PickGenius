@@ -2,6 +2,7 @@
  * Prediction Service - AI-powered game predictions
  * Integrates with Gemini API for advanced analysis
  */
+import { fetchAPI } from './api';
 
 export interface PredictionRequest {
     gameId: string;
@@ -50,11 +51,8 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 seconds
 
-        const response = await fetch('/api/predictions', {
+        const data = await fetchAPI('/api/predictions', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
                 gameId: request.gameId,
                 sport: request.sport,
@@ -63,16 +61,6 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
             }),
             signal: controller.signal
         });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error('Prediction API error:', errorData);
-            throw new Error(errorData.error || 'Failed to generate prediction');
-        }
-
-        const data = await response.json();
 
         // If API returns fallback/mock flag, USE IT if it has data
         // We prefer the server-side mock because it's richer
@@ -84,13 +72,13 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
         return data;
     } catch (error: any) {
         console.error('Error generating prediction:', error);
-        
+
         // Check if it's a timeout error
         if (error.name === 'AbortError') {
             console.error('Prediction request timed out after 90 seconds');
             throw new Error('El análisis está tomando más tiempo del esperado. Por favor, intenta de nuevo.');
         }
-        
+
         // Return mock prediction as fallback
         return generateMockPrediction(request);
     }
@@ -176,11 +164,8 @@ export async function savePredictionToHistory(
     gameId: string
 ): Promise<void> {
     try {
-        await fetch('/api/predictions/history', {
+        await fetchAPI('/api/predictions/history', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
                 userId,
                 prediction,
