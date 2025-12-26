@@ -33,6 +33,11 @@ class AnalyticsService {
      */
     async getDashboardMetrics(): Promise<DashboardMetrics> {
         try {
+            if (!db) {
+                console.error('Firebase DB not initialized');
+                return this.getMockMetrics();
+            }
+
             const now = new Date();
             const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
             const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -122,34 +127,40 @@ class AnalyticsService {
         } catch (error) {
             console.error('Error fetching dashboard metrics:', error);
 
-            // Retornar datos mock en caso de error
-            return {
-                dau: 156,
-                mau: 1243,
-                totalUsers: 3456,
-                premiumUsers: 234,
-                totalPredictions: 12543,
-                aiAccuracy: {
-                    football: 72.5,
-                    basketball: 68.3,
-                    tennis: 70.1,
-                    hockey: 65.8,
-                    nfl: 71.2,
-                    baseball: 69.4,
-                },
-                revenue: {
-                    daily: 145.99,
-                    monthly: 3420.50,
-                    total: 24680.75,
-                },
-                topSports: [
-                    { sport: 'football', count: 1243 },
-                    { sport: 'basketball', count: 987 },
-                    { sport: 'tennis', count: 654 },
-                ],
-                recentActivity: [],
-            };
+            return this.getMockMetrics();
         }
+    }
+
+    /**
+     * Helper para obtener datos mock en caso de error o DB no inicializada
+     */
+    private getMockMetrics(): DashboardMetrics {
+        return {
+            dau: 156,
+            mau: 1243,
+            totalUsers: 3456,
+            premiumUsers: 234,
+            totalPredictions: 12543,
+            aiAccuracy: {
+                football: 72.5,
+                basketball: 68.3,
+                tennis: 70.1,
+                hockey: 65.8,
+                nfl: 71.2,
+                baseball: 69.4,
+            },
+            revenue: {
+                daily: 145.99,
+                monthly: 3420.50,
+                total: 24680.75,
+            },
+            topSports: [
+                { sport: 'football', count: 1243 },
+                { sport: 'basketball', count: 987 },
+                { sport: 'tennis', count: 654 },
+            ],
+            recentActivity: [],
+        };
     }
 
     /**
