@@ -39,7 +39,7 @@ export default function PerformanceStats() {
             // Calculate stats using the profile data as source of truth if available
             const total = user.totalPredictions || history.length;
             const winRate = user.stats?.winRate || 0;
-            const hotPicks = history.filter(p => (p.probability || p.confidence || 0) >= 75).length;
+            const hotPicks = history.filter(p => Number(p.probability || p.confidence || 0) >= 75).length;
 
             // Calculate current streak from history
             let streak = 0;
