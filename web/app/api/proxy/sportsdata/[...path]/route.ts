@@ -29,12 +29,17 @@ export async function GET(
             }
         });
 
-        if (!response.ok) {
-            throw new Error(`Sofascore API returned ${response.status}`);
-        }
-
         const data = await response.json();
-        return NextResponse.json(data);
+
+        // Determinar cache según el tipo de datos
+        const isLive = path.includes('live');
+        const cacheSeconds = isLive ? 30 : 600; // 30s para vivo, 10 min para programados/finalizados
+
+        return NextResponse.json(data, {
+            headers: {
+                'Cache-Control': `public, s-maxage=${cacheSeconds}, stale-while-revalidate=${cacheSeconds / 2}`
+            }
+        });
 
     } catch (error: any) {
         console.error('❌ [Proxy Error]:', error.message);

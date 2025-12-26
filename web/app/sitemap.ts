@@ -1,33 +1,23 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://pickgenius.ai'; // Replace with actual production domain eventually
+    const baseUrl = 'https://pickgeniuspro.com';
 
-    return [
-        {
-            url: baseUrl,
-            lastModified: new Date(),
-            changeFrequency: 'daily',
-            priority: 1,
-        },
-        {
-            url: `${baseUrl}/props`,
-            lastModified: new Date(),
-            changeFrequency: 'hourly',
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/football-live`,
-            lastModified: new Date(),
-            changeFrequency: 'always',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/login`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.5,
-        },
-        // Add more static routes here
-    ];
+    // Rutas estáticas principales
+    const routes = [
+        '',
+        '/pricing',
+        '/profile',
+        '/streaks',
+        '/football-live',
+        '/basketball-live',
+        '/value-hunter',
+    ].map((route) => ({
+        url: `${baseUrl}${route}`,
+        lastModified: new Date().toISOString().split('T')[0],
+        changeFrequency: 'daily' as const,
+        priority: route === '' ? 1 : 0.8,
+    }));
+
+    return routes;
 }

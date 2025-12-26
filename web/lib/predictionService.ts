@@ -10,6 +10,7 @@ export interface PredictionRequest {
     awayTeam?: string;
     date?: Date;
     sport: string;
+    userId?: string;
 }
 
 
@@ -57,7 +58,8 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
                 gameId: request.gameId,
                 sport: request.sport,
                 homeTeam: request.homeTeam,
-                awayTeam: request.awayTeam
+                awayTeam: request.awayTeam,
+                uid: request.userId // Pass user ID for tier check
             }),
             signal: controller.signal
         });

@@ -16,6 +16,8 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import WelcomeToast from "@/components/auth/WelcomeToast";
 
 
+import { constructMetadata } from "@/lib/seo";
+
 export const viewport: Viewport = {
   themeColor: "#050505",
   width: "device-width",
@@ -24,44 +26,11 @@ export const viewport: Viewport = {
   userScalable: false,
 }
 
-export const metadata: Metadata = {
-  title: "PickGenius | Predicciones Deportivas con IA",
+export const metadata: Metadata = constructMetadata({
+  title: "PickGenius Pro | Predicciones Deportivas con IA",
   description: "Domina tus parleys de NBA y Fútbol con análisis de inteligencia artificial y estadísticas avanzadas.",
-  manifest: "/manifest.json",
-  openGraph: {
-    title: "PickGenius | Predicciones Deportivas con IA",
-    description: "Análisis y estadísticas deportivas impulsadas por Inteligencia Artificial.",
-    url: "https://pickgenius.ai",
-    siteName: "PickGenius",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "PickGenius AI Dashboard",
-      },
-    ],
-    locale: "es_ES",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "PickGenius AI",
-    description: "Predicciones deportivas inteligentes en tiempo real.",
-    images: ["/og-image.jpg"],
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "PickGenius",
-    startupImage: [
-      "/icon-512.png",
-    ],
-  },
-  formatDetection: {
-    telephone: false,
-  },
-};
+  image: "/og-image.jpg"
+});
 
 export default function RootLayout({
   children,

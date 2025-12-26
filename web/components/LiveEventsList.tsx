@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import TeamLogo from './ui/TeamLogo';
 import { API_URL } from '@/lib/api';
+import { Star } from 'lucide-react';
 
 interface LiveEvent {
     id: number;
@@ -49,15 +50,33 @@ interface LiveEvent {
     startTimestamp?: number;
 }
 
+import { useAuth } from '@/contexts/AuthContext';
+
 interface EventCardProps {
     event: LiveEvent;
     sport: 'basketball' | 'football' | 'tennis' | 'baseball' | 'nhl' | 'american-football';
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
+    const { user, addFavorite, removeFavorite } = useAuth();
     const isLive = event.status.type === 'inprogress';
     const isFinished = event.status.type === 'finished';
     const isScheduled = event.status.type === 'scheduled' || event.status.type === 'notstarted';
+
+    const isTeamFavorite = (teamName: string) => {
+        return user?.favoriteTeams?.includes(teamName) || false;
+    };
+
+    const handleToggleFavorite = async (e: React.MouseEvent, teamName: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!user) return;
+        if (isTeamFavorite(teamName)) {
+            await removeFavorite(teamName);
+        } else {
+            await addFavorite(teamName);
+        }
+    };
 
     const [now, setNow] = React.useState(0);
 
@@ -162,9 +181,17 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
                 {/* Home Team */}
                 <div className="flex items-center justify-end gap-2 sm:gap-3 text-right overflow-hidden">
                     <div className="flex flex-col items-end min-w-0">
-                        <span className={`text-sm font-bold truncate ${isLive || isFinished ? 'text-white' : 'text-gray-300'} group-hover:text-white transition-colors`}>
-                            {event.homeTeam.name}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                onClick={(e) => handleToggleFavorite(e, event.homeTeam.name)}
+                                className={`transition-all duration-300 ${isTeamFavorite(event.homeTeam.name) ? 'text-yellow-500' : 'text-white/5 hover:text-white/30'}`}
+                            >
+                                <Star className={`w-3 h-3 ${isTeamFavorite(event.homeTeam.name) ? 'fill-current' : ''}`} />
+                            </button>
+                            <span className={`text-sm font-bold truncate ${isLive || isFinished ? 'text-white' : 'text-gray-300'} group-hover:text-white transition-colors`}>
+                                {event.homeTeam.name}
+                            </span>
+                        </div>
                     </div>
                     {event.homeScore?.redCards && event.homeScore.redCards > 0 && (
                         <div className="w-2 h-3 bg-red-600 rounded-[1px] shadow-sm flex-shrink-0" title="Red Card" />
@@ -191,9 +218,17 @@ const EventCard: React.FC<EventCardProps> = ({ event, sport }) => {
                     {event.awayScore?.redCards && event.awayScore.redCards > 0 && (
                         <div className="w-2 h-3 bg-red-600 rounded-[1px] shadow-sm flex-shrink-0" title="Red Card" />
                     )}
-                    <span className={`text-sm font-bold truncate ${isLive || isFinished ? 'text-white' : 'text-gray-300'} group-hover:text-white transition-colors`}>
-                        {event.awayTeam.name}
-                    </span>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <span className={`text-sm font-bold truncate ${isLive || isFinished ? 'text-white' : 'text-gray-300'} group-hover:text-white transition-colors`}>
+                            {event.awayTeam.name}
+                        </span>
+                        <button
+                            onClick={(e) => handleToggleFavorite(e, event.awayTeam.name)}
+                            className={`transition-all duration-300 ${isTeamFavorite(event.awayTeam.name) ? 'text-yellow-500' : 'text-white/5 hover:text-white/30'}`}
+                        >
+                            <Star className={`w-3 h-3 ${isTeamFavorite(event.awayTeam.name) ? 'fill-current' : ''}`} />
+                        </button>
+                    </div>
                 </div>
             </div>
 

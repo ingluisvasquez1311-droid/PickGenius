@@ -18,11 +18,29 @@ interface AIPredictionCardProps {
 }
 
 export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }: AIPredictionCardProps) {
-    const { user, notify, saveToHistory } = useAuth();
+    const { user, notify, saveToHistory, addPlayerFavorite, removePlayerFavorite } = useAuth();
     const { addToSlip } = useBettingSlip();
     const [prediction, setPrediction] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const isPlayerFavorite = (playerName: string) => {
+        return user?.favoritePlayers?.some(p => p.name === playerName) || false;
+    };
+
+    const handleTogglePlayerFavorite = async (playerName: string) => {
+        if (!user) return;
+        if (isPlayerFavorite(playerName)) {
+            const playerToRemove = (user.favoritePlayers || []).find(p => p.name === playerName);
+            if (playerToRemove) await removePlayerFavorite(playerToRemove);
+        } else {
+            await addPlayerFavorite({
+                id: Math.random().toString(36).substring(2, 11),
+                name: playerName,
+                sport: sport
+            });
+        }
+    };
 
     // Estimate odds based on AI confidence (rough approximation)
     const estimateOdds = (confidence: number): number => {
@@ -53,9 +71,10 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
 
             const result = await generatePrediction({
                 gameId: eventId.toString(),
-                sport: sport as any,
+                sport: sport,
                 homeTeam,
-                awayTeam
+                awayTeam,
+                userId: user?.uid
             });
 
             // Limpiar timeouts para que no sobrescriban el éxito
@@ -63,6 +82,7 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
             if (timeout2) clearTimeout(timeout2);
 
             if (result) {
+                // @ts-ignore - Handle possible confidence mismatch
                 const confidenceVal = typeof result.confidence === 'number'
                     ? result.confidence
                     : parseInt(result.confidence || '0');
@@ -692,7 +712,15 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
                                                         {prediction.predictions.projections.map((p: any, idx: number) => (
                                                             <div key={idx} className="bg-white/5 p-3 rounded-lg border border-white/5 transition-all">
                                                                 <div className="flex justify-between items-center mb-2">
-                                                                    <p className="text-white font-black text-sm italic">{p.name}</p>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <p className="text-white font-black text-sm italic">{p.name}</p>
+                                                                        <button
+                                                                            onClick={() => handleTogglePlayerFavorite(p.name)}
+                                                                            className={`transition-all duration-300 ${isPlayerFavorite(p.name) ? 'text-yellow-500' : 'text-white/20 hover:text-white/60'}`}
+                                                                        >
+                                                                            <Star className={`w-3 h-3 ${isPlayerFavorite(p.name) ? 'fill-current' : ''}`} />
+                                                                        </button>
+                                                                    </div>
                                                                     <span className={`text-[8px] px-2 py-0.5 rounded-full font-black ${p.confidence === 'Alta' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
                                                                         }`}>
                                                                         CONF: {p.confidence}

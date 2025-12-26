@@ -1,74 +1,98 @@
-import { messaging, db } from '../firebase';
-import { getToken, onMessage } from 'firebase/messaging';
-import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+/**
+ * Servicio de Notificaciones Omnicanal
+ * Maneja el envío de alertas a Telegram y Discord.
+ */
 
-// You need to generate a VAPID key in Firebase Console -> Project Settings -> Cloud Messaging -> Web Configuration
-// And paste it here or in .env.local
-const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'YOUR_VAPID_KEY_HERE';
-
-export interface NotificationPermissionStatus {
-    permission: NotificationPermission;
-    token?: string;
-    error?: string;
+export interface NotificationPayload {
+    title: string;
+    message: string;
+    sport?: string;
+    confidence?: number;
+    gameId?: string;
+    imageUrl?: string;
 }
 
-export const requestNotificationPermission = async (userId?: string): Promise<NotificationPermissionStatus> => {
-    if (!messaging) {
-        return { permission: 'denied', error: 'Messaging not initialized' };
-    }
+class NotificationService {
+    /**
+     * Envía una notificación a Telegram
+     * Requiere TELEGRAM_BOT_TOKEN en el servidor
+     */
+    async sendTelegramMessage(chatId: string, payload: NotificationPayload): Promise<boolean> {
+        try {
+            const token = process.env.TELEGRAM_BOT_TOKEN;
+            if (!token) {
+                console.error('❌ TELEGRAM_BOT_TOKEN no configurado');
+                return false;
+            }
 
-    try {
-        const permission = await Notification.requestPermission();
+            const text = `
+🔥 *${payload.title}* 🔥
 
-        if (permission === 'granted') {
-            const token = await getToken(messaging, {
-                vapidKey: VAPID_KEY
+${payload.message}
+${payload.confidence ? `\n🎯 Confianza: *${payload.confidence}%*` : ''}
+${payload.sport ? `\n🏟️ Deporte: #${payload.sport.toUpperCase()}` : ''}
+
+[Ver Pronóstico Completo](https://pickgeniuspro.vercel.app/match/${payload.sport}/${payload.gameId})
+            `;
+
+            const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: text,
+                    parse_mode: 'Markdown',
+                    disable_web_page_preview: false
+                })
             });
 
-            if (token) {
-                console.log('🔥 FCM Token generated:', token);
-
-                // Save token to user profile if logged in
-                if (userId && db) {
-                    await saveTokenToUser(userId, token);
-                }
-
-                return { permission, token };
-            }
+            return response.ok;
+        } catch (error) {
+            console.error('❌ Error enviando a Telegram:', error);
+            return false;
         }
-
-        return { permission };
-    } catch (error: any) {
-        console.error('❌ Error requesting notification permission:', error);
-        return { permission: 'denied', error: error.message };
-    }
-};
-
-export const saveTokenToUser = async (userId: string, token: string) => {
-    if (!db) {
-        console.error('❌ Firestore not initialized');
-        return;
     }
 
-    try {
-        const userRef = doc(db, 'users', userId);
-        await updateDoc(userRef, {
-            fcmTokens: arrayUnion(token),
-            lastTokenUpdate: new Date().toISOString()
-        });
-        console.log('✅ Token saved to user profile');
-    } catch (error) {
-        console.error('❌ Error saving token to user:', error);
+    /**
+     * Envía una notificación a Discord vía Webhook
+     */
+    async sendDiscordMessage(webhookUrl: string, payload: NotificationPayload): Promise<boolean> {
+        try {
+            const embed = {
+                title: payload.title,
+                description: payload.message,
+                color: payload.confidence && payload.confidence > 90 ? 0x00ff00 : 0xffa500,
+                fields: [
+                    { name: 'Deporte', value: payload.sport?.toUpperCase() || 'N/A', inline: true },
+                    { name: 'Confianza', value: `${payload.confidence}%` || 'N/A', inline: true }
+                ],
+                timestamp: new Date().toISOString(),
+                footer: { text: 'PickGenius Pro Notifications' },
+                url: `https://pickgeniuspro.vercel.app/match/${payload.sport}/${payload.gameId}`
+            };
+
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: 'PickGenius Bot',
+                    embeds: [embed]
+                })
+            });
+
+            return response.ok;
+        } catch (error) {
+            console.error('❌ Error enviando a Discord:', error);
+            return false;
+        }
     }
-};
 
-export const onMessageListener = () => {
-    if (!messaging) return Promise.resolve(null);
+    /**
+     * Lógica para decidir si enviar una notificación automática (Hot Picks)
+     */
+    shouldNotifyHotPick(confidence: number): boolean {
+        return confidence >= 85;
+    }
+}
 
-    return new Promise((resolve) => {
-        onMessage(messaging!, (payload) => {
-            console.log('📩 Foreground Message received:', payload);
-            resolve(payload);
-        });
-    });
-};
+export const notificationService = new NotificationService();

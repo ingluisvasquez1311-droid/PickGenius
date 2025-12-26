@@ -7,6 +7,8 @@ import ParleyOptimizerBanner from '@/components/ai/ParleyOptimizerBanner';
 import SportHeader from '@/components/sports/SportHeader';
 import LiveSportSelector from '@/components/sports/LiveSportSelector';
 import { useSportsEvents } from '@/lib/hooks/useSportsEvents';
+// Nota: El SEO dinámico para páginas 'use client' se maneja mejor en un layout.tsx hermano 
+// o moviendo la lógica de datos a un componente de servidor.
 
 export default function FootballLivePage() {
     const { data: events = [], isLoading: loading, error } = useSportsEvents('football');

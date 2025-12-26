@@ -1,14 +1,12 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-    const baseUrl = 'https://pickgenius.ai'; // Replace with actual production domain
-
     return {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/api/', '/admin/', '/profile/'],
+            disallow: ['/api/', '/admin/', '/auth/'],
         },
-        sitemap: `${baseUrl}/sitemap.xml`,
+        sitemap: 'https://pickgeniuspro.com/sitemap.xml',
     };
 }

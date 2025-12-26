@@ -14,12 +14,22 @@ export default function ValueBetsPage() {
 
     useEffect(() => {
         const loadBets = async () => {
-            const data = await valueBetsService.getValueBets();
-            setBets(data.sort((a, b) => b.edge - a.edge)); // Best value first
-            setLoading(false);
+            if (authLoading) return;
+            try {
+                const url = user?.uid ? `/api/value-bets?uid=${user.uid}` : '/api/value-bets';
+                const res = await fetch(url);
+                const json = await res.json();
+                if (json.success) {
+                    setBets(json.data.sort((a: ValueBet, b: ValueBet) => b.edge - a.edge));
+                }
+            } catch (err) {
+                console.error("Error loading value bets:", err);
+            } finally {
+                setLoading(false);
+            }
         };
         loadBets();
-    }, []);
+    }, [user, authLoading]);
 
     return (
         <main className="min-h-screen bg-[#050505] text-white font-sans selection:bg-green-500/30 pb-20 pt-24">

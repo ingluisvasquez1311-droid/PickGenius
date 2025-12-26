@@ -4,17 +4,20 @@ import React, { useEffect, useState } from 'react';
 import PlayerStreakCard from '@/components/streaks/PlayerStreakCard';
 import { Streak, PlayerStreak } from '@/lib/services/streakService';
 import { fetchAPI } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function StreaksPage() {
     const [streaks, setStreaks] = useState<Streak[]>([]);
     const [playerStreaks, setPlayerStreaks] = useState<PlayerStreak[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'win' | 'loss' | 'goals' | 'nba-players'>('all');
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchStreaks = async () => {
             try {
-                const json = await fetchAPI('/api/analytics/streaks');
+                const url = user?.uid ? `/api/analytics/streaks?uid=${user.uid}` : '/api/analytics/streaks';
+                const json = await fetchAPI(url);
                 if (json && json.success) {
                     setStreaks(json.data);
                     setPlayerStreaks(json.players || []);

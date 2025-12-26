@@ -18,9 +18,9 @@ const ADMIN_EMAILS = [
 ];
 
 export interface FavoritePlayer {
-    id: number;
+    id: number | string;
     name: string;
-    sport: 'basketball' | 'baseball' | 'nhl' | 'tennis';
+    sport: 'basketball' | 'baseball' | 'nhl' | 'tennis' | 'football' | 'american-football' | string;
     team?: string;
 }
 

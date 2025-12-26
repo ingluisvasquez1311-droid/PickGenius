@@ -3,6 +3,7 @@
 import React from 'react';
 import MatchCard from './MatchCard';
 import { type SportsDataEvent } from '@/lib/services/sportsDataService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface GroupedMatchesListProps {
     games: SportsDataEvent[];
@@ -10,7 +11,21 @@ interface GroupedMatchesListProps {
 }
 
 export default function GroupedMatchesList({ games, sport }: GroupedMatchesListProps) {
+    const { user, addFavorite, removeFavorite } = useAuth();
     const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set());
+
+    const isTeamFavorite = (teamName: string) => {
+        return user?.favoriteTeams?.includes(teamName) || false;
+    };
+
+    const handleToggleFavorite = async (teamName: string) => {
+        if (!user) return;
+        if (isTeamFavorite(teamName)) {
+            await removeFavorite(teamName);
+        } else {
+            await addFavorite(teamName);
+        }
+    };
 
     const toggleGroup = (key: string) => {
         setExpandedGroups(prev => {
@@ -58,16 +73,12 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
 
         // Sort Leagues by Priority
         const sortedLeagues = Object.entries(groupedByLeague).sort(([keyA, dataA], [keyB, dataB]) => {
-            const leaguePartA = dataA.displayName.replace(/.*: /, ''); // Extract league name part ideally
-            const leaguePartB = dataB.displayName.replace(/.*: /, '');
-
             const isTopA = topLeagues.some(top => dataA.displayName.includes(top));
             const isTopB = topLeagues.some(top => dataB.displayName.includes(top));
 
             if (isTopA && !isTopB) return -1;
             if (!isTopA && isTopB) return 1;
 
-            // Secondary sort: Country/League Alphabetical
             return dataA.displayName.localeCompare(dataB.displayName);
         });
 
@@ -83,7 +94,6 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
                         `}
                     >
                         <div className="flex items-center gap-3">
-                            {/* Flag/Icon */}
                             <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-sm overflow-hidden border border-white/5">
                                 {countryId ? (
                                     <img
@@ -129,6 +139,8 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
                                     status={game.status.type === 'inprogress' ? 'En Vivo' : game.status.type === 'finished' ? 'Finalizado' : 'Programado'}
                                     statusDescription={game.status.description}
                                     league={displayName}
+                                    isFavorite={isTeamFavorite(game.homeTeam.name) || isTeamFavorite(game.awayTeam.name)}
+                                    onFavoriteToggle={() => handleToggleFavorite(game.homeTeam.name)}
                                 />
                             ))}
                         </div>
@@ -158,7 +170,6 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
 
     return (
         <div className="space-y-12">
-            {/* SECTION 1: LIVE */}
             {liveGames.length > 0 && (
                 <div className="animate-in fade-in duration-500">
                     <div className="flex items-center gap-3 mb-6">
@@ -172,7 +183,6 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
                 </div>
             )}
 
-            {/* SECTION 2: UPCOMING */}
             {upcomingGames.length > 0 && (
                 <div className="animate-in fade-in duration-700 delay-100">
                     <div className="flex items-center gap-3 mb-6">
@@ -182,12 +192,10 @@ export default function GroupedMatchesList({ games, sport }: GroupedMatchesListP
                         </h2>
                         <div className="flex-1 h-px bg-gradient-to-r from-blue-900/50 to-transparent"></div>
                     </div>
-                    {/* Render standard grouped list for upcoming */}
                     {renderLeagueGroups(upcomingGames)}
                 </div>
             )}
 
-            {/* SECTION 3: FINISHED */}
             {finishedGames.length > 0 && (
                 <div className="animate-in fade-in duration-1000 delay-200 opacity-80">
                     <div className="flex items-center gap-3 mb-6">

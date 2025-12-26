@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Zap, Bell, ShieldCheck } from 'lucide-react';
 import { API_URL } from '@/lib/api';
+import MatchComments from '@/components/sports/MatchComments';
 
 interface MatchLiveViewProps {
     sport: string;
@@ -400,6 +401,10 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                                 </div>
                             </div>
                         </div>
+
+                        <ErrorBoundary>
+                            <MatchComments matchId={eventId} />
+                        </ErrorBoundary>
                     </div>
 
                     {/* Right Column: Away Details & MVP (3 cols) */}

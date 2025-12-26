@@ -22,7 +22,10 @@ import {
     savePrediction,
     getUserPredictions,
     calculateUserStats,
+    addFavoritePlayer,
+    removeFavoritePlayer,
     type UserProfile,
+    type FavoritePlayer,
     type PredictionRecord
 } from '@/lib/userService';
 import { trackSignup, trackLogin, trackTrialStart } from '@/lib/analytics';
@@ -47,6 +50,8 @@ interface AuthContextType {
     signOut: () => Promise<void>;
     addFavorite: (teamName: string) => Promise<void>;
     removeFavorite: (teamName: string) => Promise<void>;
+    addPlayerFavorite: (player: FavoritePlayer) => Promise<void>;
+    removePlayerFavorite: (player: FavoritePlayer) => Promise<void>;
     usePrediction: () => Promise<void>;
     checkPredictionLimit: () => Promise<{ canPredict: boolean; remaining: number }>;
     refreshUser: () => Promise<void>;
@@ -202,6 +207,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await refreshUser();
     };
 
+    const addPlayerFavorite = async (player: any) => {
+        if (!user) return;
+        await addFavoritePlayer(user.uid, player);
+        await refreshUser();
+    };
+
+    const removePlayerFavorite = async (player: any) => {
+        if (!user) return;
+        await removeFavoritePlayer(user.uid, player);
+        await refreshUser();
+    };
+
     const usePrediction = async () => {
         if (!user) return;
         await incrementPredictionsUsed(user.uid);
@@ -292,6 +309,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             signOut,
             addFavorite,
             removeFavorite,
+            addPlayerFavorite,
+            removePlayerFavorite,
             usePrediction,
             checkPredictionLimit,
             refreshUser,
