@@ -70,16 +70,8 @@ export default async function SystemStatusPage() {
                         apiName="Groq"
                     />
                 </div>
-                {/* Groq Stats */}
-                <ServiceCard
-                    name="Groq AI Engine"
-                    status={groqStats.circuit}
-                    stats={groqStats.rotator}
-                    apiName="Groq"
-                />
             </div>
 
-        </div>
         </div>
     );
 }
