@@ -1,7 +1,7 @@
-/**
- * Servicio de Notificaciones Omnicanal
  * Maneja el envío de alertas a Telegram y Discord.
  */
+import { messaging } from '@/lib/firebase';
+import { getToken, onMessage } from 'firebase/messaging';
 
 export interface NotificationPayload {
     title: string;
@@ -96,3 +96,45 @@ ${payload.sport ? `\n🏟️ Deporte: #${payload.sport.toUpperCase()}` : ''}
 }
 
 export const notificationService = new NotificationService();
+
+/**
+ * Solicita permiso para notificaciones y obtiene el token FCM
+ * @param uid ID del usuario para asociar el token (opcional)
+ */
+export const requestNotificationPermission = async (uid?: string) => {
+    if (typeof window === 'undefined' || !messaging) {
+        return { permission: 'default' as NotificationPermission, token: null };
+    }
+
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            const token = await getToken(messaging, {
+                vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+            });
+
+            if (uid && token) {
+                console.log(`[NotificationService] Token for user ${uid}:`, token);
+                // Aquí podrías llamar a una función de userService para guardar el token
+            }
+
+            return { permission, token };
+        }
+        return { permission, token: null };
+    } catch (error) {
+        console.error('❌ Error requesting notification permission:', error);
+        return { permission: 'default' as NotificationPermission, token: null };
+    }
+};
+
+/**
+ * Escucha mensajes de Firebase en primer plano
+ */
+export const onMessageListener = () =>
+    new Promise((resolve) => {
+        if (typeof window === 'undefined' || !messaging) return;
+        onMessage(messaging, (payload) => {
+            console.log('[NotificationService] Foreground message received:', payload);
+            resolve(payload);
+        });
+    });
