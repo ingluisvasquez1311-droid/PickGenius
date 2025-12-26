@@ -25,15 +25,18 @@ import {
     type UserProfile,
     type PredictionRecord
 } from '@/lib/userService';
-// TODO: Phase 4 - Re-enable when notification system is fully implemented
-// import {
-//     subscribeToNotifications,
-//     createNotification,
-//     markAsRead,
-//     markAllAsRead,
-//     type AppNotification
-// } from '@/lib/services/notificationService';
 import { trackSignup, trackLogin, trackTrialStart } from '@/lib/analytics';
+
+export interface AppNotification {
+    id: string;
+    uid: string;
+    title: string;
+    message: string;
+    type: 'info' | 'success' | 'warning' | 'error';
+    link?: string;
+    read: boolean;
+    timestamp: Date;
+}
 
 interface AuthContextType {
     user: UserProfile | null;
@@ -69,8 +72,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifLoading, setNotifLoading] = useState(false);
 
-    // ... (AuthContext definition)
-
     const loadUserProfile = async (firebaseUser: User) => {
         const uid = firebaseUser.uid;
         const email = firebaseUser.email!;
@@ -86,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 profile = await createUserProfile(uid, email);
             } else if (!profile.stats) {
                 // AUTO-REPAIR: Add missing stats for legacy profiles
-                console.log('👤 [Auth] Legacy profile detected (missing stats). Repairing...');
+                console.log('� [Auth] Legacy profile detected (missing stats). Repairing...');
                 const defaultStats = {
                     horarios: 0,
                     resultados: 0,
@@ -107,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 await updateLastLogin(uid);
             }
 
-            console.log('👤 [Auth] Profile loaded successfully:', profile.role);
+            console.log('� [Auth] Profile loaded successfully:', profile.role);
             // Merge Firebase Auth profile data not stored in Firestore
             setUser({
                 ...profile,
@@ -157,16 +158,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const signIn = async (email: string, password: string) => {
         if (!auth) throw new Error('Firebase no está inicializado');
         await signInWithEmailAndPassword(auth, email, password);
-
-        // Track login event
         trackLogin('email');
     };
 
     const signUp = async (email: string, password: string) => {
         if (!auth) throw new Error('Firebase no está inicializado');
         await createUserWithEmailAndPassword(auth, email, password);
-
-        // Track signup and trial start
         trackSignup('email');
         trackTrialStart();
     };
@@ -174,21 +171,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const signInWithGoogle = async () => {
         if (!auth || !googleProvider) throw new Error('Firebase no está inicializado');
         const result = await signInWithPopup(auth, googleProvider);
-
-        // Check if this is a new user
         const uid = result.user.uid;
         const profile = await getUserProfile(uid);
 
-        // 🔥 NUEVO: Sincronizar perfil con datos de Google
         const { syncGoogleProfile } = await import('@/lib/services/googleProfileSync');
         await syncGoogleProfile(result.user);
 
         if (!profile) {
-            // New user - track signup
             trackSignup('google');
             trackTrialStart();
         } else {
-            // Existing user - track login
             trackLogin('google');
         }
     };
@@ -201,21 +193,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const addFavorite = async (teamName: string) => {
         if (!user) return;
         await addFavoriteTeam(user.uid, teamName);
-        // Refresh user data
         await refreshUser();
     };
 
     const removeFavorite = async (teamName: string) => {
         if (!user) return;
         await removeFavoriteTeam(user.uid, teamName);
-        // Refresh user data
         await refreshUser();
     };
 
     const usePrediction = async () => {
         if (!user) return;
         await incrementPredictionsUsed(user.uid);
-        // Refresh user data
         await refreshUser();
     };
 
@@ -251,7 +240,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!user) return;
         const { updateUserProfile } = await import('@/lib/userService');
         await updateUserProfile(user.uid, updates);
-
         setUser(prev => prev ? { ...prev, ...updates } : null);
     };
 
@@ -269,59 +257,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const markRead = async (id: string) => {
-        await markAsRead(id);
+        // await markAsRead(id);
+        console.log('🔔 [Auth] Marking as read (Stub):', id);
         await refreshNotifications();
     };
 
     const markAllRead = async () => {
         if (!user) return;
-        await markAllAsRead(user.uid);
+        // await markAllAsRead(user.uid);
+        console.log('🔔 [Auth] Marking all as read (Stub)');
         await refreshNotifications();
     };
 
     const notify = async (title: string, message: string, type: AppNotification['type'] = 'info', link?: string) => {
         if (!user) return;
         try {
-            await createNotification(user.uid, { title, message, type, link });
-
-            // Optimistic update for better UX
-            const newNotif: AppNotification = {
-                id: Math.random().toString(36).substr(2, 9),
-                uid: user.uid,
-                title,
-                message,
-                type,
-                link,
-                read: false,
-                timestamp: new Date()
-            };
-
+            console.log('🔔 [Auth] Creating notification (Stub):', title);
+            const newNotif: AppNotification = { id: Math.random().toString(36).substr(2, 9), uid: user.uid, title, message, type, link, read: false, timestamp: new Date() };
             setNotifications(prev => [newNotif, ...prev]);
             setUnreadCount(prev => prev + 1);
-
-            // Still refresh from server to get the real ID and server timestamp
             await refreshNotifications();
         } catch (error) {
             console.error('❌ [Auth] Error creating notification:', error);
         }
     };
-
-    // TODO: Phase 4 - Re-enable notification subscription
-    // useEffect(() => {
-    //     if (user) {
-    //         console.log('🔔 [Auth] Estabilizando canal de notificaciones en tiempo real...');
-    //         const unsubscribe = subscribeToNotifications(user.uid, (data: AppNotification[]) => {
-    //             const unread = data.filter((n: AppNotification) => !n.read).length;
-    //             console.log(`🔔 [Auth] Notificaciones actualizadas: ${data.length} totales, ${unread} sin leer`);
-    //             setNotifications(data);
-    //             setUnreadCount(unread);
-    //         });
-    //         return () => unsubscribe();
-    //     } else {
-    //         setNotifications([]);
-    //         setUnreadCount(0);
-    //     }
-    // }, [user]);
 
     return (
         <AuthContext.Provider value={{
