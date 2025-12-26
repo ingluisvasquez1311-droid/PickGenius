@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, doc, getDoc, getDocs, query, where, orderBy, limit, updateDoc, Timestamp } from 'firebase/firestore';
 
 export interface PredictionRecord {
+    id?: string; // Firestore document ID  
     predictionId: string;
     gameId: string;
     sport: string;

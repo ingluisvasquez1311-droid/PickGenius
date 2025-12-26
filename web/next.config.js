@@ -64,41 +64,8 @@ const nextConfig = {
         ];
     },
 
-    // Webpack optimizations
-    webpack: (config, { dev, isServer }) => {
-        // Optimización de producción
-        if (!dev && !isServer) {
-            config.optimization = {
-                ...config.optimization,
-                moduleIds: 'deterministic',
-                splitChunks: {
-                    chunks: 'all',
-                    cacheGroups: {
-                        default: false,
-                        vendors: false,
-                        commons: {
-                            name: 'commons',
-                            chunks: 'all',
-                            minChunks: 2,
-                            priority: 20,
-                        },
-                        lib: {
-                            test: /[\\/]node_modules[\\/]/,
-                            name(module) {
-                                const packageName = module.context.match(
-                                    /[\\/]node_modules[\\/](.*?)([\\/]|$)/
-                                )?.[1];
-                                return `npm.${packageName?.replace('@', '')}`;
-                            },
-                            priority: 10,
-                        },
-                    },
-                },
-            };
-        }
-
-        return config;
-    },
+    // Turbopack config (Next.js 16 default)
+    turbopack: {},
 
     // Performance budgets
     experimental: {
