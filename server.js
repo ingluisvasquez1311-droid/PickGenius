@@ -30,14 +30,15 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
-app.use(rateLimiter(100, 15 * 60 * 1000)); // Limite de 100 peticiones cada 15 min
+app.use(rateLimiter(1000, 15 * 60 * 1000)); // Limite de 1000 peticiones cada 15 min (Aumentado para dev)
 
 // CORS middleware
 app.use((req, res, next) => {
     const allowedOrigins = [
         'http://localhost:3000',
         'https://pickgeniuspro.vercel.app',
-        'https://pick-genius.vercel.app'
+        'https://pick-genius.vercel.app',
+        'https://unconsultative-lore-unlovely.ngrok-free.dev'
     ];
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin)) {
@@ -45,8 +46,14 @@ app.use((req, res, next) => {
     } else {
         res.header('Access-Control-Allow-Origin', '*');
     }
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, bypass-tunnel-reminder, ngrok-skip-browser-warning');
     res.header('Access-Control-Allow-Credentials', 'true');
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+
     next();
 });
 

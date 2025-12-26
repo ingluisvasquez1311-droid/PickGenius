@@ -45,7 +45,7 @@ class GeneralizedSofaScoreService {
                 'Cache-Control': 'no-cache'
             };
 
-            const url = `${this.baseUrl}${endpoint} `;
+            const url = `${this.baseUrl}${endpoint}`;
 
             let lastError;
             for (let i = 0; i <= retries; i++) {
@@ -80,8 +80,8 @@ class GeneralizedSofaScoreService {
         const sportName = Object.keys(this.sportsMap).find(key => this.sportsMap[key] === sportId) || sport;
 
         return this.makeRequest(
-            `/ sport / ${sportName} /events/live`,
-            `live_events_${sportId} `,
+            `/sport/${sportName}/events/live`,
+            `live_events_${sportId}`,
             30
         );
     }
@@ -95,8 +95,8 @@ class GeneralizedSofaScoreService {
         const sportName = Object.keys(this.sportsMap).find(key => this.sportsMap[key] === sportId) || sport;
 
         return this.makeRequest(
-            `/ sport / ${sportName} /events/${dateString} `,
-            `events_${sportId}_${dateString} `,
+            `/sport/${sportName}/events/${dateString}`,
+            `events_${sportId}_${dateString}`,
             300
         );
     }
@@ -111,8 +111,8 @@ class GeneralizedSofaScoreService {
         const date = dateString || new Date().toISOString().split('T')[0];
 
         const result = await this.makeRequest(
-            `/ sport / ${sportName} /scheduled-events/${date} `,
-            `scheduled_events_${sportId}_${date} `,
+            `/sport/${sportName}/scheduled-events/${date}`,
+            `scheduled_events_${sportId}_${date}`,
             300
         );
 

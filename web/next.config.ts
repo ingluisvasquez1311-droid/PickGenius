@@ -1,94 +1,39 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
-  // Relaxing checks for production build
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // No necesitamos configurar turbopack.root ya que estamos en /web
+  // y Next.js ya detectó correctamente esta carpeta
   experimental: {
+    clientTraceMetadata: ['metadata'], // Debe ser array, no boolean
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
-  },
-
-  // ✅ Configuración de variables de entorno públicas
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
-  },
-
-  // Existing Config
-  reactCompiler: true,
-  // outputFileTracingRoot: path.join(__dirname, "../"), // Comentado temporalmente si causa problemas en Vercel
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'api.sofascore.com',
-        pathname: '/api/v1/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'api.sofascore.app',
-        pathname: '/api/v1/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.sofascore.com',
-        pathname: '/api/v1/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.weserv.nl',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'upload.wikimedia.org',
-        pathname: '/**',
-      },
+    optimizePackageImports: [
+      '@heroicons/react',
+      'lucide-react'
     ],
   },
+  // Configurar rewrites para el proxy al backend
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     return [
       {
         source: '/api/:path*',
-        destination: `${apiUrl}/api/:path*`,
+        destination: 'http://localhost:3001/api/:path*',
+      },
+    ];
+  },
+  // Configurar headers CORS para desarrollo
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,DELETE,PATCH,POST,PUT' },
+          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
+        ],
       },
     ];
   },
 };
 
-const sentryConfig = withSentryConfig(nextConfig, {
-  // For all available options, see:
-  // https://github.com/getsentry/sentry-webpack-plugin#options
-
-  org: "Luis-Vasquez", // Nombre de org inferido, ajustar si es diferente
-  project: "pickgenius-web", // Nombre de proyecto inferido
-
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-
-  // For all available options, see:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-  // Upload a larger set of source maps for prettier stack traces (increases build time)
-  widenClientFileUpload: true,
-
-  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-  // This can increase your server load as well as your hosting bill.
-  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-  // side errors will fail.
-  tunnelRoute: "/monitoring",
-
-  // Hides source maps from generated client bundles
-  sourcemaps: {
-    deleteSourcemapsAfterUpload: true,
-  },
-
-
-});
-
-// Exporta la configuración sin Sentry en desarrollo para mejorar la velocidad
-export default process.env.NODE_ENV === 'development' ? nextConfig : sentryConfig;
+export default nextConfig;

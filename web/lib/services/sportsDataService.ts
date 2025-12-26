@@ -378,8 +378,8 @@ class SportsDataService {
             this.getScheduledEventsBySport(sport, tomorrow)
         ]);
 
-        const liveEvents = liveResult?.data || [];
-        const liveIds = new Set(liveEvents.map(e => e.id));
+        const liveEvents = liveResult?.events || liveResult?.data || [];
+        const liveIds = new Set(liveEvents.map((e: any) => e.id));
 
         // Filter out matches that are already LIVE from the scheduled lists
         const cleanToday = (Array.isArray(scheduledToday) ? scheduledToday : [])
