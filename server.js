@@ -38,7 +38,9 @@ app.use((req, res, next) => {
         'http://localhost:3000',
         'https://pickgeniuspro.vercel.app',
         'https://pick-genius.vercel.app',
-        'https://unconsultative-lore-unlovely.ngrok-free.dev'
+        'https://unconsultative-lore-unlovely.ngrok-free.dev',
+        'https://pickgeniuspro.com',
+        'https://www.pickgeniuspro.com'
     ];
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin)) {
