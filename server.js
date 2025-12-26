@@ -32,7 +32,7 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(rateLimiter(1000, 15 * 60 * 1000)); // Limite de 1000 peticiones cada 15 min (Aumentado para dev)
 
-// CORS middleware
+// Definitive CORS middleware
 app.use((req, res, next) => {
     const allowedOrigins = [
         'http://localhost:3000',
@@ -42,18 +42,23 @@ app.use((req, res, next) => {
         'https://pickgeniuspro.com',
         'https://www.pickgeniuspro.com'
     ];
+
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin)) {
         res.header('Access-Control-Allow-Origin', origin);
     } else {
-        res.header('Access-Control-Allow-Origin', '*');
+        // Fallback to the requested origin if it looks like one of ours or just use '*' for non-credentialed requests
+        res.header('Access-Control-Allow-Origin', origin || '*');
     }
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, bypass-tunnel-reminder, ngrok-skip-browser-warning');
+
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, bypass-tunnel-reminder, ngrok-skip-browser-warning, sentry-trace, baggage');
     res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Max-Age', '86400'); // 24 hours
 
     // Handle preflight requests
     if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
+        return res.sendStatus(204);
     }
 
     next();

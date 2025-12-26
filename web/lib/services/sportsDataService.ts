@@ -139,8 +139,7 @@ class SportsDataService {
      * Obtiene partidos de fútbol programados para una fecha
      */
     async getScheduledFootballMatches(date: string): Promise<SportsDataEvent[]> {
-        const data = await this.makeRequest<SportsDataResponse>(`/sport/football/events/${date}`);
-        return data?.events || [];
+        return this.getScheduledEventsBySport('football', date);
     }
 
     /**
@@ -190,8 +189,7 @@ class SportsDataService {
      * Obtiene partidos de baloncesto programados para una fecha
      */
     async getScheduledBasketballGames(date: string): Promise<SportsDataEvent[]> {
-        const data = await this.makeRequest<SportsDataResponse>(`/sport/basketball/events/${date}`);
-        return data?.events || [];
+        return this.getScheduledEventsBySport('basketball', date);
     }
 
     /**
