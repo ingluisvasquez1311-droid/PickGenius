@@ -88,24 +88,39 @@ export async function generatePrediction(request: PredictionRequest): Promise<Pr
  * Generate mock prediction (for development/fallback)
  */
 function generateMockPrediction(request: PredictionRequest): PredictionResult {
+    const sportNames: { [key: string]: string } = {
+        'football': 'fútbol',
+        'basketball': 'baloncesto',
+        'tennis': 'tenis',
+        'baseball': 'béisbol',
+        'hockey': 'hockey',
+        'american-football': 'fútbol americano'
+    };
+
     const isFootball = request.sport === 'football';
+    const sportDisplayName = sportNames[request.sport] || request.sport;
+    const homeName = request.homeTeam || 'Local';
+    const awayName = request.awayTeam || 'Visitante';
 
     // Sport-specific picks
     const picks = isFootball ? [
-        `${request.homeTeam} ML`,
-        `${request.awayTeam} ML`,
-        `${request.homeTeam} -1`,
-        `${request.awayTeam} +1`,
-        'Over 2.5 Goals',
-        'Under 2.5 Goals',
-        'Both Teams to Score'
-    ] : [
-        `${request.homeTeam} ML`,
-        `${request.awayTeam} ML`,
-        `${request.homeTeam} -5.5`,
-        `${request.awayTeam} +5.5`,
+        `${homeName} ML`,
+        `${awayName} ML`,
+        `${homeName} -1`,
+        `${awayName} +1`,
+        'Over 2.5 Goles',
+        'Under 2.5 Goles',
+        'Ambos Anotan (BTTS)'
+    ] : request.sport === 'basketball' ? [
+        `${homeName} ML`,
+        `${awayName} ML`,
+        `${homeName} -5.5`,
+        `${awayName} +5.5`,
         'Over 215.5',
         'Under 215.5'
+    ] : [
+        `${homeName} Ganador`,
+        `${awayName} Ganador`
     ];
 
     const randomPick = picks[Math.floor(Math.random() * picks.length)];
@@ -113,28 +128,67 @@ function generateMockPrediction(request: PredictionRequest): PredictionResult {
 
     const factors = isFootball ? [
         'Ventaja de local fuerte',
-        'Racha de 5 victorias consecutivas',
+        'Racha de victorias consecutivas',
         'Defensa sólida en casa',
         'Lesiones clave en el equipo contrario',
         'Dominio en enfrentamientos directos recientes'
     ] : [
-        'Ventaja de local fuerte',
-        'Racha de 5 victorias consecutivas',
-        'Defensa top 5 de la liga',
-        'Lesiones clave en el equipo contrario',
-        'Historial favorable en enfrentamientos directos'
+        'Eficiencia ofensiva superior',
+        'Dominio en la pintura/rebotes',
+        'Racha positiva de tiro exterior',
+        'Ventaja física en emparejamientos clave',
+        'Historial favorable en la liga'
     ];
 
     const randomFactors = factors
         .sort(() => Math.random() - 0.5)
         .slice(0, 3);
 
+    // Dynamic Predictions object based on sport
+    const predictions: any = {};
+
+    if (isFootball) {
+        predictions.totalGoals = '2.5';
+        predictions.overUnder = { line: 2.5, pick: Math.random() > 0.5 ? 'Más de' : 'Menos de', confidence: 'Alta' };
+        predictions.corners = { total: 9.5, pick: 'Más de', line: 9.5 };
+        predictions.cards = { yellowCards: 4, redCards: 0, pick: 'Menos de', line: 4.5 };
+        predictions.bothTeamsScore = { pick: 'Sí', confidence: 'Media' };
+    } else if (request.sport === 'basketball') {
+        predictions.totalPoints = '218.5';
+        predictions.overUnder = { line: 218.5, pick: 'Más de', confidence: 'Media' };
+        predictions.playerProps = {
+            threes: { player: "Estrella Local", line: 2.5, pick: "Más de" },
+            pra: { player: "Estrella Visitante", line: 30.5, pick: "Más de" }
+        };
+        predictions.quarterMarkets = {
+            raceTo20: { pick: homeName, confidence: "Media" }
+        };
+    } else if (request.sport === 'tennis') {
+        predictions.finalScore = '2-0';
+        predictions.totalGames = '21.5';
+        predictions.overUnder = { line: 21.5, pick: 'Menos de', confidence: 'Alta' };
+    } else if (request.sport === 'baseball') {
+        predictions.totalRuns = '8.5';
+        predictions.overUnder = { line: 8.5, pick: 'Más de', confidence: 'Media' };
+        predictions.runLine = { favorite: homeName, line: -1.5, recommendation: 'Cubrir' };
+    } else if (request.sport === 'hockey') {
+        predictions.totalGoals = '5.5';
+        predictions.overUnder = { line: 5.5, pick: 'Más de', confidence: 'Media' };
+        predictions.puckLine = { favorite: homeName, line: -1.5, recommendation: 'Cubrir' };
+    } else if (request.sport === 'american-football') {
+        predictions.totalPoints = '45.5';
+        predictions.overUnder = { line: 45.5, pick: 'Más de', confidence: 'Alta' };
+        predictions.touchdowns = { total: 4.5, pick: 'Más de', line: 4.5 };
+        predictions.yards = { total: 650, pick: 'Más de', line: 640.5 };
+    }
+
     return {
         winner: randomPick,
         confidence,
-        reasoning: `Basado en el análisis de datos históricos y tendencias recientes de ${isFootball ? 'fútbol' : 'baloncesto'}, ${randomPick} presenta una oportunidad sólida. Los factores clave incluyen el rendimiento reciente del equipo y las estadísticas de enfrentamientos directos.`,
-        bettingTip: `🧙‍♂️ ${isFootball ? 'Pronóstico de fútbol' : 'Pronóstico NBA'}: ${randomPick} con confianza ${confidence}%`,
-        keyFactors: randomFactors
+        reasoning: `Basado en el análisis de datos históricos y tendencias recientes de ${sportDisplayName}, ${randomPick} presenta una oportunidad sólida. Los factores clave incluyen el rendimiento reciente del equipo y las estadísticas de enfrentamientos directos.`,
+        bettingTip: `🧙‍♂️ Pronóstico de ${sportDisplayName}: ${randomPick} con confianza ${confidence}%`,
+        keyFactors: randomFactors,
+        predictions
     };
 }
 

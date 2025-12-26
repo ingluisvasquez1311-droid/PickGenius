@@ -13,9 +13,11 @@ import { API_URL } from '@/lib/api';
 interface AIPredictionCardProps {
     eventId: string | number;
     sport: string;
+    homeTeam?: string;
+    awayTeam?: string;
 }
 
-export default function AIPredictionCard({ eventId, sport }: AIPredictionCardProps) {
+export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }: AIPredictionCardProps) {
     const { user, notify, saveToHistory } = useAuth();
     const { addToSlip } = useBettingSlip();
     const [prediction, setPrediction] = useState<any>(null);
@@ -51,7 +53,9 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
 
             const result = await generatePrediction({
                 gameId: eventId.toString(),
-                sport: sport as any
+                sport: sport as any,
+                homeTeam,
+                awayTeam
             });
 
             // Limpiar timeouts para que no sobrescriban el éxito
@@ -347,11 +351,16 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-gradient-to-br from-green-900/40 to-green-800/20 p-3 rounded-xl border border-green-500/20 group hover:border-green-500/40 transition-all">
                                         <p className="text-green-300 text-[10px] uppercase font-black mb-1">
-                                            {(sport === 'basketball' || sport.includes('nfl') || sport.includes('american')) ? 'Puntos Proy.' : 'Goles Proy.'}
+                                            {sport === 'basketball' || sport.includes('nfl') || sport.includes('american') ? 'Puntos Totales' :
+                                                sport === 'tennis' ? 'Juegos Totales' :
+                                                    sport === 'baseball' ? 'Carreras Totales' : 'Goles Proy.'}
                                         </p>
                                         <div className="flex items-end justify-between">
                                             <p className="text-white font-black text-2xl italic">
-                                                {sport === 'basketball' ? prediction.predictions.totalPoints : (prediction.predictions.totalPoints || prediction.predictions.totalGoals)}
+                                                {sport === 'basketball' || sport === 'american-football' ? (prediction.predictions.totalPoints || prediction.predictions.totalPoints) :
+                                                    sport === 'tennis' ? (prediction.predictions.totalGames || prediction.predictions.totalGames) :
+                                                        sport === 'baseball' ? (prediction.predictions.totalRuns || prediction.predictions.totalRuns) :
+                                                            (prediction.predictions.totalGoals || prediction.predictions.totalGoals || '-')}
                                                 {(prediction.predictions.overUnder?.pick || prediction.predictions.pick) && (
                                                     <span className="text-[10px] ml-1 opacity-50 font-black italic">({prediction.predictions.overUnder?.pick || prediction.predictions.pick})</span>
                                                 )}
@@ -366,7 +375,9 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                     {sport !== 'basketball' && (prediction.predictions.shots || prediction.predictions.yards) && (
                                         <div className="bg-red-900/30 p-3 rounded-xl border border-red-500/20 group hover:border-red-500/40 transition-all">
                                             <p className="text-red-300 text-[10px] uppercase font-black mb-1">
-                                                {(sport.includes('nfl') || sport.includes('american')) ? 'Yardas Totales' : 'Tiros al Arco'}
+                                                {sport.includes('nfl') || sport.includes('american') ? 'Yardas Totales' :
+                                                    sport === 'tennis' ? 'Aces Proyectados' :
+                                                        sport === 'baseball' ? 'Hits Proyectados' : 'Tiros al Arco'}
                                             </p>
                                             <div className="flex items-end justify-between">
                                                 <p className="text-white font-black text-2xl italic">
@@ -487,13 +498,25 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                             </p>
                                                         </div>
                                                     )}
-                                                    {prediction.predictions.touchdowns && (
-                                                        <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-500/20">
-                                                            <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🏈 TD Totales</p>
-                                                            <p className="text-white font-bold text-lg">
-                                                                {prediction.predictions.touchdowns.total || (prediction.predictions.touchdowns.home + prediction.predictions.touchdowns.away)}
-                                                                {prediction.predictions.touchdowns.pick && <span className="text-[10px] ml-1 opacity-50 italic">({prediction.predictions.touchdowns.pick})</span>}
-                                                            </p>
+                                                    {/* TENNIS SPECIFIC (SETS) */}
+                                                    {sport === 'tennis' && prediction.predictions.sets && (
+                                                        <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-400/20">
+                                                            <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🎾 Marcador Sets</p>
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-white font-black text-lg">{prediction.predictions.sets.home} - {prediction.predictions.sets.away}</span>
+                                                                <span className="text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-black">SETS</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* BASEBALL SPECIFIC (FIRST 5) */}
+                                                    {sport === 'baseball' && prediction.predictions.first5 && (
+                                                        <div className="bg-orange-900/30 p-3 rounded-lg border border-orange-400/20">
+                                                            <p className="text-orange-300 text-[10px] uppercase font-bold mb-1">⚾ Primeras 5 Entradas</p>
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-white font-black text-lg">{prediction.predictions.first5.winner || prediction.predictions.first5.pick}</span>
+                                                                <span className="text-[8px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-black">F5</span>
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -604,7 +627,7 @@ export default function AIPredictionCard({ eventId, sport }: AIPredictionCardPro
                                                 </div>
                                             )}
 
-                                            {/* BASKETBALL ADVANCED MARKETS (NBA ELITE) */}
+                                            {/* BASKETBALL ADVANCED MARKETS (ELITE) */}
                                             {sport === 'basketball' && (
                                                 <div className="bg-gradient-to-br from-orange-900/20 to-amber-900/20 p-4 rounded-xl border border-orange-500/20 space-y-3 mt-3">
                                                     <p className="text-orange-400 text-[10px] uppercase font-black mb-3 flex items-center gap-2">

@@ -1,77 +1,55 @@
 import { useQuery } from '@tanstack/react-query';
-
-interface MatchDetails {
-    id: number;
-    homeTeam: any;
-    awayTeam: any;
-    homeScore: any;
-    awayScore: any;
-    status: any;
-    tournament: any;
-    startTimestamp: number;
-}
+import { sportsDataService } from '@/lib/services/sportsDataService';
 
 // Fetch basic match details
-async function fetchMatchDetails(sport: string, eventId: string) {
-    const res = await fetch(`/api/sports/${sport}/match/${eventId}`);
-    if (!res.ok) {
+async function fetchMatchDetails(eventId: string) {
+    // sportsDataService handles the API call and proxying
+    const data = await sportsDataService.getEventById(eventId);
+    if (!data) {
         throw new Error('Failed to fetch match details');
     }
-    const data = await res.json();
-    if (!data.success) {
-        throw new Error(data.error || 'Failed to fetch match details');
-    }
-    return data.data;
+    return data;
 }
 
 // Fetch best players / top performers
-async function fetchBestPlayers(sport: string, eventId: string) {
-    const res = await fetch(`/api/sports/${sport}/match/${eventId}/best-player`);
-    if (!res.ok) {
-        throw new Error('Failed to fetch best players');
-    }
-    const data = await res.json();
-    if (!data.success) {
-        throw new Error(data.error || 'Failed to fetch best players');
-    }
-    return data.data;
+async function fetchBestPlayers(eventId: string) {
+    const data = await sportsDataService.getMatchBestPlayers(Number(eventId));
+    return data;
 }
 
 export function useMatchDetails(sport: string, eventId: string) {
     return useQuery({
         queryKey: ['match', sport, eventId],
-        queryFn: () => fetchMatchDetails(sport, eventId),
-        enabled: !!sport && !!eventId,
+        queryFn: () => fetchMatchDetails(eventId),
+        enabled: !!eventId,
         // Refetch every 30 seconds for live games
         refetchInterval: (query) => {
             const status = query.state.data?.status?.type;
             return status === 'inprogress' ? 30000 : false;
         },
-        staleTime: 10000, // Consider data fresh for 10 seconds
+        staleTime: 10000,
     });
 }
 
 export function useMatchBestPlayers(sport: string, eventId: string) {
     return useQuery({
         queryKey: ['match-players', sport, eventId],
-        queryFn: () => fetchBestPlayers(sport, eventId),
-        enabled: !!sport && !!eventId,
-        staleTime: 60000, // Players stats update less frequently
+        queryFn: () => fetchBestPlayers(eventId),
+        enabled: !!eventId,
+        staleTime: 60000,
     });
 }
 
-async function fetchMatchStatistics(sport: string, eventId: string) {
-    const res = await fetch(`/api/sports/${sport}/match/${eventId}/statistics`);
-    if (!res.ok) throw new Error('Failed to fetch stats');
-    const data = await res.json();
-    return data.data;
+async function fetchMatchStatistics(eventId: string) {
+    const data = await sportsDataService.getMatchStatistics(Number(eventId));
+    return data;
 }
 
 export function useMatchStatistics(sport: string, eventId: string) {
     return useQuery({
         queryKey: ['match-stats', sport, eventId],
-        queryFn: () => fetchMatchStatistics(sport, eventId),
-        enabled: !!sport && !!eventId,
+        queryFn: () => fetchMatchStatistics(eventId),
+        enabled: !!eventId,
         refetchInterval: (query) => {
             const status = query.state.data?.status?.type;
             return status === 'inprogress' ? 30000 : false;
@@ -80,20 +58,22 @@ export function useMatchStatistics(sport: string, eventId: string) {
     });
 }
 
-async function fetchMatchMomentum(sport: string, eventId: string) {
-    const res = await fetch(`/api/sports/${sport}/match/${eventId}/attack-momentum`);
-    if (!res.ok) throw new Error('Failed to fetch momentum');
-    const data = await res.json();
-    return data.data;
+async function fetchMatchMomentum(eventId: string) {
+    const data = await sportsDataService.getMatchMomentum(Number(eventId));
+    // Check if valid momentum data exists
+    if (!data || !data.graph) {
+        // Return empty/null safely rather than throwing to avoid UI crashes
+        return null;
+    }
+    return data;
 }
 
 export function useMatchMomentum(sport: string, eventId: string) {
     return useQuery({
         queryKey: ['match-momentum', sport, eventId],
-        queryFn: () => fetchMatchMomentum(sport, eventId),
-        enabled: !!sport && !!eventId,
+        queryFn: () => fetchMatchMomentum(eventId),
+        enabled: !!eventId,
         refetchInterval: (query) => {
-            // High frequency for momentum
             return 30000;
         },
         staleTime: 15000,

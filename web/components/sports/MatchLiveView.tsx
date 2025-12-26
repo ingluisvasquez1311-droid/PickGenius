@@ -257,6 +257,8 @@ export default function MatchLiveView({ sport, eventId }: MatchLiveViewProps) {
                             <AIPredictionCard
                                 sport={sport}
                                 eventId={eventId}
+                                homeTeam={game?.homeTeam?.name}
+                                awayTeam={game?.awayTeam?.name}
                             />
                         </ErrorBoundary>
 
