@@ -1,5 +1,6 @@
 import { memoryCache } from './memoryCache';
 import { sportsDataService } from './sportsDataService';
+import { fetchAPI } from '../api';
 
 interface ApiResponse<T = any> {
     success: boolean;
@@ -10,7 +11,7 @@ interface ApiResponse<T = any> {
 
 class NHLDataService {
     private baseUrl: string = typeof window === 'undefined'
-        ? 'https://www.sofascore.com/api/v1'
+        ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/proxy/sportsdata`
         : '/api/proxy/sportsdata';
     private headers: Record<string, string> = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -21,10 +22,8 @@ class NHLDataService {
             const cachedData = memoryCache.get(cacheKey);
             if (cachedData) return { success: true, data: cachedData, fromCache: true };
 
-            const response = await fetch(`${this.baseUrl}${endpoint}`, { headers: this.headers });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const data = await response.json();
+            const responseData = await fetchAPI(`${this.baseUrl}${endpoint}`, { headers: this.headers });
+            const data = responseData;
             memoryCache.set(cacheKey, data, ttlSeconds);
             return { success: true, data, fromCache: false };
         } catch (error: any) {

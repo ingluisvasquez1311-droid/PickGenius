@@ -12,20 +12,18 @@ export async function GET(
         const { path: pathArray } = await params;
         const path = pathArray.join('/');
         const query = request.nextUrl.search;
-        const targetUrl = `${BASE_URL}/${path}${query}`;
 
-        console.log(`🔌 [Proxy] Direct fetch: ${path}`);
+        // 🚀 PUERTA TRASERA: Redirigimos al Bridge para usar tu IP Real
+        const BRIDGE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const targetUrl = `${BRIDGE_URL}/api/proxy/sportsdata/${path}${query}`;
 
-        // Direct fetch - works perfectly from local PC
+        console.log(`🔌 [Proxy Bridge] Routing through Home-IP: ${targetUrl}`);
+
+        // Fetch through the bridge (Your home PC)
         const response = await fetch(targetUrl, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept': 'application/json',
-                'Origin': 'https://www.sofascore.com',
-                'Referer': 'https://www.sofascore.com/'
-            },
-            next: {
-                revalidate: path.includes('live') ? 30 : 300
+                'ngrok-skip-browser-warning': 'true',
+                'bypass-tunnel-reminder': 'true'
             }
         });
 

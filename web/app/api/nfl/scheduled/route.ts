@@ -1,59 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sportsDataService } from '@/lib/services/sportsDataService';
-import { dateParamSchema } from '@/lib/schemas/paramSchema';
+import { firebaseReadService } from '@/lib/services/firebaseReadService';
+import { batchSyncService } from '@/lib/services/batchSyncService';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const dateRaw = searchParams.get('date') || new Date().toISOString().split('T')[0];
+    const { searchParams } = new URL(request.url);
+    const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
 
-        const dateValidation = dateParamSchema.safeParse(dateRaw);
-        if (!dateValidation.success) {
-            return NextResponse.json({ success: false, message: 'Formato de fecha inválido' }, { status: 400 });
+    try {
+        console.log(`⚡ [API] Fetching SCHEDULED NFL games for ${date} (Firebase-First)...`);
+
+        let events = await firebaseReadService.getScheduledGames('american-football', date);
+
+        if (events.length === 0) {
+            console.warn(`⚠️ [API] No scheduled NFL games for ${date}. Triggering sync...`);
+            await batchSyncService.syncSport('american-football');
+            events = await firebaseReadService.getScheduledGames('american-football', date);
         }
 
-        const date = dateValidation.data;
-
-        const events = await sportsDataService.getScheduledEventsBySport('nfl', date);
-
-        const transformedData = events.map((game: any) => ({
-            id: game.id,
-            tournament: {
-                name: game.tournament?.name || 'NFL',
+        tournament: {
+            name: game.tournament?.name || 'NFL',
                 uniqueTournament: {
-                    name: 'NFL'
-                },
-                category: {
-                    name: 'USA',
+                name: 'NFL'
+            },
+            category: {
+                name: 'USA',
                     flag: 'usa',
                 }
-            },
-            homeTeam: {
-                id: game.homeTeam?.id,
+        },
+        homeTeam: {
+            id: game.homeTeam?.id,
                 name: game.homeTeam?.name || 'Home Team',
-                logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
+                    logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
             },
-            awayTeam: {
-                id: game.awayTeam?.id,
+        awayTeam: {
+            id: game.awayTeam?.id,
                 name: game.awayTeam?.name || 'Away Team',
-                logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
+                    logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
             },
-            status: {
-                type: 'notstarted',
+        status: {
+            type: 'notstarted',
                 description: new Date(game.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                code: game.status?.code
-            },
-            startTimestamp: game.startTimestamp
-        }));
+                    code: game.status?.code
+        },
+        startTimestamp: game.startTimestamp
+    }));
 
-        return NextResponse.json({
-            success: true,
-            data: transformedData,
-            count: transformedData.length
-        });
-    } catch (error: any) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
+    return NextResponse.json({
+        success: true,
+        data: transformedData,
+        count: transformedData.length
+    });
+} catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+}
 }

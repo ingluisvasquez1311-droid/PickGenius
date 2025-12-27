@@ -327,6 +327,12 @@ export class CircuitBreaker {
         }
     }
 
+    reset() {
+        this.failures = 0;
+        this.state = 'CLOSED';
+        this.nextAttempt = 0;
+    }
+
     getState() { return this.state; }
 }
 

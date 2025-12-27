@@ -9,7 +9,8 @@ import {
     serverTimestamp,
     increment
 } from 'firebase/firestore';
-import { logLimitAlert } from './adminService';
+// Eliminamos la importación del adminService para evitar crasheos en el navegador
+// import { logLimitAlert } from './adminService';
 
 const ADMIN_EMAILS = [
     'pickgenius@gmail.com',
@@ -343,7 +344,9 @@ export async function canMakePrediction(uid: string): Promise<{ canPredict: bool
     const remaining = profile.predictionsLimit - profile.predictionsUsed;
 
     if (remaining <= 0) {
-        logLimitAlert(uid, profile.email).catch(() => { });
+        // Log removed to prevent client-side 'net' module errors
+        console.warn(`[Limit] Predictions limit reached for ${uid}`);
+        // logLimitAlert(uid, profile.email).catch(() => { });
     }
 
     return {

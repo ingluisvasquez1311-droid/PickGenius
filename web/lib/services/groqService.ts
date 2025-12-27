@@ -193,6 +193,7 @@ class GroqService {
 
     reset(): void {
         this.rotator.reset();
+        this.breaker.reset();
     }
 }
 

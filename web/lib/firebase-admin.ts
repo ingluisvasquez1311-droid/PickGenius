@@ -1,25 +1,33 @@
 import admin from 'firebase-admin';
 
 if (!admin.apps.length) {
-    try {
-        // Try Base64-encoded service account JSON first (recommended for Vercel)
-        const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+    let initialized = false;
 
-        if (serviceAccountBase64) {
-            const serviceAccount = JSON.parse(
-                Buffer.from(serviceAccountBase64, 'base64').toString('utf-8')
-            );
+    // 1. Try Base64-encoded service account (Priority)
+    const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+    if (serviceAccountBase64) {
+        try {
+            const buffer = Buffer.from(serviceAccountBase64, 'base64');
+            const serviceAccount = JSON.parse(buffer.toString('utf-8'));
+
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount),
             });
-            console.log('[Firebase Admin] Initialized successfully with service account JSON');
-        } else {
-            // Fallback to individual env vars
-            const projectId = process.env.FIREBASE_PROJECT_ID;
-            const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-            const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+            initialized = true;
+            console.log('✅ [Firebase Admin] Initialized with Base64 Service Account');
+        } catch (error) {
+            console.warn('⚠️ [Firebase Admin] Bad Base64 Key. Falling back to individual vars...', error);
+        }
+    }
 
-            if (projectId && clientEmail && privateKey) {
+    // 2. Fallback to individual vars if not yet initialized
+    if (!initialized) {
+        const projectId = process.env.FIREBASE_PROJECT_ID;
+        const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+        const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+        if (projectId && clientEmail && privateKey) {
+            try {
                 admin.initializeApp({
                     credential: admin.credential.cert({
                         projectId,
@@ -27,15 +35,19 @@ if (!admin.apps.length) {
                         privateKey,
                     }),
                 });
-                console.log('[Firebase Admin] Initialized successfully with individual env vars');
-            } else {
-                console.warn('[Firebase Admin] Missing environment variables. Skipping initialization (expected during build).');
+                console.log('✅ [Firebase Admin] Initialized with Individual Env Vars');
+            } catch (error) {
+                console.error('❌ [Firebase Admin] Failed to initialize with Env Vars:', error);
+            }
+        } else {
+            // Only warn if we didn't try base64 either, or both failed
+            if (!serviceAccountBase64) {
+                console.warn('❌ [Firebase Admin] Missing ALL credentials. Admin SDK inactive.');
             }
         }
-    } catch (error) {
-        console.error('[Firebase Admin] Initialization error:', error);
     }
 }
+
 
 // Lazy-initialized Firestore export
 export const adminDb = admin.apps.length ? admin.firestore() : null as unknown as admin.firestore.Firestore;

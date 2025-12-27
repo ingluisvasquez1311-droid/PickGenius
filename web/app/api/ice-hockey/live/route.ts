@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import FirebaseReadService from '@/lib/FirebaseReadService';
 import { initializeFirebaseAdmin } from '@/lib/firebaseAdmin';
 
-// Ensure init runs
 try {
     initializeFirebaseAdmin();
 } catch (error) {
@@ -14,7 +13,7 @@ export const revalidate = 0;
 
 export async function GET() {
     const startTime = Date.now();
-    const SPORT_ID = 'football';
+    const SPORT_ID = 'ice-hockey';
     const TYPE = 'live';
 
     try {
@@ -23,7 +22,6 @@ export async function GET() {
 
         if (!hasRecentData) {
             console.warn(`⚠️ No recent data for ${SPORT_ID} ${TYPE}, triggering background sync`);
-            // Trigger background sync on the BACKEND (Port 3001)
             fetch(`http://localhost:3001/api/admin/sync/${SPORT_ID}`, { method: 'POST' })
                 .catch(err => console.error('Sync trigger failed:', err));
         }

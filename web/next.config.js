@@ -69,8 +69,8 @@ const nextConfig = {
 
     // Performance budgets
     experimental: {
-        optimizeCss: true,
-        optimizePackageImports: ['lucide-react', 'framer-motion'],
+        optimizeCss: false, // Disabled to fix 'critters' error
+        optimizePackageImports: ['lucide-react', 'date-fns', 'recharts'],
     },
 };
 

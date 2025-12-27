@@ -1,56 +1,46 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { sportsDataService } from '@/lib/services/sportsDataService';
-import { dateParamSchema } from '@/lib/schemas/paramSchema';
+import { NextResponse } from 'next/server';
+import FirebaseReadService from '@/lib/FirebaseReadService';
+import { initializeFirebaseAdmin } from '@/lib/firebaseAdmin';
+
+try {
+    initializeFirebaseAdmin();
+} catch (error) {
+    console.error('❌ Error inicializando Firebase:', error);
+}
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export async function GET(request: NextRequest) {
+export async function GET() {
+    const startTime = Date.now();
+    const SPORT_ID = 'tennis';
+    const TYPE = 'scheduled';
+
     try {
-        const { searchParams } = new URL(request.url);
-        const dateRaw = searchParams.get('date') || new Date().toISOString().split('T')[0];
+        const firebaseService = new FirebaseReadService();
+        const hasRecentData = await firebaseService.hasRecentData(SPORT_ID, TYPE);
 
-        const dateValidation = dateParamSchema.safeParse(dateRaw);
-        if (!dateValidation.success) {
-            return NextResponse.json({ success: false, message: 'Formato de fecha inválido' }, { status: 400 });
+        if (!hasRecentData) {
+            console.warn(`⚠️ No recent data for ${SPORT_ID} ${TYPE}, triggering background sync`);
+            fetch(`http://localhost:3001/api/admin/sync/${SPORT_ID}`, { method: 'POST' })
+                .catch(err => console.error('Sync trigger failed:', err));
         }
 
-        const date = dateValidation.data;
+        const games = await firebaseService.getScheduledGames(SPORT_ID);
+        const duration = Date.now() - startTime;
 
-        const events = await sportsDataService.getScheduledEventsBySport('tennis', date);
-
-        const transformedData = events.map((game: any) => ({
-            id: game.id,
-            tournament: {
-                name: game.tournament?.name || 'Unknown Tournament',
-                category: {
-                    name: game.tournament?.category?.name || 'International',
-                    flag: game.tournament?.category?.flag || '',
-                }
-            },
-            homeTeam: {
-                id: game.homeTeam?.id,
-                name: game.homeTeam?.name || 'Player 1',
-                logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
-            },
-            awayTeam: {
-                id: game.awayTeam?.id,
-                name: game.awayTeam?.name || 'Player 2',
-                logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
-            },
-            status: {
-                type: 'notstarted',
-                description: new Date(game.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                code: game.status?.code
-            },
-            startTimestamp: game.startTimestamp
-        }));
-
-        return NextResponse.json({
-            success: true,
-            data: transformedData,
-            count: transformedData.length
+        return NextResponse.json(games, {
+            headers: {
+                'X-Response-Time': `${duration}ms`,
+                'X-Data-Source': 'firebase'
+            }
         });
-    } catch (error: any) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+
+    } catch (error) {
+        console.error(`❌ Error in ${SPORT_ID} ${TYPE} route:`, error);
+        return NextResponse.json(
+            { error: 'Failed to fetch games' },
+            { status: 500 }
+        );
     }
 }

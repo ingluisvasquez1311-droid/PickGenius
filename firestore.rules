@@ -1,56 +1,38 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper functions
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-    
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-    
-    // Users collection - users can only read/write their own data
+    // 1. USUARIOS: Solo el dueño puede leer/escribir su perfil
     match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
-      allow delete: if false; // Prevent user deletion via client
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
-    // NBA data collections - read-only for all authenticated users
-    match /nba_regular_season_box_scores_2024_25/{document} {
-      allow read: if isAuthenticated();
-      allow write: if false; // Only server can write
+
+    // 2. ROBOT DE SINCRONIZACIÓN (TODOS LOS DEPORTES: Fútbol, NBA, NFL, Tenis, etc.)
+    // La colección 'games' centraliza todos los deportes usando prefijos (ej: football_123)
+    match /games/{gameId} {
+      allow read: if true; // Publico para que los usuarios vean los pronósticos
+      allow write: if false; // Solo el Servidor/Robot (Admin SDK) puede escribir
     }
-    
-    match /nba_regular_season_box_scores_2010_2024_part_3/{document} {
-      allow read: if isAuthenticated();
-      allow write: if false; // Only server can write
+
+    // 3. DATOS TÉCNICOS (Cuotas de Betplay y Estadísticas H2H)
+    match /marketLines/{lineId} { allow read: if true; allow write: if false; }
+    match /matchStats/{statsId} { allow read: if true; allow write: if false; }
+
+    // 4. HISTORIAL DE PREDICCIONES (Privado por usuario)
+    match /predictions/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
-    // Predictions history - users can only access their own predictions
-    match /predictions/{userId}/history/{predictionId} {
-      allow read: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if false; // Predictions are immutable once created
-      allow delete: if isOwner(userId);
-    }
-    
-    // Football data collections (if you add them later)
-    match /football_matches/{document} {
-      allow read: if isAuthenticated();
-      allow write: if false;
-    }
-    
-    // Admin-only collections
-    match /admin/{document=**} {
-      allow read, write: if false; // Only server-side access
-    }
-    
-    // Default deny all other collections
+
+    // 5. COLECCIONES DE ESTADÍSTICAS NBA (Lectura pública, escritura denegada)
+    match /nba_regular_season_box_scores_2024_25/{doc} { allow read: if true; allow write: if false; }
+    match /nba_player_props/{doc} { allow read: if true; allow write: if false; }
+    match /universal_player_props/{doc} { allow read: if true; allow write: if false; }
+
+    // 6. SEGURIDAD ADICIONAL: Bloqueo total de logs y sistema
+    match /admin_api_logs/{log} { allow read, write: if false; }
+    match /_health_check/{check} { allow read, write: if false; }
+
+    // Denegar cualquier otra cosa por defecto
     match /{document=**} {
       allow read, write: if false;
     }

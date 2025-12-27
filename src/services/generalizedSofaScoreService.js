@@ -39,9 +39,16 @@ class GeneralizedSofaScoreService {
 
             const headers = {
                 'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
                 'User-Agent': this.getRandomUserAgent(),
                 'Referer': 'https://www.sofascore.com/',
                 'Origin': 'https://www.sofascore.com',
+                'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="121", "Google Chrome";v="121"',
+                'Sec-Ch-Ua-Mobile': '?0',
+                'Sec-Ch-Ua-Platform': '"Windows"',
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'same-site',
                 'Cache-Control': 'no-cache'
             };
 
@@ -63,7 +70,12 @@ class GeneralizedSofaScoreService {
             }
             throw lastError;
         } catch (error) {
-            console.error(`❌ SofaScore General API Error(${endpoint}): ${error.message} `);
+            if (error.response?.status === 404) {
+                // Silently handle 404s as they are common for niche markets
+                // console.warn(`ℹ️ [SofaScore] Data not available for ${endpoint}`);
+            } else {
+                console.error(`❌ SofaScore General API Error(${endpoint}): ${error.message} `);
+            }
             return { success: false, error: error.message };
         }
     }

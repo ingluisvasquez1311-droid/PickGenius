@@ -1,9 +1,12 @@
 // Determinar la URL base dependiendo del entorno (Servidor vs Cliente)
 // Si estamos en el servidor, usamos la API directa.
 // Si estamos en el cliente, usamos nuestro Proxy para evitar CORS.
+// La URL del Bridge (Tu IP casera) es obligatoria para NO ser bloqueados
+const BRIDGE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 const BASE_URL = typeof window === 'undefined'
-    ? 'https://api.sofascore.com/api/v1'
-    : '/api/proxy/sportsdata';
+    ? `${BRIDGE_URL}/api/proxy/sportsdata` // En el servidor, USAMOS EL PUENTE (Tu IP) siempre
+    : '/api/proxy/sportsdata'; // En el cliente, usamos el proxy local del navegador
 
 import { logApiCall } from '@/lib/adminService';
 import axios from 'axios';
@@ -102,11 +105,19 @@ export interface SportsDataResponse {
  */
 class SportsDataService {
     private headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://www.sofascore.com/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
         'Accept': 'application/json, text/plain, */*',
-        'Bypass-Tunnel-Reminder': 'true', // Evita la pantalla de bloqueo de LocalTunnel
-        'ngrok-skip-browser-warning': 'true' // Evita la pantalla de advertencia de ngrok
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+        'Referer': 'https://www.sofascore.com/',
+        'Origin': 'https://www.sofascore.com',
+        'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="121", "Google Chrome";v="121"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-site',
+        'Bypass-Tunnel-Reminder': 'true',
+        'ngrok-skip-browser-warning': 'true'
     };
 
     /**
@@ -291,7 +302,19 @@ class SportsDataService {
      * Obtiene cuotas reales de mercado (Bet365, etc.) para el partido
      */
     async getMatchOdds(eventId: number, marketId: number = 1): Promise<any> {
-        return await this.makeRequest(`/event/${eventId}/odds/${marketId}/all`);
+        try {
+            const data = await this.makeRequest(`/event/${eventId}/odds/${marketId}/all`);
+            // The makeRequest already handles errors and returns null for failed requests.
+            // We just need to check if the data is null or empty, which might indicate a 404 or no data.
+            if (!data || Object.keys(data).length === 0) {
+                console.warn(`[SportsData] Odds not available (or empty response) for event ${eventId}, market ${marketId}`);
+                return null;
+            }
+            return data;
+        } catch (error) {
+            console.error(`[SportsData] Error fetching odds for ${eventId}:`, error);
+            return null;
+        }
     }
 
     /**

@@ -1,36 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { nbaSyncService } from '@/lib/services/nbaSyncService';
-import { footballSyncService } from '@/lib/services/footballSyncService';
+import { batchSyncService } from '@/lib/services/batchSyncService';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300; // 5 minutes
+export const maxDuration = 300; // 5 minutes (Serverless limit)
 
 export async function GET(request: NextRequest) {
     try {
-        // Verify Cron Secret
+        // Verify Cron Secret (Allow dev mode bypass for manual testing)
         const authHeader = request.headers.get('authorization');
-        if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        const isDev = process.env.NODE_ENV === 'development';
+        const isValidSecret = process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`;
+
+        if (!isDev && !isValidSecret) {
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
-        console.log('⏰ [Cron Task] Starting Sports synchronization...');
+        console.log('🤖 [Cron Robot] Starting FULL BATCH synchronization...');
 
-        // Run both in parallel for efficiency
-        const [nbaResult, footballResult] = await Promise.all([
-            nbaSyncService.syncCurrentSeason(),
-            footballSyncService.syncDailyFixtures()
-        ]);
+        // Execute the "Robot" -> Sync All Sports (Fetch + Enrich + AI + Store)
+        const results = await batchSyncService.syncAll();
 
         return NextResponse.json({
             success: true,
             timestamp: new Date().toISOString(),
-            nba: nbaResult,
-            football: footballResult
+            results: results
         });
 
     } catch (error: any) {
-        console.error('❌ [Cron Error]:', error);
+        console.error('❌ [Cron Robot Error]:', error);
         return NextResponse.json({
+            success: false,
             error: error.message
         }, { status: 500 });
     }

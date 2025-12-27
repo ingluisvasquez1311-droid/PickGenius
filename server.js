@@ -3,7 +3,16 @@
  * Sincronización automática de NBA y Football con cache inteligente
  */
 
-require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
+
+// Priorizar .env.local para tener las 30 llaves de Groq
+if (fs.existsSync('.env.local')) {
+    dotenv.config({ path: '.env.local' });
+} else {
+    dotenv.config();
+}
 const express = require('express');
 const footballService = require('./src/services/football/footballService');
 const footballApiService = require('./src/services/football/footballApiService');
