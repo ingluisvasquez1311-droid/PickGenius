@@ -429,7 +429,7 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
                                         </p>
                                         <div className="flex items-end justify-between">
                                             <p className="text-white font-black text-2xl italic">
-                                                {sport === 'basketball' || sport === 'american-football' ? (prediction.predictions.totalPoints || prediction.predictions.totalPoints) :
+                                                {sport === 'basketball' || sport.includes('nfl') || sport.includes('american') ? (prediction.predictions.totalPoints || prediction.predictions.totalPoints) :
                                                     sport === 'tennis' ? (prediction.predictions.totalGames || prediction.predictions.totalGames) :
                                                         sport === 'baseball' ? (prediction.predictions.totalRuns || prediction.predictions.totalRuns) :
                                                             (prediction.predictions.totalGoals || prediction.predictions.totalGoals || '-')}

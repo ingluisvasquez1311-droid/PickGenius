@@ -95,11 +95,16 @@ export async function POST(request: NextRequest) {
 
         if (sport === 'basketball') {
             // Robust NBA detection
-            const isNBA = matchContext.tournament?.toLowerCase().includes('nba') ||
-                matchContext.home?.includes('Pacers') || // Check common teams as fallback
-                matchContext.away?.includes('Celtics') ||
-                matchContext.home?.includes('Warriors') ||
-                matchContext.home?.includes('Lakers');
+            const tournamentName = matchContext.tournament?.toLowerCase() || '';
+            const home = matchContext.home?.toLowerCase() || '';
+            const away = matchContext.away?.toLowerCase() || '';
+
+            const isNBA = tournamentName.includes('nba') ||
+                home.includes('pelicans') || home.includes('celtics') ||
+                home.includes('lakers') || home.includes('warriors') ||
+                home.includes('bulls') || home.includes('heat') ||
+                home.includes('suns') || home.includes('nicks') ||
+                away.includes('pelicans') || away.includes('celtics');
 
             const totalMinutes = isNBA ? 48 : 40;
             const currentTotal = homeScore + awayScore;
@@ -124,18 +129,20 @@ export async function POST(request: NextRequest) {
             const mainSpread = spreadMarket?.choices?.[0]?.name || (isNBA ? "-8.5" : "-4.5");
 
             prompt = `
-            Eres el "Oráculo PickGenius", experto en Betplay Colombia.
-            **TORNEO:** ${matchContext.tournament || 'Baloncesto'}
-            **LÍNEAS LÍDERES:** O/U ${mainOverUnder}, Hándicap ${mainSpread}
+            Eres el "Oráculo PickGenius", experto analista de Betplay Colombia.
+            **ID EVENTO:** ${gameId}
+            **FECHA CONSULTA:** ${new Date().toISOString()}
+            **TORNEO:** ${matchContext.tournament || 'Basketball'}
+            **LÍNEAS LÍDERES (BETPLAY):** O/U ${mainOverUnder}, Hándicap ${mainSpread}
 
             **OBJETIVO CRÍTICO:**
-            Tu misión es dar al cliente la opción MÁS VIABLE para ganar. 
-            Busca una línea con "cuota medio-baja" (Alta Probabilidad).
+            Analiza el partido de ${matchContext.home} vs ${matchContext.away}.
+            Tu misión es dar al cliente la opción MÁS VIABLE para ganar en Betplay Colombia.
+            Identifica el "PICK DE ORO": La línea más segura (ej: si el O/U es ${mainOverUnder}, quizás un Over ${mainOverUnder - (isNBA ? 6 : 4)} sea el Pick de Oro).
 
             **INSTRUCCIONES:**
             1. Analiza O/U ${mainOverUnder} y Hándicap ${mainSpread}.
-            2. Identifica el "PICK DE ORO": La línea más segura (ej: si el O/U es ${mainOverUnder}, quizás un Over ${mainOverUnder - (isNBA ? 5 : 3)} sea el Pick de Oro).
-            3. Proporciona alternativas de valor.
+            2. Proporciona alternativas de valor y un veredicto definitivo.
 
             RETURN JSON:
             {
@@ -179,38 +186,51 @@ export async function POST(request: NextRequest) {
                 : h2hAvgGoals;
 
             prompt = `
-            Eres un experto analista de Fútbol hablando en ESPAÑOL.
+            Eres un experto analista de Fútbol hablando en ESPAÑOL, experto en Betplay Colombia.
             **LÍNEAS REALES (BETPLAY COLOMBIA):** O/U: ${mainOverUnder}, Hándicap: ${mainSpread}
 
-            **INSTRUCCIONES:**
-            1. Analiza O/U ${mainOverUnder}, Hándicap ${mainSpread}, Córners y Tarjetas.
+            **OBJETIVO CRÍTICO:**
+            Identifica el "PICK DE ORO": La opción más segura del partido (ej: "Más de 1.5 goles" si la línea es 2.5).
 
             RETURN JSON:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
                 "reasoning": "Análisis detallado...",
+                "mostViablePick": {
+                    "market": "Total Goles",
+                    "pick": "Más de",
+                    "line": ${mainOverUnder > 2 ? 1.5 : 2.0},
+                    "rationale": "Línea de alta seguridad basada en el historial de H2H.",
+                    "winProbability": "88%"
+                },
                 "predictions": {
                     "totalGoals": "${projectedGoals}",
-                    "overUnder": { "line": ${mainOverUnder}, "pick": "Más de" o "Menos de" },
+                    "overUnder": { "line": ${mainOverUnder}, "pick": "Más de" },
                     "handicap": { "line": "${mainSpread}", "pick": "Cubre" },
                     "corners": { "total": 9.5, "pick": "Más de" },
                     "cards": { "yellowCards": 4, "pick": "Baja" },
-                    "bothTeamsScore": { "pick": "Sí/No", "confidence": "Alta" }
+                    "bothTeamsScore": { "pick": "Sí", "confidence": "Alta" }
                 }
             }
             `;
         } else if (sport.toLowerCase().includes('nfl') || sport.toLowerCase().includes('american')) {
             const mainOverUnder = realMarketLine?.line || 44.5;
             prompt = `
-            Analista ELITE de NFL. **LÍNEAS BETPLAY COLOMBIA:** O/U: ${mainOverUnder}.
-            Analiza O/U ${mainOverUnder}, Spread y Yardas/Touchdowns.
+            Analista ELITE de NFL para Betplay Colombia. **LÍNEAS BETPLAY COLOMBIA:** O/U: ${mainOverUnder}.
             
             RETURN JSON:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 80,
                 "reasoning": "Basado en línea de ${mainOverUnder}...",
+                "mostViablePick": {
+                    "market": "Spread",
+                    "pick": "${matchContext.home}",
+                    "line": "-3.5",
+                    "rationale": "Línea protegida con alta probabilidad de cobertura.",
+                    "winProbability": "85%"
+                },
                 "predictions": {
                     "totalPoints": "${mainOverUnder}",
                     "overUnder": { "line": ${mainOverUnder}, "pick": "Más de" },
@@ -223,16 +243,23 @@ export async function POST(request: NextRequest) {
         } else if (sport.toLowerCase().includes('nhl') || sport.toLowerCase().includes('hockey')) {
             const mainOverUnder = realMarketLine?.line || 6.0;
             prompt = `
-            Experto NHL. **MATCH:** ${matchContext.home} vs ${matchContext.away}.
-            **LÍNEAS REALES (BETPLAY COLOMBIA):** O/U: ${mainOverUnder}. Analiza Over/Under ${mainOverUnder} y Puck Line.
+            Experto NHL para Betplay Colombia. **MATCH:** ${matchContext.home} vs ${matchContext.away}.
+            **LÍNEAS REALES (BETPLAY COLOMBIA):** O/U: ${mainOverUnder}.
             
             RETURN JSON:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 78,
                 "reasoning": "Análisis...",
+                "mostViablePick": {
+                    "market": "Puck Line",
+                    "pick": "${matchContext.home}",
+                    "line": "+1.5",
+                    "rationale": "Ventaja defensiva confirmada en Betplay.",
+                    "winProbability": "82%"
+                },
                 "predictions": {
-                    "overUnder": { "line": ${mainOverUnder}, "pick": "Más de" o "Menos de" },
+                    "overUnder": { "line": ${mainOverUnder}, "pick": "Más de" },
                     "puckLine": { "line": "-1.5", "pick": "Cubre" }
                 }
             }
@@ -240,14 +267,20 @@ export async function POST(request: NextRequest) {
         } else if (sport.toLowerCase().includes('baseball') || sport.toLowerCase().includes('mlb')) {
             const mainOverUnder = realMarketLine?.line || 8.5;
             prompt = `
-            Analista MLB. **LÍNEAS BETPLAY COLOMBIA:** O/U: ${mainOverUnder}.
-            Analiza Over/Under ${mainOverUnder}, Run Line y First 5 Innings.
+            Analista MLB para Betplay Colombia. **LÍNEAS BETPLAY COLOMBIA:** O/U: ${mainOverUnder}.
             
             RETURN JSON:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
                 "reasoning": "Análisis...",
+                "mostViablePick": {
+                    "market": "Hándicap",
+                    "pick": "${matchContext.home}",
+                    "line": "-1.5",
+                    "rationale": "Dominio proyectado del abridor.",
+                    "winProbability": "80%"
+                },
                 "predictions": {
                     "totalRuns": "${mainOverUnder}",
                     "overUnder": { "line": ${mainOverUnder}, "pick": "Más de" },
@@ -259,14 +292,21 @@ export async function POST(request: NextRequest) {
         } else if (sport.toLowerCase().includes('tennis')) {
             const mainOverUnder = realMarketLine?.line || 22.5;
             prompt = `
-            Experto en Tenis (ATP/WTA). **MATCH:** ${matchContext.home} vs ${matchContext.away}.
-            **LÍNEAS BETPLAY COLOMBIA:** Total Juegos (O/U): ${mainOverUnder}. Analiza ganador y sets.
+            Experto Tenis (ATP/WTA) para Betplay Colombia. **MATCH:** ${matchContext.home} vs ${matchContext.away}.
+            **LÍNEAS BETPLAY COLOMBIA:** Total Juegos (O/U): ${mainOverUnder}.
             
             RETURN JSON:
             {
                 "winner": "${matchContext.home}",
                 "confidence": 75,
                 "reasoning": "Análisis...",
+                "mostViablePick": {
+                    "market": "Sets",
+                    "pick": "${matchContext.home}",
+                    "line": "Gana 2-0",
+                    "rationale": "Superioridad técnica en superficie rápida.",
+                    "winProbability": "86%"
+                },
                 "predictions": {
                     "totalGames": "${mainOverUnder}",
                     "overUnder": { "line": ${mainOverUnder}, "pick": "Más de" },

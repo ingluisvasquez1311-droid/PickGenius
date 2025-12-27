@@ -158,34 +158,39 @@ class OddsSyncService {
             // Mapeo manual para pruebas conocidas
             if (gameId.toString() === '12702781') return 1021435081;
 
-            // Búsqueda dinámica para Baloncesto (NBA)
+            // Búsqueda dinámica para Baloncesto
             if (sport === 'basketball') {
                 const bridgeUrl = process.env.NEXT_PUBLIC_API_URL;
-                const searchUrl = bridgeUrl
-                    ? `${bridgeUrl}/api/proxy/kambi/event/group/1000093204.json?lang=es_CO&market=CO`
-                    : `https://tienda.betplay.com.co/offering/v21/betp/event/group/1000093204.json?lang=es_CO&market=CO`;
+                // Intentar varios grupos comunes (NBA: 1000093204, Euroleague: 1000093652)
+                const groupIds = [1000093204, 1000093652];
 
-                const res = await fetch(searchUrl, {
-                    headers: { 'ngrok-skip-browser-warning': 'true' },
-                    signal: AbortSignal.timeout(5000)
-                }).catch(() => null);
+                for (const groupId of groupIds) {
+                    const searchUrl = bridgeUrl
+                        ? `${bridgeUrl}/api/proxy/kambi/event/group/${groupId}.json?lang=es_CO&market=CO`
+                        : `https://tienda.betplay.com.co/offering/v21/betp/event/group/${groupId}.json?lang=es_CO&market=CO`;
 
-                if (!res || !res.ok) return null;
-                const groupData = await res.json();
+                    const res = await fetch(searchUrl, {
+                        headers: { 'ngrok-skip-browser-warning': 'true' },
+                        signal: AbortSignal.timeout(3000)
+                    }).catch(() => null);
 
-                // Intentar obtener nombres de equipos de Sofascore para comparar
-                const sofascoreEvent = await sportsDataService.getEventById(Number(gameId)).catch(() => null);
-                if (!sofascoreEvent) return null;
+                    if (!res || !res.ok) continue;
+                    const groupData = await res.json();
 
-                const homeName = sofascoreEvent.homeTeam?.name?.toLowerCase();
-                const awayName = sofascoreEvent.awayTeam?.name?.toLowerCase();
+                    // Intentar obtener nombres de equipos de Sofascore
+                    const sofascoreEvent = await sportsDataService.getEventById(Number(gameId)).catch(() => null);
+                    if (!sofascoreEvent) continue;
 
-                const kambiEvent = groupData.events?.find((e: any) => {
-                    const kName = e.event?.name?.toLowerCase() || '';
-                    return (homeName && kName.includes(homeName)) || (awayName && kName.includes(awayName));
-                });
+                    const homeName = sofascoreEvent.homeTeam?.name?.toLowerCase();
+                    const awayName = sofascoreEvent.awayTeam?.name?.toLowerCase();
 
-                return kambiEvent?.event?.id || null;
+                    const kambiEvent = groupData.events?.find((e: any) => {
+                        const kName = e.event?.name?.toLowerCase() || '';
+                        return (homeName && kName.includes(homeName)) || (awayName && kName.includes(awayName));
+                    });
+
+                    if (kambiEvent?.event?.id) return kambiEvent.event.id;
+                }
             }
             return null;
         } catch (e) {
