@@ -1,0 +1,29 @@
+{
+    "name": "pickgenius-backend",
+    "version": "2.0.0",
+    "description": "PickGenius Backend with Robots for SofaScore and BetPlay",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "nodemon server.js",
+        "sync:sofascore": "node -e \"require('./robots/sofascoreScraper').fullSync().then(() => process.exit(0))\"",
+        "sync:betplay": "node -e \"require('./robots/betplayReader').fullSync().then(() => process.exit(0))\"",
+        "sync:all": "node -e \"const s = require('./schedulers/cronJobs'); s.runManual('all').then(() => process.exit(0))\"",
+        "test:firebase": "node -e \"require('firebase-admin').initializeApp({credential: require('firebase-admin').credential.cert(require('./firebase-service-account.json'))}).firestore().collection('_test').doc('test').set({test: true}).then(() => {console.log('✅ Firebase OK'); process.exit(0)})\"",
+        "ngrok": "ngrok http 3001 --domain=tu-dominio-fijo.ngrok.io"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "axios": "^1.6.0",
+        "dotenv": "^16.3.1",
+        "firebase-admin": "^12.0.0",
+        "node-cron": "^3.0.3"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
