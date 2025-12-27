@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_HOST || 'http://localhost:3000';
 
 export async function GET(

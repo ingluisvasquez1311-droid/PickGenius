@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import FirebaseReadService from '@/lib/FirebaseReadService';
+import { firebaseReadService } from '@/lib/FirebaseReadService';
 import { initializeFirebaseAdmin } from '@/lib/firebaseAdmin';
 
 try {
@@ -17,8 +17,7 @@ export async function GET() {
     const TYPE = 'live';
 
     try {
-        const firebaseService = new FirebaseReadService();
-        const hasRecentData = await firebaseService.hasRecentData(SPORT_ID, TYPE);
+        const hasRecentData = await firebaseReadService.hasRecentData(SPORT_ID, TYPE);
 
         if (!hasRecentData) {
             console.warn(`⚠️ No recent data for ${SPORT_ID} ${TYPE}, triggering background sync`);
@@ -26,7 +25,7 @@ export async function GET() {
                 .catch(err => console.error('Sync trigger failed:', err));
         }
 
-        const games = await firebaseService.getLiveGames(SPORT_ID);
+        const games = await firebaseReadService.getLiveGames(SPORT_ID);
         const duration = Date.now() - startTime;
 
         return NextResponse.json(games, {
