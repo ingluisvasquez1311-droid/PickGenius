@@ -19,40 +19,42 @@ export async function GET(request: NextRequest) {
             events = await firebaseReadService.getScheduledGames('american-football', date);
         }
 
-        tournament: {
-            name: game.tournament?.name || 'NFL',
+        const transformedData = events.map((game: any) => ({
+            id: game.id,
+            tournament: {
+                name: game.tournament?.name || 'NFL',
                 uniqueTournament: {
-                name: 'NFL'
-            },
-            category: {
-                name: 'USA',
+                    name: 'NFL'
+                },
+                category: {
+                    name: 'USA',
                     flag: 'usa',
                 }
-        },
-        homeTeam: {
-            id: game.homeTeam?.id,
+            },
+            homeTeam: {
+                id: game.homeTeam?.id,
                 name: game.homeTeam?.name || 'Home Team',
-                    logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
+                logo: `/api/proxy/team-logo/${game.homeTeam?.id}`,
             },
-        awayTeam: {
-            id: game.awayTeam?.id,
+            awayTeam: {
+                id: game.awayTeam?.id,
                 name: game.awayTeam?.name || 'Away Team',
-                    logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
+                logo: `/api/proxy/team-logo/${game.awayTeam?.id}`,
             },
-        status: {
-            type: 'notstarted',
+            status: {
+                type: 'notstarted',
                 description: new Date(game.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    code: game.status?.code
-        },
-        startTimestamp: game.startTimestamp
-    }));
+                code: game.status?.code
+            },
+            startTimestamp: game.startTimestamp
+        }));
 
-    return NextResponse.json({
-        success: true,
-        data: transformedData,
-        count: transformedData.length
-    });
-} catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-}
+        return NextResponse.json({
+            success: true,
+            data: transformedData,
+            count: transformedData.length
+        });
+    } catch (error: any) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
 }
