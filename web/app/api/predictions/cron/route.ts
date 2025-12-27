@@ -1,22 +1,34 @@
 import { NextResponse } from 'next/server';
 import { predictionTrackingService } from '@/lib/services/predictionTrackingService';
 import { sportsDataService } from '@/lib/services/sportsDataService';
+import { oddsSyncService } from '@/lib/services/oddsSyncService';
 
 /**
  * Endpoint para ejecución de Cron Job
- * Evalúa automáticamente predicciones pendientes con resultados reales
+ * Evalúa automáticamente predicciones y SINCRONIZA cuotas reales de Bet365
  */
 export async function GET(request: Request) {
     try {
-        // Verificar token simple o IP si es necesario (seguridad básica)
-        const authHeader = request.headers.get('authorization');
-        // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        //     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        // }
+        console.log('🔄 [Cron] Iniciando evaluación y sincronización de cuotas...');
 
-        console.log('🔄 [Cron] Iniciando evaluación automática de predicciones...');
+        // 0. Sincronizar cuotas de partidos de hoy (Fútbol y Basket)
+        try {
+            const footballScheduled = await sportsDataService.makeRequest('/football/scheduled/today');
+            const events = footballScheduled?.events || [];
+            for (const event of events.slice(0, 10)) {
+                await oddsSyncService.syncEventOdds(event.id, 'football').catch(() => null);
+            }
 
-        // 1. Obtener predicciones pendientes (máximo 20 por lote para evitar timeouts)
+            const basketScheduled = await sportsDataService.makeRequest('/basketball/scheduled/today');
+            const bEvents = basketScheduled?.events || [];
+            for (const event of bEvents.slice(0, 10)) {
+                await oddsSyncService.syncEventOdds(event.id, 'basketball').catch(() => null);
+            }
+        } catch (e) {
+            console.error("Error syncing odds in cron:", e);
+        }
+
+        // 1. Obtener predicciones pendientes
         const pending = await predictionTrackingService.getPendingEvaluations(20);
 
         if (!pending || pending.length === 0) {

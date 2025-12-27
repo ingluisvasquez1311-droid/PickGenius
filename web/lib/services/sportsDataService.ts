@@ -290,8 +290,40 @@ class SportsDataService {
     /**
      * Obtiene cuotas reales de mercado (Bet365, etc.) para el partido
      */
-    async getMatchOdds(eventId: number): Promise<any> {
-        return await this.makeRequest(`/event/${eventId}/odds/1/all`);
+    async getMatchOdds(eventId: number, marketId: number = 1): Promise<any> {
+        return await this.makeRequest(`/event/${eventId}/odds/${marketId}/all`);
+    }
+
+    /**
+     * Intenta extraer la línea principal de Over/Under (Totales) de un evento
+     */
+    async getMatchTotalLine(eventId: number, sport: string): Promise<{ line: number; provider: string } | null> {
+        try {
+            const odds = await this.getMatchOdds(eventId);
+            if (!odds || !odds.markets) return null;
+
+            // Diferentes nombres de mercado según el deporte
+            const marketKeywords = sport === 'football' ? ['total goals', 'over/under'] : ['total points', 'over/under', 'total'];
+
+            const market = odds.markets.find((m: any) =>
+                marketKeywords.some(key => m.marketName.toLowerCase().includes(key))
+            );
+
+            if (market && market.choices && market.choices.length > 0) {
+                const choice = market.choices[0];
+                const lineMatch = choice.name.match(/(\d+\.?\d*)/);
+                if (lineMatch) {
+                    return {
+                        line: parseFloat(lineMatch[1]),
+                        provider: 'Betplay'
+                    };
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error(`Error al extraer línea total para ${eventId}:`, error);
+            return null;
+        }
     }
 
     /**

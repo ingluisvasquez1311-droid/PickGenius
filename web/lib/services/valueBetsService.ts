@@ -93,7 +93,7 @@ class ValueBetsService {
                 // Only return "Value" if edge > 3%
                 if (edge < 3) return null;
 
-                const bookmakers = ['Bet365', 'Betano', 'Pinnacle', 'Betfair', 'Rushbet'];
+                const bookmakers = ['Betplay', 'Wplay', 'Rushbet', 'Betfair', 'Rushbet'];
                 const bookie = bookmakers[event.id % bookmakers.length];
 
                 return {
@@ -129,7 +129,7 @@ class ValueBetsService {
                 awayTeam: 'LA Clippers',
                 market: 'Moneyline',
                 selection: 'Warriors',
-                bookmaker: 'Bet365',
+                bookmaker: 'Betplay',
                 odds: 1.85,
                 impliedProbability: 54.1,
                 aiProbability: 65.5,

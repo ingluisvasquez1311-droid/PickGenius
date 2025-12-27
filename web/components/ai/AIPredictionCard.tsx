@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { Zap, Shield, TrendingUp, Target, X, Star, Crown, Loader2, CheckCircle2, AlertTriangle, ArrowRight, Lock } from 'lucide-react';
+import { Zap, Shield, TrendingUp, Target, X, Star, Crown, Loader2, CheckCircle2, AlertTriangle, ArrowRight, Lock, Info, Sparkles, Brain, Plus, ShieldCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { generatePrediction } from '@/lib/predictionService';
 import { useAuth } from '@/contexts/AuthContext';
@@ -156,9 +156,19 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
 
             <div className="relative z-10">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                        <span className="text-3xl">🧙</span> Oráculo PickGenius
-                    </h2>
+                    <div className="flex flex-col">
+                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                            <span className="text-3xl">🧙</span> Oráculo PickGenius
+                        </h2>
+                        {prediction?.sourceVerification?.isVerified && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                                <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                                <span className="text-[10px] font-black text-green-400 uppercase tracking-widest flex items-center gap-1">
+                                    <Shield className="w-3 h-3" /> Verificado con {prediction.sourceVerification.provider}
+                                </span>
+                            </div>
+                        )}
+                    </div>
                     {!prediction && (
                         <button
                             onClick={handlePredict}
@@ -271,6 +281,48 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
                             <p className="text-black/60 text-xs mt-2 font-semibold">Precisión del Oráculo</p>
                         </div>
 
+                        {/* PICK DE ORO - MOST VIABLE PICK (HIGH PROBABILITY) */}
+                        {prediction.mostViablePick && (
+                            <div className="bg-gradient-to-br from-yellow-500/20 via-yellow-600/10 to-transparent p-[2px] rounded-2xl shadow-xl shadow-yellow-500/10 border border-yellow-500/30 overflow-hidden group">
+                                <div className="bg-slate-900/90 backdrop-blur-xl p-4 rounded-[14px]">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="bg-yellow-500 p-1.5 rounded-lg shadow-lg shadow-yellow-500/40">
+                                                <Target className="w-4 h-4 text-black" />
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] block leading-none">Recomendación VIP</span>
+                                                <h3 className="text-white font-black text-lg leading-tight uppercase">Pick de Oro</h3>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-[10px] text-yellow-500/60 font-black uppercase italic">Éxito Est.</span>
+                                            <span className="text-2xl font-black text-yellow-500 leading-none tracking-tighter">{prediction.mostViablePick.winProbability || '90%'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between bg-yellow-500/5 border border-yellow-500/10 p-4 rounded-xl">
+                                        <div className="flex flex-col">
+                                            <span className="text-yellow-200/50 text-[10px] uppercase font-bold tracking-widest leading-none mb-1">{prediction.mostViablePick.market || 'Mercado de Puntos'}</span>
+                                            <span className="text-white font-black text-2xl tracking-tighter">
+                                                {prediction.mostViablePick.pick} {prediction.mostViablePick.line}
+                                            </span>
+                                        </div>
+                                        <div className="h-12 w-12 flex items-center justify-center rounded-full bg-yellow-500/10 border border-yellow-500/20 shadow-inner group-hover:scale-110 transition-transform">
+                                            <Crown className="w-6 h-6 text-yellow-500" />
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-3 flex gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
+                                        <Info className="w-4 h-4 text-yellow-500 shrink-0" />
+                                        <p className="text-[11px] text-yellow-100/70 font-medium leading-relaxed">
+                                            "{prediction.mostViablePick.rationale}"
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* VALUE BET / ODDS SECTION - ONLY IF IT IS A VALUE BET */}
                         {prediction.isValueBet && (
                             <div className="bg-gradient-to-br from-yellow-500/10 to-transparent p-5 rounded-2xl border border-yellow-500/20 space-y-4">
@@ -295,10 +347,10 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
                                                 const confidence = typeof prediction.confidence === 'number' ? prediction.confidence : 70;
                                                 const baseOdds = estimateOdds(confidence);
                                                 const houses = [
-                                                    { name: 'Betano', odds: (baseOdds * 1.02).toFixed(2) },
-                                                    { name: 'BetPlay', odds: (baseOdds * 0.98).toFixed(2) },
+                                                    { name: 'Bet365', odds: (baseOdds * 1.01).toFixed(2) },
+                                                    { name: 'Betplay', odds: (baseOdds * 1.02).toFixed(2) },
                                                     { name: 'Rushbet', odds: (baseOdds * 1.01).toFixed(2) },
-                                                    { name: 'Bet365', odds: (baseOdds * 0.99).toFixed(2) },
+                                                    { name: 'Wplay', odds: (baseOdds * 0.99).toFixed(2) },
                                                 ];
                                                 const bestOdds = Math.max(...houses.map(h => parseFloat(h.odds)));
 
@@ -539,6 +591,43 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
                                                             </div>
                                                         </div>
                                                     )}
+                                                </div>
+                                            )}
+
+                                            {/* ALTERNATIVE VALUED MARKETS (FOR BASKETBALL/ALL) */}
+                                            {prediction.predictions.alternativePicks && (
+                                                <div className="mt-4 bg-gradient-to-br from-indigo-900/30 to-purple-900/20 p-4 rounded-xl border border-indigo-500/20">
+                                                    <div className="flex justify-between items-center mb-3">
+                                                        <p className="text-white text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
+                                                            🎯 Mercados de Valor Alternativos
+                                                        </p>
+                                                        <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">BETPLAY STYLE</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 gap-2">
+                                                        {prediction.predictions.alternativePicks.map((pick: any, idx: number) => (
+                                                            <div key={idx} className={`flex items-center justify-between p-3 rounded-lg border transition-all hover:scale-[1.01] ${pick.type.includes('Bajo') ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                                                                <div className="flex flex-col">
+                                                                    <span className={`text-[9px] font-black uppercase tracking-tighter ${pick.type.includes('Bajo') ? 'text-green-400' : 'text-red-400'}`}>
+                                                                        {pick.type}
+                                                                    </span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-white font-black text-lg">
+                                                                            {pick.pick} {pick.line}
+                                                                        </span>
+                                                                        {pick.type.includes('Alto') && <Zap className="w-3 h-3 text-yellow-500 fill-yellow-500 animate-pulse" />}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right flex items-center gap-3">
+                                                                    <span className="text-[10px] text-slate-400 italic max-w-xs block leading-tight">
+                                                                        "{pick.rationale}"
+                                                                    </span>
+                                                                    <div className={`p-1.5 rounded-full ${pick.type.includes('Bajo') ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                                                                        <TrendingUp className={`w-3.5 h-3.5 ${pick.type.includes('Bajo') ? 'text-green-400' : 'text-red-400'}`} />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             )}
 

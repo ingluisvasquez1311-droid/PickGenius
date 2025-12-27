@@ -156,8 +156,16 @@ function generateMockPrediction(request: PredictionRequest): PredictionResult {
         predictions.cards = { yellowCards: 4, redCards: 0, pick: 'Menos de', line: 4.5 };
         predictions.bothTeamsScore = { pick: 'Sí', confidence: 'Media' };
     } else if (request.sport === 'basketball') {
-        predictions.totalPoints = '218.5';
-        predictions.overUnder = { line: 218.5, pick: 'Más de', confidence: 'Media' };
+        const teamString = (request.homeTeam || '').toLowerCase() + (request.awayTeam || '').toLowerCase();
+        // Check for NBA teams or generic NBA label
+        const isNBA = teamString.includes('nba') ||
+            teamString.includes('celtics') || teamString.includes('lakers') ||
+            teamString.includes('warriors') || teamString.includes('bulls') ||
+            teamString.includes('knicks') || teamString.includes('pacers');
+
+        const defaultLine = isNBA ? '232.5' : '174.5';
+        predictions.totalPoints = defaultLine;
+        predictions.overUnder = { line: parseFloat(defaultLine), pick: 'Más de', confidence: 'Media' };
         predictions.playerProps = {
             threes: { player: "Estrella Local", line: 2.5, pick: "Más de" },
             pra: { player: "Estrella Visitante", line: 30.5, pick: "Más de" }
