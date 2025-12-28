@@ -61,43 +61,32 @@ class ValueBetsService {
         );
 
         return targetEvents
-            .map(event => {
+            .flatMap(event => {
                 const sport = event.tournament.category.sport.slug;
                 const isFootball = sport === 'football';
 
-                // --- STEP 1: CALCULATE GENIUS PROBABILITY (Internal Model) ---
-                // We simulate a robust model based on team names, rankings and historical consistency
                 const homeWeight = (event.homeTeam.name.length % 10) + (event.homeTeam.id % 5);
                 const awayWeight = (event.awayTeam.name.length % 10) + (event.awayTeam.id % 5);
-
-                // Home advantage factor
                 const homeAdvantage = isFootball ? 1.2 : 1.1;
-
                 const homePower = homeWeight * homeAdvantage;
                 const awayPower = awayWeight;
 
-                // Normalizing to 100%
                 const totalPower = homePower + awayPower;
                 let aiProb = (homePower / totalPower) * 100;
-
-                // Adjustment for Draw in Football
                 if (isFootball) aiProb = aiProb * 0.85;
 
-                // --- STEP 2: SIMULATE MARKET ODDS (to find Edge) ---
                 const fairOdds = 100 / aiProb;
                 const marketOdds = FairOddsToMarket(fairOdds, event.id);
 
                 const impliedProb = (1 / marketOdds) * 100;
-                // EDGE = (Probabilidad IA * Cuota) - 1.
                 const edge = ((aiProb / impliedProb) - 1) * 100;
 
-                // Only return "Value" if edge > 3%
-                if (edge < 3) return null;
+                if (edge < 3) return [];
 
                 const bookmakers = ['Betplay', 'Wplay', 'Rushbet', 'Betfair', 'Rushbet'];
                 const bookie = bookmakers[event.id % bookmakers.length];
 
-                return {
+                return [{
                     id: `hunter-${event.id}`,
                     sport: (isFootball ? 'football' : 'basketball') as 'football' | 'basketball',
                     league: event.tournament.uniqueTournament?.name || event.tournament.name,
@@ -112,9 +101,8 @@ class ValueBetsService {
                     edge: parseFloat(edge.toFixed(1)),
                     startTime: event.startTimestamp * 1000,
                     confidenceScore: Math.min(10, Math.floor(edge / 2) + 5)
-                };
+                }];
             })
-            .filter((bet): bet is ValueBet => bet !== null)
             .sort((a, b) => b.edge - a.edge)
             .slice(0, 15);
     }
