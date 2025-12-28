@@ -12,9 +12,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
     request: Request,
-    { params }: { params: { eventId: string } }
+    { params }: { params: Promise<{ eventId: string }> }
 ) {
-    const { eventId } = params;
+    const { eventId } = await params;
 
     try {
         if (!eventId) {
