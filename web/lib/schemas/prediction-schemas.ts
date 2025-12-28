@@ -155,3 +155,31 @@ export const PredictionResponseSchema = z.object({
 export type PredictionResponse = z.infer<typeof PredictionResponseSchema>;
 export type TennisPredictions = z.infer<typeof TennisPredictionsSchema>;
 export type HockeyPredictions = z.infer<typeof HockeyPredictionsSchema>;
+
+export const NewsAnalysisSchema = z.object({
+    bettingSignal: z.string(),
+    sentiment: z.enum(['positive', 'negative', 'neutral']),
+    impactScore: z.number().min(0).max(100),
+    brutalTitle: z.string().optional()
+});
+
+export const ParleyResponseSchema = z.object({
+    title: z.string(),
+    confidence: z.number().min(0).max(100),
+    totalOdds: z.number().or(z.string()).transform(v => typeof v === 'string' ? parseFloat(v) : v),
+    isValueParley: z.boolean().optional(),
+    valueAnalysis: z.string().optional(),
+    legs: z.array(z.object({
+        matchName: z.string(),
+        pick: z.string(),
+        odds: z.string().or(z.number()).optional(),
+        confidence: z.number().min(0).max(100),
+        startTime: z.string().optional(),
+        reasoning: z.string().optional()
+    })),
+    analysis: z.string(),
+    riskLevel: z.string()
+});
+
+export type NewsAnalysisResponse = z.infer<typeof NewsAnalysisSchema>;
+export type ParleyResponse = z.infer<typeof ParleyResponseSchema>;
