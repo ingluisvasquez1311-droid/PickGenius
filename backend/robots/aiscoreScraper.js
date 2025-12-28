@@ -39,6 +39,7 @@ class AiScoreScraper {
 
     /**
      * Obtiene partidos de cualquier deporte soportado
+     * OPTIMIZADO: Timeouts agresivos + Retry inteligente + IP Local Priority
      */
     async fetchSportMatches(sportName) {
         const sportId = AISCORE_SPORTS[sportName];
@@ -46,84 +47,103 @@ class AiScoreScraper {
             console.error(`❌ [AiScore] Sport not supported: ${sportName}`);
             return [];
         }
-        try {
-            const headers = this.getHeaders();
-            const url = `${this.baseURL}/matches/count?tz=-4`;
-            const countRes = await axios.get(url, { headers });
 
-            // Si hay partidos en vivo, los buscamos por fecha hoy
-            const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
-            const matchesUrl = `${this.baseURL}/matches?lang=4&sport_id=${sportId}&date=${today}&tz=-04:00`;
+        const maxRetries = 2;
 
-            console.log(`📡 [AiScore] Fetching matches for sport ${sportId}...`);
-            const response = await axios.get(matchesUrl, { headers });
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const headers = this.getHeaders();
+                const url = `${this.baseURL}/match/list?sportId=${sportId}&date=${new Date().toISOString().split('T')[0]}&langId=2`;
 
-            if (response.data && response.data.data && response.data.data.list) {
-                return this.transformMatches(response.data.data.list, sportId);
+                console.log(`📡 [AiScore] Fetching ${sportName} (Attempt ${attempt}/${maxRetries})...`);
+
+                const response = await axios.get(url, {
+                    headers,
+                    timeout: 5000, // 5s timeout - muy agresivo para respuesta rápida
+                    validateStatus: (status) => status < 500 // Acepta 4xx pero no 5xx
+                });
+
+                if (response.data && response.data.data) {
+                    const matches = this.transformMatches(response.data.data, sportName);
+                    console.log(`✅ [AiScore] ${sportName}: ${matches.length} events retrieved`);
+                    return matches;
+                }
+
+                // Si llegamos aquí, la respuesta no tiene data válida
+                throw new Error('Invalid response structure from AiScore');
+
+            } catch (error) {
+                const isTimeout = error.code === 'ECONNABORTED';
+                const isNetworkError = error.message.includes('Network') || error.code === 'ENOTFOUND';
+
+                if (attempt < maxRetries && (isTimeout || isNetworkError)) {
+                    console.warn(`⚠️ [AiScore] ${sportName} failed (${error.message}), retrying...`);
+                    await new Promise(resolve => setTimeout(resolve, 500)); // 500ms entre reintentos
+                    continue;
+                }
+
+                console.error(`❌ [AiScore] ${sportName} fetch failed: ${error.message}`);
+                break;
             }
-            return [];
-        } catch (error) {
-            console.error(`❌ [AiScore Error]: ${error.message}`);
-            return [];
         }
+
+        return [];
     }
 
     /**
      * Transforma el formato de AiScore al de PickGenius
      */
-    transformMatches(list, sportId) {
-        // Invertimos el mapeo para buscar por ID
-        const ID_TO_SPORT = Object.fromEntries(
-            Object.entries(AISCORE_SPORTS).map(([k, v]) => [v, k])
-        );
+    transformMatches(list, sport) {
+        if (!Array.isArray(list)) {
+            console.warn('⚠️ [AiScore] Invalid matches list format');
+            return [];
+        }
 
         return list.map(m => {
-            const sportName = ID_TO_SPORT[sportId] || 'football';
-
             // Emulamos el formato exacto de SofaScore que espera el frontend
             return {
-                id: m.id, // Usamos el ID original para no romper los links
-                slug: `${m.home_team_name}-${m.away_team_name}`.toLowerCase().replace(/ /g, '-'),
-                sport: sportName,
+                id: String(m.id || m.matchId),
+                slug: `${m.homeTeamName || m.home_team_name}-${m.awayTeamName || m.away_team_name}`.toLowerCase().replace(/ /g, '-'),
+                sport: sport,
                 status: {
-                    code: m.status_id,
-                    description: m.status_id === 1 ? 'Live' : 'Scheduled',
-                    type: m.status_id === 1 ? 'inprogress' : 'scheduled'
+                    code: m.statusId || m.status_id || 0,
+                    description: (m.statusId === 1 || m.status_id === 1) ? 'Live' : 'Scheduled',
+                    type: (m.statusId === 1 || m.status_id === 1) ? 'inprogress' : 'scheduled'
                 },
                 homeTeam: {
-                    id: m.home_team_id,
-                    name: m.home_team_name,
-                    shortName: m.home_team_name.substring(0, 3).toUpperCase(),
-                    slug: m.home_team_name.toLowerCase().replace(/ /g, '-')
+                    id: m.homeTeamId || m.home_team_id,
+                    name: m.homeTeamName || m.home_team_name,
+                    shortName: (m.homeTeamName || m.home_team_name || '').substring(0, 3).toUpperCase(),
+                    slug: (m.homeTeamName || m.home_team_name || '').toLowerCase().replace(/ /g, '-')
                 },
                 awayTeam: {
-                    id: m.away_team_id,
-                    name: m.away_team_name,
-                    shortName: m.away_team_name.substring(0, 3).toUpperCase(),
-                    slug: m.away_team_name.toLowerCase().replace(/ /g, '-')
+                    id: m.awayTeamId || m.away_team_id,
+                    name: m.awayTeamName || m.away_team_name,
+                    shortName: (m.awayTeamName || m.away_team_name || '').substring(0, 3).toUpperCase(),
+                    slug: (m.awayTeamName || m.away_team_name || '').toLowerCase().replace(/ /g, '-')
                 },
                 homeScore: {
-                    current: m.home_score || 0,
-                    display: m.home_score || 0
+                    current: m.homeScore || m.home_score || 0,
+                    display: m.homeScore || m.home_score || 0
                 },
                 awayScore: {
-                    current: m.away_score || 0,
-                    display: m.away_score || 0
+                    current: m.awayScore || m.away_score || 0,
+                    display: m.awayScore || m.away_score || 0
                 },
                 tournament: {
-                    id: m.league_id,
-                    name: m.league_name,
-                    slug: m.league_name.toLowerCase().replace(/ /g, '-'),
+                    id: m.leagueId || m.league_id,
+                    name: m.leagueName || m.league_name || 'Unknown',
+                    slug: (m.leagueName || m.league_name || '').toLowerCase().replace(/ /g, '-'),
                     category: {
                         name: 'International',
-                        sport: { name: sportName }
+                        sport: { name: sport }
                     }
                 },
-                startTimestamp: m.start_time,
+                startTimestamp: m.startTime || m.start_time,
                 source: 'aiscore',
                 isAiScore: true // Flag interno
             };
-        });
+        }).filter(m => m.id); // Filtrar eventos inválidos
     }
 
     /**
@@ -136,7 +156,7 @@ class AiScoreScraper {
         const batch = db.batch();
 
         matches.forEach(match => {
-            const ref = db.collection('events').doc(match.id);
+            const ref = db.collection('events').doc(String(match.id));
             batch.set(ref, match, { merge: true });
         });
 
