@@ -1,0 +1,12 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/news/live/route.js")
+R.c("server/chunks/[root-of-the-server]__53610cb5._.js")
+R.c("server/chunks/2374f_next_9dec306c._.js")
+R.c("server/chunks/2374f_@opentelemetry_api_build_esm_9e176901._.js")
+R.c("server/chunks/2374f_xmlbuilder_lib_6b4ce031._.js")
+R.c("server/chunks/2374f_@upstash_redis_08128abe._.js")
+R.c("server/chunks/2374f_zod_v4_77e1b188._.js")
+R.c("server/chunks/2374f_e1b464cc._.js")
+R.c("server/chunks/[root-of-the-server]__5c1577ab._.js")
+R.c("server/chunks/web__next-internal_server_app_api_news_live_route_actions_f209f46b.js")
+R.m("[project]/web/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/web/app/api/news/live/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)")
+module.exports=R.m("[project]/web/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/web/app/api/news/live/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)").exports

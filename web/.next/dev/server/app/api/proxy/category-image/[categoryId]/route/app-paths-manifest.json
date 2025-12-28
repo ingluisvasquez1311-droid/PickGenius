@@ -1,0 +1,3 @@
+{
+  "/api/proxy/category-image/[categoryId]/route": "app-edge-has-no-entrypoint"
+}

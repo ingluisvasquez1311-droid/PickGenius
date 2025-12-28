@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
             });
 
         // 3. Prioritization Logic: Value Hits > Big Leagues > Others
-        let filteredEvents = allEventsRaw
+        const filteredEvents = allEventsRaw
             .sort((a, b) => {
                 // 1. Value First
                 if (a.valueHint && !b.valueHint) return -1;

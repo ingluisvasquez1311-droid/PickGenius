@@ -205,7 +205,7 @@ export class BatchSyncService {
         console.log('🚀 [BatchSync] Starting Global Sync (Firebase-First Architecture)...');
 
         try {
-            const { verifyFirebaseConnection } = require('@/lib/firebaseAdmin');
+            const { verifyFirebaseConnection } = await import('@/lib/firebaseAdmin');
             const isConnected = await verifyFirebaseConnection();
             if (!isConnected) {
                 throw new Error('Firebase Admin NOT initialized. Please check your credentials.');

@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     try {
         console.log(`[API] Fetching SCHEDULED NHL games for ${date} (Firebase-First)...`);
 
-        let events = await firebaseReadService.getScheduledGames('ice-hockey');
+        const events = await firebaseReadService.getScheduledGames('ice-hockey');
 
         if (events.length === 0) {
             console.warn(`[API] No scheduled NHL games for ${date}. Triggering sync...`);

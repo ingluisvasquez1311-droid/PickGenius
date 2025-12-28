@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
 
         const isLive = matchContext.status && !matchContext.status.includes('Not') && matchContext.status !== '0\'';
 
-        let prompt = `Eres PickGenius Oracle, el analista deportivo más avanzado. 
+        const prompt = `Eres PickGenius Oracle, el analista deportivo más avanzado. 
         Analiza este encuentro de ${matchContext.sport}:
         EQUIPOS: ${matchContext.home} vs ${matchContext.away}
         MARCADOR ACTUAL: ${matchContext.score} (${matchContext.status})

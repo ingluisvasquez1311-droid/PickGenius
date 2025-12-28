@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { generatePrediction, type PredictionRequest, type PredictionResult } from '@/lib/predictionService';
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 import PredictionAnalysis from '@/components/analysis/PredictionAnalysis';
 
 interface PredictionModalProps {
@@ -220,9 +221,9 @@ export default function PredictionModal({ isOpen, onClose, gameInfo }: Predictio
                         <p className="text-sm mb-2">
                             ¿Quieres predicciones ilimitadas?
                         </p>
-                        <a href="/profile#upgrade" className="text-[var(--primary)] font-bold hover:underline">
+                        <Link href="/profile#upgrade" className="text-[var(--primary)] font-bold hover:underline">
                             Actualiza a Premium →
-                        </a>
+                        </Link>
                     </div>
                 )}
             </div>

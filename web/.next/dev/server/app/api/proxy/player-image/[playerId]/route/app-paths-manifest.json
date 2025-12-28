@@ -1,0 +1,3 @@
+{
+  "/api/proxy/player-image/[playerId]/route": "app-edge-has-no-entrypoint"
+}

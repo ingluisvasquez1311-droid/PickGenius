@@ -1,0 +1,3 @@
+{
+  "/api/proxy/team-logo/[teamId]/route": "app-edge-has-no-entrypoint"
+}

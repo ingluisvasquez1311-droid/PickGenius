@@ -1,0 +1,3 @@
+{
+  "/match/[sport]/[eventId]/page": "app/match/[sport]/[eventId]/page.js"
+}
