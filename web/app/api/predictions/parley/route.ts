@@ -34,79 +34,74 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Fetch data
-        const [footballEvents, basketballEvents, baseballEvents, nflEvents, nhlEvents, tennisEvents] = await Promise.all([
+        const [footballEvents, basketballEvents, baseballEvents, nflEvents, nhlEvents, tennisEvents, valueBets] = await Promise.all([
             sportsDataService.getEventsBySport('football').catch(() => []),
             sportsDataService.getEventsBySport('basketball').catch(() => []),
             sportsDataService.getEventsBySport('baseball').catch(() => []),
             sportsDataService.getEventsBySport('american-football').catch(() => []),
             sportsDataService.getEventsBySport('icehockey').catch(() => []),
-            sportsDataService.getEventsBySport('tennis').catch(() => [])
+            sportsDataService.getEventsBySport('tennis').catch(() => []),
+            import('@/lib/services/valueBetsService').then(m => m.valueBetsService.getValueBets()).catch(() => [])
         ]);
 
         const BIG_LEAGUES = [
             'Premier League', 'LaLiga', 'Serie A', 'Bundesliga', 'Ligue 1',
-            'Eredivisie', 'Brasileirão', 'Primera División', 'Liga Profesional',
-            'NBA', 'NBA Cup', 'EuroLeague', 'Champions League', 'Libertadores', 'Sudamericana',
-            'MLB', 'NFL', 'NHL'
+            'NBA', 'NBA Cup', 'EuroLeague', 'Champions League', 'MLB', 'NFL', 'NHL'
         ];
 
-        // 2. Filter by Sport AND Mode AND Priority Leagues
+        // 2. Filter and Map with Value Detection
         const allEventsRaw = [...footballEvents, ...basketballEvents, ...baseballEvents, ...nflEvents, ...nhlEvents, ...tennisEvents]
             .filter(e => {
                 if (!e.status || e.status.type === 'finished') return false;
-
-                // Match Mode Filtering
                 if (mode === 'live' && e.status.type !== 'inprogress') return false;
                 if (mode === 'pre' && e.status.type === 'inprogress') return false;
 
-                // Sport filtering
                 if (sport !== 'all') {
                     const eSport = e.tournament?.category?.sport?.name?.toLowerCase() || '';
-                    const isFútbol = eSport === 'football' || eSport === 'soccer';
-
-                    if (sport === 'football' && !isFútbol) return false;
+                    if (sport === 'football' && !(eSport === 'football' || eSport === 'soccer')) return false;
                     if (sport === 'basketball' && eSport !== 'basketball') return false;
                     if (sport === 'baseball' && eSport !== 'baseball') return false;
                     if (sport === 'tennis' && eSport !== 'tennis') return false;
                     if (sport === 'american-football' && (eSport !== 'american-football' && eSport !== 'nfl')) return false;
                     if (sport === 'icehockey' && (eSport !== 'icehockey' && eSport !== 'nhl')) return false;
                 }
-
                 return true;
             })
-            .map(e => ({
-                ...e,
-                isPriority: BIG_LEAGUES.some(bl =>
-                    e.tournament.name.toLowerCase().includes(bl.toLowerCase()) ||
-                    e.tournament.category.name.toLowerCase().includes(bl.toLowerCase())
-                )
-            }));
+            .map(e => {
+                // Check if this event is a Value Bet
+                const valueBet = valueBets.find(vb =>
+                    vb.homeTeam === e.homeTeam.name ||
+                    String(vb.id).includes(String(e.id))
+                );
 
-        // Prioritize Big Leagues in the final selection
-        let filteredEvents: any[] = [];
-        const priorityEvents = allEventsRaw.filter(e => e.isPriority);
-        const secondaryEvents = allEventsRaw.filter(e => !e.isPriority);
-
-        if (sport === 'all') {
-            const groups: { [key: string]: any[] } = {};
-            // Take up to 20 priority events first
-            const baseEvents = priorityEvents.length >= 10 ? priorityEvents : [...priorityEvents, ...secondaryEvents];
-
-            baseEvents.forEach(e => {
-                const sName = e.tournament.category.sport.slug || 'other';
-                if (!groups[sName]) groups[sName] = [];
-                groups[sName].push(e);
+                return {
+                    ...e,
+                    isPriority: BIG_LEAGUES.some(bl =>
+                        e.tournament.name.toLowerCase().includes(bl.toLowerCase()) ||
+                        e.tournament.category.name.toLowerCase().includes(bl.toLowerCase())
+                    ),
+                    valueHint: valueBet ? {
+                        edge: valueBet.edge,
+                        market: valueBet.market,
+                        selection: valueBet.selection,
+                        odds: valueBet.odds
+                    } : null
+                };
             });
-            Object.values(groups).forEach(group => {
-                filteredEvents.push(...group.sort((a, b) => a.startTimestamp - b.startTimestamp).slice(0, 15));
-            });
-            filteredEvents.sort((a, b) => a.startTimestamp - b.startTimestamp);
-        } else {
-            // Specific sport: Priority first
-            filteredEvents = [...priorityEvents, ...secondaryEvents.slice(0, 30)]
-                .sort((a, b) => (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0) || a.startTimestamp - b.startTimestamp)
-                .slice(0, 60);
-        }
+
+        // 3. Prioritization Logic: Value Hits > Big Leagues > Others
+        let filteredEvents = allEventsRaw
+            .sort((a, b) => {
+                // 1. Value First
+                if (a.valueHint && !b.valueHint) return -1;
+                if (!a.valueHint && b.valueHint) return 1;
+                // 2. Big Leagues Second
+                if (a.isPriority && !b.isPriority) return -1;
+                if (!a.isPriority && b.isPriority) return 1;
+                // 3. Start time
+                return a.startTimestamp - b.startTimestamp;
+            })
+            .slice(0, 50);
 
         if (filteredEvents.length < 2) {
             return NextResponse.json({
@@ -115,39 +110,24 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        // Simplified data for AI
-        const simplifiedEvents = await Promise.all(filteredEvents.map(async (e, idx) => {
-            const oddsRes = await sportsDataService.getMatchOdds(e.id).catch(() => null);
-            let historyContext = "";
-            if (idx < 8) { // Only for top matches to save performance
-                try {
-                    const [homeH, awayH] = await Promise.all([
-                        sportsDataService.getTeamLastResults(e.homeTeam.id),
-                        sportsDataService.getTeamLastResults(e.awayTeam.id)
-                    ]);
-                    historyContext = `Local: ${homeH.slice(0, 2).map((ev: any) => ev.homeScore?.current + "-" + ev.awayScore?.current).join(", ")} | Visita: ${awayH.slice(0, 2).map((ev: any) => ev.homeScore?.current + "-" + ev.awayScore?.current).join(", ")}`;
-                } catch (err) { }
-            }
+        // Simplified data for AI with Value Context
+        const simplifiedEvents = await Promise.all(filteredEvents.map(async (e) => {
+            const oddsRes = e.valueHint ? null : await sportsDataService.getMatchOdds(e.id).catch(() => null);
 
             return {
                 id: e.id,
                 match: `${e.homeTeam.name} vs ${e.awayTeam.name}`,
-                score: `${e.homeScore?.current || 0}-${e.awayScore?.current || 0}`,
                 status: e.status.description,
-                startTime: new Date(e.startTimestamp * 1000).toLocaleString('es-ES', {
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }),
-                tournament: e.tournament.name,
                 sport: e.tournament.category.sport.name,
-                recentResults: historyContext,
-                realMarketOdds: oddsRes?.markets?.slice(0, 3).map((m: any) => ({
-                    name: m.marketName,
-                    odds: m.choices?.map((c: any) => `${c.name}: ${c.fraction}`)
-                })) || []
+                league: e.tournament.name,
+                startTime: new Date(e.startTimestamp * 1000).toLocaleString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                // INYECCIÓN DE VALOR: El secreto del éxito
+                valueAnalysis: e.valueHint ? `VALOR DETECTADO: El mercado ${e.valueHint.market} tiene un Edge del ${e.valueHint.edge}% en Betplay.` : null,
+                realMarketOdds: e.valueHint ? [{ name: e.valueHint.market, odds: [`${e.valueHint.selection}: ${e.valueHint.odds}`] }] :
+                    (oddsRes?.markets?.slice(0, 2).map((m: any) => ({
+                        name: m.marketName,
+                        odds: m.choices?.slice(0, 3).map((c: any) => `${c.name}: ${c.fraction}`)
+                    })) || [])
             };
         }));
 

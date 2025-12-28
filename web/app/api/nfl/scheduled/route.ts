@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { firebaseReadService } from '@/lib/services/firebaseReadService';
-import { batchSyncService } from '@/lib/services/batchSyncService';
+import { firebaseReadService } from '@/lib/FirebaseReadService';
+import { initializeFirebaseAdmin } from '@/lib/firebaseAdmin';
+
+try {
+    initializeFirebaseAdmin();
+} catch (error) {
+    console.error('❌ Error inicializando Firebase:', error);
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -11,12 +17,12 @@ export async function GET(request: NextRequest) {
     try {
         console.log(`⚡ [API] Fetching SCHEDULED NFL games for ${date} (Firebase-First)...`);
 
-        let events = await firebaseReadService.getScheduledGames('american-football', date);
+        let events = await firebaseReadService.getScheduledGames('american-football');
 
         if (events.length === 0) {
             console.warn(`⚠️ [API] No scheduled NFL games for ${date}. Triggering sync...`);
-            await batchSyncService.syncSport('american-football');
-            events = await firebaseReadService.getScheduledGames('american-football', date);
+            fetch(`http://localhost:3001/api/trigger/sofascore`, { method: 'POST' })
+                .catch(err => console.error('Sync trigger failed:', err));
         }
 
         const transformedData = events.map((game: any) => ({
@@ -51,7 +57,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            data: transformedData,
+            events: transformedData,
             count: transformedData.length
         });
     } catch (error: any) {

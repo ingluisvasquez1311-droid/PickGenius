@@ -7,16 +7,25 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // 2. ROBOT DE SINCRONIZACIÓN (TODOS LOS DEPORTES: Fútbol, NBA, NFL, Tenis, etc.)
-    // La colección 'games' centraliza todos los deportes usando prefijos (ej: football_123)
-    match /games/{gameId} {
-      allow read: if true; // Publico para que los usuarios vean los pronósticos
-      allow write: if false; // Solo el Servidor/Robot (Admin SDK) puede escribir
+    // 2. ROBOT DE SINCRONIZACIÓN (Dual Backend 2.0)
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /odds/{oddId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /sync_logs/{logId} {
+      allow read: if true;
+      allow write: if false;
     }
 
-    // 3. DATOS TÉCNICOS (Cuotas de Betplay y Estadísticas H2H)
-    match /marketLines/{lineId} { allow read: if true; allow write: if false; }
-    match /matchStats/{statsId} { allow read: if true; allow write: if false; }
+    // Colección antigua (Legacy/Compatibilidad)
+    match /games/{gameId} {
+      allow read: if true; 
+      allow write: if false; 
+    }
 
     // 4. HISTORIAL DE PREDICCIONES (Privado por usuario)
     match /predictions/{userId}/{document=**} {

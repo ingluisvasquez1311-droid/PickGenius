@@ -2,13 +2,17 @@ const axios = require('axios');
 const admin = require('firebase-admin');
 
 // Inicializar Firebase Admin
-const serviceAccount = require('../firebase-service-account.json');
-
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: process.env.FIREBASE_DATABASE_URL
-  });
+try {
+  if (!admin.apps.length) {
+    const serviceAccount = require('../firebase-service-account.json');
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: process.env.FIREBASE_DATABASE_URL
+    });
+  }
+} catch (e) {
+  // Si falla la carga de credenciales aquí, probablemente ya esté inicializado o se manejará en el script principal
+  console.log('ℹ️ Firebase init check skipped in module scope');
 }
 
 const db = admin.firestore();
@@ -29,13 +33,16 @@ const USE_API = !!SOFASCORE_API_KEY; // Si hay key, usar API; si no, scraping
 
 class SofaScoreScraper {
   constructor() {
-    this.baseURL = USE_API 
-      ? 'https://sofascore.p.rapidapi.com/v1' 
-      : 'https://api.sofascore.com/api/v1';
+    this.active = false; // DESACTIVADO POR SEGURIDAD
+    this.baseURL = 'http://localhost:3001/api/proxy/sportsdata';
   }
 
   // Obtener eventos de un deporte
   async fetchSportEvents(sport, sportId) {
+    if (!this.active) {
+      console.log(`🛡️ [Robot Security] SofaScore Robot is ON THE BENCH (Disabled). skipping ${sport}.`);
+      return [];
+    }
     try {
       const now = Math.floor(Date.now() / 1000);
       const tomorrow = now + 86400; // +24 horas
@@ -47,18 +54,20 @@ class SofaScoreScraper {
       const headers = USE_API ? {
         'x-rapidapi-key': SOFASCORE_API_KEY,
         'x-rapidapi-host': 'sofascore.p.rapidapi.com'
-      } : {};
+      } : {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+      };
 
-      console.log(`📥 Fetching ${sport} events from SofaScore...`);
-      
-      const response = await axios.get(url, { 
+      console.log(`📥 [BRIDGE] Fetching ${sport} events via Residency IP...`);
+
+      const response = await axios.get(url, {
         headers,
-        timeout: 15000 
+        timeout: 15000
       });
 
       const events = response.data.events || [];
       console.log(`✅ Found ${events.length} ${sport} events`);
-      
+
       return events;
     } catch (error) {
       console.error(`❌ Error fetching ${sport}:`, error.message);
@@ -68,6 +77,10 @@ class SofaScoreScraper {
 
   // Obtener eventos EN VIVO
   async fetchLiveEvents(sport, sportId) {
+    if (!this.active) {
+      console.log(`🛡️ [Robot Security] SofaScore Live Robot is ON THE BENCH. Skipping ${sport}.`);
+      return [];
+    }
     try {
       const url = USE_API
         ? `${this.baseURL}/sport/${sportId}/events/live`
@@ -76,18 +89,20 @@ class SofaScoreScraper {
       const headers = USE_API ? {
         'x-rapidapi-key': SOFASCORE_API_KEY,
         'x-rapidapi-host': 'sofascore.p.rapidapi.com'
-      } : {};
+      } : {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+      };
 
-      console.log(`📺 Fetching LIVE ${sport} events...`);
-      
-      const response = await axios.get(url, { 
+      console.log(`📺 [BRIDGE] Fetching LIVE ${sport} events via Residency IP...`);
+
+      const response = await axios.get(url, {
         headers,
-        timeout: 15000 
+        timeout: 15000
       });
 
       const events = response.data.events || [];
       console.log(`✅ Found ${events.length} LIVE ${sport} events`);
-      
+
       return events;
     } catch (error) {
       console.error(`❌ Error fetching live ${sport}:`, error.message);
@@ -114,16 +129,16 @@ class SofaScoreScraper {
         name: event.homeTeam?.name || '',
         shortName: event.homeTeam?.shortName || '',
         logo: event.homeTeam?.id ? `https://api.sofascore.com/api/v1/team/${event.homeTeam.id}/image` : null,
-        score: event.homeScore?.current || null,
-        halfScore: event.homeScore?.period1 || null
+        score: event.homeScore?.current ?? event.homeScore?.display ?? null,
+        halfScore: event.homeScore?.period1 ?? null
       },
       awayTeam: {
         id: event.awayTeam?.id,
         name: event.awayTeam?.name || '',
         shortName: event.awayTeam?.shortName || '',
         logo: event.awayTeam?.id ? `https://api.sofascore.com/api/v1/team/${event.awayTeam.id}/image` : null,
-        score: event.awayScore?.current || null,
-        halfScore: event.awayScore?.period1 || null
+        score: event.awayScore?.current ?? event.awayScore?.display ?? null,
+        halfScore: event.awayScore?.period1 ?? null
       },
       venue: {
         name: event.venue?.stadium?.name || null,
@@ -166,14 +181,14 @@ class SofaScoreScraper {
   async cleanOldEvents() {
     try {
       console.log('🗑️ Cleaning expired events...');
-      
+
       const now = new Date();
       const snapshot = await db.collection('events')
         .where('expiresAt', '<', now)
         .get();
 
       if (snapshot.empty) {
-        console.log('✅ No expired events to clean');
+        console.log('✅ No expired odds to clean');
         return 0;
       }
 
@@ -215,6 +230,30 @@ class SofaScoreScraper {
     }
   }
 
+  // Sincronización rápida (solo LIVE) - Ideal para el arranque
+  async quickLiveSync() {
+    console.log('⚡ Starting QUICK LIVE SYNC...');
+    const startTime = Date.now();
+
+    try {
+      // Sincronizar solo eventos en vivo de todos los deportes en paralelo (o con mínima pausa)
+      const syncPromises = Object.keys(SPORTS).map(async (sport) => {
+        const sportId = SPORTS[sport];
+        const liveEvents = await this.fetchLiveEvents(sport, sportId);
+        const saved = await this.saveToFirebase(liveEvents, sport);
+        return { sport, live: liveEvents.length, saved };
+      });
+
+      const results = await Promise.all(syncPromises);
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`✅ QUICK LIVE SYNC COMPLETED in ${duration}s`);
+      return { success: true, duration, results };
+    } catch (error) {
+      console.error('❌ QUICK LIVE SYNC FAILED:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // Sincronización completa
   async fullSync() {
     console.log('\n' + '='.repeat(60));
@@ -235,7 +274,7 @@ class SofaScoreScraper {
       for (const sport of Object.keys(SPORTS)) {
         const result = await this.syncSport(sport);
         results.push(result);
-        
+
         // Pausa entre deportes (2 segundos)
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
@@ -272,6 +311,48 @@ class SofaScoreScraper {
     } catch (error) {
       console.error('❌ SYNC FAILED:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Procesa y guarda datos interceptados pasivamente por el Bridge (Proxy)
+   * Esto evita que el Robot tenga que hacer su propia petición si el usuario ya vio los datos.
+   */
+  async processPassiveData(path, data) {
+    try {
+      // Detectar deporte y tipo desde el path (ej: sport/football/events/live)
+      const parts = path.split('/');
+      const sportIndex = parts.indexOf('sport');
+      if (sportIndex === -1 || parts.length < sportIndex + 3) return null;
+
+      const sport = parts[sportIndex + 1];
+      const type = parts[parts.length - 1]; // live, scheduled-events, etc.
+
+      if (!data.events || data.events.length === 0) return null;
+
+      console.log(`📡 [Passive Sync] Processing ${data.events.length} events for ${sport} (${type})`);
+
+      const batch = db.batch();
+      let savedCount = 0;
+
+      for (const event of data.events) {
+        if (!event.id) continue;
+
+        const transformed = this.transformEvent(event, sport);
+        const docRef = db.collection('events').doc(transformed.id);
+        batch.set(docRef, transformed, { merge: true });
+        savedCount++;
+      }
+
+      if (savedCount > 0) {
+        await batch.commit();
+        console.log(`✅ [Passive Sync] Saved ${savedCount} events for ${sport} to Firebase`);
+      }
+
+      return { success: true, saved: savedCount };
+    } catch (error) {
+      console.error('❌ Passive Sync Error:', error.message);
+      return null;
     }
   }
 }

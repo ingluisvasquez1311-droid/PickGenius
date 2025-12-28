@@ -2,20 +2,28 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const cronScheduler = require('./schedulers/cronJobs');
+const sofascoreRobot = require('./robots/sofascoreScraper');
+const multiSourceService = require('./services/multiSourceService');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Inicializar Firebase Admin
-const serviceAccount = require('./firebase-service-account.json');
+try {
+    const serviceAccount = require('./firebase-service-account.json');
+    if (!admin.apps.length) {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: process.env.FIREBASE_DATABASE_URL
+        });
+    }
+} catch (e) {
+    console.error("🔥 Error initializing Firebase Admin in server.js:", e.message);
+    console.log("⚠️  Ensure 'firebase-service-account.json' is present in the backend root.");
+}
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: process.env.FIREBASE_DATABASE_URL
-});
-
-const db = admin.firestore();
+const db = admin.apps.length ? admin.firestore() : null;
 
 // Middleware
 app.use(cors());
@@ -26,7 +34,7 @@ app.use(express.json());
 // ============================================================================
 
 // Trigger manual de Robot 1 (SofaScore)
-app.post('/api/trigger/sofascore', async (req, res) => {
+app.all('/api/trigger/sofascore', async (req, res) => {
     try {
         console.log('🔧 Manual trigger: SofaScore');
         const result = await cronScheduler.runManual('sofascore');
@@ -45,7 +53,7 @@ app.post('/api/trigger/sofascore', async (req, res) => {
 });
 
 // Trigger manual de Robot 2 (BetPlay)
-app.post('/api/trigger/betplay', async (req, res) => {
+app.all('/api/trigger/betplay', async (req, res) => {
     try {
         console.log('🔧 Manual trigger: BetPlay');
         const result = await cronScheduler.runManual('betplay');
@@ -64,7 +72,7 @@ app.post('/api/trigger/betplay', async (req, res) => {
 });
 
 // Trigger manual de ambos robots
-app.post('/api/trigger/all', async (req, res) => {
+app.all('/api/trigger/all', async (req, res) => {
     try {
         console.log('🔧 Manual trigger: ALL ROBOTS');
         const results = await cronScheduler.runManual('all');
@@ -89,6 +97,8 @@ app.post('/api/trigger/all', async (req, res) => {
 // Estado del sistema
 app.get('/api/status', async (req, res) => {
     try {
+        if (!db) throw new Error("Firebase DB not initialized");
+
         // Contar documentos en Firebase
         const [eventsSnapshot, oddsSnapshot, logsSnapshot] = await Promise.all([
             db.collection('events').limit(1000).get(),
@@ -130,6 +140,7 @@ app.get('/api/status', async (req, res) => {
 // Historial de sincronizaciones
 app.get('/api/sync/history', async (req, res) => {
     try {
+        if (!db) throw new Error("Firebase DB not initialized");
         const limit = parseInt(req.query.limit) || 20;
 
         const snapshot = await db.collection('sync_logs')
@@ -166,16 +177,146 @@ app.get('/api/sync/history', async (req, res) => {
 });
 
 // ============================================================================
+// ENDPOINTS DE DEPORTES (RED DE RESPALDO)
+// ============================================================================
+
+// Partidos en VIVO (AiScore/Flashscore)
+app.get('/api/:sport/live', async (req, res) => {
+    try {
+        const { sport } = req.params;
+        console.log(`📡 [API] Direct Live Request: ${sport}`);
+        const data = await multiSourceService.fetchLiveEvents(sport);
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Partidos PROGRAMADOS (Firebase fallback por ahora)
+app.get('/api/:sport/scheduled', async (req, res) => {
+    try {
+        const { sport } = req.params;
+        const date = req.query.date || new Date().toISOString().split('T')[0];
+        console.log(`📡 [API] Scheduled Request: ${sport} for ${date}`);
+
+        // Consultamos Firebase para no tocar SofaScore
+        const snapshot = await db.collection('events')
+            .where('sport', '==', sport)
+            .where('status', '==', 'scheduled')
+            .limit(100)
+            .get();
+
+        const events = [];
+        snapshot.forEach(doc => events.push(doc.data()));
+
+        res.json({ events });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================================
 // ENDPOINT DE SALUD
 // ============================================================================
 
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        memory: process.memoryUsage()
+        memory: process.memoryUsage(),
+        bridge: 'Dual Backend 2.0 Active'
     });
+});
+
+// Alias para compatibilidad
+app.get('/health', (req, res) => res.redirect('/api/health'));
+
+// ============================================================================
+// PROXY DE DATOS (BRIDGE)
+// ============================================================================
+
+const axios = require('axios');
+
+// Proxy para logos de equipos
+app.get('/api/proxy/team-logo/:teamId', async (req, res) => {
+    try {
+        const url = `https://api.sofascore.app/api/v1/team/${req.params.teamId}/image`;
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        res.set('Content-Type', response.headers['content-type']);
+        res.set('Cache-Control', 'public, max-age=86400');
+        res.send(response.data);
+    } catch (error) {
+        res.status(404).send('Logo not found');
+    }
+});
+
+// Proxy para imágenes de jugadores
+app.get('/api/proxy/player-image/:playerId', async (req, res) => {
+    try {
+        const url = `https://api.sofascore.app/api/v1/player/${req.params.playerId}/image`;
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        res.set('Content-Type', response.headers['content-type']);
+        res.set('Cache-Control', 'public, max-age=86400');
+        res.send(response.data);
+    } catch (error) {
+        res.status(404).send('Player image not found');
+    }
+});
+
+// Proxy para banderas/categorías
+app.get('/api/proxy/category-image/:categoryId', async (req, res) => {
+    try {
+        const url = `https://api.sofascore.app/api/v1/category/${req.params.categoryId}/image`;
+        const response = await axios.get(url, { responseType: 'arraybuffer' });
+        res.set('Content-Type', response.headers['content-type']);
+        res.set('Cache-Control', 'public, max-age=86400');
+        res.send(response.data);
+    } catch (error) {
+        res.status(404).send('Category image not found');
+    }
+});
+
+// Proxy para datos crudos de Sofascore (H2H, Momentum, etc)
+app.get('/api/proxy/sportsdata/*', async (req, res) => {
+    try {
+        const path = req.params[0];
+        console.log(`🔌 [Bridge Proxy] Standard Route (Direct): ${path}`);
+
+        const data = await multiSourceService.fetchData(path);
+        res.json(data);
+
+    } catch (error) {
+        console.error(`❌ [Bridge Error] ${error.message}`);
+        res.status(500).json({ success: false, error: 'SofaScore Access Error' });
+    }
+});
+
+// --- CONFIG: COOKIE INJECTION ---
+app.post('/api/proxy/config', express.json(), (req, res) => {
+    const { source, cookies } = req.body;
+    if (multiSourceService.updateCookies(source, cookies)) {
+        res.json({ success: true, message: `Cookies updated for ${source}` });
+    } else {
+        res.status(400).json({ success: false, message: 'Invalid source' });
+    }
+});
+
+// Proxy para cuotas de Betplay/Kambi
+app.get('/api/proxy/kambi/*', async (req, res) => {
+    try {
+        const path = req.params[0];
+        const url = `https://tienda.betplay.com.co/offering/v21/betp/${path}${req.url.includes('?') ? '?' + req.url.split('?')[1] : ''}`;
+        const response = await axios.get(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0',
+                'Referer': 'https://tienda.betplay.com.co/'
+            }
+        });
+        res.json(response.data);
+    } catch (error) {
+        res.status(error.response?.status || 500).json({ error: error.message });
+    }
 });
 
 // ============================================================================
@@ -193,41 +334,38 @@ app.use((err, req, res, next) => {
 // ============================================================================
 // INICIAR SERVIDOR
 // ============================================================================
-
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log('\n' + '═'.repeat(70));
     console.log('║' + ' '.repeat(20) + '🏆 PICKGENIUS BACKEND' + ' '.repeat(25) + '║');
     console.log('═'.repeat(70));
+
     console.log(`
 ✅ Server running on port ${PORT}
-✅ Firebase connected to project: ${admin.app().options.projectId}
+${db ? '✅ Firebase connected' : '❌ Firebase NOT connected'}
 ${process.env.NGROK_URL ? `✅ Ngrok URL: ${process.env.NGROK_URL}` : '⚠️  Ngrok URL not configured'}
 
 📡 Available Endpoints:
-   
-   🤖 Robot Control:
-   POST http://localhost:${PORT}/api/trigger/sofascore
-   POST http://localhost:${PORT}/api/trigger/betplay  
-   POST http://localhost:${PORT}/api/trigger/all
-   
-   📊 Monitoring:
-   GET  http://localhost:${PORT}/api/status
-   GET  http://localhost:${PORT}/api/sync/history?limit=20
-   GET  http://localhost:${PORT}/health
 
-🤖 Robots:
-   Robot 1 (SofaScore): Scrapes sports events → Firebase
-   Robot 2 (BetPlay): Reads odds JSON → Firebase
+   🤖 Robot Control (POST/GET):
+   - http://localhost:${PORT}/api/trigger/sofascore
+   - http://localhost:${PORT}/api/trigger/betplay
+   - http://localhost:${PORT}/api/trigger/all
 
-📅 CRON Schedule:
-   🔄 Starting automated schedulers...
-  `);
+   📊 Monitoring (GET):
+   - http://localhost:${PORT}/api/status
+   - http://localhost:${PORT}/api/health
 
-    // Iniciar CRON jobs
-    cronScheduler.start();
+🤖 Robots Active: SofaScore (Updates Firebase) & BetPlay (Odds Sync)
+📅 CRON Schedule: Automático cada 5, 15 y 30 minutos.
+`);
 
-    console.log(`
-═`.repeat(70) + '\n');
+    if (db) {
+        // Arrancar Schedulers (BetPlay activo, SofaScore en modo pasivo)
+        cronScheduler.start();
+        console.log('🛡️  SofaScore Passive Mode: Waiting for user activity...');
+    }
+
+    console.log('═'.repeat(70) + '\n');
 });
 
 // Manejo de cierre graceful

@@ -91,6 +91,9 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
 
                 // --- NEW: Universal History Archiving (Now including Guests) ---
                 try {
+                    // 🔥 AUTO-ARCHIVE: Now handled by the backend during generation
+                    // to avoid Permission Denied on Firestore client
+                    /*
                     await saveToHistory({
                         gameId: eventId.toString(),
                         sport: sport,
@@ -103,6 +106,7 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
                         status: 'pending'
                     });
                     console.log('✅ AI Oracle verdict archived');
+                    */
                 } catch (saveErr) {
                     console.error('❌ Failed to archive prediction:', saveErr);
                 }
@@ -160,11 +164,12 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
                         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                             <span className="text-3xl">🧙</span> Oráculo PickGenius
                         </h2>
-                        {prediction?.sourceVerification?.isVerified && (
+                        {prediction?.sourceVerification && (
                             <div className="flex items-center gap-1.5 mt-1">
-                                <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                                <span className="text-[10px] font-black text-green-400 uppercase tracking-widest flex items-center gap-1">
-                                    <Shield className="w-3 h-3" /> Verificado con {prediction.sourceVerification.provider}
+                                <span className={`flex h-2 w-2 rounded-full animate-pulse ${prediction.sourceVerification.isVerified ? 'bg-green-500' : 'bg-blue-500'}`}></span>
+                                <span className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${prediction.sourceVerification.isVerified ? 'text-green-400' : 'text-blue-400'}`}>
+                                    <ShieldCheck className="w-3 h-3" />
+                                    {prediction.sourceVerification.isVerified ? 'Verificado Betplay Direct' : `Análisis en Base a: ${prediction.dataSource || 'Bridge de Datos'}`}
                                 </span>
                             </div>
                         )}
@@ -439,7 +444,7 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
                                             </p>
                                             {prediction.predictions.overUnder && (
                                                 <span className="text-[9px] bg-green-500/20 text-green-400 font-black px-1.5 py-0.5 rounded uppercase">
-                                                    {prediction.predictions.overUnder.pick}
+                                                    <span suppressHydrationWarning>Generado: {new Date(prediction.generatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                 </span>
                                             )}
                                         </div>

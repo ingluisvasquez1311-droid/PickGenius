@@ -21,14 +21,14 @@ export async function GET() {
 
         if (!hasRecentData) {
             console.warn(`⚠️ No recent data for ${SPORT_ID} ${TYPE}, triggering background sync`);
-            fetch(`http://localhost:3001/api/admin/sync/${SPORT_ID}`, { method: 'POST' })
+            fetch(`http://localhost:3001/api/trigger/sofascore`, { method: 'POST' })
                 .catch(err => console.error('Sync trigger failed:', err));
         }
 
         const games = await firebaseReadService.getLiveGames(SPORT_ID);
         const duration = Date.now() - startTime;
 
-        return NextResponse.json(games, {
+        return NextResponse.json({ events: games }, {
             headers: {
                 'X-Response-Time': `${duration}ms`,
                 'X-Data-Source': 'firebase'

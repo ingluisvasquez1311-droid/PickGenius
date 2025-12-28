@@ -29,9 +29,9 @@ if %ERRORLEVEL% NEQ 0 (
 )
 cd ..
 
-REM Iniciar backend
+REM Iniciar backend (Nuevo Robot Bridge)
 echo [4/5] Iniciando servidor backend (puerto 3001)...
-start "PickGenius Backend" cmd /k "node server.js"
+start "PickGenius Backend" cmd /k "cd backend && node server.js"
 timeout /t 5 /nobreak >nul
 
 REM Iniciar frontend

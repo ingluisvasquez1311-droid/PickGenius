@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 const fs = require('fs').promises;
 const path = require('path');
 
-// Usar la misma instancia de Firebase
+// Usar la misma instancia de Firebase (asumiendo init previo)
 const db = admin.firestore();
 
 // Configuración
@@ -26,13 +26,16 @@ class BetPlayReader {
                 return response.data;
             } else {
                 console.log(`📂 Reading BetPlay data from file: ${BETPLAY_JSON_PATH}`);
+                // Resolver path desde donde se ejecuta, o relativo a este archivo
+                // Asumimos ejecución desde root del backend, pero intentamos resolver seguro
                 const filePath = path.resolve(BETPLAY_JSON_PATH);
                 const fileContent = await fs.readFile(filePath, 'utf8');
                 return JSON.parse(fileContent);
             }
         } catch (error) {
             console.error('❌ Error reading BetPlay data:', error.message);
-            throw error;
+            // Retornar estructura vacía para no romper el flujo
+            return { events: [] };
         }
     }
 
@@ -152,9 +155,18 @@ class BetPlayReader {
 
         for (const odds of oddsArray) {
             try {
+                // Unificamos con marketLines para que coincida con el OddsSyncService
                 const docId = `${odds.sport}_${odds.eventId}`;
-                const docRef = db.collection('odds').doc(docId);
-                batch.set(docRef, odds, { merge: true });
+                const docRef = db.collection('marketLines').doc(docId);
+
+                // Mapeo de compatibilidad con MarketLine interface
+                const marketData = {
+                    ...odds,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    marketSource: 'Robot BetPlay Reader'
+                };
+
+                batch.set(docRef, marketData, { merge: true });
                 saved++;
             } catch (error) {
                 console.error(`❌ Error preparing odds ${odds.eventId}:`, error.message);
@@ -172,7 +184,7 @@ class BetPlayReader {
             console.log('🗑️ Cleaning expired odds...');
 
             const now = new Date();
-            const snapshot = await db.collection('odds')
+            const snapshot = await db.collection('marketLines')
                 .where('expiresAt', '<', now)
                 .get();
 

@@ -1,10 +1,19 @@
 // Configuración centralizada de la API
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const isServer = typeof window === 'undefined';
+const DEFAULT_BASE_URL = isServer ? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000') : '';
+export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_BASE_URL;
 
 export async function fetchAPI(endpoint: string, options?: RequestInit, retries = 3, backoff = 1000) {
     // Ensure endpoint starts with / if it's not an absolute URL
     const isAbsolute = endpoint.startsWith('http');
-    const url = isAbsolute ? endpoint : `${API_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    let url = endpoint;
+
+    if (!isAbsolute) {
+        // En el servidor, necesitamos URLs absolutas. En el cliente, las relativas funcionan (pero las absolutas también).
+        const baseUrl = API_URL.replace(/\/$/, '');
+        const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+        url = `${baseUrl}${cleanEndpoint}`;
+    }
 
     console.log(`🔍 [API] Fetching: ${url} (Retries left: ${retries})`);
 

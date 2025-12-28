@@ -1,0 +1,52 @@
+{
+  "stats": {
+    "american-football": {
+      "notstarted": 13,
+      "inprogress": 3,
+      "finished": 4
+    },
+    "baseball": {
+      "inprogress": 1,
+      "notstarted": 29,
+      "finished": 3
+    },
+    "basketball": {
+      "finished": 179,
+      "notstarted": 341,
+      "inprogress": 15,
+      "canceled": 1,
+      "postponed": 6
+    },
+    "football": {
+      "finished": 74,
+      "notstarted": 48,
+      "inprogress": 7,
+      "postponed": 6
+    },
+    "ice-hockey": {
+      "notstarted": 219,
+      "finished": 67,
+      "inprogress": 14,
+      "postponed": 26
+    },
+    "tennis": {
+      "notstarted": 129,
+      "finished": 35,
+      "canceled": 40,
+      "inprogress": 4
+    }
+  },
+  "sample": {
+    "id": "american-football_13899168",
+    "sport": "american-football",
+    "status": "notstarted",
+    "startTime": {
+      "_seconds": 1766944800,
+      "_nanoseconds": 0
+    },
+    "home": "Miami Dolphins",
+    "away": "Tampa Bay Buccaneers"
+  },
+  "error": null,
+  "timestamp": "2025-12-28T00:53:17.218Z"
+}

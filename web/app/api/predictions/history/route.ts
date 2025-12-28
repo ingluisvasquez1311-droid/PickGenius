@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore';
+import { getFirestore } from '@/lib/firebaseAdmin';
+import { archivePredictionOnServer } from '@/lib/services/predictionArchiveService';
 
 export async function POST(request: NextRequest) {
     try {
@@ -11,35 +11,21 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
         }
 
-        if (!db) {
-            return NextResponse.json({ success: false, error: 'Database connection failed' }, { status: 500 });
-        }
-
-        // Save to specific user's history
-        const userHistoryRef = collection(db, 'users', userId, 'predictions');
-        await addDoc(userHistoryRef, {
+        await archivePredictionOnServer(userId, {
             gameId,
-            prediction,
-            timestamp: serverTimestamp(),
-            createdAt: new Date().toISOString()
-        });
-
-        // Optionally save to global history statistics
-        const globalRef = collection(db, 'stats_predictions');
-        await addDoc(globalRef, {
-            gameId,
-            pick: prediction.pick,
+            sport: prediction.sport || 'football',
+            winner: prediction.winner,
+            bettingTip: prediction.bettingTip || prediction.pick,
             confidence: prediction.confidence,
-            timestamp: serverTimestamp()
+            reasoning: prediction.reasoning || ''
         });
 
         return NextResponse.json({ success: true });
     } catch (error: any) {
-        console.error('Error saving prediction history:', error);
+        console.error('Error saving prediction history via API:', error);
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }
-// ... POST method ...
 
 export async function GET(request: NextRequest) {
     try {
@@ -50,30 +36,16 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Missing userId' }, { status: 400 });
         }
 
-        if (!db) {
-            return NextResponse.json({ success: false, error: 'Database connection failed' }, { status: 500 });
-        }
+        const db = getFirestore();
 
         // Fetch user's history
-        const userHistoryRef = collection(db, 'users', userId, 'predictions');
-        // Sort by timestamp desc implementation would require an index, simpler to fetch and sort in memory if small,
-        // or use simple query. Since this is "history", usually we want latest.
-        // For strict ordering we need composite index `predictions/{id} -> timestamp`.
-        // We'll trust default ordering or client sorting for MVP to avoid index creation Requirement on user.
-        // Actually, let's try strict sort.
-        // const q = query(userHistoryRef, orderBy('timestamp', 'desc')); 
-        // Failing indexes, let's just get docs.
-        const snapshot = await getDocs(userHistoryRef);
+        const userHistoryRef = db.collection('users').doc(userId).collection('predictions');
+        const snapshot = await userHistoryRef.orderBy('timestamp', 'desc').limit(50).get();
 
         const history = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
-        })).sort((a: any, b: any) => {
-            // Memory sort by timestamp
-            const tA = a.timestamp?.seconds || 0;
-            const tB = b.timestamp?.seconds || 0;
-            return tB - tA;
-        });
+        }));
 
         return NextResponse.json({ success: true, history });
 

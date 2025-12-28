@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBettingSlip } from '@/contexts/BettingSlipContext';
 import { useAuth } from '@/contexts/AuthContext';
 import confetti from 'canvas-confetti';
@@ -11,6 +11,11 @@ export default function BettingSlip() {
     const { user, saveParley } = useAuth();
     const [wager, setWager] = useState<string>('10');
     const [selectedHouse, setSelectedHouse] = useState<string>('betano');
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const bettingHouses = [
         { id: 'betano', name: 'Betano', url: 'https://www.betano.com.co/', color: 'from-yellow-600 to-orange-600' },
@@ -18,6 +23,8 @@ export default function BettingSlip() {
         { id: 'rushbet', name: 'Rushbet', url: 'https://www.rushbet.co/', color: 'from-blue-600 to-cyan-600' },
         { id: 'bet365', name: 'Bet365', url: 'https://www.bet365.com/', color: 'from-green-600 to-green-700' },
     ];
+
+    if (!mounted) return null;
 
     if (!isOpen && bets.length === 0) {
         return null;

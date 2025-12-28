@@ -1,6 +1,6 @@
 export interface ValueBet {
     id: string;
-    sport: 'football' | 'basketball';
+    sport: string;
     league: string;
     homeTeam: string;
     awayTeam: string;
@@ -26,16 +26,17 @@ class ValueBetsService {
     // Get Value Bets (Real or Mock)
     async getValueBets(): Promise<ValueBet[]> {
         let bets: ValueBet[] = [];
+        const sports = ['football', 'basketball', 'tennis', 'baseball', 'ice-hockey', 'american-football'];
 
         try {
-            // Intentar obtener partidos reales de Sofascore para hoy
+            // Intentar obtener partidos reales de todos los deportes
             const { sportsDataService } = await import('./sportsDataService');
-            const [footballEvents, basketballEvents] = await Promise.all([
-                sportsDataService.getAllFootballMatches(),
-                sportsDataService.getAllBasketballGames()
-            ]);
 
-            const realGames = [...footballEvents, ...basketballEvents];
+            const eventsResults = await Promise.all(
+                sports.map(sport => sportsDataService.getEventsBySport(sport).catch(() => []))
+            );
+
+            const realGames = eventsResults.flat();
 
             if (realGames.length > 0) {
                 bets = this.generateValueBetsFromRealGames(realGames);
@@ -43,7 +44,7 @@ class ValueBetsService {
                 bets = await this.getMockValueBets();
             }
         } catch (error) {
-            console.error("❌ Error fetching Real Data:", error);
+            console.error("❌ Error fetching Real Data for Value Bets:", error);
             bets = await this.getMockValueBets();
         }
 

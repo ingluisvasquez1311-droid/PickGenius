@@ -17,42 +17,18 @@ class CronScheduler {
         console.log('📅 Starting CRON Schedulers');
         console.log('='.repeat(60) + '\n');
 
-        // ROBOT 1: SofaScore - Cada 30 minutos
-        this.jobs.sofascore = cron.schedule('*/30 * * * *', async () => {
-            if (this.isRunning.sofascore) {
-                console.log('⚠️ SofaScore sync already running, skipping...');
-                return;
-            }
-
-            try {
-                this.isRunning.sofascore = true;
-                await sofascoreScraper.fullSync();
-            } catch (error) {
-                console.error('❌ SofaScore sync error:', error);
-            } finally {
-                this.isRunning.sofascore = false;
-            }
+        /* 
+        // ROBOT 1: SofaScore (MODO PASIVO) 
+        // Desactivado para evitar peticiones independientes desde la IP residencial
+        // El guardado ocurre automáticamente vía Piggyback en server.js
+        this.jobs.sofascore = cron.schedule('0 * * * *', async () => {
+             // ...
         });
-
-        // ROBOT 1b: SofaScore LIVE - Cada 5 minutos (solo eventos en vivo)
-        this.jobs.sofascoreLive = cron.schedule('*/5 * * * *', async () => {
-            if (this.isRunning.sofascore) return;
-
-            try {
-                console.log('🔄 Quick live events update...');
-                // Aquí podrías tener una versión rápida que solo actualiza eventos en vivo
-            } catch (error) {
-                console.error('❌ Live update error:', error);
-            }
-        });
+        */
 
         // ROBOT 2: BetPlay - Cada 15 minutos
         this.jobs.betplay = cron.schedule('*/15 * * * *', async () => {
-            if (this.isRunning.betplay) {
-                console.log('⚠️ BetPlay sync already running, skipping...');
-                return;
-            }
-
+            if (this.isRunning.betplay) return;
             try {
                 this.isRunning.betplay = true;
                 await betplayReader.fullSync();
@@ -64,9 +40,8 @@ class CronScheduler {
         });
 
         console.log('✅ CRON Jobs started:');
-        console.log('  🤖 Robot 1 (SofaScore): Every 30 minutes');
-        console.log('  🤖 Robot 1b (Live): Every 5 minutes');
-        console.log('  🤖 Robot 2 (BetPlay): Every 15 minutes');
+        console.log('  🤖 SofaScore: Passive Mode (Piggyback Active)');
+        console.log('  🤖 BetPlay: Every 15 minutes');
         console.log('='.repeat(60) + '\n');
     }
 
@@ -75,6 +50,8 @@ class CronScheduler {
         console.log(`🔧 Manual sync triggered: ${robot}`);
 
         switch (robot) {
+            case 'quick_live':
+                return await sofascoreScraper.quickLiveSync();
             case 'sofascore':
                 if (this.isRunning.sofascore) {
                     throw new Error('SofaScore sync already running');

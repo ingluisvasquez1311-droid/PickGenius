@@ -106,18 +106,6 @@ export interface SportsDataResponse {
 class SportsDataService {
     private headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-        'Referer': 'https://www.sofascore.com/',
-        'Origin': 'https://www.sofascore.com',
-        'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="121", "Google Chrome";v="121"',
-        'Sec-Ch-Ua-Mobile': '?0',
-        'Sec-Ch-Ua-Platform': '"Windows"',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-site',
-        'Bypass-Tunnel-Reminder': 'true',
-        'ngrok-skip-browser-warning': 'true'
     };
 
     /**
@@ -133,7 +121,15 @@ class SportsDataService {
                 headers: this.headers
             });
         } catch (error: any) {
-            console.error(`❌ [SportsDataService] Request failed for ${endpoint}:`, error.message);
+            // Silence 404s as they are often expected (e.g., no momentum or no lineups for small leagues)
+            const errorMsg = error.message || '';
+            const is404 = errorMsg.includes('404') || error.status === 404 || error.response?.status === 404;
+
+            if (!is404) {
+                console.error(`❌ [SportsDataService] Request failed for ${endpoint}:`, errorMsg);
+            } else {
+                // console.warn(`[SportsDataService] Data not found (404) for ${endpoint} - This is often expected.`);
+            }
             return null;
         }
     }
@@ -141,9 +137,21 @@ class SportsDataService {
     /**
      * Obtiene partidos de fútbol en vivo
      */
+    /**
+     * Obtiene partidos de fútbol en vivo
+     */
     async getLiveFootballMatches(): Promise<SportsDataEvent[]> {
-        const data = await this.makeRequest<SportsDataResponse>('/sport/football/events/live');
-        return data?.events || [];
+        try {
+            // 1. Prioridad: Sofascore DIRECTO (vía Bridge) para inmediatez absoluta
+            const data = await this.makeRequest<SportsDataResponse>('/sport/football/events/live');
+            if (data?.events && data.events.length > 0) return data.events;
+        } catch (e) {
+            console.warn("⚠️ Fallback to Firebase for Live Football");
+        }
+
+        // 2. Fallback: Firebase (Vía nuestra API interna)
+        const res = await fetchAPI('/api/football/live', { headers: this.headers });
+        return res?.events || [];
     }
 
     /**
@@ -157,7 +165,20 @@ class SportsDataService {
      * Obtiene eventos programados de forma filtrada (Backend Local)
      */
     async getScheduledEventsBySport(sport: string, date?: string): Promise<SportsDataEvent[]> {
+        const today = date || new Date().toISOString().split('T')[0];
+
         try {
+            // 1. Prioridad: Sofascore DIRECTO (vía Bridge) - Lo que Daniel ve en su PC
+            const ssData = await this.makeRequest<SportsDataResponse>(`/sport/${sport}/scheduled-events/${today}`);
+            if (ssData?.events && ssData.events.length > 0) {
+                return ssData.events;
+            }
+        } catch (e) {
+            console.warn(`⚠️ SofaScore Direct failed for ${sport}, checking Firebase...`);
+        }
+
+        try {
+            // 2. Fallback: Nuestra API de Firebase
             const queryParams = date ? `?date=${date}` : '';
             const endpoint = `/api/${sport}/scheduled${queryParams}`;
 
@@ -167,7 +188,7 @@ class SportsDataService {
 
             return result.events || result.data || [];
         } catch (error) {
-            console.error(`❌ [SportsDataService] Error fetching scheduled ${sport}:`, error);
+            console.error(`❌ [SportsDataService] Error total fetching scheduled ${sport}:`, error);
             return [];
         }
     }
@@ -192,8 +213,17 @@ class SportsDataService {
      * Obtiene partidos de baloncesto en vivo
      */
     async getLiveBasketballGames(): Promise<SportsDataEvent[]> {
-        const data = await this.makeRequest<SportsDataResponse>('/sport/basketball/events/live');
-        return data?.events || [];
+        try {
+            // 1. Prioridad: Sofascore DIRECTO
+            const data = await this.makeRequest<SportsDataResponse>('/sport/basketball/events/live');
+            if (data?.events && data.events.length > 0) return data.events;
+        } catch (e) {
+            console.warn("⚠️ Fallback to Firebase for Live Basketball");
+        }
+
+        // 2. Fallback: Firebase
+        const res = await fetchAPI('/api/basketball/live', { headers: this.headers });
+        return res?.events || [];
     }
 
     /**
@@ -238,8 +268,47 @@ class SportsDataService {
      * Obtiene un evento específico por ID
      */
     async getEventById(eventId: string | number): Promise<SportsDataEvent | null> {
-        const data = await this.makeRequest<{ event: SportsDataEvent }>(`/event/${eventId}`);
-        return data?.event || null;
+        try {
+            // 1. PRIORIDAD ABSOLUTA: Sofascore DIRECTO (vía Bridge)
+            // Esto garantiza que Momentum, Estadísticas y Alineaciones estén disponibles AL INSTANTE
+            const ssData = await this.makeRequest<{ event: SportsDataEvent }>(`/event/${eventId}`);
+
+            if (ssData && ssData.event) {
+                const event = ssData.event;
+
+                // 2. ENRIQUECIMIENTO ASÍNCRONO: Intentar obtener cuotas/predicciones de Firebase
+                try {
+                    const firebaseRes = await fetchAPI(`/api/events/${eventId}`);
+                    if (firebaseRes && firebaseRes.event) {
+                        // Combinamos: Datos base de Sofascore + Lo que tengamos en nuestra DB (cuotas, verificaciones)
+                        return {
+                            ...event,
+                            ...firebaseRes.event,
+                            // Mantenemos los scores de Sofascore como fuente de verdad en vivo
+                            homeScore: event.homeScore,
+                            awayScore: event.awayScore,
+                            status: event.status,
+                            // Indicador de que fue enriquecido
+                            isEnriched: true
+                        };
+                    }
+                } catch (e) {
+                    // Si falla Firebase, devolvemos el evento puro de Sofascore sin problemas
+                }
+
+                return event;
+            }
+        } catch (error) {
+            console.error(`❌ [SportsDataService] Error getting event ${eventId} from Bridge:`, error);
+        }
+
+        // 3. FALLBACK: Si el bridge falla o el evento no existe en Sofascore, intentar solo Firebase
+        try {
+            const firebaseRes = await fetchAPI(`/api/events/${eventId}`);
+            return firebaseRes?.event || null;
+        } catch (e) {
+            return null;
+        }
     }
 
     /**
@@ -424,14 +493,14 @@ class SportsDataService {
         const today = date || new Date().toISOString().split('T')[0];
         const tomorrow = new Date(new Date(today).getTime() + 86400000).toISOString().split('T')[0];
 
-        // Fetch using our backend API routes
-        const [liveResult, scheduledToday, scheduledTomorrow] = await Promise.all([
-            fetchAPI(`/api/${sport}/live`).catch(() => ({ data: [] })),
+        // 1. Obtener datos REAL-TIME directamente de Sofascore (vía Bridge)
+        const [liveFromBridge, scheduledToday, scheduledTomorrow] = await Promise.all([
+            this.makeRequest<SportsDataResponse>(`/sport/${sport}/events/live`).catch(() => null),
             this.getScheduledEventsBySport(sport, today),
             this.getScheduledEventsBySport(sport, tomorrow)
         ]);
 
-        const liveEvents = liveResult?.events || liveResult?.data || [];
+        const liveEvents = liveFromBridge?.events || [];
         const liveIds = new Set(liveEvents.map((e: any) => e.id));
 
         // Filter out matches that are already LIVE from the scheduled lists
@@ -452,18 +521,18 @@ class SportsDataService {
             index === self.findIndex(e => e.id === event.id)
         );
 
-        // Filter out old finished matches (older than 2 hours) AND future matches (more than 12 hours away)
+        // Filter out old finished matches (older than 12 hours) AND future matches (more than 24 hours away)
         const now = Date.now() / 1000;
-        const twoHoursAgo = now - (2 * 60 * 60);
-        const twelveHoursFromNow = now + (12 * 60 * 60);
+        const twelveHoursAgo = now - (12 * 60 * 60);
+        const twentyFourHoursFromNow = now + (24 * 60 * 60);
 
         const recentEvents = uniqueEvents.filter((event) => {
             if (event.status?.type === 'finished') {
-                return event.startTimestamp > twoHoursAgo;
+                return event.startTimestamp > twelveHoursAgo;
             }
 
             if (event.status?.type === 'notstarted' || event.status?.type === 'scheduled') {
-                return event.startTimestamp <= twelveHoursFromNow;
+                return event.startTimestamp <= twentyFourHoursFromNow;
             }
 
             return true;

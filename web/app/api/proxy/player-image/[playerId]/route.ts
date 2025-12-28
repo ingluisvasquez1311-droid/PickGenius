@@ -11,11 +11,11 @@ export async function GET(
         return new NextResponse('Player ID required', { status: 400 });
     }
 
-    const bridgeUrl = process.env.NEXT_PUBLIC_API_URL;
+    const bridgeUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     const isVercel = !!process.env.VERCEL;
 
     // --- PRIORITY 1: BRIDGE (TUNNEL) ---
-    if (isVercel && bridgeUrl && bridgeUrl.startsWith('http')) {
+    if (bridgeUrl && bridgeUrl.startsWith('http')) {
         const cleanBridgeUrl = bridgeUrl.trim().replace(/\/$/, "");
         const bridgeFetchUrl = `${cleanBridgeUrl}/api/proxy/player-image/${playerId}`;
 

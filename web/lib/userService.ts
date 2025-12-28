@@ -430,8 +430,8 @@ export async function savePrediction(uid: string, prediction: Omit<PredictionRec
         timestamp: serverTimestamp()
     };
 
-    // 1. Save to main predictions collection
-    const predictionsRef = collection(db, 'predictions');
+    // 1. Save to main predictions collection (Structure compatible with rules: predictions/{uid}/history)
+    const predictionsRef = collection(db, 'predictions', finalUid, 'history');
     await addDoc(predictionsRef, predictionData);
 
     // 2. Save to global stats for Admin Live Feed
@@ -483,10 +483,9 @@ import { where } from 'firebase/firestore';
 export async function getUserPredictions(uid: string, limitCount: number = 20): Promise<PredictionRecord[]> {
     if (!db) return [];
 
-    const predictionsRef = collection(db, 'predictions');
+    const predictionsRef = collection(db, 'predictions', uid, 'history');
     const q = query(
         predictionsRef,
-        where('uid', '==', uid),
         orderBy('timestamp', 'desc'),
         limit(limitCount)
     );
