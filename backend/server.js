@@ -281,14 +281,31 @@ app.get('/api/proxy/category-image/:categoryId', async (req, res) => {
 app.get('/api/proxy/sportsdata/*', async (req, res) => {
     try {
         const path = req.params[0];
-        console.log(`🔌 [Bridge Proxy] Standard Route (Direct): ${path}`);
+        console.log(`🔌 [Bridge Proxy] Request: ${path}`);
 
+        // NUEVO: Detectar si es una petición de eventos en vivo y usar AiScore
+        const liveEventsMatch = path.match(/sport\/([^\/]+)\/events\/live/);
+        if (liveEventsMatch) {
+            const sport = liveEventsMatch[1];
+            console.log(`🎯 [Bridge] Redirecting to AiScore for live ${sport} events...`);
+
+            try {
+                const data = await multiSourceService.fetchLiveEvents(sport);
+                return res.json(data);
+            } catch (error) {
+                console.error(`❌ [Bridge] AiScore failed for ${sport}:`, error.message);
+                // No hacer fallback a SofaScore aquí, devolver vacío
+                return res.json({ events: [] });
+            }
+        }
+
+        // Para otros endpoints (scheduled, match details, etc), usar SofaScore directo
         const data = await multiSourceService.fetchData(path);
         res.json(data);
 
     } catch (error) {
         console.error(`❌ [Bridge Error] ${error.message}`);
-        res.status(500).json({ success: false, error: 'SofaScore Access Error' });
+        res.status(500).json({ success: false, error: 'Bridge Error', message: error.message });
     }
 });
 
