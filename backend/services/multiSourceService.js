@@ -9,8 +9,8 @@ const sofascoreRobot = require('../robots/sofascoreScraper');
 class MultiSourceService {
     constructor() {
         this.sources = {
-            sofascore: { active: true, weight: 50, lastError: null }, // Secundario: Fallback
-            aiscore: { active: true, weight: 100, lastError: null }, // PRIMARIO
+            sofascore: { active: true, weight: 100, lastError: null }, // SOLO PASIVO (Piggyback)
+            aiscore: { active: false, weight: 0, lastError: null }, // DESACTIVADO
             flashscore: { active: false, weight: 0, lastError: null }
         };
 
@@ -162,45 +162,12 @@ class MultiSourceService {
     }
 
     /**
-     * Intenta obtener datos de múltiples fuentes en orden de prioridad.
-     * PRIORIZA AiScore para evitar bloqueos 403 de SofaScore.
+     * MODO 100% PASIVO: Este método NO hace peticiones.
+     * Los datos solo vienen de Firebase cuando el usuario navega (Piggyback)
      */
     async fetchLiveEvents(sportName) {
-        const normalizedSport = this.normalizeSport(sportName);
-
-        // --- 1. PRIORIDAD: AISCORE (PRINCIPAL - Sin bloqueos) ---
-        if (this.sources.aiscore.active) {
-            try {
-                console.log(`📡 [MultiSource] PRIMARY: AiScore for ${normalizedSport}...`);
-                const aiscoreScraper = require('../robots/aiscoreScraper');
-                const matches = await aiscoreScraper.fetchSportMatches(normalizedSport);
-                if (matches && matches.length > 0) {
-                    console.log(`✅ [MultiSource] Success with AiScore for ${normalizedSport} (${matches.length} events)`);
-                    return { events: matches };
-                }
-            } catch (error) {
-                console.warn(`⚠️ [MultiSource] AiScore failed for ${normalizedSport}: ${error.message}`);
-            }
-        }
-
-        // --- 2. FALLBACK: SOFASCORE (Secundario - Solo si AiScore falla) ---
-        if (this.sources.sofascore.active) {
-            try {
-                console.log(`📡 [MultiSource] Fallback: SofaScore H2 for ${normalizedSport}...`);
-                const path = `sport/${normalizedSport}/events/live`;
-                const data = await this.fetchFromSofaScore(path);
-
-                if (data && data.events) {
-                    console.log(`✅ [MultiSource] Success with SofaScore (Fallback) for ${normalizedSport}`);
-                    return data;
-                }
-            } catch (error) {
-                console.warn(`⚠️ [MultiSource] SofaScore H2 failed for ${normalizedSport}: ${error.message}`);
-            }
-        }
-
-        console.error(`❌ [MultiSource] No data sources available for ${normalizedSport}`);
-        return { events: [] };
+        console.log(`🛡️ [PASSIVE MODE] Live events for ${sportName} only from Firebase (No direct requests)`);
+        return { events: [] }; // Siempre vacío - los datos vienen del piggyback en server.js
     }
 
     /**
