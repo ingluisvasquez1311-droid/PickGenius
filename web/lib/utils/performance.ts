@@ -2,7 +2,7 @@
  * Utilidades de optimización de performance
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 /**
  * Hook para debounce de valores
@@ -136,6 +136,3 @@ export function useOptimizedScroll(callback: (scrollY: number) => void) {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [callback]);
 }
-
-// Necesario importar useState
-import { useState } from 'react';
