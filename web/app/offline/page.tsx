@@ -11,11 +11,6 @@ export default function OfflinePage() {
         const handleOnline = () => setOnline(true);
         const handleOffline = () => setOnline(false);
 
-        // Verificar estado inicial solo si es diferente
-        if (typeof window !== 'undefined' && online !== navigator.onLine) {
-            setOnline(navigator.onLine);
-        }
-
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 

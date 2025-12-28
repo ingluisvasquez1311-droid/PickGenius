@@ -19,7 +19,10 @@ export default function AccuracyDashboard() {
     };
 
     useEffect(() => {
-        loadStats();
+        const timer = setTimeout(() => {
+            loadStats();
+        }, 0);
+        return () => clearTimeout(timer);
     }, [period]);
 
     const overallAccuracy = stats.length > 0
