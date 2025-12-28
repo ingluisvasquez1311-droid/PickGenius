@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Daniel/PickGenius/web/app/basketball-live/layout.tsx"],"sourcesContent":["import { Metadata } from 'next';\r\nimport { constructMetadata } from '@/lib/seo';\r\n\r\nexport const metadata: Metadata = constructMetadata({\r\n    title: 'NBA y Baloncesto en Vivo | PickGenius Pro AI',\r\n    description: 'Análisis de spreads, total de puntos y props de jugadores para NBA en tiempo real con Inteligencia Artificial.',\r\n});\r\n\r\nexport default function BasketballLayout({\r\n    children,\r\n}: {\r\n    children: React.ReactNode;\r\n}) {\r\n    return <>{children}</>;\r\n}\r\n"],"names":[],"mappings":";;;;;;;AACA;;;AAEO,MAAM,WAAqB,IAAA,sIAAiB,EAAC;IAChD,OAAO;IACP,aAAa;AACjB;AAEe,SAAS,iBAAiB,EACrC,QAAQ,EAGX;IACG,qBAAO;kBAAG;;AACd"}}]
-}

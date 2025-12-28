@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Daniel/PickGenius/web/app/football-live/layout.tsx"],"sourcesContent":["import { Metadata } from 'next';\r\nimport { constructMetadata } from '@/lib/seo';\r\n\r\nexport const metadata: Metadata = constructMetadata({\r\n    title: 'Fútbol en Vivo | Predicciones AI PickGenius Pro',\r\n    description: 'Sigue los partidos de fútbol en vivo con análisis de IA, estadísticas en tiempo real y probabilidades de victoria.',\r\n});\r\n\r\nexport default function FootballLayout({\r\n    children,\r\n}: {\r\n    children: React.ReactNode;\r\n}) {\r\n    return <>{children}</>;\r\n}\r\n"],"names":[],"mappings":";;;;;;;AACA;;;AAEO,MAAM,WAAqB,IAAA,sIAAiB,EAAC;IAChD,OAAO;IACP,aAAa;AACjB;AAEe,SAAS,eAAe,EACnC,QAAQ,EAGX;IACG,qBAAO;kBAAG;;AACd"}}]
-}
