@@ -1,17 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { WifiOff, RefreshCw } from 'lucide-react';
 
 export default function OfflinePage() {
-    const [online, setOnline] = useState(false);
+    const [online, setOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : false);
 
     useEffect(() => {
         const handleOnline = () => setOnline(true);
         const handleOffline = () => setOnline(false);
 
-        // Verificar estado inicial
-        setOnline(navigator.onLine);
+        // Verificar estado inicial solo si es diferente
+        if (typeof window !== 'undefined' && online !== navigator.onLine) {
+            setOnline(navigator.onLine);
+        }
 
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
@@ -95,12 +98,12 @@ export default function OfflinePage() {
                 </div>
 
                 {/* Back Home */}
-                <a
+                <Link
                     href="/"
                     className="mt-6 inline-block text-primary hover:text-primary/80 transition-colors text-sm font-medium"
                 >
                     ← Volver al inicio
-                </a>
+                </Link>
             </div>
         </div>
     );

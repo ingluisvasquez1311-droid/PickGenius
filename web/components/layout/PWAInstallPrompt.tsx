@@ -6,7 +6,13 @@ import { toast } from 'sonner';
 
 export default function PWAInstallPrompt() {
     const [showPrompt, setShowPrompt] = useState(false);
-    const [platform, setPlatform] = useState<'ios' | 'android' | 'other'>('other');
+    const [platform, setPlatform] = useState<'ios' | 'android' | 'other'>(() => {
+        if (typeof window === 'undefined') return 'other';
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        if (/iphone|ipad|ipod/.test(userAgent)) return 'ios';
+        if (/android/.test(userAgent)) return 'android';
+        return 'other';
+    });
 
     useEffect(() => {
         // 1. Check if already installed
@@ -15,14 +21,6 @@ export default function PWAInstallPrompt() {
             || document.referrer.includes('android-app://');
 
         if (isStandalone) return;
-
-        // 2. Detect Platform
-        const userAgent = window.navigator.userAgent.toLowerCase();
-        const isIOS = /iphone|ipad|ipod/.test(userAgent);
-        const isAndroid = /android/.test(userAgent);
-
-        if (isIOS) setPlatform('ios');
-        else if (isAndroid) setPlatform('android');
 
         // 3. Show prompt after a delay (don't annoy immediately)
         const timer = setTimeout(() => {

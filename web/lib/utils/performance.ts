@@ -37,14 +37,14 @@ export function useThrottle<T extends (...args: any[]) => any>(
         callbackRef.current = callback;
     }, [callback]);
 
-    return useRef((...args: Parameters<T>) => {
+    return useCallback((...args: Parameters<T>) => {
         if (timeoutRef.current) return;
 
         timeoutRef.current = setTimeout(() => {
             callbackRef.current(...args);
             timeoutRef.current = null;
         }, delay);
-    }).current as T;
+    }, [delay]) as T;
 }
 
 /**

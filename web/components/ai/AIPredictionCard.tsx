@@ -82,7 +82,6 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
             if (timeout2) clearTimeout(timeout2);
 
             if (result) {
-                // @ts-expect-error - Handle possible confidence mismatch
                 const confidenceVal = typeof result.confidence === 'number'
                     ? result.confidence
                     : parseInt(result.confidence || '0');

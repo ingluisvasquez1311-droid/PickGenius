@@ -183,9 +183,11 @@ export async function getFirebaseHealth(): Promise<{
     }
 }
 
-export default {
+const firebaseAdmin = {
     initializeFirebaseAdmin,
     getFirestore,
     verifyFirebaseConnection,
     getFirebaseHealth
 };
+
+export default firebaseAdmin;

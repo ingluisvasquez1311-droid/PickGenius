@@ -11,16 +11,16 @@ export default function AccuracyDashboard() {
     const [period, setPeriod] = useState<'all' | 'week' | 'month'>('month');
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadStats();
-    }, [period]);
-
     const loadStats = async () => {
         setLoading(true);
         const data = await predictionTrackingService.getAccuracyStats(undefined, period);
         setStats(data);
         setLoading(false);
     };
+
+    useEffect(() => {
+        loadStats();
+    }, [period]);
 
     const overallAccuracy = stats.length > 0
         ? Math.round(stats.reduce((sum, s) => sum + s.accuracy, 0) / stats.length)
