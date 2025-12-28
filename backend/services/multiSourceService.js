@@ -16,9 +16,11 @@ class MultiSourceService {
 
         this.userAgents = [
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
         ];
+
+        this.scraperApiKey = process.env.SCRAPERAPI_KEY || '';
 
         this.cookies = {
             sofascore: '',
@@ -102,13 +104,25 @@ class MultiSourceService {
         const hostname = 'api.sofascore.com';
         const fullPath = `/api/v1/${path}`;
 
+        const userAgent = this.userAgents[Math.floor(Math.random() * this.userAgents.length)];
+
         const headers = {
-            'user-agent': this.userAgents[0],
+            ':method': 'GET',
+            ':path': fullPath,
+            ':authority': hostname,
+            ':scheme': 'https',
+            'user-agent': userAgent,
             'accept': 'application/json, text/plain, */*',
             'accept-language': 'es-ES,es;q=0.9,en;q=0.8',
             'cookie': this.cookies.sofascore,
             'referer': 'https://www.sofascore.com/',
-            'origin': 'https://www.sofascore.com'
+            'origin': 'https://www.sofascore.com',
+            'sec-ch-ua': '"Not A(Battery;Base;7.2.1", "Chromium";"121", "Google Chrome";"121"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site'
         };
 
         try {

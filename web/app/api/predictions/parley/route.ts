@@ -3,6 +3,7 @@ import { sportsDataService } from '@/lib/services/sportsDataService';
 import { groqService } from '@/lib/services/groqService';
 import { getUserProfile, saveParleyPrediction } from '@/lib/userService';
 import { ParleyResponseSchema } from '@/lib/schemas/prediction-schemas';
+import { geminiService } from '@/lib/services/geminiService';
 
 export const maxDuration = 60;
 
@@ -173,12 +174,20 @@ export async function POST(request: NextRequest) {
             }
         `;
 
+        // DANIEL: MODO DIOS PARA PARLEYS - Usando GPT-OSS 120B por su capacidad de razonamiento experto
         const parleyResult = await groqService.createPrediction({
             messages: [{ role: "user", content: prompt }],
-            model: "llama-3.1-8b-instant",
+            model: "openai/gpt-oss-120b",
             temperature: 0.7,
-            max_tokens: 2000,
             schema: ParleyResponseSchema
+        }).catch(async (err: any) => {
+            console.warn("⚠️ GPT-OSS 120B falló para Parley, usando Llama 3.3 como respaldo...");
+            return await groqService.createPrediction({
+                messages: [{ role: "user", content: prompt }],
+                model: "llama-3.3-70b-versatile",
+                temperature: 0.7,
+                schema: ParleyResponseSchema
+            });
         });
 
         if (uid) {

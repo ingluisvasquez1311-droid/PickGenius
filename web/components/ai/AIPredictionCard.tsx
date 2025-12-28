@@ -574,24 +574,63 @@ export default function AIPredictionCard({ eventId, sport, homeTeam, awayTeam }:
                                                             </p>
                                                         </div>
                                                     )}
-                                                    {/* TENNIS SPECIFIC (SETS) */}
-                                                    {sport === 'tennis' && prediction.predictions.sets && (
+                                                    {/* BEISBOL SPECIFIC (HITS) */}
+                                                    {sport === 'baseball' && prediction.predictions.hits && (
+                                                        <div className="bg-red-900/30 p-3 rounded-lg border border-red-500/20">
+                                                            <p className="text-red-300 text-[10px] uppercase font-bold mb-1">⚾ Hits Proyectados</p>
+                                                            <p className="text-white font-bold text-lg">
+                                                                {prediction.predictions.hits.total}
+                                                                {prediction.predictions.hits.pick && (
+                                                                    <span className="block text-[10px] text-red-400 font-black uppercase">
+                                                                        {prediction.predictions.hits.pick}
+                                                                    </span>
+                                                                )}
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* NHL / HOCKEY SPECIFIC (PUCK LINE) */}
+                                                    {(sport.includes('hockey') || sport.includes('nhl')) && prediction.predictions.puckLine && (
+                                                        <div className="bg-slate-800/40 p-3 rounded-lg border border-blue-400/20">
+                                                            <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🏒 Puck Line</p>
+                                                            <p className="text-white font-bold text-lg italic">
+                                                                {prediction.predictions.puckLine.line > 0 ? '+' : ''}{prediction.predictions.puckLine.line}
+                                                                <span className="text-[9px] ml-1 opacity-50 font-black">({prediction.predictions.puckLine.favorite})</span>
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* BASKETBALL SPECIFIC (1ST HALF) */}
+                                                    {sport === 'basketball' && (prediction.predictions.firstHalfPoints || prediction.predictions.firstHalf) && (
+                                                        <div className="bg-orange-900/30 p-3 rounded-lg border border-orange-500/20">
+                                                            <p className="text-orange-300 text-[10px] uppercase font-bold mb-1">🏀 Puntos 1ra Mitad</p>
+                                                            <p className="text-white font-bold text-lg">
+                                                                {prediction.predictions.firstHalfPoints || prediction.predictions.firstHalf}
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* TENNIS SPECIFIC (SETS & ACES) */}
+                                                    {sport === 'tennis' && (prediction.predictions.sets || prediction.predictions.aces) && (
                                                         <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-400/20">
-                                                            <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🎾 Marcador Sets</p>
+                                                            <p className="text-blue-300 text-[10px] uppercase font-bold mb-1">🎾 Sets / Aces</p>
                                                             <div className="flex justify-between items-center">
-                                                                <span className="text-white font-black text-lg">{prediction.predictions.sets.home} - {prediction.predictions.sets.away}</span>
-                                                                <span className="text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-black">SETS</span>
+                                                                <span className="text-white font-black text-lg">
+                                                                    {prediction.predictions.sets ? `${prediction.predictions.sets.home}-${prediction.predictions.sets.away}` : ''}
+                                                                    {prediction.predictions.aces ? ` | ${prediction.predictions.aces.total} Aces` : ''}
+                                                                </span>
+                                                                <span className="text-[8px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-black">TENNIS</span>
                                                             </div>
                                                         </div>
                                                     )}
 
                                                     {/* BASEBALL SPECIFIC (FIRST 5) */}
                                                     {sport === 'baseball' && prediction.predictions.first5 && (
-                                                        <div className="bg-orange-900/30 p-3 rounded-lg border border-orange-400/20">
-                                                            <p className="text-orange-300 text-[10px] uppercase font-bold mb-1">⚾ Primeras 5 Entradas</p>
+                                                        <div className="bg-amber-900/30 p-3 rounded-lg border border-amber-400/20">
+                                                            <p className="text-amber-300 text-[10px] uppercase font-bold mb-1">⚾ First 5 Innings</p>
                                                             <div className="flex justify-between items-center">
-                                                                <span className="text-white font-black text-lg">{prediction.predictions.first5.winner || prediction.predictions.first5.pick}</span>
-                                                                <span className="text-[8px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-black">F5</span>
+                                                                <span className="text-white font-black text-lg">{prediction.predictions.first5.winner || prediction.predictions.first5.pick} {prediction.predictions.first5.line}</span>
+                                                                <span className="text-[8px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-black">F5</span>
                                                             </div>
                                                         </div>
                                                     )}

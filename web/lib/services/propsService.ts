@@ -3,6 +3,7 @@ import { memoryCache } from './memoryCache';
 import Groq from 'groq-sdk';
 import { groqService } from './groqService';
 import Parser from 'rss-parser';
+import { geminiService } from './geminiService';
 
 const rssParser = new Parser();
 
@@ -487,16 +488,25 @@ class PropsService {
         `;
 
         try {
+            // DANIEL: MODO DIOS PARA PROPS - Usando GPT-OSS 120B por su masiva capacidad de análisis
             const result = await groqService.createPrediction({
                 messages: [{ role: "user", content: prompt }],
-                model: "llama-3.3-70b-versatile",
+                model: "openai/gpt-oss-120b",
                 temperature: 0.6,
                 response_format: { type: "json_object" }
+            }).catch(async (err: any) => {
+                console.warn("⚠️ GPT-OSS 120B falló para Props, usando Llama 3.3 como respaldo...");
+                return await groqService.createPrediction({
+                    messages: [{ role: "user", content: prompt }],
+                    model: "openai/gpt-oss-120b",
+                    temperature: 0.6,
+                    response_format: { type: "json_object" }
+                });
             });
 
             return result;
         } catch (error) {
-            console.error('❌ [PropsService] Groq Prediction Error:', error);
+            console.error('❌ [PropsService] Prediction Error:', error);
             // Fallback mock prediction
             return {
                 prediction: Math.random() > 0.5 ? 'OVER' : 'UNDER',

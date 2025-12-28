@@ -5,7 +5,6 @@ import { z } from 'zod';
 // ==========================================
 
 const PercentageSchema = z.number().min(0).max(100);
-const ScoreSchema = z.string().regex(/^\d+-\d+$/, "Score format must be 'Home-Away' (e.g. 2-1)");
 
 // ==========================================
 // ESQUEMAS DE DEPORTES
@@ -14,7 +13,8 @@ const ScoreSchema = z.string().regex(/^\d+-\d+$/, "Score format must be 'Home-Aw
 // Baloncesto
 const BasketballPredictionsSchema = z.object({
     finalScore: z.string().optional(),
-    totalPoints: z.string().or(z.number()).optional(),
+    totalPoints: z.number().optional(),
+    firstHalfPoints: z.number().optional(),
     spread: z.object({
         favorite: z.string(),
         line: z.number(),
@@ -25,44 +25,101 @@ const BasketballPredictionsSchema = z.object({
         pick: z.enum(['Más de', 'Menos de', 'Over', 'Under']),
         confidence: z.string().optional()
     }).optional(),
-    topPlayers: z.object({
-        homeTopScorer: z.object({
-            name: z.string(),
-            predictedPoints: z.number(),
-            predictedRebounds: z.number().optional(),
-            predictedAssists: z.number().optional()
-        }).optional(),
-        awayTopScorer: z.object({
-            name: z.string(),
-            predictedPoints: z.number(),
-            predictedRebounds: z.number().optional(),
-            predictedAssists: z.number().optional()
-        }).optional()
+    playerProps: z.object({
+        threes: z.object({ player: z.string(), pick: z.string(), line: z.number() }).optional(),
+        pra: z.object({ player: z.string(), pick: z.string(), line: z.number() }).optional()
+    }).optional(),
+    quarterMarkets: z.object({
+        raceTo20: z.object({ pick: z.string() }).optional(),
+        firstQuarter: z.object({ pick: z.string() }).optional()
     }).optional()
 });
 
 // Fútbol
 const FootballPredictionsSchema = z.object({
     finalScore: z.string().optional(),
-    totalGoals: z.string().or(z.number()).optional(),
+    totalGoals: z.number().optional(),
     corners: z.object({
-        home: z.number(),
-        away: z.number(),
-        total: z.number()
-    }).optional(),
-    shots: z.object({
-        home: z.number(),
-        away: z.number(),
-        onTarget: z.string().or(z.number()).optional()
+        line: z.number().optional(),
+        pick: z.string().optional(),
+        total: z.number().optional(),
+        home: z.number().optional(),
+        away: z.number().optional()
     }).optional(),
     cards: z.object({
-        yellowCards: z.number(),
-        redCards: z.number(),
-        details: z.string().optional()
+        line: z.number().optional(),
+        pick: z.string().optional(),
+        yellowCards: z.number().optional(),
+        redCards: z.number().optional()
     }).optional(),
-    offsides: z.object({
-        total: z.number(),
-        details: z.string().optional()
+    bothTeamsScore: z.object({
+        pick: z.enum(['Sí', 'No', 'Yes', 'No']),
+        confidence: z.string().optional()
+    }).optional(),
+    goalsByHalf: z.object({
+        firstHalf: z.object({ total: z.number(), pick: z.string() }),
+        secondHalf: z.object({ total: z.number(), pick: z.string() })
+    }).optional()
+});
+
+// NFL / Fútbol Americano
+const NFLPredictionsSchema = z.object({
+    finalScore: z.string().optional(),
+    totalPoints: z.number().optional(),
+    touchdowns: z.object({
+        line: z.number().optional(),
+        pick: z.string().optional(),
+        total: z.number().optional()
+    }).optional(),
+    yards: z.object({
+        line: z.number().optional(),
+        pick: z.string().optional(),
+        total: z.number().optional()
+    }).optional()
+});
+
+// Béisbol
+const BaseballPredictionsSchema = z.object({
+    finalScore: z.string().optional(),
+    totalRuns: z.number().optional(),
+    first5: z.object({
+        winner: z.string().optional(),
+        pick: z.string().optional(),
+        line: z.number().optional()
+    }).optional(),
+    hits: z.object({
+        total: z.number().optional(),
+        pick: z.string().optional()
+    }).optional()
+});
+
+// Tenis
+const TennisPredictionsSchema = z.object({
+    finalScore: z.object({ home: z.number(), away: z.number() }).optional(),
+    totalGames: z.number().optional(),
+    sets: z.object({
+        home: z.number(),
+        away: z.number(),
+        pick: z.string().optional()
+    }).optional(),
+    aces: z.object({
+        total: z.number().optional(),
+        pick: z.string().optional()
+    }).optional()
+});
+
+// NHL / Hockey
+const HockeyPredictionsSchema = z.object({
+    finalScore: z.string().optional(),
+    totalGoals: z.number().optional(),
+    puckLine: z.object({
+        favorite: z.string(),
+        line: z.number(),
+        pick: z.string().optional()
+    }).optional(),
+    periodMarkets: z.object({
+        firstPeriodWinner: z.string().optional(),
+        totalGoalsP1: z.number().optional()
     }).optional()
 });
 
@@ -75,42 +132,26 @@ export const PredictionResponseSchema = z.object({
     confidence: PercentageSchema,
     reasoning: z.string(),
     bettingTip: z.string(),
-    keyFactors: z.array(z.string()),
-
-    // Objeto de predicciones detalladas (puede ser de basket o fútbol)
-    // Usamos .passthrough() para permitir campos extra sin fallar,
-    // pero validamos los conocidos.
+    isValueBet: z.boolean().optional(),
+    edge: z.number().optional(),
+    mostViablePick: z.object({
+        pick: z.string(),
+        line: z.string().or(z.number()),
+        market: z.string(),
+        winProbability: z.string().or(z.number()),
+        rationale: z.string()
+    }).optional(),
     predictions: z.union([
         BasketballPredictionsSchema,
-        FootballPredictionsSchema
-    ]).optional()
-});
-
-export const NewsAnalysisSchema = z.object({
-    bettingSignal: z.string(),
-    sentiment: z.enum(['positive', 'negative', 'neutral']),
-    impactScore: z.number().min(0).max(100),
-    brutalTitle: z.string().optional()
-});
-
-export const ParleyResponseSchema = z.object({
-    title: z.string(),
-    confidence: z.number().min(0).max(100),
-    totalOdds: z.number().or(z.string()).transform(v => typeof v === 'string' ? parseFloat(v) : v),
-    isValueParley: z.boolean().optional(),
-    valueAnalysis: z.string().optional(),
-    legs: z.array(z.object({
-        matchName: z.string(),
-        pick: z.string(),
-        odds: z.string().or(z.number()).optional(),
-        confidence: z.number().min(0).max(100),
-        startTime: z.string().optional(),
-        reasoning: z.string().optional()
-    })),
-    analysis: z.string(),
-    riskLevel: z.string()
-});
+        FootballPredictionsSchema,
+        NFLPredictionsSchema,
+        BaseballPredictionsSchema,
+        TennisPredictionsSchema,
+        HockeyPredictionsSchema
+    ]).optional(),
+    keyFactors: z.array(z.string()).optional()
+}).passthrough();
 
 export type PredictionResponse = z.infer<typeof PredictionResponseSchema>;
-export type NewsAnalysisResponse = z.infer<typeof NewsAnalysisSchema>;
-export type ParleyResponse = z.infer<typeof ParleyResponseSchema>;
+export type TennisPredictions = z.infer<typeof TennisPredictionsSchema>;
+export type HockeyPredictions = z.infer<typeof HockeyPredictionsSchema>;

@@ -19,6 +19,7 @@ export async function GET() {
 export const maxDuration = 60;
 
 import { geminiService } from '@/lib/services/geminiService';
+import { PredictionResponseSchema } from '@/lib/schemas/prediction-schemas';
 
 export async function POST(request: NextRequest) {
     let fallbackHomeName = 'Equipo Local';
@@ -61,7 +62,10 @@ export async function POST(request: NextRequest) {
         }
 
         const [firebaseEvent, firebaseMarketLine] = await Promise.all([
-            firebaseReadService.getEventById(gameId).catch(() => null),
+            // Intentar ID prefijado primero (formato Robot: sport_id), luego ID crudo
+            firebaseReadService.getEventById(`${sport}_${gameId}`)
+                .then(res => res || firebaseReadService.getEventById(gameId))
+                .catch(() => null),
             oddsSyncService.getStoredMarketLine(gameId, sport).catch(() => null)
         ]);
 
@@ -76,7 +80,7 @@ export async function POST(request: NextRequest) {
             event = gameRes?.event || gameRes;
         }
 
-        if (!event) throw new Error("Evento no encontrado");
+        if (!event) throw new Error("Evento no encontrado en Bridge ni Firebase");
 
         const homeScore = event.homeScore?.current || 0;
         const awayScore = event.awayScore?.current || 0;
@@ -104,53 +108,69 @@ export async function POST(request: NextRequest) {
 
         const isLive = matchContext.status && !matchContext.status.includes('Not') && matchContext.status !== '0\'';
 
-        const prompt = `Eres PickGenius Oracle, el analista deportivo más avanzado. 
-        Analiza este encuentro de ${matchContext.sport}:
-        EQUIPOS: ${matchContext.home} vs ${matchContext.away}
-        MARCADOR ACTUAL: ${matchContext.score} (${matchContext.status})
-        HISTORIAL RECIENTE (H2H): ${JSON.stringify(matchContext.h2hHistory)}
-        DATOS BETPLAY (MERCADOS REALES): ${JSON.stringify(matchContext.betplayData)}
-        ESTADÍSTICAS: ${JSON.stringify(matchContext.statistics)}
+        const prompt = `ERES PICKGENIUS ORACLE (EL ORÁCULO), UN ANALISTA DE APUESTAS PROFESIONAL DE ÉLITE CON ACCESO A GPT-OSS 120B.
+        TU MISIÓN: ENTREGAR UN ANÁLISIS TÉCNICO, BRUTALMENTE HONESTO Y QUE MAXIMICE EL VALOR (VALUE BETS).
 
-        INSTRUCCIONES:
-        1. Tu pronóstico DEBE basarse en la línea de BetPlay proporcionada.
-        2. Si el deporte es baloncesto, estima puntos de jugadores estrella si los datos están disponibles.
-        3. El reasoning debe ser técnico y brutalmente honesto.
-        4. Devuelve un JSON válido en ESPAÑOL con esta estructura:
+        DATOS DEL ENCUENTRO DE ${matchContext.sport}:
+        - EQUIPOS: ${matchContext.home} vs ${matchContext.away}
+        - LIGA/TORNEO: ${matchContext.tournament}
+        - MARCADOR ACTUAL: ${matchContext.score} (${matchContext.status})
+        - HISTORIAL RECIENTE (H2H): ${JSON.stringify(matchContext.h2hHistory)}
+        - DATOS BETPLAY (MERCADOS REALES): ${JSON.stringify(matchContext.betplayData)}
+        - ESTADÍSTICAS EN VIVO/PREVIAS: ${JSON.stringify(matchContext.statistics)}
+
+        INSTRUCCIONES CRÍTICAS POR DEPORTE:
+        1. FÚTBOL (FOOTBALL): Habla de Goles, SE DEBE proyectar Córners (Over/Under) y Tarjetas Amarillas/Rojas.
+        2. BALONCESTO (BASKETBALL): Habla de Puntos, SE DEBE proyectar Puntos del Primer Tiempo y mercados PRA (Pts+Reb+Ast).
+        3. NFL/AMER. FOOTBALL: ¡PROHIBIDO hablar de "Goles"! Habla de Touchdowns, Yardas Totales y Yardas por Tierra/Aire.
+        4. BÉISBOL (BASEBALL): Habla de Carreras, Hits y proyecciones de las primeras 5 entradas (F5).
+        5. TENIS (TENNIS): Habla de Sets y Games. Proyecta Aces y dobles faltas si es posible.
+        6. NHL / HOCKEY: Habla de Goles y Puck Line (-1.5/+1.5). Proyecta goles por periodo (P1, P2, P3).
+
+        REGLAS DE ORO:
+        - VALUE BET: Identifica si la cuota de BetPlay tiene "Edge" (valor) comparando con tu modelo.
+        - MOST VIABLE PICK: El pick con mayor probabilidad (ej: +8.5 Córners en fútbol o -1.5 Puck Line en NHL).
+        - IDIOMA: Español latino profesional de apostador.
+
+        RESPONDE ÚNICAMENTE CON UN JSON VÁLIDO CON ESTA ESTRUCTURA (Ajusta 'predictions' según el deporte):
         {
-          "winner": "Nombre equipo",
+          "winner": "ELEGIDO",
           "confidence": 0-100,
-          "reasoning": "Explicación técnica",
-          "bettingTip": "Pick recomendado",
-          "keyFactors": ["Factor 1", "Factor 2", "Factor 3"],
-          "predictions": { ... }
+          "reasoning": "ANÁLISIS TACTICO PROFUNDO (Menciona hándicaps y condiciones físicas)",
+          "bettingTip": "PICK ESPECÍFICO (Ej: Gana Local y Over 2.5)",
+          "isValueBet": true/false,
+          "edge": 0-20,
+          "mostViablePick": {
+            "pick": "TEXTO DEL PICK",
+            "line": 0.0,
+            "market": "NOMBRE DEL MERCADO (Ej: Córners, Yardas, Hándicap)",
+            "winProbability": 0-100,
+            "rationale": "POR QUÉ ES EL MÁS SEGURO"
+          },
+          "predictions": {
+            /* CAMPOS SEGÚN EL DEPORTE - Ver Esquemas Zod */
+          },
+          "keyFactors": ["FACTOR 1", "FACTOR 2", "FACTOR 3"]
         }`;
 
         let prediction;
-        if (provider === 'gemini') {
-            try {
-                prediction = await geminiService.createPrediction({
-                    messages: [{ role: "user", content: prompt }],
-                    temperature: 0.7
-                });
-            } catch (err) {
-                console.warn("⚠️ Gemini principal falló, intentando con Groq...");
-                prediction = await groqService.createPrediction({
-                    messages: [{ role: "user", content: prompt }],
-                    model: "llama-3.1-8b-instant"
-                });
-            }
-        } else {
+        // DANIEL: MODO DIOS ACTIVADO - Usando OpenAI GPT-OSS 120B (El más potente de tu arsenal)
+        if (provider === 'groq' || provider === 'gemini') {
             try {
                 prediction = await groqService.createPrediction({
                     messages: [{ role: "user", content: prompt }],
-                    model: "llama-3.1-8b-instant"
+                    model: "openai/gpt-oss-120b",
+                    temperature: 0.7,
+                    schema: PredictionResponseSchema
                 });
             } catch (err) {
-                console.warn("⚠️ Groq falló, recurriendo a Gemini...");
-                prediction = await geminiService.createPrediction({
-                    messages: [{ role: "user", content: prompt }]
-                });
+                console.warn("⚠️ GPT-OSS 120B falló para el Oráculo, usando Llama 3.3 como respaldo...");
+                prediction = await groqService.createPrediction({
+                    messages: [{ role: "user", content: prompt }],
+                    model: "llama-3.3-70b-versatile",
+                    temperature: 0.7,
+                    schema: PredictionResponseSchema
+                }).catch(() => null);
             }
         }
 
@@ -160,7 +180,7 @@ export async function POST(request: NextRequest) {
             isVerified: !!firebaseMarketLine?.isVerified,
             dataSource: firebaseMarketLine?.marketSource || 'Hybrid AI Model',
             marketMatched: firebaseMarketLine ? 'Confirmado con Betplay' : 'Referencia IA',
-            aiModel: prediction.modelUsed || (provider === 'gemini' ? 'Gemini 1.5 Pro' : 'Llama 3.1 70B')
+            aiModel: prediction.modelUsed || (provider === 'gemini' ? 'Gemini 1.5 Pro' : 'Llama 3.3 70B')
         };
 
         await globalCache.set(cacheKey, finalResponse, isLive ? 120000 : 600000);
