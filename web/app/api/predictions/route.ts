@@ -90,11 +90,6 @@ export async function POST(request: NextRequest) {
             score: `${homeScore} - ${awayScore}`,
             status: event.status?.description || 'Scheduled',
             tournament: event.tournament?.name,
-            h2hHistory: h2hRes?.events?.slice(0, 5).map((e: any) => ({
-                score: `${e.homeScore?.current}-${e.awayScore?.current}`,
-                winner: e.winnerCode === 1 ? 'Local' : (e.winnerCode === 2 ? 'Visitante' : 'Empate'),
-                date: new Date(e.startTimestamp * 1000).toLocaleDateString()
-            })),
             statistics: statsRes || "No disponibles",
             betplayData: firebaseMarketLine ? {
                 mainLine: firebaseMarketLine.line,
@@ -113,7 +108,6 @@ export async function POST(request: NextRequest) {
         - EQUIPOS: ${matchContext.home} vs ${matchContext.away}
         - LIGA/TORNEO: ${matchContext.tournament}
         - MARCADOR ACTUAL: ${matchContext.score} (${matchContext.status})
-        - HISTORIAL RECIENTE (H2H): ${JSON.stringify(matchContext.h2hHistory)}
         - DATOS BETPLAY (MERCADOS REALES): ${JSON.stringify(matchContext.betplayData)}
         - ESTADÍSTICAS EN VIVO/PREVIAS: ${JSON.stringify(matchContext.statistics)}
 
