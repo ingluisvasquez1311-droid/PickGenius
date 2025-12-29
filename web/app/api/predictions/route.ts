@@ -69,10 +69,8 @@ export async function POST(request: NextRequest) {
             oddsSyncService.getStoredMarketLine(gameId, sport).catch(() => null)
         ]);
 
-        const [statsRes, h2hRes] = await Promise.all([
-            sportsDataService.makeRequest(`/event/${gameId}/statistics`).catch(() => null),
-            sportsDataService.getMatchH2H(Number(gameId)).catch(() => null)
-        ]);
+        const statsRes = await sportsDataService.makeRequest(`/event/${gameId}/statistics`).catch(() => null);
+
 
         let event = firebaseEvent;
         if (!event) {
