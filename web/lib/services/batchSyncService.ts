@@ -78,14 +78,9 @@ export class BatchSyncService {
                     // 1. Sync Odds to marketLines
                     await oddsSyncService.syncEventOdds(game.id, sport);
 
-                    // 2. Fetch and Store H2H/Stats to matchStats
-                    const h2hRes = await sportsDataService.getMatchH2H(Number(game.id)).catch(() => null);
-                    if (h2hRes) {
-                        await this.db.collection('matchStats').doc(game.id.toString()).set({
-                            ...h2hRes,
-                            syncedAt: admin.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true });
-                    }
+
+                    // Stats are now fetched on-demand by predictions API
+
 
                     // 3. Save Basic Game Info
                     const gameRef = this.db.collection('games').doc(`${sport}_${game.id}`);
