@@ -1,6 +1,0 @@
-# COPIA ESTAS 3 VARIABLES DE TU ARCHIVO .env PRINCIPAL (EN LA RAIZ)
-# Y PÉGALAS AL FINAL DE TU web/.env.local
-
-FIREBASE_PROJECT_ID=pickgenius
-FIREBASE_CLIENT_EMAIL=... (Busca esto en tu otro archivo .env)
-FIREBASE_PRIVATE_KEY=... (Busca esto en tu otro archivo .env, empieza con -----BEGIN PRIVATE KEY-----)
