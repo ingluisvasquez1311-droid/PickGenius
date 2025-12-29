@@ -43,7 +43,10 @@ export default function BasketballPage() {
                 // Filter by selected league
                 let filteredGames = allGames;
                 if (selectedLeague !== 'All') {
-                    filteredGames = sportsDataService.filterBasketballByLeague(allGames, selectedLeague);
+                    filteredGames = allGames.filter((game: any) =>
+                        game.tournament?.name?.includes(selectedLeague) ||
+                        game.league?.name?.includes(selectedLeague)
+                    );
                 }
 
                 setGames(filteredGames);
