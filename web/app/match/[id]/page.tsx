@@ -629,7 +629,7 @@ export default function MatchDetailsPage() {
                                         <div className="flex justify-between items-center gap-3 relative z-10">
                                             {market.choices.map((choice: any, cIdx: number) => {
                                                 const val = choice.value;
-                                                const isValue = aiConfidence && aiConfidence > (100 / val + 10); // Simple value formula
+                                                const isValue = val && aiConfidence && aiConfidence > (100 / val + 10); // Simple value formula
 
                                                 return (
                                                     <div key={cIdx} className={clsx(
@@ -642,7 +642,7 @@ export default function MatchDetailsPage() {
                                                         <span className={clsx(
                                                             "block font-mono font-black text-2xl tracking-tighter",
                                                             isValue ? "text-primary" : "text-white"
-                                                        )}>{val.toFixed(2)}</span>
+                                                        )}>{val ? val.toFixed(2) : '—'}</span>
                                                         {isValue && (
                                                             <div className="flex items-center justify-center gap-1">
                                                                 <Zap className="w-2 h-2 text-primary" />
