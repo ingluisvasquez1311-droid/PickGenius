@@ -18,10 +18,36 @@ interface FetchOptions {
 }
 
 /**
- * Performs a highly-stealthed fetch request to Sofascore with automatic retry logic
+ * Performs a highly-stealthed fetch request to Sofascore with automatic retry logic.
+ * Supports Home-IP Bridge: redirects requests to a local proxy via Ngrok if running in production.
  */
 export async function sofafetch(url: string, options: FetchOptions = {}) {
     const { revalidate = 0, referer = 'https://www.sofascore.com/' } = options;
+
+    // --- HOME-IP BRIDGE LOGIC ---
+    const bridgeUrl = process.env.NEXT_PUBLIC_API_URL;
+    const isVercel = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.VERCEL;
+
+    if (isVercel && bridgeUrl && !url.includes('/api/proxy') && url.includes('sofascore')) {
+        try {
+            const proxiedUrl = `${bridgeUrl.replace(/\/$/, '')}/api/proxy?url=${encodeURIComponent(url)}`;
+            console.log(`[Bridge] Routing request via tunnel: ${proxiedUrl}`);
+
+            const response = await fetch(proxiedUrl, {
+                headers: { 'Cache-Control': 'no-cache' },
+                next: { revalidate }
+            });
+
+            if (response.ok) {
+                return await response.json();
+            }
+            console.error(`[Bridge Error] Status ${response.status} from tunnel. Falling back to direct fetch.`);
+        } catch (bridgeError) {
+            console.error(`[Bridge Critical] Tunnel unreachable:`, bridgeError);
+        }
+    }
+    // ----------------------------
+
     const MAX_RETRIES = 3;
     let attempt = 0;
 
