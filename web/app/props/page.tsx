@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import {
     Zap, Trophy, Target, Users, Search, Filter,
     ChevronDown, ChevronRight, Activity, Clock,
@@ -132,6 +132,19 @@ const SPORT_STATS: Record<string, { key: string; label: string }[]> = {
 };
 
 export default function PropsDashboard() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center gap-6">
+                <Activity className="w-12 h-12 text-primary animate-spin" />
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em] italic">Iniciando Terminal de Análisis...</p>
+            </div>
+        }>
+            <PropsDashboardContent />
+        </Suspense>
+    );
+}
+
+function PropsDashboardContent() {
     const searchParams = useSearchParams();
     const [search, setSearch] = useState('');
     const [selectedSport, setSelectedSport] = useState('basketball');
