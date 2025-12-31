@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="es" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PickGenius | IA Sports Predictions</title>
+    <meta name="description" content="Predicciones deportivas de élite impulsadas por Inteligencia Artificial.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Reset & Base */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --color-background: #050505;
+            --color-foreground: #ededed;
+            --color-primary: #8b5cf6;
+            --color-secondary: #10b981;
+            --color-accent: #f43f5e;
+            --color-card: #111111;
+            --color-card-border: #262626;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-foreground);
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 60%),
+                linear-gradient(to bottom, #050505, #0a0a0a);
+            background-attachment: fixed;
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection {
+            background-color: var(--color-primary);
+            color: #000;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Utility Classes */
+        .container {
+            max-width: 100rem;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .checkered-bg {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes ping {
+            75%, 100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        .animate-fade-in { animation: fadeIn 1s ease-out; }
+
+        /* Layout */
+        .ambient-layers {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .ambient-glow-1 {
+            position: absolute;
+            top: -10%;
+            right: -10%;
+            width: 60%;
+            height: 60%;
+            background: rgba(139, 92, 246, 0.1);
+            filter: blur(200px);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            bottom: -5%;
+            left: -5%;
+            width: 50%;
+            height: 50%;
+            background: rgba(244, 63, 94, 0.05);
+            filter: blur(180px);
+        }
+
+        main {
+            position: relative;
+            z-index: 10;
+            padding: 8rem 1rem;
+        }
+
+        section {
+            margin-bottom: 10rem;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: clamp(3rem, 14vw, 14rem);
+            font-weight: 900;
+            line-height: 0.8;
+            letter-spacing: -0.05em;
+            font-style: italic;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 5rem);
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            font-style: italic;
+            text-transform: uppercase;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, var(--color-primary), #a78bfa, var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Components */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.75rem 4rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: #000;
+            box-shadow: 0 30px 60px -15px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #fff;
+            transform: scale(1.05);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            backdrop-filter: blur(12px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 3rem;
+            padding: 3rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(139, 92, 246, 0.05);
+            border-color: rgba(139, 92, 246, 0.2);
+            transform: translateY(-0.5rem);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            font-size: 0.625rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.4em;
+        }
+
+        .pulse-dot {
+            position: relative;
+            display: flex;
+            width: 0.625rem;
+            height: 0.625rem;
+        }
+
+        .pulse-dot::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 9999px;
+            background: var(--color-primary);
+            animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+            opacity: 0.75;
+        }
+
+        .pulse-dot::after {
+            content: '';
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 9999px;
+            background: var(--color-primary);
+        }
+
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .grid-6 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            main { padding: 4rem 1rem; }
+            section { margin-bottom: 5rem; }
+            .grid { gap: 1rem; }
+        }
+
+        /* Icon Placeholder */
+        .icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            display: inline-block;
+        }
+
+        .icon-lg {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .text-center { text-align: center; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-1 { gap: 0.25rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        .gap-8 { gap: 2rem; }
+        .gap-12 { gap: 3rem; }
+        
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .text-5xl { font-size: 3rem; }
+        
+        .font-bold { font-weight: 700; }
+        .font-black { font-weight: 900; }
+        .italic { font-style: italic; }
+        .uppercase { text-transform: uppercase; }
+        
+        .text-gray-400 { color: #9ca3af; }
+        .text-gray-500 { color: #6b7280; }
+        .text-gray-600 { color: #4b5563; }
+        
+        .mt-4 { margin-top: 1rem; }
+        .mt-8 { margin-top: 2rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-12 { margin-bottom: 3rem; }
+        
+        .p-8 { padding: 2rem; }
+        .p-12 { padding: 3rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-full { border-radius: 9999px; }
+        
+        .border { border: 1px solid; }
+        .border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
+        
+        .max-w-4xl { max-width: 56rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        .space-y-8 > * + * { margin-top: 2rem; }
+        .space-y-12 > * + * { margin-top: 3rem; }
+    </style>
+</head>
+<body>
+    <!-- Ambient Background Layers -->
+    <div class="ambient-layers">
+        <div class="ambient-glow-1"></div>
+        <div class="ambient-glow-2"></div>
+        <div class="checkered-bg" style="position: absolute; inset: 0; opacity: 0.03;"></div>
+        <div style="position: absolute; top: 30%; left: 50%; transform: translateX(-50%); width: 100%; height: 1px; background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);"></div>
+    </div>
+
+    <main class="container animate-fade-in">
+        <!-- HERO SECTION -->
+        <section class="text-center space-y-12">
+            <div class="flex flex-col items-center gap-6">
+                <div class="badge">
+                    <span class="pulse-dot"></span>
+                    <span style="color: #9ca3af;">Sistema de Predicción Ultra-Voz v4.2</span>
+                </div>
+
+                <h1>
+                    DOMINA EL <br>
+                    <span class="gradient-text">JUEGO IA</span>
+                </h1>
+
+                <p class="text-gray-500 max-w-4xl mx-auto text-2xl font-bold" style="line-height: 1.6;">
+                    La terminal de inteligencia deportiva más avanzada. No apostamos, 
+                    <span style="color: white; text-decoration: underline; text-decoration-color: var(--color-primary); text-underline-offset: 12px;">calculamos la victoria</span> 
+                    con precisión determinista.
+                </p>
+
+                <div class="flex flex-col gap-6 mt-12" style="flex-wrap: wrap;">
+                    <a href="/live" class="btn btn-primary">
+                        🏆 EXPLORAR RADAR
+                    </a>
+                    <a href="/picks" class="btn btn-secondary">
+                        ⚡ TERMINAL PRO
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- RADAR INFO-BETTING SECTION -->
+        <section class="space-y-12">
+            <div class="flex items-center justify-between gap-4" style="flex-wrap: wrap;">
+                <div class="flex items-center gap-4">
+                    <div style="width: 0.375rem; height: 3rem; background: var(--color-primary); border-radius: 9999px;"></div>
+                    <div>
+                        <h2>
+                            RADAR <span class="gradient-text">INFO-BETTING</span>
+                        </h2>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="px-2 py-1 rounded-lg border text-xs font-black uppercase animate-pulse" 
+                                  style="border-color: rgba(239, 68, 68, 0.5); color: #ef4444; letter-spacing: 0.2em;">
+                                LIVE FEED
+                            </span>
+                            <span class="text-xs font-black text-gray-600 uppercase" style="letter-spacing: 0.2em;">
+                                Sincronizado vía Global Logs
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-3">
+                <div class="card">
+                    <div style="height: 12rem; background: rgba(139, 92, 246, 0.1); margin: -3rem -3rem 2rem -3rem; border-radius: 3rem 3rem 0 0;"></div>
+                    <h3 class="text-2xl font-black italic uppercase mb-4">EJEMPLO NOTICIA 1</h3>
+                    <p class="text-sm text-gray-400">Análisis deportivo en tiempo real con IA avanzada.</p>
+                </div>
+                <div class="card">
+                    <div style="height: 12rem; background: rgba(16, 185, 129, 0.1); margin: -3rem -3rem 2rem -3rem; border-radius: 3rem 3rem 0 0;"></div>
+                    <h3 class="text-2xl font-black italic uppercase mb-4">EJEMPLO NOTICIA 2</h3>
+                    <p class="text-sm text-gray-400">Predicciones basadas en datos históricos.</p>
+                </div>
+                <div class="card">
+                    <div style="height: 12rem; background: rgba(244, 63, 94, 0.1); margin: -3rem -3rem 2rem -3rem; border-radius: 3rem 3rem 0 0;"></div>
+                    <h3 class="text-2xl font-black italic uppercase mb-4">EJEMPLO NOTICIA 3</h3>
+                    <p class="text-sm text-gray-400">Estrategias ganadoras para cada deporte.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- GRID FEATURES -->
+        <section class="grid grid-3">
+            <div class="card">
+                <div class="flex justify-between items-start mb-8">
+                    <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.05); border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                        🌍
+                    </div>
+                    <span class="text-xs font-black text-gray-500 uppercase" style="letter-spacing: 0.2em;">GLOBAL-SYSTEM</span>
+                </div>
+                <h3 class="text-3xl font-black italic uppercase mb-4">ALTA FIDELIDAD</h3>
+                <p class="text-sm text-gray-500 font-medium">
+                    Procesamos datos de más de 50 ligas con latencia de milisegundos para darte la señal antes que el mercado.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="flex justify-between items-start mb-8">
+                    <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.05); border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                        🎯
+                    </div>
+                    <span class="text-xs font-black text-gray-500 uppercase" style="letter-spacing: 0.2em;">QUANT-ENGINE</span>
+                </div>
+                <h3 class="text-3xl font-black italic uppercase mb-4">ESTRATEGIAS IA</h3>
+                <p class="text-sm text-gray-500 font-medium">
+                    Nuestra red neuronal PickGenius calcula parleys y props con un ROI promedio mensual del 42.8%.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="flex justify-between items-start mb-8">
+                    <div style="width: 4rem; height: 4rem; background: rgba(255,255,255,0.05); border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                        📊
+                    </div>
+                    <span class="text-xs font-black text-gray-500 uppercase" style="letter-spacing: 0.2em;">REAL-TIME</span>
+                </div>
+                <h3 class="text-3xl font-black italic uppercase mb-4">IN-PLAY RADAR</h3>
+                <p class="text-sm text-gray-500 font-medium">
+                    Detectamos cambios tácticos y fatiga en vivo. Análisis que ni los narradores profesionales ven.
+                </p>
+            </div>
+        </section>
+
+        <!-- TERMINAL DETERMINISTA -->
+        <section class="card" style="padding: 6rem; border-left: 2px solid rgba(139, 92, 246, 0.2);">
+            <div class="grid grid-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <div style="height: 2px; width: 6rem; background: var(--color-primary);"></div>
+                    <h2 class="text-5xl font-black italic uppercase" style="line-height: 0.9;">
+                        LA <br>
+                        TERMINAL <br>
+                        <span class="gradient-text">DETERMINISTA.</span>
+                    </h2>
+                    <p class="text-2xl text-gray-400 font-medium" style="max-width: 36rem; line-height: 1.6;">
+                        No creemos en la suerte, creemos en la arquitectura del dato. PickGenius es el puente entre el azar y el éxito medible.
+                    </p>
+                    <div class="flex gap-12">
+                        <div>
+                            <h4 class="text-5xl font-black italic">8.5K</h4>
+                            <p class="text-xs font-black text-gray-500 uppercase mt-2" style="letter-spacing: 0.2em;">EVENTOS CIERRE/MES</p>
+                        </div>
+                        <div>
+                            <h4 class="text-5xl font-black italic">94%</h4>
+                            <p class="text-xs font-black text-gray-500 uppercase mt-2" style="letter-spacing: 0.2em;">SINCRO-SCORE</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between p-8 rounded-2xl border" 
+                         style="background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.05);">
+                        <span class="text-xs font-black text-gray-500 uppercase" style="letter-spacing: 0.5em;">RADAR INFO</span>
+                        <div class="flex items-center gap-3">
+                            <span style="width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--color-primary);" class="animate-pulse"></span>
+                            <span class="text-xs font-black italic" style="font-family: monospace; letter-spacing: 0.2em;">ACTIVE</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-8 rounded-2xl border" 
+                         style="background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.05);">
+                        <span class="text-xs font-black text-gray-500 uppercase" style="letter-spacing: 0.5em;">QUOTAS SCAN</span>
+                        <div class="flex items-center gap-3">
+                            <span style="width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--color-primary);" class="animate-pulse"></span>
+                            <span class="text-xs font-black italic" style="font-family: monospace; letter-spacing: 0.2em;">SYNCHRONIZED</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-8 rounded-2xl border" 
+                         style="background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.05);">
+                        <span class="text-xs font-black text-gray-500 uppercase" style="letter-spacing: 0.5em;">IA-PICK ENGINE</span>
+                        <div class="flex items-center gap-3">
+                            <span style="width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--color-primary);" class="animate-pulse"></span>
+                            <span class="text-xs font-black italic" style="font-family: monospace; letter-spacing: 0.2em;">V4.2 STABLE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PLANES DE ÉXITO -->
+        <section class="space-y-12">
+            <div class="text-center space-y-4">
+                <h2 style="text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);">
+                    PLANES DE <span class="gradient-text">ÉXITO</span>
+                </h2>
+                <p class="text-gray-500 font-bold uppercase text-xs" style="letter-spacing: 0.5em;">
+                    Sin Letras Pequeñas. Solo Datos Reales.
+                </p>
+            </div>
+
+            <div class="grid grid-2" style="max-width: 72rem; margin: 0 auto;">
+                <!-- Plan Gratis -->
+                <div class="card" style="background: rgba(255,255,255,0.05);">
+                    <div class="space-y-4 mb-8">
+                        <h3 class="text-xl font-black uppercase italic" style="color: var(--color-primary); letter-spacing: 0.2em;">
+                            ACCESO GRATUITO
+                        </h3>
+                        <div class="flex items-baseline gap-2">
+                            <span class="font-black italic" style="font-size: 4rem; line-height: 1;">$0</span>
+                            <span class="text-gray-500 font-black text-sm uppercase" style="letter-spacing: 0.2em;">/MES</span>
+                        </div>
+                        <p class="text-gray-400 font-medium">Para analistas en formación</p>
+                    </div>
+                    <div class="space-y-6 mb-8">
+                        <div class="flex items-center gap-4 text-gray-300 font-bold uppercase text-xs" style="letter-spacing: 0.2em;">
+                            <span style="color: var(--color-primary);">✓</span> Picks Diarios de Fútbol
+                        </div>
+                        <div class="flex items-center gap-4 text-gray-300 font-bold uppercase text-xs" style="letter-spacing: 0.2em;">
+                            <span style="color: var(--color-primary);">✓</span> Resultados en Vivo
+                        </div>
+                        <div class="flex items-center gap-4 text-gray-300 font-bold uppercase text-xs" style="letter-spacing: 0.2em;">
+                            <span style="color: var(--color-primary);">✓</span> Análisis Básico IA
+                        </div>
+                        <div class="flex items-center gap-4 text-gray-300 font-bold uppercase text-xs" style="letter-spacing: 0.2em;">
+                            <span style="color: var(--color-primary);">✓</span> Estadísticas Limitadas
+                        </div>
+                    </div>
+                    <button class="btn" style="width: 100%; background: rgba(255,255,255,0.05); color: white;">
+                        Empezar Gratis
+                    </button>
+                </div>
+
+                <!-- Plan Premium -->
+                <div class="card" style="background: linear-gradient(to bottom right, var(--color-primary), #7c3aed); 
+                             box-shadow: 0 40px 100px -20px rgba(139, 92, 246, 0.2); position: relative;">
+                    <div style="position: absolute; top: 2rem; right: 2rem; background: white; color: black; 
+                                padding: 0.5rem 1.5rem; border-radius: 9999px; font-size: 0.625rem; 
+                                font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em;">
+                        RECOMMENDED
+                    </div>
+                    <div class="space-y-4 mb-8">
+                        <h3 class="text-xl font-black uppercase italic" style="color: white; letter-spacing: 0.2em;">
+                            ELITE PREMIUM
+                        </h3>
+                        <div class="flex items-baseline gap-2">
+                            <span class="font-black italic" style="font-size: 4rem; line-height: 1; color: white;">$5</span>
+                            <span class="text-gray-300 font-black text-sm uppercase" style="letter-spacing: 0.2em;">/MES</span>
+                        </div>
+                        <p class="text-gray-200 font-medium">Para los que dominan el juego</p>
+                    </div>
+                    <div class="space-y-6 mb-8">
+                        <div class="flex items-center gap-4 font-bold uppercase text-xs" style="letter-spacing: 0.2em; color: white;">
+                            <span style="color: white;">✓</span> Todos los Deportes
+                        </div>
+                        <div class="flex items-center gap-4 font-bold uppercase text-xs" style="letter-spacing: 0.2em; color: white;">
+                            <span style="color: white;">✓</span> IA Predictor PRO unlocked
+                        </div>
+                        <div class="flex items-center gap-4 font-bold uppercase text-xs" style="letter-spacing: 0.2em; color: white;">
+                            <span style="color: white;">✓</span> Radar In-Play v4.0
+                        </div>
+                        <div class="flex items-center gap-4 font-bold uppercase text-xs" style="letter-spacing: 0.2em; color: white;">
+                            <span style="color: white;">✓</span> Planes de Éxito VIP
+                        </div>
+                    </div>
+                    <button class="btn" style="width: 100%; background: white; color: black; font-weight: 900;">
+                        Acceso Total
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SPORT SELECTOR -->
+        <section class="space-y-12">
+            <div class="text-center">
+                <h2>
+                    EL <span class="gradient-text">RADAR</span> SPORTS
+                </h2>
+            </div>
+
+            <div class="grid grid-6">
+                <a href="/football" class="card text-center" style="padding: 2rem;">
+                    <div style="width: 3rem; height: 3rem; background: rgba(255,255,255,0.05); border-radius: 1rem; 
+                                margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        ⚽
+                    </div>
+                    <h4 class="font-black italic uppercase">Fútbol</h4>
+                    <p class="text-xs font-black text-gray-500 uppercase mt-2" style="letter-spacing: 0.2em;">LTP / LIVE</p>
+                </a>
+
+                <a href="/basketball" class="card text-center" style="padding: 2rem;">
+                    <div style="width: 3rem; height: 3rem; background: rgba(255,255,255,0.05); border-radius: 1rem; 
+                                margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        🏀
+                    </div>
+                    <h4 class="font-black italic uppercase">NBA</h4>
+                    <p class="text-xs font-black text-gray-500 uppercase mt-2" style="letter-spacing: 0.2em;">FULL SEASON</p>
+                </a>
+
+                <a href="/hockey" class="card text-center" style="padding: 2rem;">
+                    <div style="width: 3rem; height: 3rem; background: rgba(255,255,255,0.05); border-radius: 1rem; 
+                                margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        🏒
+                    </div>
+                    <h4 class="font-black italic uppercase">NHL</h4>
+                    <p class="text-xs font-black text-gray-500 uppercase mt-2" style="letter-spacing: 0.2em;">PRO-ICE</p>
+                </a>
+
+                <a href="/nfl" class="card text-center" style="padding: 2rem;">
+                    <div style="width: 3rem; height: 3rem; background: rgba(255,255,255,0.05); border-radius: 1rem; 
+                                margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        🏈
+                    </div>
+                    <h4 class="font-black italic uppercase">NFL</h4>
+                    <p class="text-xs font-black text-gray-500 uppercase mt-2" style="letter-spacing: 0.2em;">PLAYOFFS</p>
+                </a>
+
+                <a href="/baseball" class="card text-center" style="padding: 2rem;">
+                    <div style="width: 3rem; height: 3rem; background: rgba(255,255,255,0.05); border-radius: 1rem; 
+                                margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        ⚾
+                    </div>
+                    <h4 class="font-black italic uppercase">MLB</h4>
+                    <p class="text-xs font-black text-gray-500 uppercase mt-2" style="letter-spacing: 0.2em;">WORLD SERIES</p>
+                </a>
+
+                <a href="/tennis" class="card text-center" style="padding: 2rem;">
+                    <div style="width: 3rem; height: 3rem; background: rgba(255,255,255,0.05); border-radius: 1rem; 
+                                margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                        🎾
+                    </div>
+                    <h4 class="font-black italic uppercase">Tenis</h4>
+                    <p class="text-xs font-black text-gray-500 uppercase mt-2" style="letter-spacing: 0.2em;">GRAND SLAM</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer style="border-top: 1px solid rgba(255,255,255,0.05); background: #080808; padding: 8rem 2rem 4rem; position: relative; overflow: hidden;">
+        <div class="container" style="position: relative; z-index: 10;">
+            <div class="grid grid-3 gap-12 mb-12">
+                <div class="space-y-8">
+                    <div class="flex items-center gap-4">
+                        <div style="background: var(--color-primary); padding: 0.75rem; border-radius: 1rem;">
+                            🏆
+                        </div>
+                        <span class="text-4xl font-black italic uppercase">
+                            PICK<span style="color: var(--color-primary);">GENIUS</span>
+                        </span>
+                    </div>
+                    <p class="text-gray-500 font-medium italic" style="max-width: 20rem; line-height: 1.6;">
+                        La ingeniería del éxito deportivo. Procesando el caos, entregando la señal.
+                    </p>
+                </div>
+
+                <div class="space-y-8">
+                    <h5 class="text-xs font-black uppercase text-white" style="letter-spacing: 0.5em;">HUB TERMINAL</h5>
+                    <ul class="space-y-4 text-xs font-bold text-gray-500 uppercase" style="letter-spacing: 0.2em;">
+                        <li><a href="/live" style="text-decoration: none; color: inherit;">Radar en Vivo</a></li>
+                        <li><a href="/picks" style="text-decoration: none; color: inherit;">Terminal IA</a></li>
+                        <li><a href="/picks" style="text-decoration: none; color: inherit;">Planes Premium</a></li>
+                    </ul>
+                </div>
+
+                <div class="card" style="padding: 2.5rem;">
+                    <div class="flex items-center gap-2 mb-6">
+                        <span style="color: #eab308;">⚠</span>
+                        <h5 class="text-xs font-black uppercase text-white" style="letter-spacing: 0.5em;">RESPONSIBLE OPS</h5>
+                    </div>
+                    <p class="text-xs text-gray-500 font-bold uppercase" style="letter-spacing: 0.2em; line-height: 1.6;">
+                        EL JUEGO ES PARA MAYORES DE 18 AÑOS. JUEGA CON RESPONSABILIDAD.
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top: 8rem; padding-top: 3rem; border-top: 1px solid rgba(255,255,255,0.05);" 
+                 class="flex justify-between items-center gap-8" style="flex-wrap: wrap;">
+                <p class="text-xs text-gray-600 font-black uppercase" style="letter-spacing: 0.5em;">
+                    © 2025 PICKGENIUS PRO CORP.
+                </p>
+                <div class="flex gap-8 items-center">
+                    <span class="text-xs font-black text-gray-500 italic">V4.2.8_STABLE_BUILD</span>
+                    <div class="flex items-center gap-2">
+                        <div style="width: 0.375rem; height: 0.375rem; border-radius: 9999px; background: var(--color-primary);" class="animate-pulse"></div>
+                        <span class="text-xs font-black uppercase" style="color: var(--color-primary); letter-spacing: 0.2em;">
+                            NET-LATENCY: 12MS
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WATERMARK -->
+        <div style="position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%); 
+                    font-size: 25rem; font-weight: 900; color: rgba(255,255,255,0.01); 
+                    font-style: italic; letter-spacing: -0.05em; pointer-events: none; 
+                    white-space: nowrap; text-transform: uppercase;">
+            DETERMINISM ARCHITECTURE
+        </div>
+    </footer>
+</body>
+</html>

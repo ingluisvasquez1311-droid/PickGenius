@@ -4,32 +4,30 @@
   --color-background: #050505;
   --color-foreground: #ededed;
 
-  /* Brand Colors - Electric Neon */
-  --color-primary: #8b5cf6;
-  /* Electric Purple */
-  --color-secondary: #10b981;
-  /* Cyber Green */
-  --color-accent: #f43f5e;
-  /* Rose/Red */
-
-  --color-card: #111111;
-  --color-card-border: #262626;
+  /* Brand Colors - Neon Orange Cyberpunk */
+  --color-primary: #FF5F1F;
+  /* Neon Orange */
+  --color-secondary: #FF8C00;
+  /* Dark Orange */
+  --color-accent: #FFA500;
+  /* Bright Orange */
+  --color-card: #0a0a0a;
+  --color-card-border: #1a1a1a;
 
   /* Animations */
-  --animate-float: float 6s ease-in-out infinite;
+  --animate-float: float 3s ease-in-out infinite;
   --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-gradient-shift: gradient-shift 3s ease infinite;
 
   @keyframes float {
-    0% {
+
+    0%,
+    100% {
       transform: translateY(0px);
     }
 
     50% {
       transform: translateY(-10px);
-    }
-
-    100% {
-      transform: translateY(0px);
     }
   }
 
@@ -44,6 +42,51 @@
     50% {
       opacity: 0.8;
       filter: brightness(1.2);
+    }
+  }
+
+  @keyframes gradient-shift {
+
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes ping {
+
+    75%,
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(50px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
     }
   }
 }
@@ -78,10 +121,34 @@ body {
   text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
 }
 
+@utility text-glow-white {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
 @utility checkered-bg {
   background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 30px 30px;
+}
+
+@utility reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@utility reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@utility gradient-text {
+  background: linear-gradient(135deg, var(--color-primary), #a78bfa, var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: var(--animate-gradient-shift);
 }
 
 /* Custom Scrollbar */

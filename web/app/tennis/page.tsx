@@ -6,6 +6,7 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import TournamentAccordion from '@/components/TournamentAccordion';
+import NextToStartWidget from '@/components/NextToStartWidget';
 
 export default function TennisHub() {
     const [matches, setMatches] = useState<any[]>([]);
@@ -122,7 +123,7 @@ export default function TennisHub() {
                                 </button>
                             </div>
 
-                            <Link href="/props" className="group flex items-center gap-4 px-8 py-4 bg-white/5 hover:bg-white/10 border-2 border-white/5 rounded-2xl transition-all duration-500">
+                            <Link href="/props?sport=tennis" className="group flex items-center gap-4 px-8 py-4 bg-white/5 hover:bg-white/10 border-2 border-white/5 rounded-2xl transition-all duration-500">
                                 <Zap className="w-5 h-5 text-yellow-500 group-hover:scale-125 transition-transform" />
                                 <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-white italic">Player Props</span>
                                 <ChevronRight className="w-4 h-4 text-gray-700 group-hover:translate-x-1 transition-transform" />
@@ -184,7 +185,8 @@ export default function TennisHub() {
                         <div className="relative group">
                             <div className="absolute -inset-1 bg-gradient-to-r from-[#00FF88] to-[#00CC66] rounded-[3rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                             <div className="relative bg-[#080808] border-2 border-white/10 rounded-[3rem] p-10 space-y-6">
-                                <div className="flex items-center gap-4 border-b border-white/5 pb-6">
+                                <NextToStartWidget sport="tennis" />
+                                <div className="flex items-center gap-4 border-b border-white/5 pb-6 mt-6">
                                     <div className="p-3 bg-[#00FF88] text-black rounded-2xl shadow-glow-sm">
                                         <BarChart3 className="w-6 h-6" />
                                     </div>

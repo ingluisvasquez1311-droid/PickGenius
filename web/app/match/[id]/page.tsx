@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Clock, Activity, Flag, Shield, Zap, Target, ChevronRight, TrendingUp, Users, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import LiveGameClock from '@/components/LiveGameClock'; // Componente de reloj en vivo
 import Image from 'next/image';
 import clsx from 'clsx';
 import AIConfidenceMeter from '@/components/AIConfidenceMeter';
@@ -108,26 +109,79 @@ export default function MatchDetailsPage() {
         const awayLineup = data.lineups?.away?.players?.filter((p: any) => !p.substitute).map((p: any) => `${p.player.name} (${p.position || '?'})`).join(', ') || "No disponible";
         const lineupsContext = `Alineación Local: ${homeLineup}\nAlineación Visitante: ${awayLineup}`;
 
+
+
+        // Detect Sport for Context-Aware Prompts
+        // Robust detection: Check explicit slug, tournament name, or category
+        const sportSlug = data.sport?.slug || data.event.sport?.slug || '';
+        const tournamentName = data.event.tournament?.name?.toLowerCase() || '';
+        const categoryName = data.event.tournament?.category?.name?.toLowerCase() || '';
+
+        const isBasketball = sportSlug.includes('basketball') || sportSlug.includes('basket') ||
+            tournamentName.includes('nba') || tournamentName.includes('basket') ||
+            categoryName.includes('basketball');
+
+        const isTennis = sportSlug.includes('tennis') ||
+            tournamentName.includes('atp') || tournamentName.includes('wta') ||
+            tournamentName.includes('itf') || tournamentName.includes('challenger');
+
+        const isFootball = !isBasketball && !isTennis; // Default to football only if others fail
+
         let prompt = "";
 
         if (isLive) {
-            prompt = `Analiza este partido EN VIVO ahora mismo (Motor v2.0):
+            prompt = `Analiza este partido de ${isBasketball ? 'BALONCESTO' : isTennis ? 'TENIS' : 'FÚTBOL'} EN VIVO (Motor v2.2 - Contexto Profundo):
             Evento: ${data.event.homeTeam.name} vs ${data.event.awayTeam.name}
+            Liga/País: ${data.event.tournament.name} (${data.event.tournament.category?.name})
             Marcador: ${data.event.homeScore?.current ?? 0} - ${data.event.awayScore?.current ?? 0}
             Tiempo: ${data.event.status.description}
             Estadísticas Clave: ${JSON.stringify(data.statistics?.[0]?.groups || [])}
             ${lineupsContext}
-            Mejores Jugadores (Live Rating): ${JSON.stringify(data.bestPlayers || {})}
+            Mejores Jugadores: ${JSON.stringify(data.bestPlayers || {})}
             
-            Como experto táctico, analiza el flujo del partido basándote en las alineaciones activas y el rendimiento en vivo. ¿Hay algún desajuste táctico explotable? ¿Quién ganará el siguiente cuarto/tiempo? Dame un pick de valor ALTO.`;
+            CONTEXTO REQUERIDO:
+            - Usa tu conocimiento de la liga "${data.event.tournament.name}" para determinar si el ritmo actual es alto o bajo comparado con el promedio de esta competición.
+            - Considera el historial (Head-to-Head) histórico entre estos dos equipos para predecir si habrá remontada o dominio.
+
+            REQUISITOS OBLIGATORIOS DEL ANÁLISIS:
+            1. Predicción de Ganador del siguiente periodo (basado en momentum).
+            ${isBasketball ? `
+            2. PROYECCIÓN DE PUNTOS TOTALES: Ajusta tu predicción según el promedio de anotación de la liga ${data.event.tournament.name} y el ritmo actual.
+            3. ANÁLISIS DE JUGADORES: Props clave (Puntos/Rebotes) considerando la defensa rival.
+            ` : isTennis ? `
+            2. ANÁLISIS DE SETS/GAMES: Momentum del partido y superficie.
+            3. QUIEBRES DE SERVICIO: Probabilidad de break basada en presión.
+            ` : `
+            2. ANÁLISIS DE CÓRNERS: ¿El ritmo y la necesidad de gol sugieren OVER/UNDER?
+            3. ANÁLISIS DE GOLES: Proyección ajustada al tiempo restante.
+            `}
+            4. Dame un pick de valor ALTO final.`;
+
         } else if (isScheduled) {
-            prompt = `Analiza este partido PRÓXIMO (Motor v2.0):
+            prompt = `Analiza este partido de ${isBasketball ? 'BALONCESTO' : isTennis ? 'TENIS' : 'FÚTBOL'} PRÓXIMO (Motor v2.3 - Análisis de Forma):
             Evento: ${data.event.homeTeam.name} vs ${data.event.awayTeam.name}
-            Torneo: ${data.event.tournament.name}
+            Liga/País: ${data.event.tournament.name} (${data.event.tournament.category?.name})
             ${lineupsContext}
             Líderes/Estrellas: ${JSON.stringify(data.bestPlayers || {})}
             
-            Realiza un análisis profundo de "Matchups" basado en las alineaciones titulares. Identifica duelos clave (ej: QB vs Secundaria, Delantero vs Defensa). Predice el ganador y un Player Prop de alto valor basado en la debilidad del rival.`;
+            CONTEXTO DE FORMA REQUERIDO (OBLIGATORIO):
+            1. HISTORIAL H2H: ¿Quién domina los enfrentamientos directos recientes?
+            2. ÚLTIMOS 5 PARTIDOS: Analiza la racha actual (Ganados/Perdidos) de ambos equipos. ¿Vienen en racha positiva o negativa?
+            3. FACTOR LOCAL/VISITA: ¿Cómo se comporta ${data.event.homeTeam.name} en casa y ${data.event.awayTeam.name} de visita?
+            
+            REQUISITOS OBLIGATORIOS DEL ANÁLISIS:
+            1. Predicción de Ganador (Moneyline) basada estrictamente en la FORMA RECIENTE.
+            ${isBasketball ? `
+            2. PUNTOS TOTALES: Si ambos vienen anotando mucho en sus últimos 5 juegos, proyecta OVER. Si defienden bien, proyecta UNDER.
+            3. HANDICAP: Calcula el margen de victoria basado en el diferencial de puntos de sus últimos juegos.
+            ` : isTennis ? `
+            2. JUEGOS TOTALES: Basado en si sus últimos partidos fueron largos (3 sets) o cortos.
+            3. ESTADO FÍSICO: ¿Viene de partidos agotadores recientes?
+            ` : `
+            2. MERCADO DE GOLES: Si en sus últimos 5 partidos hubo muchos goles, sugiere OVER.
+            3. AMBOS ANOTAN: ¿Suelen marcar y recibir goles recientemente?
+            `}
+            4. Un Player Prop de alto valor estadístico.`;
         } else {
             prompt = `Analiza el resultado final (Post-Match v2.0):
             Evento: ${data.event.homeTeam.name} vs ${data.event.awayTeam.name}
@@ -239,7 +293,34 @@ export default function MatchDetailsPage() {
                                     <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                                     LIVE
                                 </div>
-                                <span className="text-sm font-mono text-primary font-black tracking-widest">{event.status.description}'</span>
+                                <span className="text-sm font-mono text-primary font-black tracking-widest flex items-center gap-2">
+                                    <Clock className="w-4 h-4" />
+                                    {/* Dynamic Game Time Logic */}
+                                    {(() => {
+                                        // 1. Try explicit time
+                                        if (event.status?.time) return event.status.time;
+
+                                        // 2. Calculate from timestamp
+                                        if (event.time?.currentPeriodStartTimestamp) {
+                                            const start = event.time.currentPeriodStartTimestamp * 1000;
+                                            const now = Date.now();
+                                            const diff = Math.floor((now - start) / 60000);
+
+                                            // Base time determination
+                                            let base = 0;
+                                            const desc = event.status?.description || '';
+                                            if (desc.includes('2nd') || desc.includes('2T')) base = 45;
+                                            if (desc.includes('3rd') || desc.includes('3T')) base = 0;
+                                            if (desc.includes('4th') || desc.includes('4T')) base = 0;
+
+                                            const calculated = base + diff;
+                                            return `${calculated > 0 ? calculated : 0}'`;
+                                        }
+
+                                        // 3. Fallback to description or default
+                                        return event.status?.description || 'EN VIVO';
+                                    })()}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -273,16 +354,16 @@ export default function MatchDetailsPage() {
                                 <span>{event.awayScore?.current ?? 0}</span>
                             </div>
 
-                            {/* Period Breakdown */}
-                            <div className="flex gap-4 md:gap-8 bg-white/5 px-6 py-3 rounded-2xl border border-white/5 backdrop-blur-sm">
+                            {/* Period Breakdown - Cleaner Look */}
+                            <div className="flex gap-4 md:gap-8 px-6 py-3">
                                 {[1, 2, 3, 4, 5].map(p => {
                                     const h = event.homeScore?.[`period${p}`];
                                     const a = event.awayScore?.[`period${p}`];
                                     if (h === undefined && a === undefined) return null;
                                     return (
                                         <div key={p} className="flex flex-col items-center gap-1">
-                                            <span className="text-[8px] font-black text-gray-500 uppercase">P{p}</span>
-                                            <div className="flex flex-col font-mono text-xs font-bold">
+                                            <span className="text-[8px] font-black text-gray-600 uppercase">P{p}</span>
+                                            <div className="flex flex-col font-mono text-xs font-bold gap-1">
                                                 <span className="text-white">{h ?? '-'}</span>
                                                 <span className="text-gray-400">{a ?? '-'}</span>
                                             </div>
@@ -292,8 +373,16 @@ export default function MatchDetailsPage() {
                             </div>
 
                             {event.status.type === 'inprogress' && (
-                                <div className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm">
-                                    <span className="text-gray-400 font-mono text-sm font-bold uppercase tracking-widest">Live Now</span>
+                                <div className="px-4 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg backdrop-blur-sm">
+                                    <div className="text-red-500 font-mono text-sm font-black uppercase tracking-widest animate-pulse flex items-center gap-2">
+                                        <span>LIVE</span>
+                                        <div className="w-1 h-1 bg-red-500 rounded-full"></div>
+                                        <LiveGameClock
+                                            startTimestamp={event.time?.currentPeriodStartTimestamp}
+                                            statusDescription={event.status.description}
+                                            statusType={event.status.type}
+                                        />
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -301,7 +390,7 @@ export default function MatchDetailsPage() {
                         {/* Away */}
                         <div className="flex flex-col items-center gap-6 w-1/3 group">
                             <div className="relative">
-                                <div className="absolute inset-0 bg-accent/20 blur-2xl rounded-full group-hover:bg-accent/40 transition-all opacity-0 group-hover:opacity-100"></div>
+                                <div className="absolute inset-0 bg-white/5 blur-2xl rounded-full group-hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"></div>
                                 <Image
                                     src={getTeamImage(event.awayTeam.id)}
                                     className="w-20 h-20 md:w-32 md:h-32 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform"
@@ -314,7 +403,7 @@ export default function MatchDetailsPage() {
                             </div>
                             <div className="space-y-1">
                                 <h2 className="text-xl md:text-4xl font-black text-white tracking-tighter uppercase italic">{event.awayTeam.name}</h2>
-                                <p className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">Visitante</p>
+                                <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em]">Visitante</p>
                             </div>
                         </div>
                     </div>
@@ -421,9 +510,9 @@ export default function MatchDetailsPage() {
 
                         {/* Away Lineup */}
                         <div className="space-y-6">
-                            <h4 className="text-sm font-black text-white border-b border-accent/20 pb-2 uppercase italic flex items-center justify-end gap-2 text-right">
+                            <h4 className="text-sm font-black text-white border-b border-white/20 pb-2 uppercase italic flex items-center justify-end gap-2 text-right">
                                 {event.awayTeam.name}
-                                <span className="w-2 h-2 rounded-full bg-accent"></span>
+                                <span className="w-2 h-2 rounded-full bg-white"></span>
                             </h4>
                             <div className="space-y-3">
                                 {data.lineups.away.players.filter((p: any) => !p.substitute).map((p: any) => (
@@ -454,7 +543,7 @@ export default function MatchDetailsPage() {
             )}
 
             {/* Community vs AI Voting Section */}
-            <div className="md:col-span-2 glass-card p-8 rounded-[2rem] border-white/5 space-y-6 bg-gradient-to-r from-blue-900/10 to-purple-900/10">
+            <div className="md:col-span-2 glass-card p-8 rounded-[2rem] border-white/5 space-y-6 bg-gradient-to-r from-orange-900/10 to-transparent">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-white/10 rounded-xl">
@@ -474,25 +563,24 @@ export default function MatchDetailsPage() {
                 <div className="space-y-4">
                     <div className="flex justify-between items-end px-2">
                         <span className="text-sm font-black text-primary uppercase">{event.homeTeam.name} (62%)</span>
-                        <span className="text-sm font-black text-accent uppercase">{event.awayTeam.name} (38%)</span>
+                        <span className="text-sm font-black text-white uppercase">{event.awayTeam.name} (38%)</span>
                     </div>
 
                     <div className="h-4 bg-white/10 rounded-full overflow-hidden flex relative">
-                        {/* Home Bar */}
+                        {/* Home Bar - Primary Orange */}
                         <div className="h-full bg-primary flex items-center justify-start px-2 relative group cursor-pointer hover:brightness-110 transition-all" style={{ width: '62%' }}>
-                            {/* Vote Button Overlay */}
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/20 backdrop-blur-sm transition-opacity">
-                                <span className="text-[10px] font-black text-white uppercase">Votar Local</span>
+                                <span className="text-[10px] font-black text-black uppercase">Votar Local</span>
                             </div>
                         </div>
-                        {/* Away Bar */}
-                        <div className="h-full bg-accent flex items-center justify-end px-2 relative group cursor-pointer hover:brightness-110 transition-all" style={{ width: '38%' }}>
+                        {/* Away Bar - White/Gray for clear contrast with Orange */}
+                        <div className="h-full bg-white/50 flex items-center justify-end px-2 relative group cursor-pointer hover:brightness-110 transition-all" style={{ width: '38%' }}>
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/20 backdrop-blur-sm transition-opacity">
                                 <span className="text-[10px] font-black text-white uppercase">Votar Visita</span>
                             </div>
                         </div>
 
-                        {/* Center Marker (Neutral) */}
+                        {/* Center Marker */}
                         <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-black/50"></div>
                     </div>
 
@@ -502,11 +590,11 @@ export default function MatchDetailsPage() {
                 </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Stats Grid - Side by Side with AI on Desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* Main Stats Column */}
-                <div className="glass-card p-6 rounded-3xl space-y-6">
+                {/* Main Stats Column (Takes 2/3 width) */}
+                <div className="glass-card p-6 rounded-3xl space-y-6 lg:col-span-2">
                     <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/5">
                         <Activity className="w-5 h-5 text-accent" />
                         <h3 className="font-bold text-white uppercase tracking-wider">Estadísticas del Partido</h3>
@@ -517,7 +605,7 @@ export default function MatchDetailsPage() {
                             No hay estadísticas detalladas disponibles para este evento.
                         </div>
                     ) : (
-                        <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                             {periodStats.map((group: any, idx: number) => (
                                 <div key={idx} className="space-y-4">
                                     <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest text-primary/80 pb-2">
@@ -595,81 +683,7 @@ export default function MatchDetailsPage() {
                     )}
                 </div>
 
-                {/* Odds Scanner (Real Data) */}
-                <div className="md:col-span-2 glass-card p-8 rounded-[2rem] border-white/5 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-green-500/10 rounded-xl">
-                                <TrendingUp className="w-6 h-6 text-green-500" />
-                            </div>
-                            <div>
-                                <h3 className="font-black text-white uppercase italic tracking-tighter text-xl">Odds Scanner Pro</h3>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Comparativa de Mercados en Tiempo Real</p>
-                            </div>
-                        </div>
-                        <span className="px-3 py-1 bg-white/5 rounded-lg text-[10px] uppercase font-mono text-gray-400">Scanner Live</span>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {data.odds && data.odds.length > 0 ? (
-                            data.odds.filter((m: any) => m.marketName === 'Full time' || m.marketName === 'Match winner' || m.marketName === 'Winner').slice(0, 3).map((market: any, idx: number) => {
-                                return (
-                                    <div key={idx} className="p-6 rounded-2xl border bg-black/40 border-white/5 hover:border-primary/20 flex flex-col gap-6 transition-all group relative overflow-hidden">
-                                        {/* Background Scanline pulse */}
-                                        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                                        <div className="flex justify-between items-center relative z-10">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                                                <span className="font-black uppercase tracking-[0.2em] text-[10px] text-gray-400">{market.marketName}</span>
-                                            </div>
-                                            {idx === 0 && <span className="text-[8px] font-black bg-white text-black px-2 py-0.5 rounded-md uppercase tracking-widest">Market Alpha</span>}
-                                        </div>
-
-                                        <div className="flex justify-between items-center gap-3 relative z-10">
-                                            {market.choices.map((choice: any, cIdx: number) => {
-                                                const val = choice.value;
-                                                const isValue = val && aiConfidence && aiConfidence > (100 / val + 10); // Simple value formula
-
-                                                return (
-                                                    <div key={cIdx} className={clsx(
-                                                        "flex-1 p-4 rounded-xl border transition-all text-center space-y-2",
-                                                        isValue ? "bg-primary/10 border-primary/40 shadow-[0_0_15px_rgba(139,92,246,0.1)]" : "bg-white/[0.02] border-white/5 hover:bg-white/5"
-                                                    )}>
-                                                        <span className="block text-[8px] font-black text-gray-500 uppercase tracking-widest">
-                                                            {choice.name === '1' ? 'HOME' : choice.name === 'X' ? 'DRAW' : choice.name === '2' ? 'AWAY' : choice.name}
-                                                        </span>
-                                                        <span className={clsx(
-                                                            "block font-mono font-black text-2xl tracking-tighter",
-                                                            isValue ? "text-primary" : "text-white"
-                                                        )}>{val ? val.toFixed(2) : '—'}</span>
-                                                        {isValue && (
-                                                            <div className="flex items-center justify-center gap-1">
-                                                                <Zap className="w-2 h-2 text-primary" />
-                                                                <span className="text-[7px] font-black text-primary uppercase">VALUE EDGE</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        ) : (
-                            <div className="md:col-span-3 py-12 text-center border border-dashed border-white/10 rounded-2xl bg-white/[0.01]">
-                                <p className="text-xs font-black text-gray-600 uppercase tracking-widest italic">No hay cuotas disponibles para los filtros actuales</p>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="flex justify-end">
-                        <Link href="/bankroll" className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors group">
-                            Gestionar mi Bankroll
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                    </div>
-                </div>
 
             </div>
         </div>

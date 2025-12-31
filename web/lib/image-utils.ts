@@ -3,7 +3,8 @@
  * Standardizes how we fetch images from external providers like Sofascore.
  */
 
-const PROXY = 'https://wsrv.nl/?url=';
+// Using local Next.js proxy via rewrites to avoid external proxy blocks and CORS issues
+const PROXY_PREFIX = '/api/proxy-image';
 
 export const getBlurDataURL = (color = '#111') => {
     const svg = `
@@ -19,23 +20,31 @@ export const getBlurDataURL = (color = '#111') => {
 };
 
 export const getTeamImage = (id: number | string) => {
-    if (!id) return DEFAULT_IMAGES.team;
-    return `${PROXY}${encodeURIComponent('https://api.sofascore.com/api/v1/team/' + id + '/image')}&w=100&h=100&fit=contain`;
+    if (!id) return getProxiedDefault('team');
+    return `${PROXY_PREFIX}/team/${id}`;
 };
 
+export const getTeamLogo = getTeamImage;
+
+
+
 export const getTournamentImage = (id: number | string) => {
-    if (!id) return DEFAULT_IMAGES.tournament;
-    return `${PROXY}${encodeURIComponent('https://api.sofascore.com/api/v1/unique-tournament/' + id + '/image')}&w=100&h=100&fit=contain`;
+    if (!id) return getProxiedDefault('tournament');
+    return `${PROXY_PREFIX}/tournament/${id}`;
 };
 
 export const getCategoryImage = (id: number | string) => {
-    if (!id) return DEFAULT_IMAGES.tournament;
-    return `${PROXY}${encodeURIComponent('https://api.sofascore.com/api/v1/category/' + id + '/image')}&w=100&h=100&fit=cover`;
+    if (!id) return getProxiedDefault('tournament');
+    return `${PROXY_PREFIX}/category/${id}`;
 };
 
 export const getPlayerImage = (id: number | string) => {
-    if (!id) return DEFAULT_IMAGES.player;
-    return `${PROXY}${encodeURIComponent('https://api.sofascore.com/api/v1/player/' + id + '/image')}&w=200&h=200&fit=cover`;
+    if (!id) return getProxiedDefault('player');
+    return `${PROXY_PREFIX}/player/${id}`;
+};
+
+const getProxiedDefault = (type: 'team' | 'tournament' | 'player') => {
+    return DEFAULT_IMAGES[type];
 };
 
 export const DEFAULT_IMAGES = {

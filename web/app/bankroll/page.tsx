@@ -145,8 +145,8 @@ export default function BankrollPage() {
                                 <AreaChart data={chartData}>
                                     <defs>
                                         <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                            <stop offset="5%" stopColor="#00FF41" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#00FF41" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
@@ -175,12 +175,12 @@ export default function BankrollPage() {
                                             fontWeight: '900',
                                             textTransform: 'uppercase',
                                         }}
-                                        itemStyle={{ color: '#8b5cf6' }}
+                                        itemStyle={{ color: '#00FF41' }}
                                     />
                                     <Area
                                         type="monotone"
                                         dataKey="value"
-                                        stroke="#8b5cf6"
+                                        stroke="#00FF41"
                                         strokeWidth={4}
                                         fillOpacity={1}
                                         fill="url(#colorValue)"

@@ -119,7 +119,7 @@ export default function ParleyOptimizer({ isOpen, onClose, sport: initialSport =
             <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar bg-[#050505] border border-white/10 rounded-[3rem] shadow-[0_0_100px_-20px_rgba(139,92,246,0.3)] animate-in zoom-in-95 duration-500">
 
                 {/* Header: Gradient Banner */}
-                <div className="bg-gradient-to-br from-[#E6551E] via-[#8B5CF6] to-[#D946EF] p-10 md:p-14 flex justify-between items-start relative overflow-hidden">
+                <div className="bg-gradient-to-br from-black via-[#00FF41] to-[#39FF14] p-10 md:p-14 flex justify-between items-start relative overflow-hidden">
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
                     <div className="space-y-4 relative z-10">
                         <div className="flex items-center gap-3">
@@ -288,8 +288,9 @@ export default function ParleyOptimizer({ isOpen, onClose, sport: initialSport =
                                         {result.legs?.map((leg: any, idx: number) => (
                                             <div key={idx} className="flex justify-between items-center p-6 bg-white/[0.03] rounded-3xl border border-white/5 hover:border-primary/30 transition-all group">
                                                 <div className="flex items-center gap-6">
-                                                    <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-[10px] font-black text-gray-500 group-hover:bg-primary group-hover:text-black transition-all">
-                                                        {idx + 1}
+                                                    <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-[10px] font-black text-gray-500 group-hover:bg-primary group-hover:text-black transition-all relative overflow-hidden">
+                                                        <span className="relative z-10">{idx + 1}</span>
+                                                        <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                                     </div>
                                                     <div className="space-y-1">
                                                         <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{leg.event}</p>
@@ -299,9 +300,11 @@ export default function ParleyOptimizer({ isOpen, onClose, sport: initialSport =
                                                 <div className="flex items-center gap-4">
                                                     <div className="hidden md:block text-right">
                                                         <p className="text-[9px] font-black text-gray-600 uppercase tracking-tighter">Probabilidad</p>
-                                                        <p className="text-xs font-black text-white italic">Muy Alta</p>
+                                                        <p className="text-xs font-black text-white italic uppercase tracking-tighter">AI Tier 1</p>
                                                     </div>
-                                                    <ChevronRight className="w-5 h-5 text-primary group-hover:translate-x-2 transition-transform" />
+                                                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                                                        <Zap className="w-4 h-4 text-primary" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -329,16 +332,17 @@ export default function ParleyOptimizer({ isOpen, onClose, sport: initialSport =
                                         <TrendingUp className="w-4 h-4" />
                                         RE-OPTIMIZAR ESCENARIO
                                     </button>
-                                    <button className="flex-[2] py-6 bg-primary text-black rounded-[2rem] text-xs font-black uppercase tracking-[0.3em] hover:shadow-[0_20px_40px_-5px_rgba(139,92,246,0.6)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3">
-                                        COPIAR A BETPLAY
-                                        <ArrowRight className="w-4 h-4" />
+                                    <button className="flex-[2] py-6 bg-gradient-to-r from-primary to-accent text-black rounded-[2rem] text-xs font-black uppercase tracking-[0.3em] hover:shadow-[0_20px_40px_-5px_rgba(139,92,246,0.6)] hover:scale-[1.02] transition-all flex items-center justify-center gap-3 relative overflow-hidden group">
+                                        <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-12"></div>
+                                        <span className="relative z-10">SINCRONIZAR TERMINAL PRO</span>
+                                        <ArrowRight className="w-4 h-4 relative z-10" />
                                     </button>
                                 </div>
                             </div>
                         ) : (
                             <button
                                 onClick={handleGenerate}
-                                className="w-full py-8 bg-gradient-to-r from-[#8B5CF6] to-[#3B82F6] text-white font-black uppercase tracking-[0.4em] text-xs rounded-[2.5rem] hover:shadow-[0_30px_70px_-15px_rgba(139,92,246,0.8)] hover:scale-[1.01] transition-all flex items-center justify-center gap-4 active:scale-95 group relative overflow-hidden"
+                                className="w-full py-8 bg-gradient-to-r from-[#00FF41] to-[#39FF14] text-black font-black uppercase tracking-[0.4em] text-xs rounded-[2.5rem] hover:shadow-[0_30px_70px_-15px_rgba(0,255,65,0.8)] hover:scale-[1.01] transition-all flex items-center justify-center gap-4 active:scale-95 group relative overflow-hidden"
                             >
                                 <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-12"></div>
                                 GENERAR PARLEY OPTIMIZADO CON IA

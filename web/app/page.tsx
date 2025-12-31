@@ -1,63 +1,24 @@
 "use client";
 
+
 import { useState, useEffect } from 'react';
 import {
-  Zap, Trophy, Target, Users, ArrowRight, Play, Activity,
-  Calendar, Star, Shield, TrendingUp, BarChart3, Globe,
-  MapPin, Clock, Search, CreditCard, CheckCircle2, AlertCircle,
-  Newspaper, Radio
+  Zap, Trophy, Target, Globe,
+  Activity, ArrowRight, Shield, Star
 } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
-
-const sportsCards = [
-  { id: 'football', name: 'Fútbol', icon: Globe, color: 'from-blue-600 to-cyan-500', href: '/football', count: '142+', tag: 'LTP / LIVE' },
-  { id: 'basketball', name: 'NBA', icon: Activity, color: 'from-orange-600 to-red-500', href: '/basketball', count: '15+', tag: 'FULL SEASON' },
-  { id: 'hockey', name: 'NHL', icon: Zap, color: 'from-blue-400 to-indigo-600', href: '/hockey', count: '12+', tag: 'PRO-ICE' },
-  { id: 'nfl', name: 'NFL', icon: Target, color: 'from-green-600 to-emerald-500', href: '/nfl', count: '16+', tag: 'PLAYOFFS' },
-  { id: 'baseball', name: 'MLB', icon: Star, color: 'from-red-600 to-rose-500', href: '/baseball', count: '30+', tag: 'WORLD SERIES' },
-  { id: 'tennis', name: 'Tenis', icon: TrendingUp, color: 'from-lime-500 to-yellow-400', href: '/tennis', count: '50+', tag: 'GRAND SLAM' },
-];
-
-const plans = [
-  {
-    name: "ACCESO GRATUITO",
-    price: "$0",
-    desc: "Para analistas en formación",
-    features: ["Picks Diarios de Fútbol", "Resultados en Vivo", "Análisis Básico IA", "Estadísticas Limitadas"],
-    cta: "Empezar Gratis",
-    color: "bg-white/5"
-  },
-  {
-    name: "ELITE PREMIUM",
-    price: "$5",
-    desc: "Para los que dominan el juego",
-    features: ["Todos los Deportes", "IA Predictor PRO unlocked", "Radar In-Play v4.0", "Planes de Éxito VIP"],
-    cta: "Acceso Total",
-    color: "bg-gradient-to-br from-primary to-purple-800",
-    hot: true
-  }
-];
+import { StatsCounter } from '@/components/StatsCounter';
+import { SportsTabs } from '@/components/SportsTabs';
+import { TestimonialSlider } from '@/components/TestimonialSlider';
+import { SubscribeModal } from '@/components/SubscribeModal';
 
 export default function Home() {
-  const [hotMatches, setHotMatches] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [news, setNews] = useState<any[]>([]);
-  const [loadingMatches, setLoadingMatches] = useState(true);
   const [loadingNews, setLoadingNews] = useState(true);
 
   useEffect(() => {
-    const fetchHotMatches = async () => {
-      try {
-        const res = await fetch('/api/live/football');
-        const data = await res.json();
-        setHotMatches(data.events?.slice(0, 3) || []);
-      } catch (error) {
-        console.error("Error fetching hot matches:", error);
-      } finally {
-        setLoadingMatches(false);
-      }
-    };
-
     const fetchNews = async () => {
       try {
         const res = await fetch('/api/news');
@@ -69,13 +30,12 @@ export default function Home() {
         setLoadingNews(false);
       }
     };
-
-    fetchHotMatches();
     fetchNews();
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-[#050505] text-white selection:bg-primary selection:text-black">
+    <div className="relative min-h-screen text-white selection:bg-primary selection:text-black">
+      <SubscribeModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* --- DESIGN SYSTEM: AMBIENT LAYERS --- */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -87,7 +47,7 @@ export default function Home() {
 
       <main className="relative z-10 pt-32 pb-32 px-4 md:px-12 max-w-[100rem] mx-auto space-y-40">
 
-        {/* --- HERO: DOMINA EL JUEGO IA --- */}
+        {/* --- HERO SECTION --- */}
         <section className="text-center space-y-12 animate-in fade-in slide-in-from-bottom-10 duration-1000">
           <div className="flex flex-col items-center gap-6">
             <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl group cursor-default">
@@ -100,7 +60,7 @@ export default function Home() {
 
             <h1 className="text-8xl md:text-[14rem] font-black tracking-tighter leading-[0.8] italic uppercase drop-shadow-[0_0_50px_rgba(255,255,255,0.05)]">
               DOMINA EL <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-accent">JUEGO IA</span>
+              <span className="gradient-text">JUEGO IA</span>
             </h1>
 
             <p className="text-gray-500 max-w-4xl mx-auto text-lg md:text-3xl font-medium tracking-tight leading-relaxed">
@@ -108,15 +68,26 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-12">
-              <Link href="/live" className="w-full md:w-auto px-16 py-7 bg-primary text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-white transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-4 shadow-[0_30px_60px_-15px_rgba(139,92,246,0.3)]">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full md:w-auto px-16 py-7 bg-primary text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-white transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-4 shadow-[0_30px_60px_-15px_rgba(139,92,246,0.3)]"
+              >
                 <Trophy className="w-6 h-6" />
                 EXPLORAR RADAR
-              </Link>
+              </button>
               <Link href="/picks" className="w-full md:w-auto px-16 py-7 bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center gap-4 group backdrop-blur-md">
                 <Zap className="w-6 h-6 text-primary group-hover:animate-pulse" />
                 TERMINAL PRO
               </Link>
             </div>
+          </div>
+
+          {/* --- STATS GRID --- */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-20">
+            <StatsCounter target={8500} label="Eventos Cierre/Mes" prefix="+" />
+            <StatsCounter target={94} label="Sincro-Score Precisión" suffix="%" />
+            <StatsCounter target={50} label="Ligas Globales Web" prefix="+" />
+            <StatsCounter target={42} label="ROI Promedio Mensual" suffix="%" />
           </div>
         </section>
 
@@ -135,10 +106,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <Link href="/status" className="hidden md:flex items-center gap-3 px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
-              <Radio className="w-4 h-4 text-primary animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Terminal Status</span>
-            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -148,11 +115,8 @@ export default function Home() {
               ))
             ) : (
               news.map((item) => (
-                <a
+                <div
                   key={item.id}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="group relative bg-white/[0.02] border border-white/5 rounded-[3rem] overflow-hidden hover:border-primary/30 transition-all hover:-translate-y-2 block"
                 >
                   {/* Article Image with Overlay */}
@@ -201,47 +165,83 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                </a>
+                </div>
               ))
             )}
           </div>
         </section>
 
-        {/* --- GRID FEATURES: RADAR-SYSTEM --- */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              title: "ALTA FIDELIDAD",
-              desc: "Procesamos datos de más de 50 ligas con latencia de milisegundos para darte la señal antes que el mercado.",
-              icon: Globe,
-              tag: "GLOBAL-SYSTEM"
-            },
-            {
-              title: "ESTRATEGIAS IA",
-              desc: "Nuestra red neuronal PickGenius calcula parleys y props con un ROI promedio mensual del 42.8%.",
-              icon: Target,
-              tag: "QUANT-ENGINE"
-            },
-            {
-              title: "IN-PLAY RADAR",
-              desc: "Detectamos cambios tácticos y fatiga en vivo. Análisis que ni los narradores profesionales ven.",
-              icon: Activity,
-              tag: "REAL-TIME"
-            }
-          ].map((item, i) => (
-            <div key={i} className="group p-10 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-primary/5 hover:border-primary/20 transition-all space-y-8">
-              <div className="flex justify-between items-start">
-                <div className="w-16 h-16 rounded-[1.5rem] bg-white/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary group-hover:text-black transition-all">
-                  <item.icon className="w-8 h-8" />
-                </div>
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{item.tag}</span>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black italic uppercase tracking-tighter leading-none">{item.title}</h3>
-                <p className="text-gray-500 text-sm font-medium leading-relaxed group-hover:text-gray-300 transition-colors">{item.desc}</p>
-              </div>
+        {/* --- ELITE SYSTEM SECTION --- */}
+        <section className="space-y-16 reveal-on-scroll reveal-visible">
+          <div className="flex items-center gap-4">
+            <div className="w-1.5 h-12 bg-primary rounded-full"></div>
+            <div>
+              <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter">
+                SISTEMA <span className="text-primary italic">ELITE v4.2</span>
+              </h2>
+              <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Protocolo de Alta Fidelidad</span>
             </div>
-          ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "ALTA FIDELIDAD",
+                desc: "Procesamos datos de más de 50 ligas con latencia de milisegundos para darte la señal antes que el mercado.",
+                icon: Globe,
+                tag: "GLOBAL-SYSTEM"
+              },
+              {
+                title: "ESTRATEGIAS IA",
+                desc: "Nuestra red neuronal PickGenius calcula parleys y props con un ROI promedio mensual del 42.8%.",
+                icon: Target,
+                tag: "QUANT-ENGINE"
+              },
+              {
+                title: "IN-PLAY RADAR",
+                desc: "Detectamos cambios tácticos y fatiga en vivo. Análisis que ni los narradores profesionales ven.",
+                icon: Activity,
+                tag: "REAL-TIME"
+              }
+            ].map((item, i) => (
+              <div key={i} className="group p-10 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-primary/5 hover:border-primary/20 transition-all space-y-8">
+                <div className="flex justify-between items-start">
+                  <div className="w-16 h-16 rounded-[1.5rem] bg-white/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary group-hover:text-black transition-all">
+                    <item.icon className="w-8 h-8" />
+                  </div>
+                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{item.tag}</span>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-3xl font-black italic uppercase tracking-tighter leading-none">{item.title}</h3>
+                  <p className="text-gray-500 text-sm font-medium leading-relaxed group-hover:text-gray-300 transition-colors">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* --- SPORTS RADAR SELECTION --- */}
+        <section className="space-y-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-6xl md:text-8xl font-black uppercase tracking-tighter italic leading-none">
+              EL <span className="text-primary italic">RADAR</span> SPORTS
+            </h2>
+            <p className="text-gray-500 font-bold uppercase tracking-[0.5em] text-[10px]">Análisis Multideporte en Tiempo Real</p>
+          </div>
+
+          <SportsTabs />
+        </section>
+
+        {/* --- TESTIMONIALS SECTION --- */}
+        <section className="space-y-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter">
+              VOCES DE LA <span className="text-primary italic">COMUNIDAD</span>
+            </h2>
+            <p className="text-gray-500 font-bold uppercase tracking-[0.5em] text-[10px]">Resultados Verificados por Usuarios Elite</p>
+          </div>
+
+          <TestimonialSlider />
         </section>
 
         {/* --- TERMINAL DETERMINISTA: THE CORE --- */}
@@ -285,83 +285,15 @@ export default function Home() {
                 </div>
               ))}
               <div className="bg-primary p-1 bg-gradient-to-r from-primary to-accent rounded-[2rem] overflow-hidden">
-                <div className="bg-black/80 p-8 rounded-[1.9rem] flex items-center justify-between">
-                  <span className="text-sm font-black text-white italic uppercase tracking-widest">VER ESTRATEGIAS LIVE</span>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-full bg-black/80 p-8 rounded-[1.9rem] flex items-center justify-between hover:bg-black/60 transition-all"
+                >
+                  <span className="text-sm font-black text-white italic uppercase tracking-widest">ACTIVAR TERMINAL PRO</span>
                   <ArrowRight className="w-6 h-6 text-primary" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* --- PLANES DE EXITO: PRICING --- */}
-        <section className="space-y-16">
-          <div className="text-center space-y-4">
-            <h2 className="text-6xl font-black uppercase italic tracking-tighter text-glow-white">PLANES DE <span className="text-primary italic">ÉXITO</span></h2>
-            <p className="text-gray-500 font-bold uppercase tracking-[0.5em] text-[10px]">Sin Letras Pequeñas. Solo Datos Reales.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
-            {plans.map((plan, i) => (
-              <div key={i} className={clsx(
-                "p-12 rounded-[3.5rem] border border-white/5 space-y-12 relative overflow-hidden group transition-all duration-500 hover:scale-[1.02]",
-                plan.color,
-                plan.hot ? "shadow-[0_40px_100px_-20px_rgba(139,92,246,0.2)]" : ""
-              )}>
-                {plan.hot && (
-                  <div className="absolute top-8 right-8 px-6 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full">RECOMMENDED</div>
-                )}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-black text-primary uppercase italic tracking-widest">{plan.name}</h3>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-7xl font-black text-white italic leading-none">{plan.price}</span>
-                    <span className="text-gray-500 font-black text-sm uppercase tracking-widest">/MES</span>
-                  </div>
-                  <p className="text-gray-400 font-medium">{plan.desc}</p>
-                </div>
-                <div className="space-y-6">
-                  {plan.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-center gap-4 text-gray-300 font-bold uppercase text-[10px] tracking-widest">
-                      <CheckCircle2 className="w-4 h-4 text-primary" />
-                      {feat}
-                    </div>
-                  ))}
-                </div>
-                <button className={clsx(
-                  "w-full py-6 rounded-2xl font-black uppercase tracking-[0.2em] transition-all",
-                  plan.hot ? "bg-white text-black hover:bg-white/90" : "bg-white/5 text-white hover:bg-white/10"
-                )}>
-                  {plan.cta}
                 </button>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* --- SPORT SELECTOR: RADAR-GRID --- */}
-        <section className="space-y-16">
-          <div className="flex flex-col items-center gap-4">
-            <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter italic text-center leading-none">
-              EL <span className="text-primary italic">RADAR</span> SPORTS
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-8">
-            {sportsCards.map((sport) => (
-              <Link
-                key={sport.id}
-                href={sport.href}
-                className="group relative p-8 bg-white/[0.02] border border-white/5 rounded-[2.5rem] hover:bg-primary/5 hover:border-primary/20 transition-all text-center space-y-4"
-              >
-                <div className="mx-auto w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all">
-                  <sport.icon className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-lg font-black italic uppercase tracking-tight">{sport.name}</h4>
-                  <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest group-hover:text-primary transition-colors">{sport.tag}</p>
-                </div>
-              </Link>
-            ))}
+            </div>
           </div>
         </section>
 
@@ -380,14 +312,6 @@ export default function Home() {
             <p className="text-gray-500 text-lg font-medium leading-relaxed max-w-sm italic">
               La ingeniería del éxito deportivo. Procesando el caos, entregando la señal.
             </p>
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary transition-all cursor-pointer">
-                <Globe className="w-4 h-4" />
-              </div>
-              <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary transition-all cursor-pointer">
-                <Users className="w-4 h-4" />
-              </div>
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-12">
@@ -396,26 +320,26 @@ export default function Home() {
               <ul className="space-y-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
                 <li><Link href="/live" className="hover:text-primary transition-colors">Radar en Vivo</Link></li>
                 <li><Link href="/picks" className="hover:text-primary transition-colors">Terminal IA</Link></li>
-                <li><Link href="/picks" className="hover:text-primary transition-colors">Planes Premium</Link></li>
+                <li><Link href="/bankroll" className="hover:text-primary transition-colors">Bankroll Manager</Link></li>
               </ul>
             </div>
             <div className="space-y-8">
               <h5 className="text-[10px] font-black uppercase tracking-[0.5em] text-white">LEGAL OPS</h5>
               <ul className="space-y-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
-                <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Contact Support</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Términos de Servicio</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Privacidad</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Soporte</a></li>
               </ul>
             </div>
           </div>
 
           <div className="space-y-8 bg-white/[0.03] p-10 rounded-[3rem] border border-white/5">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-yellow-500" />
+              <Shield className="w-4 h-4 text-yellow-500" />
               <h5 className="text-[10px] font-black uppercase tracking-[0.5em] text-white">RESPONSIBLE OPS</h5>
             </div>
             <p className="text-[10px] text-gray-500 font-bold uppercase leading-relaxed tracking-widest">
-              EL JUEGO ES PARA MAYORES DE 18 AÑOS. JUEGA CON RESPONSABILIDAD. NUESTRA IA ES UNA HERRAMIENTA DE SOPORTE DE DECISIONES, NO UN MÉTODO DE ENRIQUECIMIENTO GARANTIZADO.
+              EL JUEGO ES PARA MAYORES DE 18 AÑOS. JUEGA CON RESPONSABILIDAD. NUESTRA IA ES UNA HERRAMIENTA DE SOPORTE, NO UN MÉTODO GARANTIZADO.
             </p>
           </div>
         </div>
@@ -436,7 +360,6 @@ export default function Home() {
           DETERMINISM ARCHITECTURE
         </div>
       </footer>
-
     </div>
   );
 }

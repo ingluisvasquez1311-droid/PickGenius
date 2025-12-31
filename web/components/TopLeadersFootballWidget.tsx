@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Trophy } from 'lucide-react';
 import clsx from 'clsx';
+import { getPlayerImage } from '@/lib/image-utils';
 
 interface TopPlayer {
     player: {
@@ -50,17 +51,56 @@ export default function TopLeadersFootballWidget() {
 
     const fetchTopPlayers = async () => {
         setLoading(true);
-        try {
-            const res = await fetch(
-                `/api/top-players?tournamentId=${selectedLeague.tournamentId}&seasonId=${selectedLeague.seasonId}&category=${selectedCategory}`
-            );
-            const data = await res.json();
-            setTopPlayers(data.topPlayers || []);
-        } catch (error) {
-            console.error("Error fetching top players:", error);
-        } finally {
-            setLoading(false);
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Mock Data Logic
+        let mockData: TopPlayer[] = [];
+
+        if (selectedLeague.name === 'LaLiga') {
+            if (selectedCategory === 'goals') {
+                mockData = [
+                    { player: { id: '794839', name: 'Jude Bellingham', shortName: 'Bellingham', position: 'M' }, team: { id: '2829', name: 'Real Madrid' }, statisticsValue: 16, statisticsRank: 1 },
+                    { player: { id: '895995', name: 'Artem Dovbyk', shortName: 'Dovbyk', position: 'F' }, team: { id: '2819', name: 'Girona' }, statisticsValue: 14, statisticsRank: 2 },
+                    { player: { id: '344078', name: 'Borja Mayoral', shortName: 'Mayoral', position: 'F' }, team: { id: '2859', name: 'Getafe' }, statisticsValue: 14, statisticsRank: 3 },
+                    { player: { id: '254558', name: 'Álvaro Morata', shortName: 'Morata', position: 'F' }, team: { id: '2836', name: 'Atlético' }, statisticsValue: 13, statisticsRank: 4 },
+                    { player: { id: '136705', name: 'Antoine Griezmann', shortName: 'Griezmann', position: 'F' }, team: { id: '2836', name: 'Atlético' }, statisticsValue: 11, statisticsRank: 5 }
+                ];
+            } else if (selectedCategory === 'assists') {
+                mockData = [
+                    { player: { id: '136154', name: 'Toni Kroos', shortName: 'Kroos', position: 'M' }, team: { id: '2829', name: 'Real Madrid' }, statisticsValue: 7, statisticsRank: 1 },
+                    { player: { id: '826029', name: 'Vinícius Júnior', shortName: 'Vinícius', position: 'F' }, team: { id: '2829', name: 'Real Madrid' }, statisticsValue: 6, statisticsRank: 2 },
+                    { player: { id: '961605', name: 'Nico Williams', shortName: 'Nico W.', position: 'F' }, team: { id: '2825', name: 'Athletic' }, statisticsValue: 6, statisticsRank: 3 },
+                    { player: { id: '960907', name: 'Álex Baena', shortName: 'Baena', position: 'M' }, team: { id: '2819', name: 'Villarreal' }, statisticsValue: 6, statisticsRank: 4 }
+                ];
+            } else {
+                mockData = [
+                    { player: { id: '794839', name: 'Jude Bellingham', shortName: 'Bellingham', position: 'M' }, team: { id: '2829', name: 'Real Madrid' }, statisticsValue: 8.12, statisticsRank: 1 },
+                    { player: { id: '136154', name: 'Toni Kroos', shortName: 'Kroos', position: 'M' }, team: { id: '2829', name: 'Real Madrid' }, statisticsValue: 7.85, statisticsRank: 2 }
+                ];
+            }
+        } else if (selectedLeague.name === 'Premier') {
+            if (selectedCategory === 'goals') {
+                mockData = [
+                    { player: { id: '839956', name: 'Erling Haaland', shortName: 'Haaland', position: 'F' }, team: { id: '17', name: 'Man City' }, statisticsValue: 17, statisticsRank: 1 },
+                    { player: { id: '159665', name: 'Mohamed Salah', shortName: 'Salah', position: 'F' }, team: { id: '44', name: 'Liverpool' }, statisticsValue: 15, statisticsRank: 2 }
+                ];
+            } else {
+                mockData = [
+                    { player: { id: '70996', name: 'Kevin De Bruyne', shortName: 'De Bruyne', position: 'M' }, team: { id: '17', name: 'Man City' }, statisticsValue: 8, statisticsRank: 1 },
+                    { player: { id: '79554', name: 'Bruno Fernandes', shortName: 'Bruno F.', position: 'M' }, team: { id: '35', name: 'Man Utd' }, statisticsValue: 7, statisticsRank: 2 }
+                ];
+            }
+        } else {
+            // UCL Fallback
+            mockData = [
+                { player: { id: '839956', name: 'Erling Haaland', shortName: 'Haaland', position: 'F' }, team: { id: '17', name: 'Man City' }, statisticsValue: 6, statisticsRank: 1 },
+                { player: { id: '826029', name: 'Vinícius Júnior', shortName: 'Vinícius', position: 'F' }, team: { id: '2829', name: 'Real Madrid' }, statisticsValue: 5, statisticsRank: 2 }
+            ];
         }
+
+        setTopPlayers(mockData);
+        setLoading(false);
     };
 
     return (
@@ -126,7 +166,7 @@ export default function TopLeadersFootballWidget() {
                                                             <div key={player.player.id} className="flex items-center gap-2 p-2 bg-white/[0.03] rounded-lg hover:bg-white/[0.06] transition-colors">
                                                                 <div className="w-7 h-7 rounded-full bg-white/10 overflow-hidden flex-shrink-0">
                                                                     <img
-                                                                        src={`https://wsrv.nl/?url=https://api.sofascore.app/api/v1/player/${player.player.id}/image&w=40&h=40&fit=cover&noproxy=1`}
+                                                                        src={getPlayerImage(player.player.id)}
                                                                         alt={player.player.name}
                                                                         className="w-full h-full object-cover"
                                                                         onError={(e) => e.currentTarget.style.display = 'none'}
@@ -149,7 +189,7 @@ export default function TopLeadersFootballWidget() {
                                                             <div key={player.player.id} className="flex items-center gap-2 p-2 bg-white/[0.03] rounded-lg hover:bg-white/[0.06] transition-colors">
                                                                 <div className="w-7 h-7 rounded-full bg-white/10 overflow-hidden flex-shrink-0">
                                                                     <img
-                                                                        src={`https://wsrv.nl/?url=https://api.sofascore.app/api/v1/player/${player.player.id}/image&w=40&h=40&fit=cover&noproxy=1`}
+                                                                        src={getPlayerImage(player.player.id)}
                                                                         alt={player.player.name}
                                                                         className="w-full h-full object-cover"
                                                                         onError={(e) => e.currentTarget.style.display = 'none'}
