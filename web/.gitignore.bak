@@ -1,7 +1,0 @@
-# Next.js build and cache
-.next/
-node_modules/
-
-# Environment
-.vercel
-.env*.local

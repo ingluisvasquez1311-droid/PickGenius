@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.26",
+    "groq-sdk": "^0.37.0",
+    "lucide-react": "^0.562.0",
+    "recharts": "^3.6.0",
+    "tailwind-merge": "^3.4.0"
+  }
+}

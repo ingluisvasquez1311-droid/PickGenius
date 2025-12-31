@@ -90,7 +90,7 @@ class CacheBrowserSystem:
         # Headless=False temporalmente para permitir ver qué pasa si hay bloqueos, o True para producción
         self.browser_context = await pw.chromium.launch_persistent_context(
             user_data_dir=self.user_data_dir,
-            headless=True,
+            headless=False, # MODO VISIBLE: El usuario ve lo que pasa (Anti-Robot Feeling)
             args=[
                 '--disable-blink-features=AutomationControlled',
                 '--no-sandbox',
@@ -163,9 +163,28 @@ class CacheBrowserSystem:
                 
                 if data and data['data'] and len(data['data']) > 0:
                     # Guardar en Redis
+                    # Guardar en Redis (Bulk)
                     cache_key = f"sports_cache:{hashlib.md5(f'{name}_{sport}_{data_type}'.encode()).hexdigest()}"
                     self.redis_client.set(cache_key, json.dumps(data), ex=3600 if data_type == 'scheduled' else 600)
-                    print(f"✅ {sport} - {name}: {len(data['data'])} partidos")
+                    
+                    # NUEVO: Guardar partidos individuales para acceso rápido desde API (O(1))
+                    # Key format: live_match:{sport}:{id}
+                    stored_count = 0
+                    for match in data['data']:
+                        if match.get('id'):
+                            # Normalizar ID para asegurar match con frontend
+                            match_id = str(match['id'])
+                            individual_key = f"live_match:{sport}:{match_id}"
+                            
+                            # Enriquecer con timestamp de captura
+                            match['last_updated'] = datetime.now().isoformat()
+                            
+                            # Guardar con TTL corto para asegurar frescura (5 min live, 60 min scheduled)
+                            ttl = 300 if data_type == 'live' else 3600
+                            self.redis_client.set(individual_key, json.dumps(match), ex=ttl)
+                            stored_count += 1
+                            
+                    print(f"✅ {sport} - {name}: {len(data['data'])} partidos (y {stored_count} keys individuales)")
                     success = True
                     break 
                 else:
@@ -210,9 +229,18 @@ class CacheBrowserSystem:
             
             print(f"🌐 Navegador real → {endpoint}: {url}")
             
-            # Navegar con tiempo de espera generoso
-            await page.goto(url, wait_until='networkidle', timeout=60000)
-            await page.wait_for_timeout(8000)  # Increased wait for dynamic content
+            # Navegar (DOM Content Loaded es más rápido y seguro para sitios con streams constantes)
+            try:
+                await page.goto(url, wait_until='domcontentloaded', timeout=60000)
+                # Esperar un poco a que la red se calme, pero no bloquear si no lo hace
+                try:
+                   await page.wait_for_load_state('networkidle', timeout=5000)
+                except:
+                   pass
+            except Exception as e:
+                print(f"⚠️ Alerta de carga lenta: {e}, intentando continuar igual...")
+
+            await page.wait_for_timeout(5000)  # Espera inicial fija
             
             # Si es Sofascore y queremos Live, clic en el botón Live
             if endpoint == 'sofascore' and data_type == 'live':
@@ -262,104 +290,202 @@ class CacheBrowserSystem:
                 pass
 
             # JS inyectado para extracción masiva (incluye tiempo e IDs)
-            matches = await page.evaluate(r"""
-                (args) => {
-                    const { selectors, data_type } = args;
-                    const items = document.querySelectorAll(selectors.matches);
-                    return Array.from(items).map(item => {
-                        // Capturar hora/estado primero para poder filtrarlo de los nombres
-                        const timeElement = item.querySelector('.time, .status, .match-time, [class*="Time"], [class*="status"], [class*="EventCellStatus"]');
-                        const timeText = timeElement?.innerText?.trim() || '';
+            # NOTA: Usamos una función JS normal stringificada (raw string) para evitar escapes de Python
+            js_script = r"""
+                ({ selectors, data_type }) => {
+                    // Helper para extracción segura
+                    const safeGetText = (el) => {
+                        if (!el) return '';
+                        return (el.textContent || el.innerText || '').trim();
+                    };
 
-                        const scoreElements = item.querySelectorAll(selectors.score);
-                        const teamElements = item.querySelectorAll(selectors.team);
+                    // Intento 1: Buscar por Cards de Eventos (Selector Genérico Robusto)
+                    let items = Array.from(document.querySelectorAll('a[href*="/match/"], div[data-testid="event_cell"], [class*="EventCell"]'));
+                    
+                    if (items.length === 0) {
+                        items = Array.from(document.querySelectorAll('.ReactVirtualized__Grid__innerScrollContainer > div, [class*="sport-event-list"] > div'));
+                    }
+
+                    return items.map(item => {
+                        // 1. Detección Inteligente de Tiempo/Estado
+                        const statusEl = item.querySelector('[class*="Status"], [class*="status"], [class*="Time"], span[color="live"], span[class*="red"]');
+                        let timeText = safeGetText(statusEl);
                         
-                        // Extraer nombres reales filtrando basura (ej: horas, scores pegados)
-                        let names = Array.from(teamElements)
-                            .map(el => el.innerText?.trim())
-                            .filter(text => {
-                                if (!text || text.length < 2) return false;
-                                if (text.includes(':')) return false; // Elimina horas como 15:00
-                                if (/^\d+$/.test(text)) return false; // Elimina puntuaciones puras
-                                if (text.toLowerCase() === 'live') return false;
-                                if (text.toLowerCase() === 'vs') return false;
-                                return true;
-                            });
+                        if (!timeText) {
+                            const allText = safeGetText(item);
+                            const timeMatch = allText.match(/\d{2}:\d{2}|LIVE|FT|AET|\d{1,3}'/);
+                            if (timeMatch) timeText = timeMatch[0];
+                        }
 
-                        let home = names[0] || 'Unknown';
-                        let away = names[names.length - 1] || 'Unknown';
+                        // 2. Extracción de Equipos
+                        let home = '', away = '';
+                        // Intento A: Data-testids
+                        const homeEl = item.querySelector('[data-testid="home_team_name"], [class*="HomeTeam"], [class*="home"]');
+                        const awayEl = item.querySelector('[data-testid="away_team_name"], [class*="AwayTeam"], [class*="away"]');
                         
-                        // Si falló por selectores genéricos, intentar por data-testid (SofaScore)
-                        if (home === 'Unknown' || home.length < 3) {
-                            home = item.querySelector('[data-testid*="participant_home"], [data-testid*="team_name_home"]')?.innerText?.trim() || home;
-                        }
-                        if (away === 'Unknown' || away === home) {
-                            away = item.querySelector('[data-testid*="participant_away"], [data-testid*="team_name_away"]')?.innerText?.trim() || away;
-                        }
+                        home = safeGetText(homeEl);
+                        away = safeGetText(awayEl);
 
-                        // Limpieza de Puntuación
-                        let homeScore = scoreElements[0]?.innerText?.trim() || '0';
-                        let awayScore = scoreElements[1]?.innerText?.trim() || '0';
-                        
-                        if (homeScore.includes('\n')) {
-                            const parts = homeScore.split('\n');
-                            homeScore = parts[0];
-                            awayScore = parts[1] || awayScore;
-                        }
-
-                        // Extraer ID del partido
-                        let matchId = '';
-                        const link = item.closest('a') || item.querySelector('a');
-                        if (link && link.href) {
-                            const m = link.href.match(/\/match\/.*[\/-]([0-9a-zA-Z]+)$/) || link.href.match(/\/([0-9a-zA-Z]+)$/);
-                            if (m) matchId = m[1];
-                        }
-
-                        // IDs de equipos
-                        const logos = item.querySelectorAll('img[src*="team"], img[src*="/t/"]');
-                        let homeId = '';
-                        let awayId = '';
-                        if (logos[0]?.src) {
-                            const m = logos[0].src.match(/team[s]?\/([0-9]+)/) || logos[0].src.match(/\/t\/([0-9]+)/);
-                            if (m) homeId = m[1];
-                        }
-                        if (logos[1]?.src) {
-                            const m = logos[1].src.match(/team[s]?\/([0-9]+)/) || logos[1].src.match(/\/t\/([0-9]+)/);
-                            if (m) awayId = m[1];
-                        }
-
-                        // Liga/Torneo
-                        let leagueName = 'Unknown League';
-                        let leagueId = '';
-                        const leagueElement = item.closest('[class*="EventCellGroup"]') || 
-                                           item.previousElementSibling?.closest('[class*="CategoryHeader"]') ||
-                                           document.querySelector('[class*="TournamentName"]');
-                        
-                        if (leagueElement) {
-                            leagueName = leagueElement.innerText?.split('\n')[0]?.trim() || leagueName;
-                            const leagueImage = leagueElement.querySelector('img[src*="tournament"], img[src*="unique-tournament"]');
-                            if (leagueImage && leagueImage.src) {
-                                const lm = leagueImage.src.match(/tournament\/([0-9]+)/) || leagueImage.src.match(/unique-tournament\/([0-9]+)/);
-                                if (lm) leagueId = lm[1];
+                        // Intento B: Texto bruto filtrado
+                        if (!home || !away) {
+                            const texts = Array.from(item.querySelectorAll('span, div'))
+                                .map(e => safeGetText(e))
+                                .filter(t => t.length > 2 && !t.includes(':') && !/^\d+$/.test(t) && t !== 'LIVE' && t !== '-');
+                            
+                            if (texts.length >= 2) {
+                                home = texts[0];
+                                away = texts[1];
                             }
                         }
 
-                        return {
-                            id: matchId,
-                            home_id: homeId,
-                            away_id: awayId,
+                        // 2.5 Extracción de IDs para LOGOS (Vital)
+                        let homeId = '0';
+                        let awayId = '0';
+                        const images = item.querySelectorAll('img');
+                        images.forEach(img => {
+                             const src = img.src || '';
+                             // Buscar patrón de ID de Sofascore en URLs de imagenes
+                             // Ej: api.sofascore.app/api/v1/team/1234/image
+                             const match = src.match(/team\/(\d+)/) || src.match(/team\/(\d+)/);
+                             if (match) {
+                                 if (homeId === '0') homeId = match[1];
+                                 else if (awayId === '0') awayId = match[1];
+                             }
+                        });
+
+                        // 3. Extracción de Scores
+                        let homeScore = 0, awayScore = 0;
+                        const scoreEls = item.querySelectorAll('[class*="Score"], [class*="score"], b');
+                        // Filtrar solo números puros
+                        const scores = Array.from(scoreEls)
+                             .map(e => safeGetText(e))
+                             .filter(t => /^\d+$/.test(t));
+                        
+                        if (scores.length >= 2) {
+                            homeScore = parseInt(scores[0]);
+                            awayScore = parseInt(scores[1]);
+                        } else {
+                            // Regex sobre todo el texto para "2 - 1"
+                            const fullText = safeGetText(item);
+                            const scoreMatch = fullText.match(/(\d+)\s*-\s*(\d+)/);
+                            if (scoreMatch) {
+                                homeScore = parseInt(scoreMatch[1]);
+                                awayScore = parseInt(scoreMatch[2]);
+                            }
+                        }
+
+                        // Generar ID
+                        let id = '';
+                        const link = item.closest('a') || item.querySelector('a[href*="/match/"]');
+                        if (link && link.href) {
+                            const parts = link.href.split('/');
+                            id = parts[parts.length - 1]; 
+                        }
+                        if (!id) id = `${home}_${away}`.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+                        // Nombre de la liga (subiendo en el DOM)
+                        let league = 'League';
+                        try {
+                            let parent = item.parentElement;
+                            let depth = 0;
+                            while (parent && depth < 5) {
+                                const leagueEl = parent.querySelector('[class*="Header"], [class*="League"], h3');
+                                if (leagueEl) {
+                                    league = safeGetText(leagueEl).split('\n')[0];
+                                    break;
+                                }
+                                parent = parent.parentElement;
+                                depth++;
+                            }
+                        } catch(e) {}
+
+                        if (!home || !away || home === away) return null;
+
+                            id: id,
                             home_team: home,
                             away_team: away,
+                            home_id: homeId,
+                            away_id: awayId,
                             home_score: homeScore,
                             away_score: awayScore,
-                            status: data_type,
+                            status: data_type === 'live' ? 'inprogress' : 'scheduled',
                             start_time_raw: timeText,
-                            league_name: leagueName,
-                            league_id: leagueId
+                            league_name: league
                         };
-                    }).filter(m => m.home_team !== 'Unknown' && m.home_team.length > 2);
+
+                    }).filter(i => i !== null);
                 }
-            """, {"selectors": selectors, "data_type": data_type})
+            """
+            
+            matches = await page.evaluate(js_script, { 'selectors': selectors, 'data_type': data_type })
+            
+            # --- NUEVA FASE: ENRIQUECIMIENTO DE ESTADÍSTICAS (FETCH INJECTION) ---
+            # Si estamos en LIVE, aprovechamos la sesión para pedir las stats internas de cada partido
+            # sin navegar. Esto es ULTRA RÁPIDO.
+            if data_type == 'live' and matches:
+                print(f"   ⚡ Inyectando captura de estadísticas para {len(matches)} partidos...")
+                
+                stats_script = r"""
+                async (matches) => {
+                    const results = {};
+                    const fetchWithTimeout = (url, ms) => {
+                        const controller = new AbortController();
+                        const promise = fetch(url, { signal: controller.signal });
+                        const timeout = setTimeout(() => controller.abort(), ms);
+                        return promise.finally(() => clearTimeout(timeout));
+                    };
+
+                    // Ejecutar en lotes de 5 para no saturar
+                    const batchSize = 5;
+                    for (let i = 0; i < matches.length; i += batchSize) {
+                        const batch = matches.slice(i, i + batchSize);
+                        await Promise.all(batch.map(async (m) => {
+                            if (!m.id) return;
+                            try {
+                                // Endpoint interno de Sofascore
+                                const url = `https://api.sofascore.com/api/v1/event/${m.id}/statistics`;
+                                const res = await fetchWithTimeout(url, 3000);
+                                if (res.ok) {
+                                    const json = await res.json();
+                                    // Simplificar estructura
+                                    const stats = {};
+                                    if (json.statistics && json.statistics.length > 0) {
+                                        json.statistics[0].groups.forEach(g => {
+                                            g.statisticsItems.forEach(item => {
+                                                stats[item.name] = { home: item.home, away: item.away };
+                                            });
+                                        });
+                                    }
+                                    results[m.id] = stats;
+                                }
+                            } catch (e) {
+                                // Silent fail
+                            }
+                        }));
+                        // Pequeña pausa entre lotes
+                        await new Promise(r => setTimeout(r, 500));
+                    }
+                    return results;
+                }
+                """
+                
+                try:
+                    # Ejecutar el fetch masivo desde el navegador
+                    stats_map = await page.evaluate(stats_script, matches)
+                    
+                    # Fusionar resultados con los partidos
+                    enrich_count = 0
+                    for match in matches:
+                        mid = match.get('id')
+                        if mid and mid in stats_map and stats_map[mid]:
+                            match['statistics'] = stats_map[mid]
+                            enrich_count += 1
+                            
+                    print(f"   📈 Stats capturadas para {enrich_count}/{len(matches)} partidos")
+                    
+                except Exception as e:
+                    print(f"   ⚠️ Error enriqueciendo stats: {e}")
+
             return matches
         except Exception as e:
              print(f"⚠️ Error en extracción JS: {e}")

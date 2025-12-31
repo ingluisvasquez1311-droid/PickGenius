@@ -1,190 +1,104 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import PlayerStreakCard from '@/components/streaks/PlayerStreakCard';
-import { Streak, PlayerStreak } from '@/lib/services/streakService';
-import { fetchAPI } from '@/lib/api';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { Flame, Trophy, TrendingUp, Zap, ArrowLeft, Activity } from 'lucide-react';
+import Link from 'next/link';
+import clsx from 'clsx';
+import { useRouter } from 'next/navigation';
 
 export default function StreaksPage() {
-    const [streaks, setStreaks] = useState<Streak[]>([]);
-    const [playerStreaks, setPlayerStreaks] = useState<PlayerStreak[]>([]);
+    const [streaks, setStreaks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'all' | 'win' | 'loss' | 'goals' | 'nba-players'>('all');
-    const { user } = useAuth();
+    const router = useRouter();
 
+    // Mock data for immediate visualization while we build the backend
     useEffect(() => {
-        const fetchStreaks = async () => {
-            try {
-                const url = user?.uid ? `/api/analytics/streaks?uid=${user.uid}` : '/api/analytics/streaks';
-                const json = await fetchAPI(url);
-                if (json && json.success) {
-                    setStreaks(json.data);
-                    setPlayerStreaks(json.players || []);
-                }
-            } catch (error) {
-                console.error('Failed to load streaks');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchStreaks();
+        setTimeout(() => {
+            setStreaks([
+                { id: 1, team: 'Real Madrid', sport: 'football', streak: '5 Wins', diff: '+12', next: 'vs Barcelona' },
+                { id: 2, team: 'Lakers', sport: 'basketball', streak: '4 Wins', diff: '+35', next: 'vs Warriors' },
+                { id: 3, team: 'Man City', sport: 'football', streak: '8 Games Unbeaten', diff: '+18', next: 'vs Liverpool' },
+                { id: 4, team: 'Celtics', sport: 'basketball', streak: '10 Home Wins', diff: '+80', next: 'vs Heat' },
+            ]);
+            setLoading(false);
+        }, 1000);
     }, []);
 
-    const filteredStreaks = streaks.filter(s => {
-        if (filter === 'all') return true;
-        if (filter === 'nba-players') return false; // Hide team streaks when showing players only
-        if (filter === 'goals') return s.type.includes('over_') || s.type === 'btts';
-        return s.type === filter;
-    });
-
-    const filteredPlayerStreaks = playerStreaks.filter(p => {
-        if (filter === 'all') return true; // Show all in 'all' view? Maybe just top 2 as requested.
-        return filter === 'nba-players';
-    });
-
     return (
-        <main className="min-h-screen bg-[#050505] text-white font-sans selection:bg-orange-500/30 pb-20 pt-24">
+        <div className="min-h-screen bg-black text-white pt-24 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-10">
 
             {/* Header */}
-            <header className="relative py-12 text-center overflow-hidden">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-600/10 rounded-full blur-[120px] pointer-events-none"></div>
-
-                <div className="relative z-10 container mx-auto px-4">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/30 bg-orange-500/10 text-orange-400 text-xs font-bold uppercase tracking-wider mb-4 animate-pulse">
-                        <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                        Trend & Streak Analyzer
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <div className="flex items-center gap-4 mb-2">
+                        <Link href="/" className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+                            <ArrowLeft className="w-5 h-5 text-gray-400" />
+                        </Link>
+                        <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase relative">
+                            ZONE <span className="text-orange-500">ON FIRE</span>
+                            <Flame className="w-8 h-8 text-orange-500 absolute -top-4 -right-8 animate-bounce" />
+                        </h1>
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter mb-4">
-                        STREAK <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600">FINDER</span>
-                    </h1>
-                    <p className="text-gray-400 max-w-xl mx-auto text-lg">
-                        Detectamos equipos en racha: <span className="text-white font-bold">Victorias consecutivas</span>, sequías y tendencias de goles activas ahora mismo.
-                    </p>
-                </div>
-            </header>
-
-            {/* Filters */}
-            <div className="container mx-auto px-4">
-                <div className="flex justify-center gap-2 mb-10 overflow-x-auto pb-4 no-scrollbar">
-                    {[
-                        { id: 'all', label: 'Todas' },
-                        { id: 'nba-players', label: '🏀 NBA Players', highlight: true },
-                        { id: 'win', label: '🔥 Victorias' },
-                        { id: 'loss', label: '🧊 Derrotas' },
-                        { id: 'goals', label: '⚽ Goles' },
-                    ].map((f) => (
-                        <button
-                            key={f.id}
-                            onClick={() => setFilter(f.id as any)}
-                            className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap ${filter === f.id
-                                ? f.highlight ? 'bg-orange-500 text-black border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.4)]' : 'bg-white text-black border-white'
-                                : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30'
-                                }`}
-                        >
-                            {f.label}
-                        </button>
-                    ))}
+                    <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Identificando equipos intocables en tiempo real</p>
                 </div>
             </div>
 
-            {/* Grid */}
-            <div className="container mx-auto px-4 max-w-5xl">
-                {loading ? (
-                    <div className="grid md:grid-cols-2 gap-4">
-                        {[1, 2, 3, 4].map(i => (
-                            <div key={i} className="h-40 bg-[#111] rounded-2xl animate-pulse border border-white/5"></div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="space-y-8">
-                        {/* FEATURED: NBA PLAYER TRENDS (Show 2 in 'All' mode, or all in 'NBA' mode) */}
-                        {(filter === 'all' || filter === 'nba-players') && playerStreaks.length > 0 && (
-                            <div className="animate-in slide-in-from-bottom-4 duration-700">
-                                {filter === 'all' && (
-                                    <div className="flex items-center gap-2 mb-4 px-2">
-                                        <span className="text-orange-500 animate-pulse">🔥</span>
-                                        <h3 className="text-sm font-black uppercase tracking-widest text-orange-100">Tendencias de Jugadores NBA</h3>
-                                    </div>
-                                )}
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    {(filter === 'nba-players' ? filteredPlayerStreaks : filteredPlayerStreaks.slice(0, 2)).map((streak, idx) => (
-                                        <PlayerStreakCard key={streak.id} streak={streak} index={idx} />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+            {/* Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                        {/* TEAM STREAKS */}
-                        {(filter !== 'nba-players') && (
-                            <div className="grid md:grid-cols-2 gap-4 animate-in slide-in-from-bottom-8 duration-700 delay-100">
-                                {filteredStreaks.map((streak) => (
-                                    <StreakCard key={streak.id} streak={streak} />
-                                ))}
-                            </div>
-                        )}
-
-                        {filter === 'nba-players' && filteredPlayerStreaks.length === 0 && (
-                            <div className="text-center py-20 text-gray-500">
-                                No hay tendencias destacadas de jugadores en este momento.
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-        </main>
-    );
-}
-
-const StreakCard = ({ streak }: { streak: Streak }) => {
-    const isHot = streak.type === 'win' || streak.type.includes('over');
-
-    return (
-        <div className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 overflow-hidden hover:border-white/20 transition-all">
-            {/* Background Glow */}
-            <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full blur-[60px] opacity-20 pointer-events-none ${isHot ? 'bg-orange-600' : 'bg-blue-600'}`}></div>
-
-            <div className="relative z-10 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <img src={streak.teamLogo} alt={streak.teamName} className="w-12 h-12 object-contain" />
-                    <div>
-                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1 flex items-center gap-2">
-                            <span>{streak.league}</span>
-                            <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
-                            <span>{streak.sport}</span>
+                {/* Main List */}
+                <div className="lg:col-span-2 space-y-6">
+                    {loading ? (
+                        <div className="space-y-4">
+                            {Array(3).fill(0).map((_, i) => (
+                                <div key={i} className="h-32 bg-white/5 rounded-3xl animate-pulse"></div>
+                            ))}
                         </div>
-                        <h3 className="text-xl font-bold text-white leading-none">{streak.teamName}</h3>
-                        <p className="text-xs text-gray-400 mt-1">Último: {streak.lastMatch}</p>
+                    ) : (
+                        <div className="space-y-4">
+                            {streaks.map((s) => (
+                                <div key={s.id} className="glass-card p-6 rounded-3xl border-white/5 hover:border-orange-500/30 transition-all group relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-10 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/10 transition-all"></div>
+
+                                    <div className="flex justify-between items-center relative z-10">
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5">
+                                                <Trophy className="w-8 h-8 text-white" />
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-orange-500">{s.sport}</span>
+                                                    <span className="w-1 h-1 rounded-full bg-gray-600"></span>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Serie Activa</span>
+                                                </div>
+                                                <h3 className="text-2xl font-black italic uppercase tracking-tight text-white">{s.team}</h3>
+                                                <p className="text-xs text-gray-400 mt-1 font-medium">Próximo: <span className="text-white">{s.next}</span></p>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-right">
+                                            <div className="text-3xl font-black italic text-orange-500 tracking-tighter">{s.streak}</div>
+                                            <div className="text-xs font-bold text-green-400 uppercase tracking-wider">Diff {s.diff}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Sidebar Info */}
+                <div className="space-y-6">
+                    <div className="glass-card p-8 rounded-3xl bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/20">
+                        <TrendingUp className="w-10 h-10 text-orange-500 mb-6" />
+                        <h3 className="text-xl font-black italic uppercase tracking-tighter mb-2">Algoritmo de Momentum</h3>
+                        <p className="text-xs text-gray-400 leading-relaxed">
+                            Nuestro sistema analiza las últimas 10 actuaciones de cada equipo, ponderando la dificultad del oponente y el margen de victoria.
+                        </p>
                     </div>
                 </div>
 
-                <div className="text-center">
-                    <div className={`text-4xl font-black italic tracking-tighter ${isHot ? 'text-orange-500' : 'text-blue-400'}`}>
-                        {streak.count}
-                    </div>
-                    <div className="text-[10px] font-bold uppercase text-gray-500 tracking-widest leading-none">
-                        {streak.type === 'win' && 'Victorias'}
-                        {streak.type === 'loss' && 'Derrotas'}
-                        {streak.type.includes('over') && 'Over 2.5'}
-                        {streak.type === 'btts' && 'Ambos Marcan'}
-                    </div>
-                </div>
-            </div>
-
-            {/* Footer Bar */}
-            <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <span className="relative flex h-2 w-2">
-                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isHot ? 'bg-orange-400' : 'bg-blue-400'}`}></span>
-                        <span className={`relative inline-flex rounded-full h-2 w-2 ${isHot ? 'bg-orange-500' : 'bg-blue-500'}`}></span>
-                    </span>
-                    <span className="text-[10px] text-gray-300 font-mono uppercase">Tendencia Activa</span>
-                </div>
-                <div className="text-[10px] font-bold bg-white/10 px-2 py-1 rounded text-white">
-                    Confianza: {streak.confidenceScore}/10
-                </div>
             </div>
         </div>
     );
-};
+}

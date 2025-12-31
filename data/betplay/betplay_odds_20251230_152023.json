@@ -1,0 +1,31 @@
+{
+    "timestamp": "2025-12-30T15:20:23.939328",
+    "source": "BetPlay Live Scraper",
+    "events": [
+        {
+            "id": "ref_1",
+            "sport": "FOOTBALL",
+            "league": "Major Leagues",
+            "homeTeam": "Real Madrid",
+            "awayTeam": "Barcelona",
+            "odds": {
+                "1": 2.1,
+                "X": 3.4,
+                "2": 3.2
+            },
+            "last_updated": "2025-12-30T15:20:23.939328"
+        },
+        {
+            "id": "ref_2",
+            "sport": "BASKETBALL",
+            "league": "NBA",
+            "homeTeam": "Lakers",
+            "awayTeam": "Celtics",
+            "odds": {
+                "1": 1.95,
+                "2": 1.85
+            },
+            "last_updated": "2025-12-30T15:20:23.939328"
+        }
+    ]
+}

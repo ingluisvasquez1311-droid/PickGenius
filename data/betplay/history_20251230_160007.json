@@ -1,0 +1,4648 @@
+{
+    "timestamp": "2025-12-30T16:00:07.989324",
+    "count": 430,
+    "events": [
+        {
+            "id": "1024044020",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Chelsea",
+            "awayTeam": "AFC Bournemouth",
+            "odds": {
+                "1": 1.74,
+                "X": 3.5,
+                "2": 4.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024044039",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Nottingham Forest",
+            "awayTeam": "Everton",
+            "odds": {
+                "1": 3.95,
+                "X": 3.25,
+                "2": 1.92
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024044044",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "West Ham",
+            "awayTeam": "Brighton",
+            "odds": {
+                "1": 1.6,
+                "X": 3.9,
+                "2": 4.8
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024044021",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Burnley",
+            "awayTeam": "Newcastle United",
+            "odds": {
+                "1": 12.5,
+                "X": 5.5,
+                "2": 1.2
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274686",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Aldershot",
+            "awayTeam": "Wealdstone",
+            "odds": {
+                "1": 1.1,
+                "X": 8.0,
+                "2": 14.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274690",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Boreham Wood",
+            "awayTeam": "Solihull Moors",
+            "odds": {
+                "1": 1.17,
+                "X": 6.1,
+                "2": 11.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274660",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Boston United",
+            "awayTeam": "Brackley Town",
+            "odds": {
+                "1": 2.16,
+                "X": 2.85,
+                "2": 3.25
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274663",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Carlisle",
+            "awayTeam": "Morecambe",
+            "odds": {
+                "1": 1.32,
+                "X": 4.5,
+                "2": 7.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274666",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Forest Green Rovers",
+            "awayTeam": "Truro City",
+            "odds": {
+                "1": 1.25,
+                "X": 5.0,
+                "2": 8.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274670",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Scunthorpe United",
+            "awayTeam": "Gateshead",
+            "odds": {
+                "1": 1.28,
+                "X": 5.1,
+                "2": 7.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274644",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Woking",
+            "awayTeam": "Braintree Town",
+            "odds": {
+                "1": 3.2,
+                "X": 3.15,
+                "2": 2.02
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274647",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Yeovil Town",
+            "awayTeam": "Eastleigh FC",
+            "odds": {
+                "1": 2.48,
+                "X": 2.7,
+                "2": 2.8
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274688",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Altrincham",
+            "awayTeam": "York City",
+            "odds": {
+                "1": 5.4,
+                "X": 4.1,
+                "2": 1.45
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274668",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Rochdale",
+            "awayTeam": "Hartlepool United",
+            "odds": {
+                "1": 1.44,
+                "X": 4.0,
+                "2": 5.8
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274639",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Southend",
+            "awayTeam": "Sutton United",
+            "odds": {
+                "1": 1.45,
+                "X": 3.85,
+                "2": 5.8
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274641",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Tamworth",
+            "awayTeam": "Halifax Town",
+            "odds": {
+                "1": 6.4,
+                "X": 4.2,
+                "2": 1.37
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287585",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Chester FC",
+            "awayTeam": "Macclesfield Town",
+            "odds": {
+                "1": 2.25,
+                "X": 3.05,
+                "2": 2.85
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287532",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Kidderminster Harriers",
+            "awayTeam": "AFC Telford United",
+            "odds": {
+                "1": 1.23,
+                "X": 5.0,
+                "2": 9.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287538",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Merthyr Town FC",
+            "awayTeam": "Hereford United",
+            "odds": {
+                "1": 1.71,
+                "X": 3.6,
+                "2": 3.85
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287543",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Radcliffe FC",
+            "awayTeam": "AFC Fylde",
+            "odds": {
+                "1": 4.9,
+                "X": 3.95,
+                "2": 1.49
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287583",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Alfreton Town",
+            "awayTeam": "Leamington",
+            "odds": {
+                "1": 1.68,
+                "X": 3.3,
+                "2": 4.4
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287580",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Bedford Town",
+            "awayTeam": "King's Lynn Town FC",
+            "odds": {
+                "1": 1.68,
+                "X": 3.55,
+                "2": 4.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287534",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Darlington FC",
+            "awayTeam": "South Shields FC",
+            "odds": {
+                "1": 6.5,
+                "X": 4.5,
+                "2": 1.34
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287536",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Peterborough Sports FC",
+            "awayTeam": "Oxford City",
+            "odds": {
+                "1": 1.95,
+                "X": 3.3,
+                "2": 3.25
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287557",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Southport",
+            "awayTeam": "Curzon Ashton",
+            "odds": {
+                "1": 3.85,
+                "X": 3.4,
+                "2": 1.75
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024287531",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Norte",
+            "homeTeam": "Chorley",
+            "awayTeam": "Marine",
+            "odds": {
+                "1": 1.81,
+                "X": 3.25,
+                "2": 3.8
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274096",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "AFC Totton",
+            "awayTeam": "Chippenham Town",
+            "odds": {
+                "1": 1.86,
+                "X": 3.25,
+                "2": 3.65
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274095",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "Bath City",
+            "awayTeam": "Torquay United",
+            "odds": {
+                "1": 3.6,
+                "X": 2.95,
+                "2": 1.97
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274112",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "Hemel Hempstead Town",
+            "awayTeam": "Enfield Town",
+            "odds": {
+                "1": 1.53,
+                "X": 3.65,
+                "2": 5.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274131",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "Worthing",
+            "awayTeam": "Dorking Wanderers FC",
+            "odds": {
+                "1": 1.46,
+                "X": 4.2,
+                "2": 5.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274091",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "Dover Athletic",
+            "awayTeam": "Ebbsfleet United",
+            "odds": {
+                "1": 3.25,
+                "X": 3.2,
+                "2": 1.98
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274110",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "Horsham",
+            "awayTeam": "Farnborough Town",
+            "odds": {
+                "1": 0,
+                "X": 0,
+                "2": 0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274109",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "Slough Town",
+            "awayTeam": "Chesham United",
+            "odds": {
+                "1": 2.7,
+                "X": 2.95,
+                "2": 2.43
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274111",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "AFC Hornchurch",
+            "awayTeam": "Maidstone United",
+            "odds": {
+                "1": 2.23,
+                "X": 3.0,
+                "2": 2.9
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274132",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "Weston Super Mare",
+            "awayTeam": "Salisbury City",
+            "odds": {
+                "1": 1.15,
+                "X": 6.1,
+                "2": 12.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024274133",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "Tonbridge Angels",
+            "awayTeam": "Eastbourne Borough",
+            "odds": {
+                "1": 4.75,
+                "X": 4.1,
+                "2": 1.49
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026062747",
+            "sport": "FOOTBALL",
+            "league": "Tocantinense",
+            "homeTeam": "Tocantinópolis-TO",
+            "awayTeam": "Araguaina-TO",
+            "odds": {
+                "1": 5.75,
+                "X": 2.8,
+                "2": 1.71
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1022760313",
+            "sport": "FOOTBALL",
+            "league": "Copa de África",
+            "homeTeam": "Benin",
+            "awayTeam": "Senegal",
+            "odds": {
+                "1": 41.0,
+                "X": 9.5,
+                "2": 1.06
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1022760315",
+            "sport": "FOOTBALL",
+            "league": "Copa de África",
+            "homeTeam": "Botswana",
+            "awayTeam": "Rep. Dem. Congo",
+            "odds": {
+                "1": 161.0,
+                "X": 46.0,
+                "2": 0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024064152",
+            "sport": "FOOTBALL",
+            "league": "Premiership de Escocia",
+            "homeTeam": "Hibernian",
+            "awayTeam": "Aberdeen",
+            "odds": {
+                "1": 1.84,
+                "X": 3.55,
+                "2": 4.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024064184",
+            "sport": "FOOTBALL",
+            "league": "Premiership de Escocia",
+            "homeTeam": "Livingston",
+            "awayTeam": "Dundee United",
+            "odds": {
+                "1": 2.65,
+                "X": 3.1,
+                "2": 2.75
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024064149",
+            "sport": "FOOTBALL",
+            "league": "Premiership de Escocia",
+            "homeTeam": "Dundee FC",
+            "awayTeam": "Kilmarnock",
+            "odds": {
+                "1": 2.85,
+                "X": 3.1,
+                "2": 2.55
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024064167",
+            "sport": "FOOTBALL",
+            "league": "Premiership de Escocia",
+            "homeTeam": "Rangers FC",
+            "awayTeam": "St Mirren",
+            "odds": {
+                "1": 1.45,
+                "X": 4.3,
+                "2": 6.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024064181",
+            "sport": "FOOTBALL",
+            "league": "Premiership de Escocia",
+            "homeTeam": "Motherwell",
+            "awayTeam": "Celtic",
+            "odds": {
+                "1": 5.0,
+                "X": 4.1,
+                "2": 1.58
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026112222",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Italy (aguuero)",
+            "awayTeam": "Portugal (Cofardi)",
+            "odds": {
+                "1": 6.1,
+                "X": 3.9,
+                "2": 1.36
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026112301",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Países Bajos (Izrn)",
+            "awayTeam": "Morocco (Linox)",
+            "odds": {
+                "1": 0,
+                "X": 0,
+                "2": 0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026112187",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Arsenal (KaLuBa)",
+            "awayTeam": "Liverpool (Rodja)",
+            "odds": {
+                "1": 3.75,
+                "X": 3.75,
+                "2": 1.58
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026111914",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Man City (Gaga)",
+            "awayTeam": "Tottenham (Vuksha)",
+            "odds": {
+                "1": 2.8,
+                "X": 3.3,
+                "2": 1.96
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026074676",
+            "sport": "FOOTBALL",
+            "league": "League Cup",
+            "homeTeam": "Smouha SC",
+            "awayTeam": "Kahrabaa Ismailia",
+            "odds": {
+                "1": 0,
+                "X": 0,
+                "2": 0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026019731",
+            "sport": "FOOTBALL",
+            "league": "Premier Liga",
+            "homeTeam": "Cardiff Met University",
+            "awayTeam": "Haverfordwest County",
+            "odds": {
+                "1": 2.25,
+                "X": 3.15,
+                "2": 2.75
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026019729",
+            "sport": "FOOTBALL",
+            "league": "NIFL Premiership",
+            "homeTeam": "Bangor FC",
+            "awayTeam": "Ballymena United",
+            "odds": {
+                "1": 2.48,
+                "X": 3.1,
+                "2": 2.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026066637",
+            "sport": "FOOTBALL",
+            "league": "NIFL Premiership",
+            "homeTeam": "Coleraine",
+            "awayTeam": "Linfield",
+            "odds": {
+                "1": 2.0,
+                "X": 3.15,
+                "2": 3.25
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026019726",
+            "sport": "FOOTBALL",
+            "league": "NIFL Premiership",
+            "homeTeam": "Crusaders Belfast",
+            "awayTeam": "Carrick Rangers",
+            "odds": {
+                "1": 2.45,
+                "X": 3.2,
+                "2": 2.45
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026019728",
+            "sport": "FOOTBALL",
+            "league": "NIFL Premiership",
+            "homeTeam": "Glenavon",
+            "awayTeam": "Dungannon Swifts",
+            "odds": {
+                "1": 3.6,
+                "X": 3.1,
+                "2": 1.91
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026019727",
+            "sport": "FOOTBALL",
+            "league": "NIFL Premiership",
+            "homeTeam": "Glentoran",
+            "awayTeam": "Portadown",
+            "odds": {
+                "1": 1.5,
+                "X": 3.6,
+                "2": 5.75
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026115095",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Atalanta (T3RZ)",
+            "awayTeam": "Napoli (BiBiB)",
+            "odds": {
+                "1": 2.8,
+                "X": 5.2,
+                "2": 1.65
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026115096",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Roma (SuperMario)",
+            "awayTeam": "Juventus (djamik)",
+            "odds": {
+                "1": 25.0,
+                "X": 11.0,
+                "2": 1.01
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026115266",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Dinamarca (dewidek)",
+            "awayTeam": "Noruega (Skwara)",
+            "odds": {
+                "1": 1.5,
+                "X": 5.4,
+                "2": 3.25
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1026115267",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Italia (zimny)",
+            "awayTeam": "Argentina (Schabson)",
+            "odds": {
+                "1": 3.5,
+                "X": 6.1,
+                "2": 1.41
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024352740",
+            "sport": "BASKETBALL",
+            "league": "Euroliga",
+            "homeTeam": "Hapoel Tel Aviv",
+            "awayTeam": "Žalgiris Kaunas",
+            "odds": {
+                "Hapoel Tel Aviv": 1.24,
+                "Žalgiris Kaunas": 3.85
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024352742",
+            "sport": "BASKETBALL",
+            "league": "Euroliga",
+            "homeTeam": "Lyon-Villeurbanne",
+            "awayTeam": "Paris Basket",
+            "odds": {
+                "Lyon-Villeurbanne": 2.6,
+                "Paris Basket": 1.48
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283195"
+        },
+        {
+            "id": "1024352753",
+            "sport": "BASKETBALL",
+            "league": "Euroliga",
+            "homeTeam": "FC Barcelona",
+            "awayTeam": "AS Monaco",
+            "odds": {
+                "FC Barcelona": 5.3,
+                "AS Monaco": 1.14
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024352755",
+            "sport": "BASKETBALL",
+            "league": "Euroliga",
+            "homeTeam": "Valencia Basket Club",
+            "awayTeam": "Partizán de Belgrado",
+            "odds": {
+                "Valencia Basket Club": 1.33,
+                "Partizán de Belgrado": 3.25
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024240315",
+            "sport": "BASKETBALL",
+            "league": "EuroCup",
+            "homeTeam": "Budućnost Podgorica",
+            "awayTeam": "TÜRK Telekom",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024240314",
+            "sport": "BASKETBALL",
+            "league": "EuroCup",
+            "homeTeam": "Hapoel Jerusalem",
+            "awayTeam": "BAXI Manresa",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024240294",
+            "sport": "BASKETBALL",
+            "league": "EuroCup",
+            "homeTeam": "Aris",
+            "awayTeam": "KK Cedevita Olimpija",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024240295",
+            "sport": "BASKETBALL",
+            "league": "EuroCup",
+            "homeTeam": "Dolomiti Energia Trento",
+            "awayTeam": "London Lions",
+            "odds": {
+                "Dolomiti Energia Trento": 1.67,
+                "London Lions": 2.07
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024694745",
+            "sport": "BASKETBALL",
+            "league": "Liga ACB",
+            "homeTeam": "Unicaja Málaga",
+            "awayTeam": "Joventut Badalona",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024694756",
+            "sport": "BASKETBALL",
+            "league": "Liga ACB",
+            "homeTeam": "La Laguna Tenerife",
+            "awayTeam": "C.B. Granada",
+            "odds": {
+                "La Laguna Tenerife": 1.58,
+                "C.B. Granada": 2.23
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024694743",
+            "sport": "BASKETBALL",
+            "league": "Liga ACB",
+            "homeTeam": "UCAM Murcia",
+            "awayTeam": "Real Madrid Baloncesto",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112451",
+            "sport": "DARTS",
+            "league": "Mundial PDC",
+            "homeTeam": "Charlie Manby",
+            "awayTeam": "Gian van Veen",
+            "odds": {
+                "Gian van Veen": 1.01,
+                "Charlie Manby": 12.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026119595",
+            "sport": "COUNTER_STRIKE",
+            "league": "Christmas Cup",
+            "homeTeam": "Prestige Esport",
+            "awayTeam": "Natus Vincere Junior",
+            "odds": {
+                "Prestige Esport": 0,
+                "Natus Vincere Junior": 0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024275714",
+            "sport": "HANDBALL",
+            "league": "Allsvenskan",
+            "homeTeam": "HK Aranäs",
+            "awayTeam": "Vinslövs HK",
+            "odds": {
+                "1": 1.58,
+                "X": 6.5,
+                "2": 3.2
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024575490",
+            "sport": "BASKETBALL",
+            "league": "BBL",
+            "homeTeam": "BV Chemnitz 99",
+            "awayTeam": "Gladiators Trier",
+            "odds": {
+                "BV Chemnitz 99": 1.09,
+                "Gladiators Trier": 6.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024575465",
+            "sport": "BASKETBALL",
+            "league": "BBL",
+            "homeTeam": "MLP Academics Heidelberg",
+            "awayTeam": "Skyliners Frankfurt",
+            "odds": {
+                "MLP Academics Heidelberg": 2.23,
+                "Skyliners Frankfurt": 1.57
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026019155",
+            "sport": "BASKETBALL",
+            "league": "Pro A",
+            "homeTeam": "Paderborn Baskets",
+            "awayTeam": "BG Göttingen",
+            "odds": {
+                "Paderborn Baskets": 1.61,
+                "BG Göttingen": 2.18
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026004012",
+            "sport": "BASKETBALL",
+            "league": "PLK (F)",
+            "homeTeam": "Polonia Warszawa (F)",
+            "awayTeam": "Wisła Kraków (F)",
+            "odds": {
+                "Polonia Warszawa (F)": 1.29,
+                "Wisła Kraków (F)": 3.25
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024748685",
+            "sport": "BASKETBALL",
+            "league": "Super League Basketball",
+            "homeTeam": "Caledonia Gladiators",
+            "awayTeam": "Manchester Basketball",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024748658",
+            "sport": "BASKETBALL",
+            "league": "Super League Basketball",
+            "homeTeam": "Leicester Riders",
+            "awayTeam": "Bristol Flyers",
+            "odds": {
+                "Leicester Riders": 1.16,
+                "Bristol Flyers": 4.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024748682",
+            "sport": "BASKETBALL",
+            "league": "Super League Basketball",
+            "homeTeam": "Sheffield Sharks",
+            "awayTeam": "Cheshire Phoenix",
+            "odds": {
+                "Sheffield Sharks": 2.95,
+                "Cheshire Phoenix": 1.35
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024748656",
+            "sport": "BASKETBALL",
+            "league": "Super League Basketball",
+            "homeTeam": "Surrey 89ers",
+            "awayTeam": "Newcastle Eagles",
+            "odds": {
+                "Surrey 89ers": 3.25,
+                "Newcastle Eagles": 1.29
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024240838",
+            "sport": "BASKETBALL",
+            "league": "NBL",
+            "homeTeam": "Basket Brno",
+            "awayTeam": "Hradec Kralove",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024065685",
+            "sport": "BASKETBALL",
+            "league": "BasketLigan",
+            "homeTeam": "Köping Stars",
+            "awayTeam": "Södertälje Kings",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024065694",
+            "sport": "BASKETBALL",
+            "league": "BasketLigan",
+            "homeTeam": "Uppsala Basket",
+            "awayTeam": "Högsbo Basket",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026111802",
+            "sport": "E_BASKETBALL",
+            "league": "Batalla esports (4x5min)",
+            "homeTeam": "Philadelphia 76ers (McLovin)",
+            "awayTeam": "Los Angeles Clippers (Master)",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026111764",
+            "sport": "E_BASKETBALL",
+            "league": "Batalla esports (4x5min)",
+            "homeTeam": "Los Angeles Clippers (Jovke)",
+            "awayTeam": "Boston Celtics (Dzojo)",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026111796",
+            "sport": "E_BASKETBALL",
+            "league": "Batalla esports (4x5min)",
+            "homeTeam": "Portland Trail Blazers (Kole)",
+            "awayTeam": "New Orleans Pelicans (Lucashin)",
+            "odds": {},
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026104197",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Knoxville",
+            "homeTeam": "Pavan Uppu",
+            "awayTeam": "Jack Di Menna",
+            "odds": {
+                "Jack Di Menna": 1.11,
+                "Pavan Uppu": 5.3
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026108215",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Denis Hofman",
+            "awayTeam": "Radim Urbaniec",
+            "odds": {
+                "Denis Hofman": 1.87,
+                "Radim Urbaniec": 1.79
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1025692560",
+            "sport": "ICE_HOCKEY",
+            "league": "Campeonato Mundo Sub20",
+            "homeTeam": "Suiza Sub-20",
+            "awayTeam": "Alemania sub-20",
+            "odds": {
+                "1": 1.01,
+                "X": 12.5,
+                "2": 25.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024166315",
+            "sport": "ICE_HOCKEY",
+            "league": "DEL Bundesliga",
+            "homeTeam": "Iserlohn Roosters",
+            "awayTeam": "Kölner Haie",
+            "odds": {
+                "1": 19.0,
+                "X": 7.0,
+                "2": 1.08
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1023744809",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Linköping HC",
+            "awayTeam": "Örebro HK",
+            "odds": {
+                "1": 1.37,
+                "X": 3.4,
+                "2": 11.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1023744802",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Djurgårdens IF",
+            "awayTeam": "Luleå HF",
+            "odds": {
+                "1": 1.46,
+                "X": 3.15,
+                "2": 9.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1023744824",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Frölunda HC",
+            "awayTeam": "Färjestad BK",
+            "odds": {
+                "1": 1.05,
+                "X": 9.0,
+                "2": 29.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1023744804",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Skellefteå AIK",
+            "awayTeam": "Brynäs IF",
+            "odds": {
+                "1": 1.11,
+                "X": 5.75,
+                "2": 46.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1023744815",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Växjö Lakers HC",
+            "awayTeam": "Rögle BK",
+            "odds": {
+                "1": 21.0,
+                "X": 4.0,
+                "2": 1.23
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1023744806",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "HV 71",
+            "awayTeam": "IF Malmö Redhawks",
+            "odds": {
+                "1": 5.6,
+                "X": 1.34,
+                "2": 5.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1023744828",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Timrå IK",
+            "awayTeam": "Leksands IF",
+            "odds": {
+                "1": 3.25,
+                "X": 1.77,
+                "2": 4.35
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026015763",
+            "sport": "VOLLEYBALL",
+            "league": "Coppa Italia SuperLega",
+            "homeTeam": "Sir Safety Conad Perugia",
+            "awayTeam": "Cucine Lube Civitanova",
+            "odds": {
+                "Sir Safety Conad Perugia": 1.12,
+                "Cucine Lube Civitanova": 5.4
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024810823",
+            "sport": "VOLLEYBALL",
+            "league": "Liga A ",
+            "homeTeam": "AS Cannes",
+            "awayTeam": "Paris Volley",
+            "odds": {
+                "AS Cannes": 3.95,
+                "Paris Volley": 1.2
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024810841",
+            "sport": "VOLLEYBALL",
+            "league": "Liga A ",
+            "homeTeam": "Narbonne Volley",
+            "awayTeam": "Chaumont",
+            "odds": {
+                "Narbonne Volley": 1.12,
+                "Chaumont": 5.4
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024810824",
+            "sport": "VOLLEYBALL",
+            "league": "Liga A ",
+            "homeTeam": "Toulouse V.B.",
+            "awayTeam": "G.F.C.O. Ajaccio",
+            "odds": {
+                "Toulouse V.B.": 1.03,
+                "G.F.C.O. Ajaccio": 10.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1024810826",
+            "sport": "VOLLEYBALL",
+            "league": "Liga A ",
+            "homeTeam": "Tours VB",
+            "awayTeam": "Nice Volley-Ball",
+            "odds": {
+                "Tours VB": 0,
+                "Nice Volley-Ball": 18.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T16:00:04.283701"
+        },
+        {
+            "id": "1026111809",
+            "sport": "E_BASKETBALL",
+            "league": "Batalla esports (4x5min)",
+            "homeTeam": "Philadelphia 76ers (McLovin)",
+            "awayTeam": "Dallas Mavericks (Targun)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112313",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Portugal (Cofardi)",
+            "awayTeam": "Croacia (Maki)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112238",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Morocco (Linox)",
+            "awayTeam": "Italy (aguuero)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115097",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Lecce (Sxitted)",
+            "awayTeam": "Napoli (BiBiB)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115098",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Roma (SuperMario)",
+            "awayTeam": "Atalanta (T3RZ)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026102693",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Waco",
+            "homeTeam": "Mary Grace Rennard",
+            "awayTeam": "Ella Brownback",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026110708",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Waco",
+            "homeTeam": "Vikas Deo",
+            "awayTeam": "Filip Apltauer",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111981",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Chelsea (Duka)",
+            "awayTeam": "Tottenham (Vuksha)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111945",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Man City (Gaga)",
+            "awayTeam": "Liverpool (Rodja)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026093061",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Knoxville",
+            "homeTeam": "Ashton Adesoro",
+            "awayTeam": "Aditya Vyas",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115268",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Dinamarca (dewidek)",
+            "awayTeam": "Argentina (Schabson)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024044047",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Manchester United",
+            "awayTeam": "Wolves",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024044032",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Arsenal",
+            "awayTeam": "Aston Villa",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025918001",
+            "sport": "FOOTBALL",
+            "league": "Liga 2",
+            "homeTeam": "Torreense",
+            "awayTeam": "Lusitania Lourosa",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112302",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Italy (aguuero)",
+            "awayTeam": "Países Bajos (Izrn)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112241",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Croacia (Maki)",
+            "awayTeam": "Morocco (Linox)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112357",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Atleti (malverz)",
+            "awayTeam": "Man City (Cevuu)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112341",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Arsenal (Maslja)",
+            "awayTeam": "B Dortmund (Terza)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115099",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Roma (SuperMario)",
+            "awayTeam": "Napoli (BiBiB)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115100",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Juventus (djamik)",
+            "awayTeam": "Lecce (Sxitted)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111918",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Liverpool (Rodja)",
+            "awayTeam": "Chelsea (Duka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111978",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Arsenal (KaLuBa)",
+            "awayTeam": "Man City (Gaga)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115271",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Noruega (Skwara)",
+            "awayTeam": "Italia (zimny)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026117059",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Adam Brazda",
+            "awayTeam": "Robin Pacha",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111785",
+            "sport": "E_BASKETBALL",
+            "league": "Batalla esports (4x5min)",
+            "homeTeam": "Portland Trail Blazers (Kole)",
+            "awayTeam": "Boston Celtics (Dzojo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111798",
+            "sport": "E_BASKETBALL",
+            "league": "Batalla esports (4x5min)",
+            "homeTeam": "Los Angeles Clippers (Jovke)",
+            "awayTeam": "Milwaukee Bucks (Dzmn)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112308",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Portugal (Cofardi)",
+            "awayTeam": "Morocco (Linox)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107931",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Michal Jezek",
+            "awayTeam": "Matous Klimenta",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107970",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Petr Sebera",
+            "awayTeam": "Jan Sucharda",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107973",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jan Junior Mecl",
+            "awayTeam": "Zdenek Bilek",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112243",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Croacia (Maki)",
+            "awayTeam": "Países Bajos (Izrn)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111910",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Chelsea (Duka)",
+            "awayTeam": "Arsenal (KaLuBa)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112186",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Tottenham (Vuksha)",
+            "awayTeam": "Liverpool (Rodja)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115101",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Juventus (djamik)",
+            "awayTeam": "Napoli (BiBiB)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115102",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Atalanta (T3RZ)",
+            "awayTeam": "Lecce (Sxitted)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112365",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "B Dortmund (Terza)",
+            "awayTeam": "Juventus (Glumac)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112335",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Man City (Cevuu)",
+            "awayTeam": "Arsenal (Maslja)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118842",
+            "sport": "E_BASKETBALL",
+            "league": "Batalla esports (4x5min)",
+            "homeTeam": "San Antonio Spurs (MaaaS1K)",
+            "awayTeam": "Denver Nuggets (Polub)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118865",
+            "sport": "E_BASKETBALL",
+            "league": "Batalla esports (4x5min)",
+            "homeTeam": "Cleveland Cavaliers (Sakaido)",
+            "awayTeam": "Milwaukee Bucks (H1lex13)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115273",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Noruega (Skwara)",
+            "awayTeam": "Argentina (Schabson)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112304",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Italy (aguuero)",
+            "awayTeam": "Croacia (Maki)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112226",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Países Bajos (Izrn)",
+            "awayTeam": "Portugal (Cofardi)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026104095",
+            "sport": "DARTS",
+            "league": "Mundial PDC",
+            "homeTeam": "Michael van Gerwen",
+            "awayTeam": "Gary Anderson",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111919",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Arsenal (KaLuBa)",
+            "awayTeam": "Tottenham (Vuksha)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111982",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Man City (Gaga)",
+            "awayTeam": "Chelsea (Duka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026068353",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Knoxville",
+            "homeTeam": "Carson Baker",
+            "awayTeam": "Vincent Yang",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026091949",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Knoxville",
+            "homeTeam": "Stewart Aronson",
+            "awayTeam": "Poonthong Komopisut",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115274",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Italia (zimny)",
+            "awayTeam": "Dinamarca (dewidek)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112312",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Morocco (Linox)",
+            "awayTeam": "Países Bajos (Izrn)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112221",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Portugal (Cofardi)",
+            "awayTeam": "Italy (aguuero)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026101350",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Boca Raton",
+            "homeTeam": "Claire Hill",
+            "awayTeam": "Alexandra Orlins",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112366",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Arsenal (Maslja)",
+            "awayTeam": "Atleti (malverz)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112344",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Juventus (Glumac)",
+            "awayTeam": "Man City (Cevuu)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111977",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Liverpool (Rodja)",
+            "awayTeam": "Arsenal (KaLuBa)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026111946",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Tottenham (Vuksha)",
+            "awayTeam": "Man City (Gaga)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115104",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Estudiantes L.P. (Sava)",
+            "awayTeam": "River Plate (Shark)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108209",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Robin Pacha",
+            "awayTeam": "Radim Urbaniec",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107967",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Zdenek Bilek",
+            "awayTeam": "Vojtech Koubek",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108020",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Matous Klimenta",
+            "awayTeam": "Dan Volhejn",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108054",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jan Sucharda",
+            "awayTeam": "Viktor Vejvoda",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112328",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Croacia (Maki)",
+            "awayTeam": "Portugal (Cofardi)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112237",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Italy (aguuero)",
+            "awayTeam": "Morocco (Linox)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115277",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Argentina (Schabson)",
+            "awayTeam": "Italia (zimny)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115276",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Noruega (Skwara)",
+            "awayTeam": "Dinamarca (dewidek)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115105",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Racing Club (abr4m_5)",
+            "awayTeam": "Independiente (SuperMario)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115106",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Boca Juniors (Alukard)",
+            "awayTeam": "Estudiantes L.P. (Sava)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112358",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Man City (Cevuu)",
+            "awayTeam": "B Dortmund (Terza)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112342",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Atleti (malverz)",
+            "awayTeam": "Juventus (Glumac)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112309",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Países Bajos (Izrn)",
+            "awayTeam": "Italy (aguuero)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112240",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Morocco (Linox)",
+            "awayTeam": "Croacia (Maki)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026110578",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Waco",
+            "homeTeam": "Isaac Nortie Nortey",
+            "awayTeam": "Matthis Ross",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118909",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Alemania (zoyir)",
+            "awayTeam": "España (tohi4)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118870",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Francia (bodyaoo)",
+            "awayTeam": "Inglaterra (nekishka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026105776",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Waco",
+            "homeTeam": "Joao Vitor Goncalves Ceolin",
+            "awayTeam": "Brody Nejedly-Krall",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115278",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Argentina (Schabson)",
+            "awayTeam": "Dinamarca (dewidek)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115107",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Racing Club (abr4m_5)",
+            "awayTeam": "River Plate (Shark)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115108",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Independiente (SuperMario)",
+            "awayTeam": "Estudiantes L.P. (Sava)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118972",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Braga (Inquisitor)",
+            "awayTeam": "Vitoria SC (Kray)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119008",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Porto (Kodak)",
+            "awayTeam": "Sporting CP (GianniKid)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026117060",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Denis Hofman",
+            "awayTeam": "Adam Brazda",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025692566",
+            "sport": "ICE_HOCKEY",
+            "league": "Campeonato Mundo Sub20",
+            "homeTeam": "Letonia sub-20",
+            "awayTeam": "Dinamarca Sub-20",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107942",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Erik Mares",
+            "awayTeam": "Jan Junior Mecl",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107986",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Martin Huk",
+            "awayTeam": "Michal Jezek",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107991",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jiri Louda",
+            "awayTeam": "Petr Sebera",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118910",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Inglaterra (nekishka)",
+            "awayTeam": "Argentina (Nightxx)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118872",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "España (tohi4)",
+            "awayTeam": "Francia (bodyaoo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112370",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Juventus (Glumac)",
+            "awayTeam": "Arsenal (Maslja)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112345",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "B Dortmund (Terza)",
+            "awayTeam": "Atleti (malverz)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115281",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Italia (zimny)",
+            "awayTeam": "Noruega (Skwara)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118971",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Vitoria SC (Kray)",
+            "awayTeam": "Porto (Kodak)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118978",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Sporting CP (GianniKid)",
+            "awayTeam": "Benfica (RuBIX)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115109",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Racing Club (abr4m_5)",
+            "awayTeam": "Estudiantes L.P. (Sava)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115110",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "River Plate (Shark)",
+            "awayTeam": "Boca Juniors (Alukard)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118913",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Francia (bodyaoo)",
+            "awayTeam": "Alemania (zoyir)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118890",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Argentina (Nightxx)",
+            "awayTeam": "España (tohi4)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026112452",
+            "sport": "DARTS",
+            "league": "Mundial PDC",
+            "homeTeam": "Luke Humphries",
+            "awayTeam": "Kevin Doets",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118970",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Benfica (RuBIX)",
+            "awayTeam": "Vitoria SC (Kray)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119013",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Porto (Kodak)",
+            "awayTeam": "Braga (Inquisitor)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118932",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "España (tohi4)",
+            "awayTeam": "Inglaterra (nekishka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118891",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Alemania (zoyir)",
+            "awayTeam": "Argentina (Nightxx)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115112",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "River Plate (Shark)",
+            "awayTeam": "Independiente (SuperMario)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115111",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Racing Club (abr4m_5)",
+            "awayTeam": "Boca Juniors (Alukard)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118875",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Boca Juniors (Stenido)",
+            "awayTeam": "River Plate (zaha)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026095267",
+            "sport": "FOOTBALL",
+            "league": "Amistosos entre clubes",
+            "homeTeam": "Penedense-AL",
+            "awayTeam": "Itabaiana-SE",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026091932",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Knoxville",
+            "homeTeam": "Joseph Phillips",
+            "awayTeam": "Piotr Siekanowicz",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118969",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Braga (Inquisitor)",
+            "awayTeam": "Benfica (RuBIX)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119012",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Vitoria SC (Kray)",
+            "awayTeam": "Sporting CP (GianniKid)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118931",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Argentina (Nightxx)",
+            "awayTeam": "Francia (bodyaoo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118892",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Inglaterra (nekishka)",
+            "awayTeam": "Alemania (zoyir)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115114",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "River Plate (Shark)",
+            "awayTeam": "Estudiantes L.P. (Sava)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118975",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Sporting CP (GianniKid)",
+            "awayTeam": "Braga (Inquisitor)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119020",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Benfica (RuBIX)",
+            "awayTeam": "Porto (Kodak)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118868",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Boca Juniors (Stenido)",
+            "awayTeam": "Racing Club (Solya)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118934",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "España (tohi4)",
+            "awayTeam": "Alemania (zoyir)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118908",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Inglaterra (nekishka)",
+            "awayTeam": "Francia (bodyaoo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115115",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Independiente (SuperMario)",
+            "awayTeam": "Racing Club (abr4m_5)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115116",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Estudiantes L.P. (Sava)",
+            "awayTeam": "Boca Juniors (Alukard)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118968",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Sporting CP (GianniKid)",
+            "awayTeam": "Porto (Kodak)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026110728",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Waco",
+            "homeTeam": "Josephine Lombardi",
+            "awayTeam": "Ligaya Murray",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119014",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Vitoria SC (Kray)",
+            "awayTeam": "Braga (Inquisitor)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025879239",
+            "sport": "AMERICAN_FOOTBALL",
+            "league": "NCAAF",
+            "homeTeam": "Illinois Fighting Illini",
+            "awayTeam": "Tennessee Volunteers",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026092848",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Knoxville",
+            "homeTeam": "Paxton Pritchard",
+            "awayTeam": "Cole Henceroth",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026095268",
+            "sport": "FOOTBALL",
+            "league": "Amistosos entre clubes",
+            "homeTeam": "ABC-RN",
+            "awayTeam": "Campinense-PB",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118933",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Argentina (Nightxx)",
+            "awayTeam": "Inglaterra (nekishka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118896",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Francia (bodyaoo)",
+            "awayTeam": "España (tohi4)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118871",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "River Plate (zaha)",
+            "awayTeam": "Racing Club (Solya)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115117",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "River Plate (Shark)",
+            "awayTeam": "Racing Club (abr4m_5)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115118",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Estudiantes L.P. (Sava)",
+            "awayTeam": "Independiente (SuperMario)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119017",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Porto (Kodak)",
+            "awayTeam": "Vitoria SC (Kray)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118983",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Benfica (RuBIX)",
+            "awayTeam": "Sporting CP (GianniKid)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118954",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Alemania (zoyir)",
+            "awayTeam": "Francia (bodyaoo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118894",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "España (tohi4)",
+            "awayTeam": "Argentina (Nightxx)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115119",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Estudiantes L.P. (Sava)",
+            "awayTeam": "Racing Club (abr4m_5)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115120",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Boca Juniors (Alukard)",
+            "awayTeam": "River Plate (Shark)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118973",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Braga (Inquisitor)",
+            "awayTeam": "Porto (Kodak)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119010",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Vitoria SC (Kray)",
+            "awayTeam": "Benfica (RuBIX)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118867",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "River Plate (zaha)",
+            "awayTeam": "Boca Juniors (Stenido)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118937",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Inglaterra (nekishka)",
+            "awayTeam": "España (tohi4)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118895",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Argentina (Nightxx)",
+            "awayTeam": "Alemania (zoyir)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108211",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jaroslav Prokupek",
+            "awayTeam": "Stanislav Olejarcik",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108039",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Milan Smrcek",
+            "awayTeam": "Jan Steffan",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108052",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jaroslav Bares",
+            "awayTeam": "Ba Hoang Tai Nguyen",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026114858",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Boca Juniors (Alukard)",
+            "awayTeam": "Racing Club (abr4m_5)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118974",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Sporting CP (GianniKid)",
+            "awayTeam": "Vitoria SC (Kray)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119009",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Benfica (RuBIX)",
+            "awayTeam": "Braga (Inquisitor)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115121",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Independiente (SuperMario)",
+            "awayTeam": "River Plate (Shark)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118955",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Francia (bodyaoo)",
+            "awayTeam": "Argentina (Nightxx)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118893",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Alemania (zoyir)",
+            "awayTeam": "Inglaterra (nekishka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118873",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Racing Club (Solya)",
+            "awayTeam": "Boca Juniors (Stenido)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026063280",
+            "sport": "BASEBALL",
+            "league": "LIDOM",
+            "homeTeam": "Leones del Escogido",
+            "awayTeam": "Gigantes del Cibao",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119023",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Braga (Inquisitor)",
+            "awayTeam": "Sporting CP (GianniKid)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119011",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Porto (Kodak)",
+            "awayTeam": "Benfica (RuBIX)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118916",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Fiorentina (bodyaoo)",
+            "awayTeam": "Napoli (nekishka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118940",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Roma (zoyir)",
+            "awayTeam": "Juventus (tohi4)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118866",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Racing Club (Solya)",
+            "awayTeam": "River Plate (zaha)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115123",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Atlético Madrid (Sava)",
+            "awayTeam": "Real Madrid (Shark)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025345666",
+            "sport": "ICE_HOCKEY",
+            "league": "AHL",
+            "homeTeam": "Cleveland Monsters",
+            "awayTeam": "Toronto Marlies",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108214",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jiri Plachy",
+            "awayTeam": "Radim Pavelka",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107997",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Tomas Janata",
+            "awayTeam": "Vladimir Postelt",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108047",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Tomas Andrle",
+            "awayTeam": "Radek Bartunek",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119016",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Sweden (Kodak)",
+            "awayTeam": "Ucrania (GianniKid)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118977",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Dinamarca (Inquisitor)",
+            "awayTeam": "Chequia (Kray)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024835226",
+            "sport": "CRICKET",
+            "league": "Super Smash (F)",
+            "homeTeam": "Northern Brave (F)",
+            "awayTeam": "Wellington Blaze (F)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118956",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Napoli (nekishka)",
+            "awayTeam": "Bologna (Nightxx)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118898",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Juventus (tohi4)",
+            "awayTeam": "Fiorentina (bodyaoo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115125",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Barcelona (Alukard)",
+            "awayTeam": "Atlético Madrid (Sava)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115124",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Real Sociedad (abr4m_5)",
+            "awayTeam": "Sevilla (SuperMario)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118881",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Boca Juniors (Stenido)",
+            "awayTeam": "River Plate (zaha)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119022",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Chequia (Kray)",
+            "awayTeam": "Sweden (Kodak)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118982",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Ucrania (GianniKid)",
+            "awayTeam": "Hungría (RuBIX)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118938",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Fiorentina (bodyaoo)",
+            "awayTeam": "Roma (zoyir)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118900",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Bologna (Nightxx)",
+            "awayTeam": "Juventus (tohi4)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115127",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Sevilla (SuperMario)",
+            "awayTeam": "Atlético Madrid (Sava)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115126",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Real Sociedad (abr4m_5)",
+            "awayTeam": "Real Madrid (Shark)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024345784",
+            "sport": "ICE_HOCKEY",
+            "league": "NHL",
+            "homeTeam": "Florida Panthers",
+            "awayTeam": "Montreal Canadiens",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024345780",
+            "sport": "ICE_HOCKEY",
+            "league": "NHL",
+            "homeTeam": "Toronto Maple Leafs",
+            "awayTeam": "New Jersey Devils",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024345777",
+            "sport": "ICE_HOCKEY",
+            "league": "NHL",
+            "homeTeam": "Pittsburgh Penguins",
+            "awayTeam": "Carolina Hurricanes",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108210",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Stanislav Olejarcik",
+            "awayTeam": "Tomas Barta",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108001",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jan Steffan",
+            "awayTeam": "Lukas Babicka",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108027",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Ba Hoang Tai Nguyen",
+            "awayTeam": "Matej Volf",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025161972",
+            "sport": "ICE_HOCKEY",
+            "league": "PWHL",
+            "homeTeam": "Toronto Sceptres",
+            "awayTeam": "Minnesota Frost",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119025",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Hungría (RuBIX)",
+            "awayTeam": "Chequia (Kray)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118991",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Sweden (Kodak)",
+            "awayTeam": "Dinamarca (Inquisitor)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025345727",
+            "sport": "ICE_HOCKEY",
+            "league": "AHL",
+            "homeTeam": "Wilkes-Barre/Scranton Penguins",
+            "awayTeam": "Charlotte Checkers",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118959",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Juventus (tohi4)",
+            "awayTeam": "Napoli (nekishka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118915",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Roma (zoyir)",
+            "awayTeam": "Bologna (Nightxx)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118878",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Boca Juniors (Stenido)",
+            "awayTeam": "Racing Club (Solya)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115129",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Real Madrid (Shark)",
+            "awayTeam": "Barcelona (Alukard)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115128",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Real Sociedad (abr4m_5)",
+            "awayTeam": "Atlético Madrid (Sava)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119018",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Dinamarca (Inquisitor)",
+            "awayTeam": "Hungría (RuBIX)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118984",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Chequia (Kray)",
+            "awayTeam": "Ucrania (GianniKid)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118912",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Napoli (nekishka)",
+            "awayTeam": "Roma (zoyir)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118936",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Bologna (Nightxx)",
+            "awayTeam": "Fiorentina (bodyaoo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118874",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "River Plate (zaha)",
+            "awayTeam": "Racing Club (Solya)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115131",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Real Madrid (Shark)",
+            "awayTeam": "Sevilla (SuperMario)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115130",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Real Sociedad (abr4m_5)",
+            "awayTeam": "Barcelona (Alukard)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119033",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Hungría (RuBIX)",
+            "awayTeam": "Sweden (Kodak)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118980",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Ucrania (GianniKid)",
+            "awayTeam": "Dinamarca (Inquisitor)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118962",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Juventus (tohi4)",
+            "awayTeam": "Roma (zoyir)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118901",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Napoli (nekishka)",
+            "awayTeam": "Fiorentina (bodyaoo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025345689",
+            "sport": "ICE_HOCKEY",
+            "league": "AHL",
+            "homeTeam": "Milwaukee Admirals",
+            "awayTeam": "Rockford IceHogs",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108216",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jaroslav Prokupek",
+            "awayTeam": "Jiri Plachy",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026063278",
+            "sport": "BASEBALL",
+            "league": "LIDOM",
+            "homeTeam": "Toros del Este",
+            "awayTeam": "Aguilas Cibaenas",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107964",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Milan Smrcek",
+            "awayTeam": "Tomas Andrle",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107996",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jaroslav Bares",
+            "awayTeam": "Tomas Janata",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119028",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Chequia (Kray)",
+            "awayTeam": "Dinamarca (Inquisitor)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118976",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Ucrania (GianniKid)",
+            "awayTeam": "Sweden (Kodak)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115133",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Real Madrid (Shark)",
+            "awayTeam": "Atlético Madrid (Sava)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118963",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Bologna (Nightxx)",
+            "awayTeam": "Napoli (nekishka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118921",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Fiorentina (bodyaoo)",
+            "awayTeam": "Juventus (tohi4)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118876",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "River Plate (zaha)",
+            "awayTeam": "Boca Juniors (Stenido)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119031",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Sweden (Kodak)",
+            "awayTeam": "Chequia (Kray)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118986",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Hungría (RuBIX)",
+            "awayTeam": "Ucrania (GianniKid)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118942",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Roma (zoyir)",
+            "awayTeam": "Fiorentina (bodyaoo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118911",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Juventus (tohi4)",
+            "awayTeam": "Bologna (Nightxx)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115135",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Atlético Madrid (Sava)",
+            "awayTeam": "Barcelona (Alukard)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115134",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Sevilla (SuperMario)",
+            "awayTeam": "Real Sociedad (abr4m_5)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118869",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Racing Club (Solya)",
+            "awayTeam": "Boca Juniors (Stenido)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024653115",
+            "sport": "BASKETBALL",
+            "league": "NBA",
+            "homeTeam": "Memphis Grizzlies",
+            "awayTeam": "Philadelphia 76ers",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026093035",
+            "sport": "TENNIS",
+            "league": "Indonesia",
+            "homeTeam": "Leo Pade",
+            "awayTeam": "Robin Eldin",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026093354",
+            "sport": "TENNIS",
+            "league": "Indonesia",
+            "homeTeam": "Max Pade",
+            "awayTeam": "Denis Vishenchuk Vishenko",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025345685",
+            "sport": "ICE_HOCKEY",
+            "league": "AHL",
+            "homeTeam": "Calgary Wranglers",
+            "awayTeam": "Colorado Eagles",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025345682",
+            "sport": "ICE_HOCKEY",
+            "league": "AHL",
+            "homeTeam": "Iowa Wild",
+            "awayTeam": "Texas Stars",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108217",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Tomas Barta",
+            "awayTeam": "Radim Pavelka",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107988",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Lukas Babicka",
+            "awayTeam": "Radek Bartunek",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108046",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Matej Volf",
+            "awayTeam": "Vladimir Postelt",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119019",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Dinamarca (Inquisitor)",
+            "awayTeam": "Sweden (Kodak)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119021",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Chequia (Kray)",
+            "awayTeam": "Hungría (RuBIX)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118939",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Napoli (nekishka)",
+            "awayTeam": "Juventus (tohi4)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118897",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Bologna (Nightxx)",
+            "awayTeam": "Roma (zoyir)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115137",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Atlético Madrid (Sava)",
+            "awayTeam": "Sevilla (SuperMario)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115136",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Real Madrid (Shark)",
+            "awayTeam": "Real Sociedad (abr4m_5)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118979",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Hungría (RuBIX)",
+            "awayTeam": "Dinamarca (Inquisitor)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118992",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Ucrania (GianniKid)",
+            "awayTeam": "Chequia (Kray)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118914",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Roma (zoyir)",
+            "awayTeam": "Napoli (nekishka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118935",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Fiorentina (bodyaoo)",
+            "awayTeam": "Bologna (Nightxx)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118888",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Racing Club (Solya)",
+            "awayTeam": "River Plate (zaha)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115139",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Barcelona (Alukard)",
+            "awayTeam": "Real Madrid (Shark)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115138",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Atlético Madrid (Sava)",
+            "awayTeam": "Real Sociedad (abr4m_5)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119015",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Sweden (Kodak)",
+            "awayTeam": "Hungría (RuBIX)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119027",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Dinamarca (Inquisitor)",
+            "awayTeam": "Ucrania (GianniKid)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024345772",
+            "sport": "ICE_HOCKEY",
+            "league": "NHL",
+            "homeTeam": "Chicago Blackhawks",
+            "awayTeam": "New York Islanders",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108212",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Stanislav Olejarcik",
+            "awayTeam": "Jiri Plachy",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107950",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jan Steffan",
+            "awayTeam": "Tomas Andrle",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107998",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Ba Hoang Tai Nguyen",
+            "awayTeam": "Tomas Janata",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115141",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Sevilla (SuperMario)",
+            "awayTeam": "Real Madrid (Shark)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026115140",
+            "sport": "FOOTBALL",
+            "league": "Cyber Live Arena (2x5 min)",
+            "homeTeam": "Barcelona (Alukard)",
+            "awayTeam": "Real Sociedad (abr4m_5)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118943",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Arsenal (zoyir)",
+            "awayTeam": "B Dortmund (tohi4)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118899",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Atleti (bodyaoo)",
+            "awayTeam": "Juventus (nekishka)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118883",
+            "sport": "FOOTBALL",
+            "league": "Batalla eSports (2x6min)",
+            "homeTeam": "Atleti (Stenido)",
+            "awayTeam": "Real Madrid (zaha)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118960",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Juventus (nekishka)",
+            "awayTeam": "Man City (Nightxx)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118903",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "B Dortmund (tohi4)",
+            "awayTeam": "Atleti (bodyaoo)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026119038",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Paris (Inquisitor)",
+            "awayTeam": "Liverpool (Kray)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026118988",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Real Madrid (Kodak)",
+            "awayTeam": "Barcelona (GianniKid)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025879243",
+            "sport": "AMERICAN_FOOTBALL",
+            "league": "NCAAF",
+            "homeTeam": "TCU Horned Frogs",
+            "awayTeam": "(16) USC Trojans",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024757565",
+            "sport": "BASEBALL",
+            "league": "Liga Mexicana Pacífico",
+            "homeTeam": "Venados de Mazatlán",
+            "awayTeam": "Cañeros de Los Mochis",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024653166",
+            "sport": "BASKETBALL",
+            "league": "NBA",
+            "homeTeam": "Utah Jazz",
+            "awayTeam": "Boston Celtics",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108213",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Radim Pavelka",
+            "awayTeam": "Jaroslav Prokupek",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108012",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Radek Bartunek",
+            "awayTeam": "Milan Smrcek",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108044",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Vladimir Postelt",
+            "awayTeam": "Jaroslav Bares",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026093026",
+            "sport": "TENNIS",
+            "league": "Indonesia",
+            "homeTeam": "David Kovarik",
+            "awayTeam": "Jacob Kailiang Shen",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026092137",
+            "sport": "TENNIS",
+            "league": "Estados Unidos - Newport Beach",
+            "homeTeam": "Anne-Christine Lutkemeyer",
+            "awayTeam": "Camille Kiss",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024757573",
+            "sport": "BASEBALL",
+            "league": "Liga Mexicana Pacífico",
+            "homeTeam": "Naranjeros de Hermosillo",
+            "awayTeam": "Yaquis de Obregón",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025372946",
+            "sport": "BASEBALL",
+            "league": "Liga Mexicana Pacífico",
+            "homeTeam": "Algodoneros de Guasave",
+            "awayTeam": "Tucson Baseball Club",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108208",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Jiri Plachy",
+            "awayTeam": "Tomas Barta",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107957",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Tomas Andrle",
+            "awayTeam": "Lukas Babicka",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107977",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Tomas Janata",
+            "awayTeam": "Matej Volf",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025372888",
+            "sport": "BASEBALL",
+            "league": "Liga Mexicana Pacífico",
+            "homeTeam": "Jaguares de Nayarit",
+            "awayTeam": "Tomateros de Culiacán",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024345769",
+            "sport": "ICE_HOCKEY",
+            "league": "NHL",
+            "homeTeam": "Vancouver Canucks",
+            "awayTeam": "Philadelphia Flyers",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025345678",
+            "sport": "ICE_HOCKEY",
+            "league": "AHL",
+            "homeTeam": "Henderson Silver Knights",
+            "awayTeam": "Ontario Reign",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108221",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Radim Pavelka",
+            "awayTeam": "Stanislav Olejarcik",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107982",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Radek Bartunek",
+            "awayTeam": "Jan Steffan",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108038",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Vladimir Postelt",
+            "awayTeam": "Ba Hoang Tai Nguyen",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026074993",
+            "sport": "CRICKET",
+            "league": "Georgie Pie Super Smash",
+            "homeTeam": "Northern Brave",
+            "awayTeam": "Wellington Firebirds",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024757571",
+            "sport": "BASEBALL",
+            "league": "Liga Mexicana Pacífico",
+            "homeTeam": "Águilas de Mexicali",
+            "awayTeam": "Charros de Jalisco",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024653162",
+            "sport": "BASKETBALL",
+            "league": "NBA",
+            "homeTeam": "Los Angeles Lakers",
+            "awayTeam": "Detroit Pistons",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026108219",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Tomas Barta",
+            "awayTeam": "Jaroslav Prokupek",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107945",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Lukas Babicka",
+            "awayTeam": "Milan Smrcek",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026107993",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Matej Volf",
+            "awayTeam": "Jaroslav Bares",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026092147",
+            "sport": "TENNIS",
+            "league": "Estados Unidos - Newport Beach",
+            "homeTeam": "Neo Niedner",
+            "awayTeam": "Aadarsh Tripathi",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024653073",
+            "sport": "BASKETBALL",
+            "league": "NBA",
+            "homeTeam": "LA Clippers",
+            "awayTeam": "Sacramento Kings",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026068382",
+            "sport": "TENNIS",
+            "league": "Estados Unidos - Newport Beach",
+            "homeTeam": "Hudson Rivera",
+            "awayTeam": "Antreas Djakouris",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026116106",
+            "sport": "TENNIS",
+            "league": "Estados Unidos - Newport Beach",
+            "homeTeam": "Parashar Bharadwaj",
+            "awayTeam": "Nischal Spurling",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024081953",
+            "sport": "BASKETBALL",
+            "league": "NBL",
+            "homeTeam": "Illawarra Hawks",
+            "awayTeam": "Tasmania JackJumpers",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024944865",
+            "sport": "FOOTBALL",
+            "league": "A-Liga",
+            "homeTeam": "Central Coast Mariners",
+            "awayTeam": "Brisbane Roar",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024323689",
+            "sport": "CRICKET",
+            "league": "T20 Big Bash League",
+            "homeTeam": "Adelaide Strikers",
+            "awayTeam": "Brisbane Heat",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024081951",
+            "sport": "BASKETBALL",
+            "league": "NBL",
+            "homeTeam": "Cairns Taipans",
+            "awayTeam": "South East Melbourne Phoenix",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024082773",
+            "sport": "BASKETBALL",
+            "league": "WNBL (W)",
+            "homeTeam": "Townsville Fire (F)",
+            "awayTeam": "Bendigo Spirit (F)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024335344",
+            "sport": "BASKETBALL",
+            "league": "KBL",
+            "homeTeam": "Ulsan Mobis Phoebus",
+            "awayTeam": "Changwon LG Sakers",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025014928",
+            "sport": "BASKETBALL",
+            "league": "KBL (F)",
+            "homeTeam": "Woori Bank Hansae (F)",
+            "awayTeam": "Busan BNK Sum (F)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024647782",
+            "sport": "VOLLEYBALL",
+            "league": "V-League",
+            "homeTeam": "Cheonan Hyundai Capital Skywalkers",
+            "awayTeam": "Gumi KB Insurance Stars",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025022963",
+            "sport": "CRICKET",
+            "league": "SA20",
+            "homeTeam": "Sunrisers Eastern Cape",
+            "awayTeam": "Paarl Royals",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024575459",
+            "sport": "BASKETBALL",
+            "league": "BBL",
+            "homeTeam": "Alba Berlin",
+            "awayTeam": "Basketball Löwen Braunschweig",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025961028",
+            "sport": "BASKETBALL",
+            "league": "CBA",
+            "homeTeam": "Shenzhen Leopards",
+            "awayTeam": "Beijing Royal Fighters",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026055959",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Defence Force SC (ETP)",
+            "awayTeam": "Ethiopian Coffee SC",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024375966",
+            "sport": "BANDY",
+            "league": "Elitserien",
+            "homeTeam": "IF Boltic",
+            "awayTeam": "Gripen Trollhattan BK",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024375963",
+            "sport": "BANDY",
+            "league": "Elitserien",
+            "homeTeam": "IFK Vänersborg",
+            "awayTeam": "Villa Lidköping BK",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024375997",
+            "sport": "BANDY",
+            "league": "Elitserien",
+            "homeTeam": "Västerås SK",
+            "awayTeam": "Hammarby IF",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024637052",
+            "sport": "FOOTBALL",
+            "league": "1ª División",
+            "homeTeam": "Al Draih",
+            "awayTeam": "Al-Jubail",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024637034",
+            "sport": "FOOTBALL",
+            "league": "1ª División",
+            "homeTeam": "Al-Baten",
+            "awayTeam": "Abha",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026026796",
+            "sport": "FOOTBALL",
+            "league": "Premier Liga",
+            "homeTeam": "Bala Town",
+            "awayTeam": "Caernarfon",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024335330",
+            "sport": "BASKETBALL",
+            "league": "KBL",
+            "homeTeam": "Busan KCC Egis",
+            "awayTeam": "Wonju Dongbu Promy",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025990433",
+            "sport": "FOOTBALL",
+            "league": "Premier Liga",
+            "homeTeam": "Briton Ferry Llansawel",
+            "awayTeam": "Barry Town",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026076497",
+            "sport": "FOOTBALL",
+            "league": "2ª División",
+            "homeTeam": "Horse Owners Club",
+            "awayTeam": "El-Olympi",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026117582",
+            "sport": "FOOTBALL",
+            "league": "Higher League",
+            "homeTeam": "Halaba City",
+            "awayTeam": "Dessie Ketema",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026026795",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Ethiopia Nigd Bank",
+            "awayTeam": "Ethiopian Medhin",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025471506",
+            "sport": "BASKETBALL",
+            "league": "BBL",
+            "homeTeam": "Rostock Seawolves",
+            "awayTeam": "FC Bayern München",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026057234",
+            "sport": "FOOTBALL",
+            "league": "Premier Liga",
+            "homeTeam": "Kazma SC",
+            "awayTeam": "Al Salmiyah",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026028113",
+            "sport": "FOOTBALL",
+            "league": "Premier Liga",
+            "homeTeam": "Connah's Quay FC",
+            "awayTeam": "The New Saints",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025094712",
+            "sport": "FOOTBALL",
+            "league": "Liga Profesional Saudí",
+            "homeTeam": "Neom SC",
+            "awayTeam": "Al Ittihad (KSA)",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025022965",
+            "sport": "CRICKET",
+            "league": "SA20",
+            "homeTeam": "MI Cape Town",
+            "awayTeam": "Pretoria Capitals",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1022760324",
+            "sport": "FOOTBALL",
+            "league": "Copa de África",
+            "homeTeam": "Equatorial Guinea",
+            "awayTeam": "Argelia",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1022760325",
+            "sport": "FOOTBALL",
+            "league": "Copa de África",
+            "homeTeam": "Sudan",
+            "awayTeam": "Burkina Faso",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1026049559",
+            "sport": "FOOTBALL",
+            "league": "2.ª División",
+            "homeTeam": "Bouri",
+            "awayTeam": "Qalali",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025980626",
+            "sport": "BASKETBALL",
+            "league": "Super Liga",
+            "homeTeam": "Hapoel Haemek",
+            "awayTeam": "Hapoel Holon",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025879244",
+            "sport": "AMERICAN_FOOTBALL",
+            "league": "NCAAF",
+            "homeTeam": "(14) Vanderbilt Commodores",
+            "awayTeam": "(23) Iowa Hawkeyes",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025094683",
+            "sport": "FOOTBALL",
+            "league": "Liga Profesional Saudí",
+            "homeTeam": "Al-Kholood",
+            "awayTeam": "Al Hilal",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025094720",
+            "sport": "FOOTBALL",
+            "league": "Liga Profesional Saudí",
+            "homeTeam": "Al Shabab",
+            "awayTeam": "Al Qadisiya",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024345765",
+            "sport": "ICE_HOCKEY",
+            "league": "NHL",
+            "homeTeam": "Washington Capitals",
+            "awayTeam": "New York Rangers",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025692559",
+            "sport": "ICE_HOCKEY",
+            "league": "Campeonato Mundo Sub20",
+            "homeTeam": "Suiza Sub-20",
+            "awayTeam": "Eslovaquia Sub-20",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025663578",
+            "sport": "ICE_HOCKEY",
+            "league": "PWHL",
+            "homeTeam": "New York Sirens",
+            "awayTeam": "Vancouver Goldeneyes",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1022760330",
+            "sport": "FOOTBALL",
+            "league": "Copa de África",
+            "homeTeam": "Gabon",
+            "awayTeam": "Costa de Marfíl",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1022760331",
+            "sport": "FOOTBALL",
+            "league": "Copa de África",
+            "homeTeam": "Mozambique",
+            "awayTeam": "Camerún ",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025965577",
+            "sport": "AMERICAN_FOOTBALL",
+            "league": "NCAAF",
+            "homeTeam": "Duke Blue Devils",
+            "awayTeam": "Arizona State Sun Devils",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025879245",
+            "sport": "AMERICAN_FOOTBALL",
+            "league": "NCAAF",
+            "homeTeam": "(13) Texas Longhorns",
+            "awayTeam": "(18) Michigan Wolverines",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1024345762",
+            "sport": "ICE_HOCKEY",
+            "league": "NHL",
+            "homeTeam": "Vegas Golden Knights",
+            "awayTeam": "Nashville Predators",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        },
+        {
+            "id": "1025345680",
+            "sport": "ICE_HOCKEY",
+            "league": "AHL",
+            "homeTeam": "Belleville Senators",
+            "awayTeam": "Laval Rocket",
+            "odds": {},
+            "live": false,
+            "last_updated": "2025-12-30T16:00:07.984642"
+        }
+    ]
+}

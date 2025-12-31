@@ -35,8 +35,8 @@ class PickGeniusOracle:
         self.model = "llama-3.3-70b-versatile"
         print(f"🧬 AI Model set to: {self.model} (Pro Oracle)")
         
-    async def generate_prediction(self, sport: str, home_team: str, away_team: str, home_score=None, away_score=None) -> Dict:
-        """Genera una predicción profesional usando IA"""
+    async def generate_prediction(self, sport: str, home_team: str, away_team: str, home_score=None, away_score=None, real_odds: Dict = None) -> Dict:
+        """Generates a professional prediction including value analysis if odds are provided"""
         
         if not self.client:
             return self._mock_prediction(home_team, away_team)
@@ -56,9 +56,14 @@ class PickGeniusOracle:
         
         context = sport_context.get(sport.lower(), "Analiza variables técnicos de este deporte.")
         
+        odds_info = ""
+        if real_odds:
+            odds_info = f"\nCUOTAS REALES (BetPlay): {json.dumps(real_odds)}"
+            context += "\nIMPORTANTE: Compara tu probabilidad estimada con las cuotas reales para detectar valor (Value Bet)."
+        
         prompt = f"""
         ERES PICKGENIUS ORACLE, EL MEJOR ANALISTA DE APUESTAS DEL MUNDO.
-        Analiza este partido de {sport}: {home_team} vs {away_team}{score_info}.
+        Analiza este partido de {sport}: {home_team} vs {away_team}{score_info}.{odds_info}
         CONTEXTO TÉCNICO: {context}
         
         REGLAS ESTRICTAS:
@@ -74,7 +79,8 @@ class PickGeniusOracle:
             "confidence": 85,
             "reasoning": "Breve análisis profesional técnico detallando por qué este equipo ganará",
             "bettingTip": "Recomendación específica de mercado (Ej: Over 2.5, Handicap +3.5, etc)",
-            "keyFactors": ["Factor 1", "Factor 2", "Métrica Proyectada"]
+            "keyFactors": ["Factor 1", "Factor 2", "Métrica Proyectada"],
+            "valueVerdict": "EXCELENTE | BUENO | NEUTRAL (Determina si la cuota de BetPlay tiene valor real)"
         }}
         """
         

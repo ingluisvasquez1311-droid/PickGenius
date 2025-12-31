@@ -1,0 +1,872 @@
+{
+    "timestamp": "2025-12-30T15:40:08.373759",
+    "count": 64,
+    "events": [
+        {
+            "id": "1026023690",
+            "sport": "FOOTBALL",
+            "league": "Division de Honor Juvenil",
+            "homeTeam": "CD Marino U19",
+            "awayTeam": "CF Juventud Laguna U19",
+            "odds": {
+                "1": 36.0,
+                "X": 5.8,
+                "2": 1.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024044020",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Chelsea",
+            "awayTeam": "AFC Bournemouth",
+            "odds": {
+                "1": 2.2,
+                "X": 3.6,
+                "2": 2.85
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024044039",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Nottingham Forest",
+            "awayTeam": "Everton",
+            "odds": {
+                "1": 1.92,
+                "X": 3.25,
+                "2": 4.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024044044",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "West Ham",
+            "awayTeam": "Brighton",
+            "odds": {
+                "1": 1.81,
+                "X": 3.85,
+                "2": 3.7
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024044021",
+            "sport": "FOOTBALL",
+            "league": "Premier League",
+            "homeTeam": "Burnley",
+            "awayTeam": "Newcastle United",
+            "odds": {
+                "1": 36.0,
+                "X": 15.0,
+                "2": 1.04
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024274663",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Carlisle",
+            "awayTeam": "Morecambe",
+            "odds": {
+                "1": 1.29,
+                "X": 5.0,
+                "2": 6.75
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024274641",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Tamworth",
+            "awayTeam": "Halifax Town",
+            "odds": {
+                "1": 2.7,
+                "X": 3.1,
+                "2": 2.35
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024274644",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional",
+            "homeTeam": "Woking",
+            "awayTeam": "Braintree Town",
+            "odds": {
+                "1": 1.78,
+                "X": 3.25,
+                "2": 3.95
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024274111",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "AFC Hornchurch",
+            "awayTeam": "Maidstone United",
+            "odds": {
+                "1": 2.35,
+                "X": 3.05,
+                "2": 2.7
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024274131",
+            "sport": "FOOTBALL",
+            "league": "Liga Nacional Sur",
+            "homeTeam": "Worthing",
+            "awayTeam": "Dorking Wanderers FC",
+            "odds": {
+                "1": 2.14,
+                "X": 3.5,
+                "2": 2.7
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026062747",
+            "sport": "FOOTBALL",
+            "league": "Tocantinense",
+            "homeTeam": "Tocantinópolis-TO",
+            "awayTeam": "Araguaina-TO",
+            "odds": {
+                "1": 4.6,
+                "X": 2.43,
+                "2": 2.04
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1022760313",
+            "sport": "FOOTBALL",
+            "league": "Copa de África",
+            "homeTeam": "Benin",
+            "awayTeam": "Senegal",
+            "odds": {
+                "1": 0.0,
+                "X": 0.0,
+                "2": 0.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1022760315",
+            "sport": "FOOTBALL",
+            "league": "Copa de África",
+            "homeTeam": "Botswana",
+            "awayTeam": "Rep. Dem. Congo",
+            "odds": {
+                "1": 0.0,
+                "X": 0.0,
+                "2": 0.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024064149",
+            "sport": "FOOTBALL",
+            "league": "Premiership de Escocia",
+            "homeTeam": "Dundee FC",
+            "awayTeam": "Kilmarnock",
+            "odds": {
+                "1": 2.7,
+                "X": 3.15,
+                "2": 2.65
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024064152",
+            "sport": "FOOTBALL",
+            "league": "Premiership de Escocia",
+            "homeTeam": "Hibernian",
+            "awayTeam": "Aberdeen",
+            "odds": {
+                "1": 1.86,
+                "X": 3.55,
+                "2": 4.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024064184",
+            "sport": "FOOTBALL",
+            "league": "Premiership de Escocia",
+            "homeTeam": "Livingston",
+            "awayTeam": "Dundee United",
+            "odds": {
+                "1": 2.38,
+                "X": 3.25,
+                "2": 2.95
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024064167",
+            "sport": "FOOTBALL",
+            "league": "Premiership de Escocia",
+            "homeTeam": "Rangers FC",
+            "awayTeam": "St Mirren",
+            "odds": {
+                "1": 1.58,
+                "X": 3.9,
+                "2": 5.6
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026111941",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Arsenal (KaLuBa)",
+            "awayTeam": "Chelsea (Duka)",
+            "odds": {
+                "1": 2.55,
+                "X": 2.7,
+                "2": 2.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026111991",
+            "sport": "FOOTBALL",
+            "league": "Esports Battle (2x4min)",
+            "homeTeam": "Liverpool (Rodja)",
+            "awayTeam": "Tottenham (Vuksha)",
+            "odds": {
+                "1": 1.12,
+                "X": 6.1,
+                "2": 13.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026074676",
+            "sport": "FOOTBALL",
+            "league": "League Cup",
+            "homeTeam": "Smouha SC",
+            "awayTeam": "Kahrabaa Ismailia",
+            "odds": {
+                "1": 3.0,
+                "X": 1.6,
+                "2": 6.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026019731",
+            "sport": "FOOTBALL",
+            "league": "Premier Liga",
+            "homeTeam": "Cardiff Met University",
+            "awayTeam": "Haverfordwest County",
+            "odds": {
+                "1": 2.25,
+                "X": 3.25,
+                "2": 2.65
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026019729",
+            "sport": "FOOTBALL",
+            "league": "NIFL Premiership",
+            "homeTeam": "Bangor FC",
+            "awayTeam": "Ballymena United",
+            "odds": {
+                "1": 2.38,
+                "X": 3.3,
+                "2": 2.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026066637",
+            "sport": "FOOTBALL",
+            "league": "NIFL Premiership",
+            "homeTeam": "Coleraine",
+            "awayTeam": "Linfield",
+            "odds": {
+                "1": 1.87,
+                "X": 3.5,
+                "2": 3.4
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026019727",
+            "sport": "FOOTBALL",
+            "league": "NIFL Premiership",
+            "homeTeam": "Glentoran",
+            "awayTeam": "Portadown",
+            "odds": {
+                "1": 1.41,
+                "X": 3.9,
+                "2": 6.4
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026019730",
+            "sport": "FOOTBALL",
+            "league": "NIFL Premiership",
+            "homeTeam": "Larne FC",
+            "awayTeam": "Cliftonville",
+            "odds": {
+                "1": 1.75,
+                "X": 3.25,
+                "2": 4.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024352740",
+            "sport": "BASKETBALL",
+            "league": "Euroliga",
+            "homeTeam": "Hapoel Tel Aviv",
+            "awayTeam": "Žalgiris Kaunas",
+            "odds": {
+                "Hapoel Tel Aviv": 1.17,
+                "Žalgiris Kaunas": 4.9
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024352742",
+            "sport": "BASKETBALL",
+            "league": "Euroliga",
+            "homeTeam": "Lyon-Villeurbanne",
+            "awayTeam": "Paris Basket",
+            "odds": {
+                "Lyon-Villeurbanne": 2.1,
+                "Paris Basket": 1.7
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024352753",
+            "sport": "BASKETBALL",
+            "league": "Euroliga",
+            "homeTeam": "FC Barcelona",
+            "awayTeam": "AS Monaco",
+            "odds": {
+                "FC Barcelona": 1.56,
+                "AS Monaco": 2.38
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024352755",
+            "sport": "BASKETBALL",
+            "league": "Euroliga",
+            "homeTeam": "Valencia Basket Club",
+            "awayTeam": "Partizán de Belgrado",
+            "odds": {
+                "Valencia Basket Club": 1.3,
+                "Partizán de Belgrado": 3.3
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024240315",
+            "sport": "BASKETBALL",
+            "league": "EuroCup",
+            "homeTeam": "Budućnost Podgorica",
+            "awayTeam": "TÜRK Telekom",
+            "odds": {
+                "Budućnost Podgorica": 1.07,
+                "TÜRK Telekom": 6.75
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024240294",
+            "sport": "BASKETBALL",
+            "league": "EuroCup",
+            "homeTeam": "Aris",
+            "awayTeam": "KK Cedevita Olimpija",
+            "odds": {
+                "Aris": 5.75,
+                "KK Cedevita Olimpija": 1.09
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024240295",
+            "sport": "BASKETBALL",
+            "league": "EuroCup",
+            "homeTeam": "Dolomiti Energia Trento",
+            "awayTeam": "London Lions",
+            "odds": {
+                "Dolomiti Energia Trento": 1.36,
+                "London Lions": 2.9
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024694756",
+            "sport": "BASKETBALL",
+            "league": "Liga ACB",
+            "homeTeam": "La Laguna Tenerife",
+            "awayTeam": "C.B. Granada",
+            "odds": {
+                "La Laguna Tenerife": 1.33,
+                "C.B. Granada": 3.05
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026112451",
+            "sport": "DARTS",
+            "league": "Mundial PDC",
+            "homeTeam": "Charlie Manby",
+            "awayTeam": "Gian van Veen",
+            "odds": {
+                "Gian van Veen": 1.19,
+                "Charlie Manby": 4.35
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026119595",
+            "sport": "COUNTER_STRIKE",
+            "league": "Christmas Cup",
+            "homeTeam": "Prestige Esport",
+            "awayTeam": "Natus Vincere Junior",
+            "odds": {
+                "Prestige Esport": 1.28,
+                "Natus Vincere Junior": 3.25
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024575490",
+            "sport": "BASKETBALL",
+            "league": "BBL",
+            "homeTeam": "BV Chemnitz 99",
+            "awayTeam": "Gladiators Trier",
+            "odds": {
+                "BV Chemnitz 99": 1.12,
+                "Gladiators Trier": 5.25
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024575465",
+            "sport": "BASKETBALL",
+            "league": "BBL",
+            "homeTeam": "MLP Academics Heidelberg",
+            "awayTeam": "Skyliners Frankfurt",
+            "odds": {
+                "MLP Academics Heidelberg": 2.33,
+                "Skyliners Frankfurt": 1.54
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026019155",
+            "sport": "BASKETBALL",
+            "league": "Pro A",
+            "homeTeam": "Paderborn Baskets",
+            "awayTeam": "BG Göttingen",
+            "odds": {
+                "Paderborn Baskets": 1.04,
+                "BG Göttingen": 8.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026004012",
+            "sport": "BASKETBALL",
+            "league": "PLK (F)",
+            "homeTeam": "Polonia Warszawa (F)",
+            "awayTeam": "Wisła Kraków (F)",
+            "odds": {
+                "Polonia Warszawa (F)": 1.14,
+                "Wisła Kraków (F)": 4.8
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024748685",
+            "sport": "BASKETBALL",
+            "league": "Super League Basketball",
+            "homeTeam": "Caledonia Gladiators",
+            "awayTeam": "Manchester Basketball",
+            "odds": {
+                "Caledonia Gladiators": 7.5,
+                "Manchester Basketball": 1.05
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024748658",
+            "sport": "BASKETBALL",
+            "league": "Super League Basketball",
+            "homeTeam": "Leicester Riders",
+            "awayTeam": "Bristol Flyers",
+            "odds": {
+                "Leicester Riders": 1.2,
+                "Bristol Flyers": 3.9
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024748682",
+            "sport": "BASKETBALL",
+            "league": "Super League Basketball",
+            "homeTeam": "Sheffield Sharks",
+            "awayTeam": "Cheshire Phoenix",
+            "odds": {
+                "Sheffield Sharks": 1.65,
+                "Cheshire Phoenix": 2.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024748656",
+            "sport": "BASKETBALL",
+            "league": "Super League Basketball",
+            "homeTeam": "Surrey 89ers",
+            "awayTeam": "Newcastle Eagles",
+            "odds": {
+                "Surrey 89ers": 3.75,
+                "Newcastle Eagles": 1.22
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024240838",
+            "sport": "BASKETBALL",
+            "league": "NBL",
+            "homeTeam": "Basket Brno",
+            "awayTeam": "Hradec Kralove",
+            "odds": {
+                "Basket Brno": 1.75,
+                "Hradec Kralove": 1.97
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024065689",
+            "sport": "BASKETBALL",
+            "league": "BasketLigan",
+            "homeTeam": "Borås Basket",
+            "awayTeam": "BC Luleå",
+            "odds": {
+                "Borås Basket": 1.1,
+                "BC Luleå": 5.5
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024065685",
+            "sport": "BASKETBALL",
+            "league": "BasketLigan",
+            "homeTeam": "Köping Stars",
+            "awayTeam": "Södertälje Kings",
+            "odds": {
+                "Köping Stars": 1.25,
+                "Södertälje Kings": 3.55
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024065664",
+            "sport": "BASKETBALL",
+            "league": "BasketLigan",
+            "homeTeam": "Umeå BSKT",
+            "awayTeam": "Norrköping Dolphins",
+            "odds": {
+                "Umeå BSKT": 2.0,
+                "Norrköping Dolphins": 1.73
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024065694",
+            "sport": "BASKETBALL",
+            "league": "BasketLigan",
+            "homeTeam": "Uppsala Basket",
+            "awayTeam": "Högsbo Basket",
+            "odds": {
+                "Uppsala Basket": 1.2,
+                "Högsbo Basket": 4.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026104197",
+            "sport": "TENNIS",
+            "league": "EE.UU. - Knoxville",
+            "homeTeam": "Pavan Uppu",
+            "awayTeam": "Jack Di Menna",
+            "odds": {
+                "Jack Di Menna": 1.55,
+                "Pavan Uppu": 2.3
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026108057",
+            "sport": "TABLE_TENNIS",
+            "league": "Liga Pro checa",
+            "homeTeam": "Viktor Vejvoda",
+            "awayTeam": "Petr Sebera",
+            "odds": {
+                "Viktor Vejvoda": 1.01,
+                "Petr Sebera": 10.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1025692560",
+            "sport": "ICE_HOCKEY",
+            "league": "Campeonato Mundo Sub20",
+            "homeTeam": "Suiza Sub-20",
+            "awayTeam": "Alemania sub-20",
+            "odds": {
+                "1": 1.08,
+                "X": 9.0,
+                "2": 14.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024166315",
+            "sport": "ICE_HOCKEY",
+            "league": "DEL Bundesliga",
+            "homeTeam": "Iserlohn Roosters",
+            "awayTeam": "Kölner Haie",
+            "odds": {
+                "1": 2.9,
+                "X": 2.9,
+                "2": 2.35
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1023744809",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Linköping HC",
+            "awayTeam": "Örebro HK",
+            "odds": {
+                "1": 19.0,
+                "X": 7.0,
+                "2": 1.1
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1023744802",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Djurgårdens IF",
+            "awayTeam": "Luleå HF",
+            "odds": {
+                "1": 1.58,
+                "X": 3.1,
+                "2": 6.75
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1023744824",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Frölunda HC",
+            "awayTeam": "Färjestad BK",
+            "odds": {
+                "1": 1.4,
+                "X": 3.5,
+                "2": 9.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1023744804",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Skellefteå AIK",
+            "awayTeam": "Brynäs IF",
+            "odds": {
+                "1": 1.33,
+                "X": 3.7,
+                "2": 11.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1023744815",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Växjö Lakers HC",
+            "awayTeam": "Rögle BK",
+            "odds": {
+                "1": 8.5,
+                "X": 3.3,
+                "2": 1.46
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1023744806",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "HV 71",
+            "awayTeam": "IF Malmö Redhawks",
+            "odds": {
+                "1": 9.0,
+                "X": 3.25,
+                "2": 1.45
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1023744828",
+            "sport": "ICE_HOCKEY",
+            "league": "SHL",
+            "homeTeam": "Timrå IK",
+            "awayTeam": "Leksands IF",
+            "odds": {
+                "1": 2.55,
+                "X": 2.25,
+                "2": 3.75
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1026015763",
+            "sport": "VOLLEYBALL",
+            "league": "Coppa Italia SuperLega",
+            "homeTeam": "Sir Safety Conad Perugia",
+            "awayTeam": "Cucine Lube Civitanova",
+            "odds": {
+                "Sir Safety Conad Perugia": 1.41,
+                "Cucine Lube Civitanova": 2.65
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024810823",
+            "sport": "VOLLEYBALL",
+            "league": "Liga A ",
+            "homeTeam": "AS Cannes",
+            "awayTeam": "Paris Volley",
+            "odds": {
+                "AS Cannes": 1.79,
+                "Paris Volley": 1.9
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024810841",
+            "sport": "VOLLEYBALL",
+            "league": "Liga A ",
+            "homeTeam": "Narbonne Volley",
+            "awayTeam": "Chaumont",
+            "odds": {
+                "Narbonne Volley": 1.47,
+                "Chaumont": 2.45
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024810824",
+            "sport": "VOLLEYBALL",
+            "league": "Liga A ",
+            "homeTeam": "Toulouse V.B.",
+            "awayTeam": "G.F.C.O. Ajaccio",
+            "odds": {
+                "Toulouse V.B.": 1.16,
+                "G.F.C.O. Ajaccio": 4.6
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        },
+        {
+            "id": "1024810826",
+            "sport": "VOLLEYBALL",
+            "league": "Liga A ",
+            "homeTeam": "Tours VB",
+            "awayTeam": "Nice Volley-Ball",
+            "odds": {
+                "Tours VB": 1.01,
+                "Nice Volley-Ball": 15.0
+            },
+            "live": true,
+            "last_updated": "2025-12-30T15:40:07.806772"
+        }
+    ]
+}

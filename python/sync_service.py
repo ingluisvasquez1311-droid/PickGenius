@@ -127,12 +127,57 @@ class PickGeniusSync:
                 
         print(f"💾 Synced {synced_count} matches for {sport} ({data_type}) to Firebase")
 
+    async def sync_predictions_to_firebase(self):
+        """Toma las predicciones de Redis y las sube a Firestore 'predictions'"""
+        if not self.db: return
+        
+        pattern = "prediction:*"
+        keys = self.redis_client.keys(pattern)
+        
+        synced_count = 0
+        batch = self.db.batch()
+        processed_in_batch = 0
+
+        for key in keys:
+            try:
+                raw_data = self.redis_client.get(key)
+                if not raw_data: continue
+                
+                prediction = json.loads(raw_data)
+                # El key de redis es 'prediction:match_id'
+                match_id = key.split(':', 1)[1]
+                
+                doc_ref = self.db.collection('predictions').document(match_id)
+                
+                # Enriquecer con metadata de sync
+                prediction['syncedAt'] = firestore.SERVER_TIMESTAMP
+                prediction['matchId'] = match_id
+                
+                batch.set(doc_ref, prediction, merge=True)
+                processed_in_batch += 1
+                synced_count += 1
+                
+                if processed_in_batch >= 400:
+                    batch.commit()
+                    batch = self.db.batch()
+                    processed_in_batch = 0
+                    
+            except Exception as e:
+                print(f"⚠️ Prediction sync error for key {key}: {e}")
+
+        if processed_in_batch > 0:
+            batch.commit()
+            
+        if synced_count > 0:
+            print(f"🧠 Synced {synced_count} AI predictions to Firebase")
+
 if __name__ == "__main__":
     async def test():
         base_path = os.path.dirname(os.path.abspath(__file__))
         service_account = os.path.join(base_path, '..', 'firebase-service-account.json')
         sync = PickGeniusSync(service_account)
         await sync.sync_matches_to_firebase('football', 'live')
+        await sync.sync_predictions_to_firebase()
         
     import asyncio
     asyncio.run(test())
