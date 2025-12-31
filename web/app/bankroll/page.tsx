@@ -211,12 +211,12 @@ export default function BankrollPage() {
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-white">{item.match}</span>
-                                                <span className="text-[8px] font-mono text-gray-600">Odds: {item.odds.toFixed(2)} | Stake: {item.stake}u</span>
+                                                <span className="text-[8px] font-mono text-gray-600">Odds: {item.odds ? item.odds.toFixed(2) : '—'} | Stake: {item.stake}u</span>
                                             </div>
                                         </div>
                                         <div className="flex flex-col items-end gap-2">
                                             <span className={clsx("font-mono font-black text-sm", item.profit > 0 ? "text-green-500" : item.profit < 0 ? "text-red-500" : "text-gray-500")}>
-                                                {item.profit > 0 ? '+' : ''}{item.profit.toFixed(2)}u
+                                                {item.profit > 0 ? '+' : ''}{(item.profit || 0).toFixed(2)}u
                                             </span>
                                             <button
                                                 onClick={() => deleteEntry(item.id)}
@@ -240,7 +240,7 @@ export default function BankrollPage() {
                                 Smart Stake
                             </h4>
                             <p className="text-[10px] font-bold text-gray-500 uppercase leading-relaxed tracking-wider">
-                                Basado en tu win rate actual ({winRate.toFixed(1)}%), el algoritmo sugiere un stake máximo por evento de <span className="text-primary">{(currentBankroll * 0.02).toFixed(1)}u (2%)</span> para gestión conservadora.
+                                Basado en tu win rate actual ({(winRate || 0).toFixed(1)}%), el algoritmo sugiere un stake máximo por evento de <span className="text-primary">{((currentBankroll || 0) * 0.02).toFixed(1)}u (2%)</span> para gestión conservadora.
                             </p>
                         </div>
                     </div>
