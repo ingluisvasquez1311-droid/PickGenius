@@ -12,14 +12,15 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
 
         // Fetch using Cache Service (TTL 60 seconds)
         const combinedData = await globalCache.getOrFetch(cacheKey, async () => {
-            const [eventRes, statsRes, lineupsRes, bestPlayersRes, oddsRes, h2hRes, incidentsRes] = await Promise.allSettled([
+            const [eventRes, statsRes, lineupsRes, bestPlayersRes, oddsRes, h2hRes, incidentsRes, votesRes] = await Promise.allSettled([
                 sofafetch(`https://api.sofascore.com/api/v1/event/${id}`),
                 sofafetch(`https://api.sofascore.com/api/v1/event/${id}/statistics`),
                 sofafetch(`https://api.sofascore.com/api/v1/event/${id}/lineups`),
                 sofafetch(`https://api.sofascore.com/api/v1/event/${id}/best-players`),
                 sofafetch(`https://api.sofascore.com/api/v1/event/${id}/odds/1/all`),
                 sofafetch(`https://api.sofascore.com/api/v1/event/${id}/h2h`),
-                sofafetch(`https://api.sofascore.com/api/v1/event/${id}/incidents`)
+                sofafetch(`https://api.sofascore.com/api/v1/event/${id}/incidents`),
+                sofafetch(`https://api.sofascore.com/api/v1/event/${id}/votes`)
             ]);
 
             const eventData = eventRes.status === 'fulfilled' ? eventRes.value : null;
@@ -33,6 +34,7 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
             const oddsData = oddsRes.status === 'fulfilled' ? oddsRes.value : { markets: [] };
             const h2hData = h2hRes.status === 'fulfilled' ? h2hRes.value : { matches: [], teamStats: {} };
             const incidentsData = incidentsRes.status === 'fulfilled' ? incidentsRes.value : { incidents: [] };
+            const votesData = votesRes.status === 'fulfilled' ? votesRes.value : { vote: { vote1: 0, voteX: 0, vote2: 0 } };
 
             return {
                 event: eventData.event,
@@ -41,7 +43,8 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
                 bestPlayers: bestPlayersData.bestPlayers || {},
                 odds: oddsData.markets || [],
                 h2h: h2hData,
-                incidents: incidentsData.incidents || []
+                incidents: incidentsData.incidents || [],
+                votes: votesData.vote
             };
         }, 60); // 60s TTL
 

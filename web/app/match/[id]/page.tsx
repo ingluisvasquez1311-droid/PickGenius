@@ -364,14 +364,14 @@ export default function MatchDetailsPage() {
                         </div>
                     </div>
 
-                    <div className="flex justify-between items-center max-w-4xl mx-auto relative z-10">
+                    <div className="flex justify-between items-center max-w-4xl mx-auto relative z-10 px-4 md:px-0">
                         {/* Home */}
-                        <div className="flex flex-col items-center gap-6 w-1/3 group">
+                        <div className="flex flex-col items-center gap-4 md:gap-6 w-1/3 group">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full group-hover:bg-primary/40 transition-all opacity-0 group-hover:opacity-100"></div>
                                 <Image
                                     src={getTeamImage(event.homeTeam.id)}
-                                    className="w-20 h-20 md:w-32 md:h-32 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform"
+                                    className="w-16 h-16 md:w-32 md:h-32 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform"
                                     alt={event.homeTeam.name}
                                     width={128}
                                     height={128}
@@ -380,31 +380,31 @@ export default function MatchDetailsPage() {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <h2 className="text-xl md:text-4xl font-black text-white tracking-tighter uppercase italic">{event.homeTeam.name}</h2>
-                                <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Local</p>
+                                <h2 className="text-sm md:text-3xl font-black text-white tracking-tighter uppercase italic line-clamp-2 md:line-clamp-none">{event.homeTeam.name}</h2>
+                                <p className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em]">Local</p>
                             </div>
                         </div>
 
                         {/* Score */}
-                        <div className="flex flex-col items-center gap-6">
-                            <div className="text-6xl md:text-9xl font-black text-white font-mono flex items-center gap-4 md:gap-8 drop-shadow-[0_0_30px_rgba(139,92,246,0.3)]">
+                        <div className="flex flex-col items-center gap-4 md:gap-6 flex-1 px-4">
+                            <div className="text-4xl md:text-9xl font-black text-white font-mono flex items-center gap-2 md:gap-8 drop-shadow-[0_0_30px_rgba(139,92,246,0.3)]">
                                 <span>{event.homeScore?.current ?? 0}</span>
-                                <span className="text-white/10 text-4xl md:text-6xl animate-pulse">:</span>
+                                <span className="text-white/10 text-2xl md:text-6xl animate-pulse">:</span>
                                 <span>{event.awayScore?.current ?? 0}</span>
                             </div>
 
                             {/* Period Breakdown - Cleaner Look */}
-                            <div className="flex gap-4 md:gap-8 px-6 py-3">
+                            <div className="flex gap-2 md:gap-8 px-4 py-2 bg-white/5 rounded-2xl border border-white/5">
                                 {[1, 2, 3, 4, 5].map(p => {
                                     const h = event.homeScore?.[`period${p}`];
                                     const a = event.awayScore?.[`period${p}`];
                                     if (h === undefined && a === undefined) return null;
                                     return (
-                                        <div key={p} className="flex flex-col items-center gap-1">
-                                            <span className="text-[8px] font-black text-gray-600 uppercase">P{p}</span>
-                                            <div className="flex flex-col font-mono text-xs font-bold gap-1">
+                                        <div key={p} className="flex flex-col items-center gap-0.5">
+                                            <span className="text-[7px] font-black text-gray-600 uppercase">P{p}</span>
+                                            <div className="flex flex-col font-mono text-[10px] md:text-xs font-bold gap-0.5 min-w-[1.5rem]">
                                                 <span className="text-white">{h ?? '-'}</span>
-                                                <span className="text-gray-400">{a ?? '-'}</span>
+                                                <span className="text-gray-400 border-t border-white/5">{a ?? '-'}</span>
                                             </div>
                                         </div>
                                     );
@@ -412,8 +412,8 @@ export default function MatchDetailsPage() {
                             </div>
 
                             {event.status.type === 'inprogress' && (
-                                <div className="px-4 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg backdrop-blur-sm">
-                                    <div className="text-red-500 font-mono text-sm font-black uppercase tracking-widest animate-pulse flex items-center gap-2">
+                                <div className="px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-lg backdrop-blur-sm">
+                                    <div className="text-red-500 font-mono text-[10px] md:text-sm font-black uppercase tracking-widest animate-pulse flex items-center gap-1.5">
                                         <span>LIVE</span>
                                         <div className="w-1 h-1 bg-red-500 rounded-full"></div>
                                         <LiveGameClock
@@ -426,28 +426,13 @@ export default function MatchDetailsPage() {
                             )}
                         </div>
 
-                        {/* Win Probability Chart (NEW - Phase 5) */}
-                        <div className="lg:col-span-1">
-                            <WinProbabilityChart
-                                incidents={data.incidents}
-                                homeTeam={data.event.homeTeam.name}
-                                awayTeam={data.event.awayTeam.name}
-                                currentStatus={data.event.status.type}
-                            />
-
-                            {/* Social Feed (NEW - Phase 5) */}
-                            <div className="mt-8">
-                                <SocialFeed matchId={id as string} />
-                            </div>
-                        </div>
-
                         {/* Away */}
-                        <div className="flex flex-col items-center gap-6 w-1/3 group">
+                        <div className="flex flex-col items-center gap-4 md:gap-6 w-1/3 group">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-white/5 blur-2xl rounded-full group-hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"></div>
                                 <Image
                                     src={getTeamImage(event.awayTeam.id)}
-                                    className="w-20 h-20 md:w-32 md:h-32 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform"
+                                    className="w-16 h-16 md:w-32 md:h-32 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform"
                                     alt={event.awayTeam.name}
                                     width={128}
                                     height={128}
@@ -456,315 +441,245 @@ export default function MatchDetailsPage() {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <h2 className="text-xl md:text-4xl font-black text-white tracking-tighter uppercase italic">{event.awayTeam.name}</h2>
-                                <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em]">Visitante</p>
+                                <h2 className="text-sm md:text-3xl font-black text-white tracking-tighter uppercase italic line-clamp-2 md:line-clamp-none">{event.awayTeam.name}</h2>
+                                <p className="text-[8px] md:text-[10px] font-black text-white/50 uppercase tracking-[0.3em]">Visitante</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Best Players (Sofascore Essence) */}
-            {data.bestPlayers && Object.keys(data.bestPlayers).length > 0 && (
-                <div className="glass-card p-8 md:p-14 rounded-[3rem] border-white/5 space-y-12 bg-white/[0.01]">
-                    <div className="flex flex-col items-center gap-4">
-                        <div className="w-12 h-1 bg-primary rounded-full"></div>
-                        <h3 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">Mejores jugadores</h3>
-                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.5em]">Líderes Estadísticos</p>
+            {/* Match Tools Grid - Balanced and Professional */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Probability & Social (Left/Center) */}
+                <div className="lg:col-span-8 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="glass-card p-6 rounded-[2rem] border-white/5">
+                            <WinProbabilityChart
+                                incidents={data.incidents}
+                                homeTeam={data.event.homeTeam.name}
+                                awayTeam={data.event.awayTeam.name}
+                                currentStatus={data.event.status.type}
+                            />
+                        </div>
+                        <div className="glass-card p-4 rounded-[2rem] border-white/5 max-h-[500px] overflow-hidden flex flex-col">
+                            <SocialFeed matchId={id as string} />
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {Object.entries(data.bestPlayers).map(([category, players]: [string, any]) => (
-                            <div key={category} className="space-y-6 bg-white/5 p-6 rounded-[2rem] border border-white/5 hover:border-primary/20 transition-all group/card">
-                                <div className="flex flex-col items-center gap-2 text-primary">
-                                    <div className="p-2.5 bg-primary/10 rounded-2xl group-hover/card:scale-110 transition-transform">
-                                        <Activity className="w-4 h-4" />
-                                    </div>
-                                    <span className="text-[9px] font-black uppercase tracking-[0.2em]">{translateStat(category)}</span>
-                                </div>
+                    {/* Community vs AI Voting Section (Integrated Real Data) */}
+                    <div className="glass-card p-8 rounded-[2.5rem] border-white/5 space-y-8 bg-gradient-to-r from-primary/10 via-transparent to-transparent relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <Users className="w-32 h-32 text-white" />
+                        </div>
 
-                                <div className="space-y-4">
-                                    {(players as any[]).map((entry, idx) => (
-                                        <div key={idx} className={clsx(
-                                            "flex items-center gap-3 group/player",
-                                            entry.team?.id === event.awayTeam.id ? "flex-row-reverse text-right" : "text-left"
-                                        )}>
-                                            <div className="relative shrink-0">
-                                                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover/player:opacity-100 transition-opacity"></div>
-                                                <Image
-                                                    src={getPlayerImage(entry.player.id)}
-                                                    className="w-10 h-10 rounded-full object-cover border-2 border-white/10 bg-black relative z-10 group-hover/player:border-primary/50 transition-colors"
-                                                    alt={entry.player.name}
-                                                    width={40}
-                                                    height={40}
-                                                    placeholder="blur"
-                                                    blurDataURL={getBlurDataURL()}
-                                                />
-                                            </div>
-                                            <div className="flex-1 overflow-hidden">
-                                                <div className={clsx(
-                                                    "flex items-baseline gap-1.5",
-                                                    entry.team?.id === event.awayTeam.id ? "flex-row-reverse" : "flex-row"
-                                                )}>
-                                                    <span className="text-xl font-black text-white font-mono leading-none">{entry.value}</span>
-                                                    <p className="text-[9px] font-black text-gray-400 truncate group-hover/player:text-white transition-colors uppercase tracking-tight">{entry.player.name}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-primary/20 rounded-2xl border border-primary/20">
+                                    <Users className="w-8 h-8 text-primary" />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-white uppercase italic tracking-tighter text-2xl">Nación PickGenius</h3>
+                                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em]">Sentimiento Global Sofascore</p>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Lineups (Alineaciones) */}
-            {data.lineups && (data.lineups.home?.players?.length > 0 || data.lineups.away?.players?.length > 0) && (
-                <div className="glass-card p-6 md:p-8 rounded-[2rem] border-white/5 space-y-8">
-                    <div className="flex flex-col items-center">
-                        <div className="flex items-center gap-2">
-                            <Shield className="w-5 h-5 text-primary" />
-                            <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Alineaciones</h3>
-                        </div>
-                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-2 px-3 py-1 bg-white/5 rounded-full">Confirmadas</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
-                        {/* Home Lineup */}
-                        <div className="space-y-6">
-                            <h4 className="text-sm font-black text-white border-b border-primary/20 pb-2 uppercase italic flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-primary"></span>
-                                {event.homeTeam.name}
-                            </h4>
-                            <div className="space-y-3">
-                                {data.lineups.home.players.filter((p: any) => !p.substitute).map((p: any) => (
-                                    <div key={p.player.id} className="flex items-center gap-3 group">
-                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white/5 border border-white/10 shrink-0">
-                                            <Image
-                                                src={getPlayerImage(p.player.id)}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                                                alt=""
-                                                width={32}
-                                                height={32}
-                                                placeholder="blur"
-                                                blurDataURL={getBlurDataURL()}
-                                            />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{p.player.name}</span>
-                                                <span className="text-[10px] font-mono text-gray-500">{p.shirtNumber}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                            <div className="text-center md:text-right px-6 py-3 bg-white/5 rounded-2xl border border-white/5">
+                                <span className="text-3xl font-mono font-black text-white">
+                                    {((data.votes?.vote1 || 0) + (data.votes?.voteX || 0) + (data.votes?.vote2 || 0)).toLocaleString()}
+                                </span>
+                                <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] mt-1">Votantes Globales</p>
                             </div>
                         </div>
 
-                        {/* Away Lineup */}
-                        <div className="space-y-6">
-                            <h4 className="text-sm font-black text-white border-b border-white/20 pb-2 uppercase italic flex items-center justify-end gap-2 text-right">
-                                {event.awayTeam.name}
-                                <span className="w-2 h-2 rounded-full bg-white"></span>
-                            </h4>
-                            <div className="space-y-3">
-                                {data.lineups.away.players.filter((p: any) => !p.substitute).map((p: any) => (
-                                    <div key={p.player.id} className="flex items-center gap-3 group flex-row-reverse text-right">
-                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white/5 border border-white/10 shrink-0">
-                                            <Image
-                                                src={getPlayerImage(p.player.id)}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                                                alt=""
-                                                width={32}
-                                                height={32}
-                                                placeholder="blur"
-                                                blurDataURL={getBlurDataURL()}
-                                            />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between flex-row-reverse">
-                                                <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{p.player.name}</span>
-                                                <span className="text-[10px] font-mono text-gray-500">{p.shirtNumber}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+                        <div className="space-y-6 relative z-10">
+                            {(() => {
+                                const v1 = data.votes?.vote1 || 0;
+                                const vX = data.votes?.voteX || 0;
+                                const v2 = data.votes?.vote2 || 0;
+                                const total = v1 + vX + v2 || 1;
+                                const p1 = Math.round((v1 / total) * 100);
+                                const pX = Math.round((vX / total) * 100);
+                                const p2 = Math.round((v2 / total) * 100);
 
-            {/* Community vs AI Voting Section */}
-            <div className="md:col-span-2 glass-card p-8 rounded-[2rem] border-white/5 space-y-6 bg-gradient-to-r from-orange-900/10 to-transparent">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-white/10 rounded-xl">
-                            <Users className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                            <h3 className="font-black text-white uppercase italic tracking-tighter text-xl">Nación PickGenius</h3>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sentimiento Público vs Predicción IA</p>
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <span className="text-2xl font-black text-white">12,405</span>
-                        <p className="text-[9px] font-black text-gray-500 uppercase">Votos Totales</p>
-                    </div>
-                </div>
-
-                <div className="space-y-4">
-                    <div className="flex justify-between items-end px-2">
-                        <span className="text-sm font-black text-primary uppercase">{event.homeTeam.name} (62%)</span>
-                        <span className="text-sm font-black text-white uppercase">{event.awayTeam.name} (38%)</span>
-                    </div>
-
-                    <div className="h-4 bg-white/10 rounded-full overflow-hidden flex relative">
-                        {/* Home Bar - Primary Orange */}
-                        <div className="h-full bg-primary flex items-center justify-start px-2 relative group cursor-pointer hover:brightness-110 transition-all" style={{ width: '62%' }}>
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/20 backdrop-blur-sm transition-opacity">
-                                <span className="text-[10px] font-black text-black uppercase">Votar Local</span>
-                            </div>
-                        </div>
-                        {/* Away Bar - White/Gray for clear contrast with Orange */}
-                        <div className="h-full bg-white/50 flex items-center justify-end px-2 relative group cursor-pointer hover:brightness-110 transition-all" style={{ width: '38%' }}>
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/20 backdrop-blur-sm transition-opacity">
-                                <span className="text-[10px] font-black text-white uppercase">Votar Visita</span>
-                            </div>
-                        </div>
-
-                        {/* Center Marker */}
-                        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-black/50"></div>
-                    </div>
-
-                    <p className="text-center text-[10px] text-gray-400 uppercase tracking-widest pt-2">
-                        La IA discrepa con el público en este evento. <span className="text-white font-bold">Oportunidad de Valor detectada.</span>
-                    </p>
-                </div>
-            </div>
-
-            {/* Stats Grid - Side by Side with AI on Desktop */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                {/* Main Stats Column (Takes 2/3 width) */}
-                <div className="glass-card p-6 rounded-3xl space-y-6 lg:col-span-2">
-                    <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/5">
-                        <Activity className="w-5 h-5 text-accent" />
-                        <h3 className="font-bold text-white uppercase tracking-wider">Estadísticas del Partido</h3>
-                    </div>
-
-                    {!periodStats.length ? (
-                        <div className="text-center text-gray-500 py-10">
-                            No hay estadísticas detalladas disponibles para este evento.
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            {periodStats.map((group: any, idx: number) => (
-                                <div key={idx} className="space-y-4">
-                                    <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest text-primary/80 pb-2">
-                                        {group.groupName === "Expected goals" ? "Goles Esperados (xG)" : group.groupName}
-                                    </h4>
-                                    {group.statisticsItems.map((item: any, i: number) => (
-                                        <div key={i} className="flex items-center justify-between text-sm py-2 hover:bg-white/5 rounded-lg px-3 transition-colors group">
-                                            <span className="text-white font-mono w-12 text-right font-bold text-lg group-hover:text-primary transition-colors">{item.home}</span>
-
-                                            <span className="text-gray-400 flex-1 text-center text-[10px] md:text-xs uppercase tracking-wide px-2 font-medium">
-                                                {translateStat(item.name)}
-                                            </span>
-
-                                            <span className="text-white font-mono w-12 text-left font-bold text-lg group-hover:text-accent transition-colors">{item.away}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* AI Analysis Section */}
-                <div className="glass-card p-6 rounded-3xl space-y-6 border border-primary/20 bg-gradient-to-b from-primary/5 to-transparent">
-                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
-                        <div className="flex items-center gap-2">
-                            <Zap className="w-5 h-5 text-primary" />
-                            <h3 className="font-bold text-white uppercase tracking-wider">
-                                {data.event.status.type === 'notstarted' ? 'Predicción IA Pre-Match' : 'Análisis IA en Vivo'}
-                            </h3>
-                        </div>
-                        {aiConfidence !== null && (
-                            <AIConfidenceMeter confidence={aiConfidence} size="sm" showLabel={false} />
-                        )}
-                    </div>
-                    {!aiAnalysis ? (
-                        <div className="bg-primary/5 p-8 rounded-2xl border border-primary/10 text-center space-y-6">
-                            <p className="text-gray-300 italic text-sm">
-                                {data.event.status.type === 'notstarted'
-                                    ? "Solicita una predicción basada en el estado actual y datos históricos de ambos equipos."
-                                    : "Solicita un análisis táctico en tiempo real basado en las estadísticas actuales del partido."}
-                            </p>
-                            <button
-                                onClick={generateAnalysis}
-                                disabled={analyzing}
-                                className="w-full bg-primary text-black font-black uppercase text-xs px-6 py-4 rounded-xl hover:bg-white transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xl shadow-primary/20"
-                            >
-                                {analyzing ? (
-                                    <AnalysisSkeleton />
-                                ) : (
+                                return (
                                     <>
-                                        <Zap className="w-4 h-4 fill-current" />
-                                        {data.event.status.type === 'notstarted' ? 'Generar Predicción Pre-Match' : 'Generar Análisis en Vivo'}
+                                        <div className="flex justify-between items-end px-2">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black text-primary uppercase tracking-widest">{event.homeTeam.name}</span>
+                                                <span className="text-2xl font-black text-white italic">{p1}%</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Empate</span>
+                                                <span className="text-xl font-black text-gray-400 italic">{pX}%</span>
+                                            </div>
+                                            <div className="flex flex-col items-right text-right">
+                                                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">{event.awayTeam.name}</span>
+                                                <span className="text-2xl font-black text-white italic">{p2}%</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="h-6 bg-white/5 rounded-full overflow-hidden flex p-1 border border-white/10 shadow-inner">
+                                            {/* Home Bar */}
+                                            <div
+                                                className="h-full bg-primary rounded-l-full relative group transition-all duration-1000 ease-out"
+                                                style={{ width: `${p1}%` }}
+                                            >
+                                                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            </div>
+                                            {/* Draw Bar */}
+                                            <div
+                                                className="h-full bg-white/10 relative group transition-all duration-1000 ease-out"
+                                                style={{ width: `${pX}%` }}
+                                            >
+                                                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            </div>
+                                            {/* Away Bar */}
+                                            <div
+                                                className="h-full bg-white/40 rounded-r-full relative group transition-all duration-1000 ease-out"
+                                                style={{ width: `${p2}%` }}
+                                            >
+                                                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            </div>
+                                        </div>
                                     </>
-                                )}
-                            </button>
+                                );
+                            })()}
+
+                            <div className="flex items-center gap-3 justify-center text-center p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                                <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                                <p className="text-[11px] font-medium text-gray-300 uppercase tracking-wider">
+                                    Datos comunitarios verificados en tiempo real vía <span className="text-white font-black">Sofascore Intelligence</span>.
+                                </p>
+                            </div>
                         </div>
-                    ) : (
-                        <div className="relative group/analysis">
-                            <div className={clsx(
-                                "bg-[#0a0a0a]/50 p-6 rounded-2xl border border-white/5 animate-in fade-in slide-in-from-bottom-2 transition-all duration-700",
-                                !isGold && "blur-md select-none pointer-events-none opacity-40 max-h-40 overflow-hidden"
-                            )}>
-                                <div className="prose prose-invert prose-sm max-w-none">
-                                    <div className="whitespace-pre-wrap text-gray-300 leading-relaxed font-light">
-                                        {aiAnalysis}
-                                    </div>
-                                </div>
+                    </div>
+                </div>
+
+                {/* AI & Best (Sofascore Essence) takes right column (4 units) */}
+                <div className="lg:col-span-4 space-y-6">
+                    {/* Re-using AI analysis sidebar but improved */}
+
+                    {/* Stats Grid - Side by Side with AI on Desktop */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                        {/* Main Stats Column (Takes 2/3 width) */}
+                        <div className="glass-card p-6 rounded-3xl space-y-6 lg:col-span-2">
+                            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/5">
+                                <Activity className="w-5 h-5 text-accent" />
+                                <h3 className="font-bold text-white uppercase tracking-wider">Estadísticas del Partido</h3>
                             </div>
 
-                            {!isGold && (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-20">
-                                    <div className="w-16 h-16 bg-gradient-to-tr from-amber-400 to-primary rounded-2xl flex items-center justify-center mb-4 shadow-glow rotate-3">
-                                        <Lock className="w-8 h-8 text-black" />
-                                    </div>
-                                    <h4 className="text-xl font-black text-white italic tracking-tighter mb-2 uppercase">Análisis Bloqueado</h4>
-                                    <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest max-w-[200px] mb-6">
-                                        Actualiza a <span className="text-primary font-black">GOLD</span> para ver el análisis de élite y proyecciones exactas.
+                            {!periodStats.length ? (
+                                <div className="text-center text-gray-500 py-10">
+                                    No hay estadísticas detalladas disponibles para este evento.
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                    {periodStats.map((group: any, idx: number) => (
+                                        <div key={idx} className="space-y-4">
+                                            <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest text-primary/80 pb-2">
+                                                {group.groupName === "Expected goals" ? "Goles Esperados (xG)" : group.groupName}
+                                            </h4>
+                                            {group.statisticsItems.map((item: any, i: number) => (
+                                                <div key={i} className="flex items-center justify-between text-sm py-2 hover:bg-white/5 rounded-lg px-3 transition-colors group">
+                                                    <span className="text-white font-mono w-12 text-right font-bold text-lg group-hover:text-primary transition-colors">{item.home}</span>
+
+                                                    <span className="text-gray-400 flex-1 text-center text-[10px] md:text-xs uppercase tracking-wide px-2 font-medium">
+                                                        {translateStat(item.name)}
+                                                    </span>
+
+                                                    <span className="text-white font-mono w-12 text-left font-bold text-lg group-hover:text-accent transition-colors">{item.away}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* AI Analysis Section */}
+                        <div className="glass-card p-6 rounded-3xl space-y-6 border border-primary/20 bg-gradient-to-b from-primary/5 to-transparent">
+                            <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
+                                <div className="flex items-center gap-2">
+                                    <Zap className="w-5 h-5 text-primary" />
+                                    <h3 className="font-bold text-white uppercase tracking-wider">
+                                        {data.event.status.type === 'notstarted' ? 'Predicción IA Pre-Match' : 'Análisis IA en Vivo'}
+                                    </h3>
+                                </div>
+                                {aiConfidence !== null && (
+                                    <AIConfidenceMeter confidence={aiConfidence} size="sm" showLabel={false} />
+                                )}
+                            </div>
+                            {!aiAnalysis ? (
+                                <div className="bg-primary/5 p-8 rounded-2xl border border-primary/10 text-center space-y-6">
+                                    <p className="text-gray-300 italic text-sm">
+                                        {data.event.status.type === 'notstarted'
+                                            ? "Solicita una predicción basada en el estado actual y datos históricos de ambos equipos."
+                                            : "Solicita un análisis táctico en tiempo real basado en las estadísticas actuales del partido."}
                                     </p>
                                     <button
-                                        onClick={handleUpgrade}
-                                        disabled={isUpgrading}
-                                        className="bg-primary text-black font-black uppercase text-[10px] px-8 py-3 rounded-xl hover:scale-110 transition-all shadow-glow flex items-center gap-2"
+                                        onClick={generateAnalysis}
+                                        disabled={analyzing}
+                                        className="w-full bg-primary text-black font-black uppercase text-xs px-6 py-4 rounded-xl hover:bg-white transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xl shadow-primary/20"
                                     >
-                                        <Crown className="w-3.5 h-3.5" />
-                                        {isUpgrading ? 'Procesando...' : 'Desbloquear Ahora'}
+                                        {analyzing ? (
+                                            <AnalysisSkeleton />
+                                        ) : (
+                                            <>
+                                                <Zap className="w-4 h-4 fill-current" />
+                                                {data.event.status.type === 'notstarted' ? 'Generar Predicción Pre-Match' : 'Generar Análisis en Vivo'}
+                                            </>
+                                        )}
                                     </button>
                                 </div>
-                            )}
+                            ) : (
+                                <div className="relative group/analysis">
+                                    <div className={clsx(
+                                        "bg-[#0a0a0a]/50 p-6 rounded-2xl border border-white/5 animate-in fade-in slide-in-from-bottom-2 transition-all duration-700",
+                                        !isGold && "blur-md select-none pointer-events-none opacity-40 max-h-40 overflow-hidden"
+                                    )}>
+                                        <div className="prose prose-invert prose-sm max-w-none">
+                                            <div className="whitespace-pre-wrap text-gray-300 leading-relaxed font-light">
+                                                {aiAnalysis}
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            {isGold && (
-                                <button
-                                    onClick={() => setAiAnalysis(null)}
-                                    className="mt-6 w-full py-3 rounded-lg border border-white/10 text-xs text-primary hover:bg-white/5 hover:text-white transition-colors"
-                                >
-                                    Generar Nuevo Análisis
-                                </button>
+                                    {!isGold && (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-20">
+                                            <div className="w-16 h-16 bg-gradient-to-tr from-amber-400 to-primary rounded-2xl flex items-center justify-center mb-4 shadow-glow rotate-3">
+                                                <Lock className="w-8 h-8 text-black" />
+                                            </div>
+                                            <h4 className="text-xl font-black text-white italic tracking-tighter mb-2 uppercase">Análisis Bloqueado</h4>
+                                            <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest max-w-[200px] mb-6">
+                                                Actualiza a <span className="text-primary font-black">GOLD</span> para ver el análisis de élite y proyecciones exactas.
+                                            </p>
+                                            <button
+                                                onClick={handleUpgrade}
+                                                disabled={isUpgrading}
+                                                className="bg-primary text-black font-black uppercase text-[10px] px-8 py-3 rounded-xl hover:scale-110 transition-all shadow-glow flex items-center gap-2"
+                                            >
+                                                <Crown className="w-3.5 h-3.5" />
+                                                {isUpgrading ? 'Procesando...' : 'Desbloquear Ahora'}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {isGold && (
+                                        <button
+                                            onClick={() => setAiAnalysis(null)}
+                                            className="mt-6 w-full py-3 rounded-lg border border-white/10 text-xs text-primary hover:bg-white/5 hover:text-white transition-colors"
+                                        >
+                                            Generar Nuevo Análisis
+                                        </button>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
+
+
+
+                    </div>
                 </div>
-
-
-
-            </div>
-        </div>
-    );
+                );
 }
