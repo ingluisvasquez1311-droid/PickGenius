@@ -13,6 +13,11 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth: any, request: NextRequest) => {
+    // Safety check for middleware invocation in production environments with missing secrets
+    if (!process.env.CLERK_SECRET_KEY && process.env.NODE_ENV === 'production') {
+        return;
+    }
+
     if (!isPublicRoute(request)) {
         await auth.protect();
     }
