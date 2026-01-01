@@ -109,7 +109,8 @@ export default function MatchDetailsPage() {
     const { user, isLoaded: authLoaded } = useUser();
     const [isUpgrading, setIsUpgrading] = useState(false);
 
-    const isGold = user?.publicMetadata?.isGold === true || user?.publicMetadata?.role === 'admin';
+    const isAuthorizedAdmin = user?.emailAddresses[0]?.emailAddress === 'luisvasquez1311@gmail.com';
+    const isGold = user?.publicMetadata?.isGold === true || user?.publicMetadata?.role === 'admin' || isAuthorizedAdmin;
 
     const { data, isLoading: loading } = useQuery({
         queryKey: ['match', id],
