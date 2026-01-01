@@ -72,20 +72,34 @@ export async function POST(req: NextRequest) {
 
         if (action === 'refresh_odds') {
             Logger.info('ADMIN ACTION: Refreshing BetPlay Odds invoked');
+
             // Execute the python script to update odds
-            const pythonPath = process.env.PYTHON_PATH || 'python';
+            let pythonPath = process.env.PYTHON_PATH || 'python';
             const scriptPath = 'c:/Users/Daniel/PickGenius/python/download_betplay_odds.py';
 
+            // Fallback for local dev if default python fails
+            if (process.env.NODE_ENV === 'development') {
+                const fs = await import('fs');
+                const venvPython = 'c:/Users/Daniel/PickGenius/.venv/Scripts/python.exe';
+                if (fs.existsSync(venvPython)) {
+                    pythonPath = venvPython;
+                }
+            }
+
             try {
-                const { stdout, stderr } = await execPromise(`${pythonPath} "${scriptPath}"`);
+                const { stdout, stderr } = await execPromise(`"${pythonPath}" "${scriptPath}"`);
                 if (stderr && !stderr.includes('Warning')) {
                     Logger.error('Odds Refresh Script Error', { stderr });
                 }
                 Logger.info('Odds Refresh Script Output', { stdout });
-                return NextResponse.json({ success: true, message: 'Odds synchronization complete' });
+                return NextResponse.json({
+                    success: true,
+                    message: 'Odds synchronization complete',
+                    details: stdout
+                });
             } catch (err: any) {
                 Logger.error('Failed to execute odds refresh script', { error: err.message });
-                return NextResponse.json({ error: 'Data Engine sync failed' }, { status: 500 });
+                return NextResponse.json({ error: `Data Engine sync failed: ${err.message}` }, { status: 500 });
             }
         }
 

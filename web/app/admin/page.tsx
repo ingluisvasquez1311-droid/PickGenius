@@ -23,6 +23,7 @@ export default function AdminDashboard() {
     const [reports, setReports] = useState<any[]>([]);
     const [isFlushing, setIsFlushing] = useState(false);
     const [isSyncingOdds, setIsSyncingOdds] = useState(false);
+    const [isSendingNewsletter, setIsSendingNewsletter] = useState(false);
     const [logs, setLogs] = useState<string[]>([]);
     const [activeTab, setActiveTab] = useState<'system' | 'moderation' | 'users'>('system');
 
@@ -79,6 +80,61 @@ export default function AdminDashboard() {
             addLog('Fallo al purgar caché', 'error');
         } finally {
             setIsFlushing(false);
+        }
+    };
+
+    const handleSyncOdds = async () => {
+        setIsSyncingOdds(true);
+        addLog('Invocando motor Python para descarga de Odds...');
+        try {
+            const res = await fetch('/api/admin/system', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'refresh_odds' })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                addLog('Sincronización de BetPlay completada', 'success');
+            } else {
+                addLog(`Error en motor: ${data.error}`, 'error');
+            }
+        } catch (e) {
+            addLog('Fallo crítico en la comunicación con el motor', 'error');
+        } finally {
+            setIsSyncingOdds(false);
+        }
+    };
+
+    const handleDeleteReport = async (id: string) => {
+        if (!confirm('¿Estás seguro de eliminar este reporte?')) return;
+        addLog(`Eliminando reporte ${id}...`, 'warn');
+        try {
+            const res = await fetch(`/api/admin/reports?id=${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setReports(prev => prev.filter(r => r.id !== id));
+                addLog('Reporte eliminado con éxito', 'success');
+            }
+        } catch (e) {
+            addLog('Error al eliminar reporte', 'error');
+        }
+    };
+
+    const handleSendNewsletter = async () => {
+        if (!confirm('¿Deseas enviar el newsletter a todos los suscriptores ahora?')) return;
+        setIsSendingNewsletter(true);
+        addLog('Iniciando campaña de Newsletter...', 'info');
+        try {
+            const res = await fetch('/api/admin/newsletter/send', { method: 'POST' });
+            const data = await res.json();
+            if (res.ok) {
+                addLog(`Newsletter enviado con éxito a ${data.sentCount} usuarios`, 'success');
+            } else {
+                addLog(`Fallo en Newsletter: ${data.error}`, 'error');
+            }
+        } catch (e) {
+            addLog('Error crítico en servicio de correo', 'error');
+        } finally {
+            setIsSendingNewsletter(false);
         }
     };
 
@@ -169,7 +225,15 @@ export default function AdminDashboard() {
                                             title="Sincronizar Odds BetPlay"
                                             desc="Fuerza la descarga de cuotas reales mediante el motor Python."
                                             icon={Database}
-                                            onClick={() => { }}
+                                            onClick={handleSyncOdds}
+                                            loading={isSyncingOdds}
+                                        />
+                                        <AdminAction
+                                            title="Enviar Newsletter Semanal"
+                                            desc="Envía los mejores picks a todos los suscriptores registrados."
+                                            icon={Mail}
+                                            onClick={handleSendNewsletter}
+                                            loading={isSendingNewsletter}
                                         />
                                     </div>
                                 </div>
@@ -196,6 +260,13 @@ export default function AdminDashboard() {
                                     <h2 className="text-3xl font-black italic uppercase tracking-tighter">Moderación de Comunidad</h2>
                                     <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-2">{reports.length} reportes pendientes</p>
                                 </div>
+                                <button
+                                    onClick={fetchData}
+                                    className="p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all flex items-center gap-2 group"
+                                >
+                                    <RefreshCw className="w-4 h-4 text-primary group-hover:rotate-180 transition-transform duration-500" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Refrescar</span>
+                                </button>
                             </div>
 
                             <div className="bg-white/5 border border-white/10 rounded-[3rem] overflow-hidden">
@@ -232,7 +303,11 @@ export default function AdminDashboard() {
                                                         <button className="p-2 text-gray-600 hover:text-white transition-colors" title="Ver Comentario">
                                                             <ArrowRight className="w-4 h-4" />
                                                         </button>
-                                                        <button className="p-2 text-gray-600 hover:text-red-500 transition-colors" title="Eliminar">
+                                                        <button
+                                                            onClick={() => handleDeleteReport(report.id)}
+                                                            className="p-2 text-gray-600 hover:text-red-500 transition-colors"
+                                                            title="Eliminar"
+                                                        >
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     </div>
@@ -248,6 +323,19 @@ export default function AdminDashboard() {
                                         )}
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'users' && (
+                        <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
+                            <div>
+                                <h2 className="text-3xl font-black italic uppercase tracking-tighter">Gestión de Usuarios</h2>
+                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-2">Próximamente: Control total de membresías GOLD</p>
+                            </div>
+                            <div className="bg-white/5 border border-white/10 rounded-[3rem] p-20 text-center">
+                                <Users className="w-12 h-12 text-gray-700 mx-auto mb-6" />
+                                <p className="text-gray-500 font-medium">El módulo de usuarios está en desarrollo. Pronto podrás gestionar suscripciones y roles directamente desde aquí.</p>
                             </div>
                         </div>
                     )}
