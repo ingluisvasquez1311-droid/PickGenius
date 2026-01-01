@@ -14,6 +14,7 @@ const USER_AGENTS = [
 interface FetchOptions {
     revalidate?: number;
     referer?: string;
+    binary?: boolean;
 }
 
 /**
@@ -40,6 +41,7 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
             });
 
             if (response.ok) {
+                if (options.binary) return response;
                 return await response.json();
             }
             Logger.warn(`[Bridge Error] Status ${response.status} from tunnel. Falling back to direct fetch.`);
@@ -102,6 +104,7 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
             }
 
             trackRequest(true);
+            if (options.binary) return response;
             return await response.json();
         } catch (error: any) {
             if (attempt === MAX_RETRIES) {

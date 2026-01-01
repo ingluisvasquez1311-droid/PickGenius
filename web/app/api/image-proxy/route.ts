@@ -32,7 +32,15 @@ export async function GET(request: NextRequest) {
     };
 
     try {
-        const response = await fetch(targetUrl, { headers });
+        const response = await sofafetch(targetUrl, {
+            binary: true,
+            revalidate: 86400
+        });
+
+        if (!(response instanceof Response)) {
+            console.error(`[ImageProxy] sofafetch did not return a Response instance for ${targetUrl}`);
+            return new NextResponse('Internal Error', { status: 500 });
+        }
 
         if (!response.ok) {
             console.error(`[ImageProxy] Failed to fetch ${targetUrl}: ${response.status}`);
@@ -46,7 +54,7 @@ export async function GET(request: NextRequest) {
             status: 200,
             headers: {
                 'Content-Type': contentType,
-                'Cache-Control': 'public, max-age=86400, mutable', // Cache for 1 day
+                'Cache-Control': 'public, max-age=86400',
             },
         });
     } catch (error) {
