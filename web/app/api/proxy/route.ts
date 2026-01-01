@@ -19,8 +19,13 @@ export async function GET(request: Request) {
 
         if (isImage) {
             const response = await sofafetch(targetUrl, { binary: true });
-            const blob = await (response as Response).blob();
-            const contentType = (response as Response).headers.get('content-type') || 'image/png';
+
+            if (!(response instanceof Response)) {
+                return NextResponse.json({ error: 'Proxy received invalid response for image' }, { status: 502 });
+            }
+
+            const blob = await response.blob();
+            const contentType = response.headers.get('content-type') || 'image/png';
 
             return new NextResponse(blob, {
                 headers: {
@@ -34,6 +39,8 @@ export async function GET(request: Request) {
         return NextResponse.json(data);
     } catch (error: any) {
         console.error(`[Proxy Bridge Error]:`, error.message);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        // Relay 404 if it originated from the external API, otherwise 500
+        const status = error.message?.includes('404') ? 404 : 500;
+        return NextResponse.json({ error: error.message }, { status });
     }
 }
