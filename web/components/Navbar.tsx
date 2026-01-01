@@ -14,11 +14,9 @@ import ParleyOptimizer from './ParleyOptimizer';
 import {
     SignInButton,
     SignUpButton,
-    SignedIn,
-    SignedOut,
     UserButton,
-    useUser
 } from '@clerk/nextjs';
+import { SafeSignedIn as SignedIn, SafeSignedOut as SignedOut, useUser } from './ClerkSafeProvider';
 // Lucide icons merged above
 
 export function Navbar() {

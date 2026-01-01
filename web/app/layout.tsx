@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import LiveScoreWidget from "@/components/LiveScoreWidget";
 import { Particles } from "@/components/Particles";
 import GlobalSearch from "@/components/GlobalSearch";
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkSafeProvider } from "@/components/ClerkSafeProvider";
 
 import QueryProvider from "@/components/QueryProvider";
 
@@ -56,7 +56,7 @@ export default function RootLayout({
   const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_Y2xlcmsuaW5jbHVkZWQuY29tJA";
 
   return (
-    <ClerkProvider publishableKey={clerkPubKey}>
+    <ClerkSafeProvider publishableKey={clerkPubKey}>
       <html lang="es">
         <body className={`${inter.className} bg-[#050505] overflow-x-hidden`}>
           <QueryProvider>
@@ -73,6 +73,6 @@ export default function RootLayout({
           </QueryProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkSafeProvider>
   );
 }

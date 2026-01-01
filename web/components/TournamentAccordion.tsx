@@ -98,46 +98,39 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                 <div className="divide-y-2 divide-white/5 animate-in fade-in slide-in-from-top-4 duration-500">
                     {group.events.map((event: any) => (
                         <div
-                            key={event.id}
-                            onClick={() => onClickMatch(event.id)}
+                            key={event?.id}
+                            onClick={() => onClickMatch(event?.id)}
                             className="flex flex-col md:flex-row items-center gap-8 p-8 hover:bg-white/[0.02] active:bg-white/5 transition-all cursor-pointer group/row relative overflow-hidden"
                         >
                             <div className={clsx("absolute left-0 top-0 bottom-0 w-1 scale-y-0 group-hover/row:scale-y-100 transition-transform duration-500", bgAccent)}></div>
 
                             {/* Status Section */}
                             <div className="w-full md:w-32 shrink-0 flex items-center justify-between md:flex-col md:items-start gap-2">
-                                {mode === 'live' || event.status?.type === 'inprogress' ? (
+                                {mode === 'live' || event?.status?.type === 'inprogress' ? (
                                     <div className="flex flex-col">
                                         <div className="flex items-center gap-2">
                                             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
                                             <span className="text-sm font-black text-red-500 uppercase italic">
-                                                {event.status.description}
+                                                {event?.status?.description}
                                             </span>
                                         </div>
                                         {/* Game Time Display */}
                                         <div className={clsx("text-lg font-mono font-black ml-4 flex items-center gap-1.5", textAccent)}>
                                             <Clock className="w-4 h-4" />
                                             {(() => {
-                                                // 1. Try explicit time if available (e.g. from some APIs)
-                                                if (event.status?.time) return event.status.time;
+                                                if (event?.status?.time) return event.status.time;
 
-                                                // 2. Calculate from currentPeriodStartTimestamp if available (common in football)
-                                                if (event.time?.currentPeriodStartTimestamp) {
+                                                if (event?.time?.currentPeriodStartTimestamp) {
                                                     const start = event.time.currentPeriodStartTimestamp * 1000;
                                                     const now = Date.now();
                                                     const diff = Math.floor((now - start) / 60000);
-                                                    // Add base time based on period (simplified)
                                                     let base = 0;
-                                                    if (event.status?.description?.includes('2nd') || event.status?.description?.includes('2T')) base = 45;
-                                                    if (event.status?.description?.includes('3rd') || event.status?.description?.includes('3T')) base = 0; // Depends on sport
-                                                    if (event.status?.description?.includes('4th') || event.status?.description?.includes('4T')) base = 0; // Depends on sport
+                                                    if (event?.status?.description?.includes('2nd') || event?.status?.description?.includes('2T')) base = 45;
 
-                                                    // Cap at reasonable max (e.g. 45+ or 90+)
                                                     const calculated = base + diff;
                                                     return `${calculated > 0 ? calculated : 0}'`;
                                                 }
 
-                                                // 3. Fallback: Check if description itself is a time (rare but possible) or show active
                                                 return 'EN VIVO';
                                             })()}
                                         </div>
@@ -145,7 +138,7 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                                 ) : (
                                     <div className="flex flex-col">
                                         <span className="text-2xl font-mono font-black text-white italic tracking-tighter">
-                                            {new Date(event.startTimestamp * 1000).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                            {event?.startTimestamp ? new Date(event.startTimestamp * 1000).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'}
                                         </span>
                                         <span className="text-[9px] font-black uppercase text-gray-600 tracking-[0.4em]">HORA</span>
                                     </div>
@@ -153,7 +146,7 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                                 <Star className="w-5 h-5 text-gray-800 hover:text-yellow-500 transition-colors" />
 
                                 {/* AI Confidence Badge */}
-                                {event.aiConfidence && (
+                                {event?.aiConfidence && (
                                     <div className="mt-2 flex flex-col items-center gap-1">
                                         <div className="h-1 w-8 bg-white/5 rounded-full overflow-hidden">
                                             <div
@@ -176,21 +169,23 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                                 <div className="col-span-4 flex items-center gap-3 justify-end group/team">
                                     <span className={clsx(
                                         "text-xs md:text-sm font-black uppercase italic tracking-tight text-right transition-all duration-300",
-                                        event.homeScore?.current >= event.awayScore?.current ? "text-white scale-105" : "text-gray-600 group-hover/row:text-gray-400"
+                                        (event?.homeScore?.current ?? 0) >= (event?.awayScore?.current ?? 0) ? "text-white scale-105" : "text-gray-600 group-hover/row:text-gray-400"
                                     )}>
-                                        {event.homeTeam.name}
+                                        {event?.homeTeam?.name || 'TBA'}
                                     </span>
                                     <div className="relative">
                                         <div className="absolute -inset-2 bg-white/5 rounded-full scale-0 group-hover/team:scale-100 transition-transform"></div>
-                                        <Image
-                                            src={getTeamImage(event.homeTeam.id)}
-                                            className="w-10 h-10 md:w-14 md:h-14 object-contain relative z-10"
-                                            alt=""
-                                            width={56}
-                                            height={56}
-                                            placeholder="blur"
-                                            blurDataURL={getBlurDataURL()}
-                                        />
+                                        {event?.homeTeam?.id && (
+                                            <Image
+                                                src={getTeamImage(event.homeTeam.id)}
+                                                className="w-10 h-10 md:w-14 md:h-14 object-contain relative z-10"
+                                                alt=""
+                                                width={56}
+                                                height={56}
+                                                placeholder="blur"
+                                                blurDataURL={getBlurDataURL()}
+                                            />
+                                        )}
                                     </div>
                                 </div>
 
@@ -198,16 +193,16 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                                 <div className={clsx("col-span-3 flex items-center justify-center gap-2 py-2 transition-colors")}>
                                     <span className={clsx(
                                         "text-xl font-black italic font-mono min-w-[1em] text-center drop-shadow-glow",
-                                        event.status.type === 'inprogress' ? "text-red-500" : "text-white"
+                                        event?.status?.type === 'inprogress' ? "text-red-500" : "text-white"
                                     )}>
-                                        {event.homeScore?.current ?? '-'}
+                                        {event?.homeScore?.current ?? '-'}
                                     </span>
                                     <div className="w-1 h-1 rounded-full bg-white/30"></div>
                                     <span className={clsx(
                                         "text-xl font-black italic font-mono min-w-[1em] text-center drop-shadow-glow",
-                                        event.status.type === 'inprogress' ? "text-red-500" : "text-white"
+                                        event?.status?.type === 'inprogress' ? "text-red-500" : "text-white"
                                     )}>
-                                        {event.awayScore?.current ?? '-'}
+                                        {event?.awayScore?.current ?? '-'}
                                     </span>
                                 </div>
 
@@ -215,27 +210,29 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                                 <div className="col-span-4 flex items-center gap-3 justify-start group/team">
                                     <div className="relative">
                                         <div className="absolute -inset-2 bg-white/5 rounded-full scale-0 group-hover/team:scale-100 transition-transform"></div>
-                                        <Image
-                                            src={getTeamImage(event.awayTeam.id)}
-                                            className="w-10 h-10 md:w-14 md:h-14 object-contain relative z-10"
-                                            alt=""
-                                            width={56}
-                                            height={56}
-                                            placeholder="blur"
-                                            blurDataURL={getBlurDataURL()}
-                                        />
+                                        {event?.awayTeam?.id && (
+                                            <Image
+                                                src={getTeamImage(event.awayTeam.id)}
+                                                className="w-10 h-10 md:w-14 md:h-14 object-contain relative z-10"
+                                                alt=""
+                                                width={56}
+                                                height={56}
+                                                placeholder="blur"
+                                                blurDataURL={getBlurDataURL()}
+                                            />
+                                        )}
                                     </div>
                                     <span className={clsx(
                                         "text-xs md:text-sm font-black uppercase italic tracking-tight transition-all duration-300",
-                                        event.awayScore?.current >= event.homeScore?.current ? "text-white scale-105" : "text-gray-600 group-hover/row:text-gray-400"
+                                        (event?.awayScore?.current ?? 0) >= (event?.homeScore?.current ?? 0) ? "text-white scale-105" : "text-gray-600 group-hover/row:text-gray-400"
                                     )}>
-                                        {event.awayTeam.name}
+                                        {event?.awayTeam?.name || 'TBA'}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Main Odds (1X2) - Real Time */}
-                            {event.mainOdds && event.mainOdds.length > 0 && (
+                            {event?.mainOdds && event.mainOdds.length > 0 && (
                                 <div className="hidden lg:flex items-center gap-2 px-6 border-l-2 border-white/5">
                                     {event.mainOdds.map((choice: any, cIdx: number) => (
                                         <div
@@ -243,10 +240,10 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                                             className="flex flex-col items-center justify-center w-14 h-12 bg-white/5 rounded-xl border border-white/10 hover:border-primary/50 hover:bg-white/10 transition-all cursor-default"
                                         >
                                             <span className="text-[7px] font-black text-gray-500 uppercase tracking-tighter">
-                                                {choice.name === '1' ? 'HOME' : choice.name === 'X' ? 'DRAW' : choice.name === '2' ? 'AWAY' : choice.name}
+                                                {choice?.name === '1' ? 'HOME' : choice?.name === 'X' ? 'DRAW' : choice?.name === '2' ? 'AWAY' : choice?.name}
                                             </span>
                                             <span className="text-xs font-mono font-black text-primary italic">
-                                                {choice.value ? choice.value.toFixed(2) : '—'}
+                                                {choice?.value ? choice.value.toFixed(2) : '—'}
                                             </span>
                                         </div>
                                     ))}
@@ -256,7 +253,7 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                             {/* Pro Analytics Trigger */}
                             <div className="w-full md:w-16 flex justify-center md:justify-end items-center">
                                 <div className={clsx("p-4 rounded-2xl bg-[#111] border-2 border-white/5 transition-all duration-500 shadow-xl", `group-hover/row:${borderAccent}/50`, `group-hover/row:${bgAccent}/10`, `group-hover/row:${shadowAccent}`)}>
-                                    <BarChart3 className={clsx("w-6 h-6 group-hover/row:animate-pulse", textAccent)} />
+                                    <BarChart3 className={clsx("w-4 h-4 group-hover/row:animate-pulse", textAccent)} />
                                 </div>
                             </div>
                         </div>

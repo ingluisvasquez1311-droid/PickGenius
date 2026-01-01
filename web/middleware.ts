@@ -1,5 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
     "/",
@@ -12,16 +12,27 @@ const isPublicRoute = createRouteMatcher([
     "/sign-up(.*)",
 ]);
 
-export default clerkMiddleware(async (auth: any, request: NextRequest) => {
-    // Safety check for middleware invocation in production environments with missing secrets
-    if (!process.env.CLERK_SECRET_KEY && process.env.NODE_ENV === 'production') {
-        return;
+export default function middleware(request: NextRequest, event: any) {
+    // Safety check: Bypass Clerk logic if the secret key is missing in production
+    // This prevents MIDDLEWARE_INVOCATION_FAILED on Vercel
+    const secretKey = process.env.CLERK_SECRET_KEY;
+    const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+    if (process.env.NODE_ENV === 'production' && (!secretKey || !publishableKey || publishableKey.includes('include'))) {
+        return NextResponse.next();
     }
 
-    if (!isPublicRoute(request)) {
-        await auth.protect();
+    try {
+        return clerkMiddleware(async (auth: any, req: NextRequest) => {
+            if (!isPublicRoute(req)) {
+                await auth.protect();
+            }
+        })(request, event);
+    } catch (e) {
+        console.error("Clerk Middleware Error:", e);
+        return NextResponse.next();
     }
-});
+}
 
 export const config = {
     matcher: [

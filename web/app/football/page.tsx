@@ -25,29 +25,35 @@ export default function FootballHub() {
             const res = await fetch(endpoint);
             if (!res.ok) throw new Error('Error al cargar partidos de fútbol');
             const data = await res.json();
-            const events = data.events || [];
-
-            // Auto-expand first 3 tournaments if none are expanded
-            const grouped = groupEvents(events);
-            const initialExpanded: Record<number, boolean> = {};
-            Object.keys(grouped).slice(0, 3).forEach(id => {
-                initialExpanded[Number(id)] = true;
-            });
-            setExpandedTournaments(prev => Object.keys(prev).length === 0 ? initialExpanded : prev);
-
-            return events;
+            return data.events || [];
         },
         staleTime: 30000,
         refetchInterval: activeFilter === 'live' ? 30000 : 0,
     });
 
+    // Auto-expand first 3 tournaments if none are expanded - moved to useEffect for safety
+    useEffect(() => {
+        if (matches.length > 0 && Object.keys(expandedTournaments).length === 0) {
+            const grouped = groupEvents(matches);
+            const initialExpanded: Record<number, boolean> = {};
+            Object.keys(grouped).slice(0, 3).forEach(id => {
+                initialExpanded[Number(id)] = true;
+            });
+            setExpandedTournaments(initialExpanded);
+        }
+    }, [matches]);
+
     const groupEvents = (events: any[]) => {
+        if (!events || !Array.isArray(events)) return {};
         return events.reduce((acc: any, event: any) => {
+            if (!event || !event.tournament) return acc;
             const tId = event.tournament.uniqueId || event.tournament.id;
+            if (!tId) return acc;
+
             if (!acc[tId]) {
                 acc[tId] = {
                     info: event.tournament,
-                    category: event.tournament.category,
+                    category: event.tournament.category || { name: 'Mundo' },
                     events: []
                 };
             }
