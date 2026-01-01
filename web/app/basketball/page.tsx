@@ -87,11 +87,11 @@ export default function BasketballHub() {
                         </div>
                         <h1 className="text-7xl md:text-9xl font-black italic tracking-tighter uppercase leading-[0.8] flex flex-col">
                             <span className="text-white">HUB</span>
-                            <span className="text-transparent" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.2)' }}>NBA PRO</span>
+                            <span className="text-transparent" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.2)' }}>BALONCESTO</span>
                         </h1>
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-1 bg-[#FF4500]"></div>
-                            <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px]">Corte Analítica de Alta Resolución v5.2</p>
+                            <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px]">Motor de Análisis de Alta Resolución v5.2</p>
                         </div>
                     </div>
 
@@ -131,7 +131,7 @@ export default function BasketballHub() {
 
                         {/* Blocky Tabs */}
                         <div className="flex w-full items-stretch h-14 bg-white/5 border-2 border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-                            {['PARTIDOS', 'TABLAS', 'LÍDERES'].map((tabLabel, idx) => {
+                            {['PARTIDOS', 'TABLAS', 'ÉLITE'].map((tabLabel, idx) => {
                                 const tabId = ['matches', 'standings', 'leaders'][idx];
                                 const TabIcon = [Activity, Trophy, Target][idx];
                                 return (

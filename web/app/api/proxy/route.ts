@@ -12,9 +12,10 @@ export async function GET(request: Request) {
     try {
         console.log(`[Proxy Bridge] Fetching: ${targetUrl}`);
 
-        const isImage = targetUrl.includes('/image/') ||
+        const isImage = targetUrl.includes('/image') ||
             targetUrl.includes('/player/') ||
-            targetUrl.match(/\.(png|jpg|jpeg|webp|gif|svg)$/i);
+            targetUrl.includes('/team/') ||
+            targetUrl.match(/\.(png|jpg|jpeg|webp|gif|svg|avif)$/i);
 
         if (isImage) {
             const response = await sofafetch(targetUrl, { binary: true });

@@ -97,7 +97,7 @@ export default function FootballHub() {
                         </h1>
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-1 bg-primary"></div>
-                            <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px]">High Efficiency Sports Analytics v4.0</p>
+                            <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px]">Motor de Análisis de Alta Resolución v4.0</p>
                         </div>
                     </div>
 
@@ -140,7 +140,7 @@ export default function FootballHub() {
                             {[
                                 { id: 'matches', label: 'CAMPO', icon: Activity },
                                 { id: 'standings', label: 'TABLAS', icon: Trophy },
-                                { id: 'leaders', label: 'ELITE', icon: Target }
+                                { id: 'leaders', label: 'ÉLITE', icon: Target }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
