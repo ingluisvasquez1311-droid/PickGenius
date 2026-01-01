@@ -450,10 +450,10 @@ export default function MatchDetailsPage() {
             </div>
 
             {/* Match Tools Grid - Balanced and Professional */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                {/* Probability & Social (Left/Center) */}
-                <div className="lg:col-span-8 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* Left Column (8 units) */}
+                <div className="lg:col-span-8 space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="glass-card p-6 rounded-[2rem] border-white/5">
                             <WinProbabilityChart
                                 incidents={data.incidents}
@@ -467,7 +467,7 @@ export default function MatchDetailsPage() {
                         </div>
                     </div>
 
-                    {/* Community vs AI Voting Section (Integrated Real Data) */}
+                    {/* Community Voting Section (Integrated Real Data) */}
                     <div className="glass-card p-8 rounded-[2.5rem] border-white/5 space-y-8 bg-gradient-to-r from-primary/10 via-transparent to-transparent relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                             <Users className="w-32 h-32 text-white" />
@@ -555,91 +555,46 @@ export default function MatchDetailsPage() {
                     </div>
                 </div>
 
-                {/* AI & Best (Sofascore Essence) takes right column (4 units) */}
-                <div className="lg:col-span-4 space-y-6">
-                    {/* Re-using AI analysis sidebar but improved */}
-
-                    {/* Stats Grid - Side by Side with AI on Desktop */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                        {/* Main Stats Column (Takes 2/3 width) */}
-                        <div className="glass-card p-6 rounded-3xl space-y-6 lg:col-span-2">
-                            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/5">
-                                <Activity className="w-5 h-5 text-accent" />
-                                <h3 className="font-bold text-white uppercase tracking-wider">Estadísticas del Partido</h3>
+                {/* Right Column (4 units) - AI & Stats Stack */}
+                <div className="lg:col-span-4 space-y-8">
+                    {/* AI Analysis Section */}
+                    <div className="glass-card p-6 rounded-[2rem] space-y-6 border border-primary/20 bg-gradient-to-b from-primary/5 to-transparent relative overflow-hidden">
+                        <div className="flex items-center justify-between mb-2 relative z-10">
+                            <div className="flex items-center gap-2">
+                                <Zap className="w-5 h-5 text-primary" />
+                                <h3 className="font-black text-white uppercase tracking-tighter text-xl italic">
+                                    {data.event.status.type === 'notstarted' ? 'Predicción IA' : 'Análisis IA'}
+                                </h3>
                             </div>
-
-                            {!periodStats.length ? (
-                                <div className="text-center text-gray-500 py-10">
-                                    No hay estadísticas detalladas disponibles para este evento.
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                    {periodStats.map((group: any, idx: number) => (
-                                        <div key={idx} className="space-y-4">
-                                            <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest text-primary/80 pb-2">
-                                                {group.groupName === "Expected goals" ? "Goles Esperados (xG)" : group.groupName}
-                                            </h4>
-                                            {group.statisticsItems.map((item: any, i: number) => (
-                                                <div key={i} className="flex items-center justify-between text-sm py-2 hover:bg-white/5 rounded-lg px-3 transition-colors group">
-                                                    <span className="text-white font-mono w-12 text-right font-bold text-lg group-hover:text-primary transition-colors">{item.home}</span>
-
-                                                    <span className="text-gray-400 flex-1 text-center text-[10px] md:text-xs uppercase tracking-wide px-2 font-medium">
-                                                        {translateStat(item.name)}
-                                                    </span>
-
-                                                    <span className="text-white font-mono w-12 text-left font-bold text-lg group-hover:text-accent transition-colors">{item.away}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ))}
-                                </div>
+                            {aiConfidence !== null && (
+                                <AIConfidenceMeter confidence={aiConfidence} size="sm" showLabel={false} />
                             )}
                         </div>
 
-                        {/* AI Analysis Section */}
-                        <div className="glass-card p-6 rounded-3xl space-y-6 border border-primary/20 bg-gradient-to-b from-primary/5 to-transparent">
-                            <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
-                                <div className="flex items-center gap-2">
-                                    <Zap className="w-5 h-5 text-primary" />
-                                    <h3 className="font-bold text-white uppercase tracking-wider">
-                                        {data.event.status.type === 'notstarted' ? 'Predicción IA Pre-Match' : 'Análisis IA en Vivo'}
-                                    </h3>
-                                </div>
-                                {aiConfidence !== null && (
-                                    <AIConfidenceMeter confidence={aiConfidence} size="sm" showLabel={false} />
-                                )}
-                            </div>
+                        <div className="relative z-10">
                             {!aiAnalysis ? (
-                                <div className="bg-primary/5 p-8 rounded-2xl border border-primary/10 text-center space-y-6">
-                                    <p className="text-gray-300 italic text-sm">
+                                <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10 text-center space-y-4">
+                                    <p className="text-gray-400 italic text-[11px] uppercase tracking-wider font-bold">
                                         {data.event.status.type === 'notstarted'
-                                            ? "Solicita una predicción basada en el estado actual y datos históricos de ambos equipos."
-                                            : "Solicita un análisis táctico en tiempo real basado en las estadísticas actuales del partido."}
+                                            ? "Solicita el radar predictivo"
+                                            : "Analizador táctico offline"}
                                     </p>
                                     <button
                                         onClick={generateAnalysis}
                                         disabled={analyzing}
-                                        className="w-full bg-primary text-black font-black uppercase text-xs px-6 py-4 rounded-xl hover:bg-white transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xl shadow-primary/20"
+                                        className="w-full bg-primary text-black font-black uppercase text-[10px] px-6 py-4 rounded-xl hover:bg-white transition-all shadow-glow disabled:opacity-50"
                                     >
-                                        {analyzing ? (
-                                            <AnalysisSkeleton />
-                                        ) : (
-                                            <>
-                                                <Zap className="w-4 h-4 fill-current" />
-                                                {data.event.status.type === 'notstarted' ? 'Generar Predicción Pre-Match' : 'Generar Análisis en Vivo'}
-                                            </>
-                                        )}
+                                        {analyzing ? "Procesando..." : "ACTIVAR IA"}
                                     </button>
                                 </div>
                             ) : (
                                 <div className="relative group/analysis">
                                     <div className={clsx(
-                                        "bg-[#0a0a0a]/50 p-6 rounded-2xl border border-white/5 animate-in fade-in slide-in-from-bottom-2 transition-all duration-700",
+                                        "bg-black/40 p-5 rounded-2xl border border-white/5 transition-all duration-700",
                                         !isGold && "blur-md select-none pointer-events-none opacity-40 max-h-40 overflow-hidden"
                                     )}>
                                         <div className="prose prose-invert prose-sm max-w-none">
-                                            <div className="whitespace-pre-wrap text-gray-300 leading-relaxed font-light">
+                                            <div className="whitespace-pre-wrap text-[13px] text-gray-300 leading-relaxed font-medium">
                                                 {aiAnalysis}
                                             </div>
                                         </div>
@@ -647,39 +602,189 @@ export default function MatchDetailsPage() {
 
                                     {!isGold && (
                                         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-20">
-                                            <div className="w-16 h-16 bg-gradient-to-tr from-amber-400 to-primary rounded-2xl flex items-center justify-center mb-4 shadow-glow rotate-3">
-                                                <Lock className="w-8 h-8 text-black" />
+                                            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-3">
+                                                <Lock className="w-6 h-6 text-black" />
                                             </div>
-                                            <h4 className="text-xl font-black text-white italic tracking-tighter mb-2 uppercase">Análisis Bloqueado</h4>
-                                            <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest max-w-[200px] mb-6">
-                                                Actualiza a <span className="text-primary font-black">GOLD</span> para ver el análisis de élite y proyecciones exactas.
-                                            </p>
+                                            <h4 className="text-sm font-black text-white italic uppercase mb-1">Elite Locked</h4>
                                             <button
                                                 onClick={handleUpgrade}
-                                                disabled={isUpgrading}
-                                                className="bg-primary text-black font-black uppercase text-[10px] px-8 py-3 rounded-xl hover:scale-110 transition-all shadow-glow flex items-center gap-2"
+                                                className="text-primary font-black uppercase text-[9px] tracking-widest hover:underline"
                                             >
-                                                <Crown className="w-3.5 h-3.5" />
-                                                {isUpgrading ? 'Procesando...' : 'Desbloquear Ahora'}
+                                                Desbloquear con Gold
                                             </button>
                                         </div>
-                                    )}
-
-                                    {isGold && (
-                                        <button
-                                            onClick={() => setAiAnalysis(null)}
-                                            className="mt-6 w-full py-3 rounded-lg border border-white/10 text-xs text-primary hover:bg-white/5 hover:text-white transition-colors"
-                                        >
-                                            Generar Nuevo Análisis
-                                        </button>
                                     )}
                                 </div>
                             )}
                         </div>
+                    </div>
 
+                    {/* Quick Stats Card */}
+                    <div className="glass-card p-6 rounded-[2rem] border-white/5 space-y-6">
+                        <div className="flex items-center gap-2 pb-4 border-b border-white/5">
+                            <Activity className="w-5 h-5 text-gray-400" />
+                            <h3 className="font-black text-white uppercase tracking-tighter text-xl italic">Estadísticas</h3>
+                        </div>
 
-
+                        {!periodStats.length ? (
+                            <div className="text-center text-gray-600 py-8 text-xs font-black uppercase tracking-widest">
+                                Sin datos detallados
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {periodStats.slice(0, 1).map((group: any) => (
+                                    <div key={group.groupName} className="space-y-3">
+                                        {group.statisticsItems.slice(0, 8).map((item: any, i: number) => (
+                                            <div key={i} className="space-y-1.5">
+                                                <div className="flex justify-between text-[10px] font-black uppercase text-gray-500 tracking-wider">
+                                                    <span>{item.home}</span>
+                                                    <span className="text-white">{translateStat(item.name)}</span>
+                                                    <span>{item.away}</span>
+                                                </div>
+                                                <div className="h-1 bg-white/5 rounded-full overflow-hidden flex">
+                                                    <div
+                                                        className="h-full bg-primary"
+                                                        style={{ width: `${(parseFloat(item.home) / (parseFloat(item.home) + parseFloat(item.away) || 1)) * 100}%` }}
+                                                    ></div>
+                                                    <div className="flex-1 bg-white/20"></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
-                );
+            </div>
+
+            {/* Lineups (Alineaciones) */}
+            {data.lineups && (data.lineups.home?.players?.length > 0 || data.lineups.away?.players?.length > 0) && (
+                <div className="glass-card p-8 md:p-12 rounded-[2.5rem] border-white/5 space-y-10">
+                    <div className="flex flex-col items-center">
+                        <div className="flex items-center gap-3">
+                            <Shield className="w-6 h-6 text-primary" />
+                            <h3 className="text-3xl font-black text-white uppercase italic tracking-tighter">Alineaciones</h3>
+                        </div>
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.5em] mt-3">Confirmación Táctica</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+                        {/* Home Lineup */}
+                        <div className="space-y-8">
+                            <h4 className="text-lg font-black text-white border-b border-primary/30 pb-4 uppercase italic flex items-center gap-3">
+                                <span className="w-3 h-3 rounded-full bg-primary shadow-glow-sm"></span>
+                                {event.homeTeam.name}
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {data.lineups.home.players.filter((p: any) => !p.substitute).map((p: any) => (
+                                    <div key={p.player.id} className="flex items-center gap-3 group bg-white/5 p-3 rounded-2xl border border-white/5 hover:border-primary/20 transition-all">
+                                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-black border border-white/10 shrink-0 shadow-lg">
+                                            <Image
+                                                src={getPlayerImage(p.player.id)}
+                                                className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500"
+                                                alt=""
+                                                width={40}
+                                                height={40}
+                                                placeholder="blur"
+                                                blurDataURL={getBlurDataURL()}
+                                            />
+                                        </div>
+                                        <div className="flex-1 overflow-hidden">
+                                            <p className="text-[11px] font-black text-white truncate group-hover:text-primary transition-colors uppercase">{p.player.name}</p>
+                                            <span className="text-[9px] font-mono text-gray-500 uppercase tracking-tighter">#{p.shirtNumber} | {p.position}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Away Lineup */}
+                        <div className="space-y-8">
+                            <h4 className="text-lg font-black text-white border-b border-white/20 pb-4 uppercase italic flex items-center justify-end gap-3 text-right">
+                                {event.awayTeam.name}
+                                <span className="w-3 h-3 rounded-full bg-white/40"></span>
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {data.lineups.away.players.filter((p: any) => !p.substitute).map((p: any) => (
+                                    <div key={p.player.id} className="flex items-center gap-3 group flex-row-reverse text-right bg-white/5 p-3 rounded-2xl border border-white/5 hover:border-primary/20 transition-all">
+                                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-black border border-white/10 shrink-0 shadow-lg">
+                                            <Image
+                                                src={getPlayerImage(p.player.id)}
+                                                className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500"
+                                                alt=""
+                                                width={40}
+                                                height={40}
+                                                placeholder="blur"
+                                                blurDataURL={getBlurDataURL()}
+                                            />
+                                        </div>
+                                        <div className="flex-1 overflow-hidden">
+                                            <p className="text-[11px] font-black text-white truncate group-hover:text-primary transition-colors uppercase">{p.player.name}</p>
+                                            <span className="text-[9px] font-mono text-gray-500 uppercase tracking-tighter">#{p.shirtNumber} | {p.position}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Best Players Section */}
+            {data.bestPlayers && Object.keys(data.bestPlayers).length > 0 && (
+                <div className="glass-card p-10 md:p-16 rounded-[3rem] border-white/5 space-y-12 bg-white/[0.01] relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20">
+                            <Trophy className="w-8 h-8 text-primary" />
+                        </div>
+                        <h3 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">Mejores jugadores</h3>
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.5em]">Líderes de Escuadra</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {Object.entries(data.bestPlayers).map(([category, players]: [string, any]) => (
+                            <div key={category} className="space-y-6 bg-white/5 p-6 rounded-[2rem] border border-white/5 hover:border-primary/20 transition-all group/card">
+                                <div className="flex flex-col items-center gap-2 text-primary">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.3em] bg-primary/10 px-3 py-1 rounded-full">{translateStat(category)}</span>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {(players as any[]).map((entry, idx) => (
+                                        <div key={idx} className={clsx(
+                                            "flex items-center gap-3 group/player",
+                                            entry.team?.id === event.awayTeam.id ? "flex-row-reverse text-right" : "text-left"
+                                        )}>
+                                            <div className="relative shrink-0">
+                                                <Image
+                                                    src={getPlayerImage(entry.player.id)}
+                                                    className="w-10 h-10 rounded-full object-cover border-2 border-white/10 bg-black relative z-10 group-hover/player:border-primary/50 transition-colors"
+                                                    alt={entry.player.name}
+                                                    width={40}
+                                                    height={40}
+                                                    placeholder="blur"
+                                                    blurDataURL={getBlurDataURL()}
+                                                />
+                                            </div>
+                                            <div className="flex-1 overflow-hidden">
+                                                <div className={clsx(
+                                                    "flex items-baseline gap-1.5",
+                                                    entry.team?.id === event.awayTeam.id ? "flex-row-reverse" : "flex-row"
+                                                )}>
+                                                    <span className="text-xl font-black text-white font-mono leading-none">{entry.value}</span>
+                                                    <p className="text-[9px] font-black text-gray-400 truncate uppercase tracking-tighter">{entry.player.name}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
