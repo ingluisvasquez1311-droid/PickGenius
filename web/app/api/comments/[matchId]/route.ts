@@ -94,9 +94,13 @@ export async function DELETE(
         const key = `comments:${matchId}`;
 
         // Obtener comentarios para encontrar el exacto (necesario para LREM en Redis list)
-        const comments = await redis.lrange(key, 0, -1);
+        // - [x] Corregir conflicto de dependencias Clerk/Next.js (Build Fix).
+        // - [x] Agregar dependencia faltante `nodemailer` (Build Fix).
+        // - [x] Corregir ESLint y Rutas Async ([matchId]) (Build Fix).
+        // - [x] Verificación final de `next.config.ts` y compilación.
         let targetCommentStr = null;
 
+        const comments = await redis.lrange(key, 0, -1);
         for (const cStr of comments) {
             const c = JSON.parse(cStr);
             if (c.id === commentId) {
