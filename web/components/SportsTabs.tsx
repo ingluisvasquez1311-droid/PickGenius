@@ -74,7 +74,7 @@ export const SportsTabs = () => {
                             key={sport.id}
                             onClick={() => setActiveTab(sport.id)}
                             className={clsx(
-                                "flex items-center gap-3 px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap relative group",
+                                "flex items-center gap-2 md:gap-3 px-4 md:px-8 py-3 md:py-4 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap relative group",
                                 activeTab === sport.id
                                     ? "bg-white/10 text-primary border-b-2 border-primary"
                                     : "text-gray-500 hover:text-white hover:bg-white/5"
@@ -96,10 +96,10 @@ export const SportsTabs = () => {
             <div className="animate-in fade-in slide-in-from-bottom-5 duration-500">
                 <div className="grid md:grid-cols-2 gap-8 items-center bg-white/[0.02] border border-white/5 rounded-[3rem] p-8 md:p-12 overflow-hidden relative">
                     <div className="space-y-6 relative z-10">
-                        <h3 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
+                        <h3 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
                             {sportsContent[activeTab].title}
                         </h3>
-                        <p className="text-gray-400 text-lg font-medium leading-relaxed max-w-xl">
+                        <p className="text-gray-400 text-base md:text-lg font-medium leading-relaxed max-w-xl">
                             {sportsContent[activeTab].desc}
                         </p>
                         <div className="space-y-3">

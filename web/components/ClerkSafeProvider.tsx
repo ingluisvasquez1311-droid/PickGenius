@@ -19,17 +19,21 @@ const MockClerkContext = createContext<{
 });
 
 export function useUser() {
-    const isClerkEnabled = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('include');
+    const context = useContext(MockClerkContext);
+    const isClerkEnabled = typeof window !== 'undefined' &&
+        !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('include');
 
-    // We try to use Clerk if enabled, but useClerkUser might still throw if not wrapped
+    // Return mock context if Clerk is disabled
+    if (!isClerkEnabled) return context;
+
     try {
+        // Only call the clerk hook if env exists
         const clerk = useClerkUser();
-        if (isClerkEnabled) return clerk;
+        return clerk;
     } catch (e) {
-        // Fallback to mock
+        return context;
     }
-
-    return useContext(MockClerkContext);
 }
 
 export function ClerkSafeProvider({ children, publishableKey }: { children: React.ReactNode, publishableKey: string }) {

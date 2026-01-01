@@ -54,13 +54,13 @@ export default function Home() {
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 group-hover:text-primary transition-colors">Sistema de Predicción Ultra-Voz v4.2</span>
             </div>
 
-            <h1 className="text-8xl md:text-[14rem] font-black tracking-tighter leading-[0.8] italic uppercase drop-shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+            <h1 className="text-5xl md:text-8xl lg:text-[14rem] font-black tracking-tighter leading-[0.9] md:leading-[0.8] italic uppercase drop-shadow-[0_0_50px_rgba(255,255,255,0.05)]">
               DOMINA EL <br />
               <span className="gradient-text">JUEGO IA</span>
             </h1>
 
-            <p className="text-gray-500 max-w-4xl mx-auto text-lg md:text-3xl font-medium tracking-tight leading-relaxed">
-              La terminal de inteligencia deportiva más avanzada. No apostamos, <span className="text-white underline decoration-primary underline-offset-[12px]">calculamos la victoria</span> con precisión determinista.
+            <p className="text-gray-500 max-w-4xl mx-auto text-base md:text-3xl font-medium tracking-tight leading-relaxed px-4 md:px-0">
+              La terminal de inteligencia deportiva más avanzada. No apostamos, <span className="text-white underline decoration-primary underline-offset-[8px] md:underline-offset-[12px]">calculamos la victoria</span> con precisión determinista.
             </p>
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-12">
@@ -129,8 +129,8 @@ export default function Home() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-8 space-y-6">
-                    <h3 className="text-2xl font-black italic uppercase tracking-tighter leading-tight">{item.title}</h3>
+                  <div className="p-6 md:p-8 space-y-4 md:space-y-6">
+                    <h3 className="text-xl md:text-2xl font-black italic uppercase tracking-tighter leading-tight">{item.title}</h3>
 
                     {/* AI Insight Card */}
                     <div className="bg-black/40 border border-white/5 p-5 rounded-2xl space-y-4">
@@ -172,7 +172,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <div className="w-1.5 h-12 bg-primary rounded-full"></div>
             <div>
-              <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter">
+              <h2 className="text-3xl md:text-6xl font-black uppercase italic tracking-tighter">
                 SISTEMA <span className="text-primary italic">ELITE v4.2</span>
               </h2>
               <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Protocolo de Alta Fidelidad</span>
@@ -202,10 +202,10 @@ export default function Home() {
             ].map((item, i) => (
               <div key={i} className="group p-10 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-primary/5 hover:border-primary/20 transition-all space-y-8">
                 <div className="flex justify-between items-start">
-                  <div className="w-16 h-16 rounded-[1.5rem] bg-white/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary group-hover:text-black transition-all">
-                    <item.icon className="w-8 h-8" />
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-[1.5rem] bg-white/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary group-hover:text-black transition-all">
+                    <item.icon className="w-6 h-6 md:w-8 md:h-8" />
                   </div>
-                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{item.tag}</span>
+                  <span className="text-[8px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">{item.tag}</span>
                 </div>
                 <div className="space-y-4">
                   <h3 className="text-3xl font-black italic uppercase tracking-tighter leading-none">{item.title}</h3>
@@ -296,7 +296,7 @@ export default function Home() {
       </main>
 
       {/* --- FOOTER: THE LOG --- */}
-      <footer className="border-t border-white/5 bg-[#080808] pt-32 pb-16 px-8 relative overflow-hidden">
+      <footer className="border-t border-white/5 bg-[#080808] pt-20 md:pt-32 pb-16 px-8 relative overflow-hidden">
         <div className="max-w-[100rem] mx-auto grid md:grid-cols-3 gap-24 relative z-10">
           <div className="space-y-10">
             <div className="flex items-center gap-4">
@@ -352,7 +352,7 @@ export default function Home() {
         </div>
 
         {/* MASSIVE WATERMARK */}
-        <div className="absolute bottom-[-100px] left-1/2 -translate-x-1/2 text-[25rem] font-black text-white/[0.01] italic tracking-tighter select-none pointer-events-none whitespace-nowrap uppercase">
+        <div className="absolute bottom-[-50px] md:bottom-[-100px] left-1/2 -translate-x-1/2 text-[10rem] md:text-[25rem] font-black text-white/[0.01] italic tracking-tighter select-none pointer-events-none whitespace-nowrap uppercase">
           DETERMINISM ARCHITECTURE
         </div>
       </footer>
