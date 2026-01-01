@@ -51,26 +51,36 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_build_time_fallback_key";
+  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   return (
-    <ClerkProvider publishableKey={clerkPubKey}>
-      <html lang="es">
-        <body className={`${inter.className} bg-[#050505] overflow-x-hidden`}>
-          <QueryProvider>
-            <Particles className="absolute inset-0 z-0 pointer-events-none" />
-            <div className="relative z-10 min-h-screen flex flex-col">
-              <Navbar />
-              <LiveScoreWidget />
-              <main className="flex-grow">
-                {children}
-              </main>
-              <Footer />
-              <GlobalSearch />
-            </div>
-          </QueryProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="es">
+      <body className={`${inter.className} bg-[#050505] overflow-x-hidden`}>
+        {clerkPubKey ? (
+          <ClerkProvider publishableKey={clerkPubKey}>
+            <LayoutContent>{children}</LayoutContent>
+          </ClerkProvider>
+        ) : (
+          <LayoutContent>{children}</LayoutContent>
+        )}
+      </body>
+    </html>
+  );
+}
+
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryProvider>
+      <Particles className="absolute inset-0 z-0 pointer-events-none" />
+      <div className="relative z-10 min-h-screen flex flex-col">
+        <Navbar />
+        <LiveScoreWidget />
+        <main className="flex-grow">
+          {children}
+        </main>
+        <Footer />
+        <GlobalSearch />
+      </div>
+    </QueryProvider>
   );
 }
