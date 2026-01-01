@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import Groq from "groq-sdk";
 
+export const runtime = 'edge';
+
 // Helper to get a random key for rotation
 const getGroqClient = () => {
     const keys = (process.env.GROQ_API_KEYS || "").split(",").map(k => k.trim()).filter(Boolean);

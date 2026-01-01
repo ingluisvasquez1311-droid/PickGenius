@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
+import { cn } from '@/lib/utils';
 
-export const Particles = () => {
+export const Particles = ({ className }: { className?: string }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -88,7 +89,7 @@ export const Particles = () => {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 pointer-events-none z-0"
+            className={cn("fixed inset-0 pointer-events-none z-0", className)}
             aria-hidden="true"
         />
     );

@@ -5,11 +5,21 @@ import { usePathname } from 'next/navigation';
 import {
     Home, Zap, Radio, Menu, Trophy, X,
     Target, Flame, Newspaper, Plus, Bell,
-    User, LayoutDashboard, Globe, Activity, Star
+    User, LayoutDashboard, Globe, Activity, Star,
+    Circle, Diamond, Crown
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import ParleyOptimizer from './ParleyOptimizer';
+import {
+    SignInButton,
+    SignUpButton,
+    SignedIn,
+    SignedOut,
+    UserButton,
+    useUser
+} from '@clerk/nextjs';
+// Lucide icons merged above
 
 export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -20,6 +30,25 @@ export function Navbar() {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [hasUnread, setHasUnread] = useState(false);
     const pathname = usePathname();
+    const { user } = useUser();
+    const [isUpgrading, setIsUpgrading] = useState(false);
+
+    const isGold = user?.publicMetadata?.isGold === true || user?.publicMetadata?.role === 'admin' || user?.emailAddresses[0]?.emailAddress === 'luisvasquez1311@gmail.com';
+
+    const handleUpgrade = async () => {
+        setIsUpgrading(true);
+        try {
+            const res = await fetch('/api/checkout/session', { method: 'POST' });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        } catch (e) {
+            console.error('Upgrade error:', e);
+        } finally {
+            setIsUpgrading(false);
+        }
+    };
 
     const otherSports = [
         { name: 'TENIS', href: '/tennis', icon: Trophy },
@@ -61,14 +90,15 @@ export function Navbar() {
     };
 
     const navItems = [
-        { name: 'BALONCESTO', href: '/basketball', icon: Activity },
-        { name: 'FÚTBOL', href: '/football', icon: Globe },
-        { name: 'VALUE BETS', href: '/value', icon: Target, isStat: true },
-        { name: 'PLAYER PROPS', href: '/props', icon: User }, // New Props Link
-        { name: 'SMART PARLEY', href: '#', icon: Zap, isSpecial: true }, // Reverted to Modal Trigger
-        { name: 'RACHAS', href: '/streaks', icon: Flame },
-        { name: 'BLOG', href: '/blog', icon: Newspaper },
-        { name: '+ MÁS', href: '/more', icon: Plus },
+        { name: 'BALONCESTO', href: '/basketball', icon: Activity, color: 'text-[#FF4500]' },
+        { name: 'FÚTBOL', href: '/football', icon: Circle, color: 'text-white' },
+        { name: 'VALUE BETS', href: '/value', icon: Diamond, color: 'text-cyan-400' },
+        { name: 'PLAYER PROPS', href: '/props', icon: User, color: 'text-primary' },
+        { name: 'SMART PARLEY', href: '#', icon: Target, isSpecial: true, color: 'text-red-600' },
+        { name: 'RACHAS', href: '/streaks', icon: Flame, color: 'text-orange-500' },
+        { name: 'MI PERFIL', href: '/profile', icon: User, color: 'text-blue-400', isPrivate: true },
+        { name: 'BLOG', href: '/blog', icon: Newspaper, color: 'text-gray-400' },
+        { name: '+ MÁS', href: '/more', icon: Plus, color: 'text-gray-500' },
     ];
 
     return (
@@ -101,7 +131,7 @@ export function Navbar() {
                                     onMouseEnter={() => setIsMoreOpen(true)}
                                     onMouseLeave={() => setIsMoreOpen(false)}
                                 >
-                                    <item.icon className="w-3.5 h-3.5 text-gray-600" />
+                                    <item.icon className={clsx("w-3.5 h-3.5", item.color)} />
                                     {item.name}
 
                                     {isMoreOpen && (
@@ -130,7 +160,7 @@ export function Navbar() {
                                     onClick={() => setIsOptimizerOpen(true)}
                                     className="flex items-center gap-2 px-6 py-2.5 mx-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all bg-white/10 border border-white/10 text-white hover:bg-white/20 relative"
                                 >
-                                    <item.icon className="w-3.5 h-3.5 text-primary" />
+                                    <item.icon className={clsx("w-3.5 h-3.5", item.color)} />
                                     {item.name}
                                     <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                                 </button>
@@ -143,7 +173,7 @@ export function Navbar() {
                                         pathname === item.href ? "text-white bg-white/5" : "text-gray-400 hover:text-white"
                                     )}
                                 >
-                                    <item.icon className={clsx("w-3.5 h-3.5", pathname === item.href ? "text-white" : "text-gray-600")} />
+                                    <item.icon className={clsx("w-3.5 h-3.5", pathname === item.href ? "text-white" : item.color)} />
                                     {item.name}
                                 </Link>
                             )}
@@ -216,10 +246,51 @@ export function Navbar() {
                         )}
                     </div>
 
-                    {/* User Profile */}
-                    <button className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-primary flex items-center justify-center border border-white/10 shadow-lg hover:scale-105 transition-transform text-xs font-black italic">
-                        L
-                    </button>
+                    {/* User Profile / Auth */}
+                    <div className="flex items-center">
+                        <SignedOut>
+                            <div className="flex items-center gap-3">
+                                <SignInButton mode="modal">
+                                    <button className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all text-gray-400 hover:text-white">
+                                        Entrar
+                                    </button>
+                                </SignInButton>
+                                <SignUpButton mode="modal">
+                                    <button className="px-5 py-2.5 bg-primary text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-glow-sm">
+                                        Unirse
+                                    </button>
+                                </SignUpButton>
+                            </div>
+                        </SignedOut>
+                        <SignedIn>
+                            <div className="flex items-center gap-3 mr-3">
+                                {!isGold && (
+                                    <button
+                                        onClick={handleUpgrade}
+                                        disabled={isUpgrading}
+                                        className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-400 to-yellow-600 text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_20px_-5px_rgba(251,191,36,0.4)] disabled:opacity-50"
+                                    >
+                                        <Crown className="w-3.5 h-3.5" />
+                                        {isUpgrading ? 'Procesando...' : 'Pasar a Gold'}
+                                    </button>
+                                )}
+                                {isGold && (
+                                    <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-xl">
+                                        <Crown className="w-3 h-3 text-primary" />
+                                        <span className="text-[8px] font-black text-primary uppercase tracking-widest">Socio Gold</span>
+                                    </div>
+                                )}
+                            </div>
+                            <UserButton afterSignOutUrl="/"
+                                appearance={{
+                                    elements: {
+                                        userButtonAvatarBox: "w-10 h-10 rounded-xl border border-white/10 shadow-lg hover:scale-105 transition-transform",
+                                        userButtonTrigger: "focus:shadow-none focus:outline-none"
+                                    }
+                                }}
+                            />
+                        </SignedIn>
+                    </div>
 
                     {/* Mobile Toggle */}
                     <button
@@ -244,7 +315,7 @@ export function Navbar() {
                                 className="flex items-center justify-between p-6 bg-white/5 border border-white/5 rounded-3xl"
                             >
                                 <div className="flex items-center gap-4">
-                                    <item.icon className="w-6 h-6 text-primary" />
+                                    <item.icon className={clsx("w-6 h-6", item.color)} />
                                     <span className="text-xl font-black uppercase italic italic tracking-tighter">{item.name}</span>
                                 </div>
                                 <Plus className="w-5 h-5 text-gray-700" />

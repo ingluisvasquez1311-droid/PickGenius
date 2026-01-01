@@ -1,69 +1,103 @@
+import RedisManager from '@/lib/redis';
+
 type CacheEntry<T> = {
     data: T;
     expiry: number;
 };
 
-class SimpleCacheService {
-    private cache: Map<string, CacheEntry<any>> = new Map();
-    private readonly DEFAULT_TTL = 60 * 1000; // 1 minute default
+class HybridCacheService {
+    private localCache: Map<string, CacheEntry<any>> = new Map();
+    private readonly DEFAULT_TTL = 60; // 1 minute in seconds
 
     /**
-     * Set a value in the cache with a specific TTL (in seconds)
+     * Get a value from the cache. 
+     * Tries memory first (L1), then Redis (L2) if on server.
      */
-    set<T>(key: string, data: T, ttlSeconds: number = 60): void {
+    async get<T>(key: string): Promise<T | null> {
+        // L1: Memory Cache (Ultra-fast)
+        const entry = this.localCache.get(key);
+        if (entry && Date.now() < entry.expiry) {
+            console.log(`[Cache L1 HIT]: ${key}`);
+            return entry.data as T;
+        }
+
+        // L2: Redis Cache (Persistent/Distributed)
+        if (typeof window === 'undefined') {
+            try {
+                const redis = RedisManager.getInstance();
+                const data = await redis.get(key);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    // Hydrate local cache
+                    this.localCache.set(key, { data: parsed, expiry: Date.now() + (this.DEFAULT_TTL * 1000) });
+                    console.log(`[Cache L2 HIT]: ${key}`);
+                    return parsed as T;
+                }
+            } catch (error) {
+                console.warn(`[Redis Error] Failed to get ${key}:`, error);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Set a value in both L1 and L2 caches.
+     */
+    async set<T>(key: string, data: T, ttlSeconds: number = 60): Promise<void> {
         const expiry = Date.now() + (ttlSeconds * 1000);
-        this.cache.set(key, { data, expiry });
 
-        // Basic cleanup strategy: limit size
-        if (this.cache.size > 1000) {
-            const firstKey = this.cache.keys().next().value;
-            if (firstKey) this.cache.delete(firstKey);
+        // Update L1
+        this.localCache.set(key, { data, expiry });
+
+        // Update L2 (Server-only)
+        if (typeof window === 'undefined') {
+            try {
+                const redis = RedisManager.getInstance();
+                await redis.set(key, JSON.stringify(data), 'EX', ttlSeconds);
+            } catch (error) {
+                console.warn(`[Redis Error] Failed to set ${key}:`, error);
+            }
+        }
+
+        // Cleanup L1 if too large
+        if (this.localCache.size > 500) {
+            const firstKey = this.localCache.keys().next().value;
+            if (firstKey) this.localCache.delete(firstKey);
         }
     }
 
     /**
-     * Get a value from the cache if it exists and hasn't expired.
-     */
-    get<T>(key: string): T | null {
-        const entry = this.cache.get(key);
-
-        if (!entry) return null;
-
-        if (Date.now() > entry.expiry) {
-            this.cache.delete(key);
-            return null;
-        }
-
-        return entry.data as T;
-    }
-
-    /**
-     * Helper to wrap an async function with caching
+     * Helper to wrap an async function with hybrid caching
      */
     async getOrFetch<T>(key: string, fetchFn: () => Promise<T>, ttlSeconds: number = 60): Promise<T> {
-        const cached = this.get<T>(key);
-        if (cached) {
-            console.log(`[Cache] HIT: ${key}`);
-            return cached;
-        }
+        const cached = await this.get<T>(key);
+        if (cached) return cached;
 
-        console.log(`[Cache] MISS: ${key}`);
+        console.log(`[Cache MISS]: ${key}. Fetching fresh data...`);
         const data = await fetchFn();
-        this.set(key, data, ttlSeconds);
+        await this.set(key, data, ttlSeconds);
         return data;
     }
 
-    /**
-     * Clear specific key or flush all
-     */
-    invalidate(key: string) {
-        this.cache.delete(key);
+    async invalidate(key: string) {
+        this.localCache.delete(key);
+        if (typeof window === 'undefined') {
+            try {
+                await RedisManager.getInstance().del(key);
+            } catch { }
+        }
     }
 
-    flush() {
-        this.cache.clear();
+    async flush() {
+        this.localCache.clear();
+        if (typeof window === 'undefined') {
+            try {
+                await RedisManager.getInstance().flushdb();
+            } catch { }
+        }
     }
 }
 
 // Singleton instance
-export const globalCache = new SimpleCacheService();
+export const globalCache = new HybridCacheService();

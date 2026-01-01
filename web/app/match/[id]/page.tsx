@@ -2,12 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Clock, Activity, Flag, Shield, Zap, Target, ChevronRight, TrendingUp, Users, ArrowRight } from 'lucide-react';
+import {
+    ChevronLeft, ChevronRight, Activity, Zap, Users, Info,
+    TrendingUp, Trophy, ArrowLeft, Crown, Lock, Clock,
+    Shield, Flag, Target, ArrowRight,
+    Diamond, Search, Sparkles, ShieldAlert, History
+} from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import LiveGameClock from '@/components/LiveGameClock'; // Componente de reloj en vivo
 import Image from 'next/image';
 import clsx from 'clsx';
 import AIConfidenceMeter from '@/components/AIConfidenceMeter';
+import KellyCalculator from '@/components/KellyCalculator';
+import WinProbabilityChart from '@/components/WinProbabilityChart';
+import SocialFeed from '@/components/SocialFeed';
+import { AnalysisSkeleton, MatchCardSkeleton, Skeleton } from '@/components/Skeleton';
 import { getTeamImage, getTournamentImage, getCategoryImage, getPlayerImage, getBlurDataURL } from '@/lib/image-utils';
 
 // Translation Helper
@@ -88,14 +98,47 @@ const translateStat = (name: string) => {
     return dictionary[name] || name;
 };
 
+import { useQuery } from '@tanstack/react-query';
+
 export default function MatchDetailsPage() {
     const { id } = useParams();
     const router = useRouter();
-    const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
     const [analyzing, setAnalyzing] = useState(false);
     const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
     const [aiConfidence, setAiConfidence] = useState<number | null>(null);
+    const { user, isLoaded: authLoaded } = useUser();
+    const [isUpgrading, setIsUpgrading] = useState(false);
+
+    const isGold = user?.publicMetadata?.isGold === true || user?.publicMetadata?.role === 'admin';
+
+    const { data, isLoading: loading } = useQuery({
+        queryKey: ['match', id],
+        queryFn: async () => {
+            const res = await fetch(`/api/match/${id}`);
+            if (!res.ok) throw new Error('Error al cargar datos del partido');
+            return res.json();
+        },
+        refetchInterval: (query: any) => {
+            const status = query.state.data?.event?.status?.type;
+            return status === 'inprogress' ? 30000 : 0;
+        },
+        enabled: !!id,
+    });
+
+    const handleUpgrade = async () => {
+        setIsUpgrading(true);
+        try {
+            const res = await fetch('/api/checkout/session', { method: 'POST' });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        } catch (e) {
+            console.error('Upgrade error:', e);
+        } finally {
+            setIsUpgrading(false);
+        }
+    };
 
     const generateAnalysis = async () => {
         if (!data || !data.event) return;
@@ -109,10 +152,7 @@ export default function MatchDetailsPage() {
         const awayLineup = data.lineups?.away?.players?.filter((p: any) => !p.substitute).map((p: any) => `${p.player.name} (${p.position || '?'})`).join(', ') || "No disponible";
         const lineupsContext = `Alineación Local: ${homeLineup}\nAlineación Visitante: ${awayLineup}`;
 
-
-
         // Detect Sport for Context-Aware Prompts
-        // Robust detection: Check explicit slug, tournament name, or category
         const sportSlug = data.sport?.slug || data.event.sport?.slug || '';
         const tournamentName = data.event.tournament?.name?.toLowerCase() || '';
         const categoryName = data.event.tournament?.category?.name?.toLowerCase() || '';
@@ -121,67 +161,76 @@ export default function MatchDetailsPage() {
             tournamentName.includes('nba') || tournamentName.includes('basket') ||
             categoryName.includes('basketball');
 
+        const isNFL = sportSlug.includes('american-football') || sportSlug.includes('nfl') ||
+            tournamentName.includes('nfl') || tournamentName.includes('super bowl');
+
         const isTennis = sportSlug.includes('tennis') ||
             tournamentName.includes('atp') || tournamentName.includes('wta') ||
             tournamentName.includes('itf') || tournamentName.includes('challenger');
 
-        const isFootball = !isBasketball && !isTennis; // Default to football only if others fail
+        const isFootball = !isBasketball && !isTennis && !isNFL; // Soccer
+
+        // NEW: Deep Analytics Context (H2H & Incidents)
+        const h2hSummary = data.h2h?.teamStats ?
+            `H2H Histórico: Local ${data.h2h.teamStats.homeWins}V - Empates ${data.h2h.teamStats.draws} - Visitante ${data.h2h.teamStats.awayWins}V` : "";
+        const injuryContext = data.incidents?.filter((inc: any) => inc.incidentType === 'injury' || inc.incidentClass === 'injury').length > 0 ?
+            `Reportes de Lesiones/Ausencias Recientes: Detectados` : "Sin incidencias graves reportadas.";
+
+        const deepContext = `\n--- DEEP ANALYTICS ---\n${h2hSummary}\n${injuryContext}\n`;
 
         let prompt = "";
 
         if (isLive) {
-            prompt = `Analiza este partido de ${isBasketball ? 'BALONCESTO' : isTennis ? 'TENIS' : 'FÚTBOL'} EN VIVO (Motor v2.2 - Contexto Profundo):
+            prompt = `Analiza este partido de ${isBasketball ? 'BALONCESTO' : isNFL ? 'FÚTBOL AMERICANO' : isTennis ? 'TENIS' : 'FÚTBOL'} EN VIVO (Motor v2.5 - Deep Analytics):
             Evento: ${data.event.homeTeam.name} vs ${data.event.awayTeam.name}
             Liga/País: ${data.event.tournament.name} (${data.event.tournament.category?.name})
             Marcador: ${data.event.homeScore?.current ?? 0} - ${data.event.awayScore?.current ?? 0}
             Tiempo: ${data.event.status.description}
             Estadísticas Clave: ${JSON.stringify(data.statistics?.[0]?.groups || [])}
             ${lineupsContext}
-            Mejores Jugadores: ${JSON.stringify(data.bestPlayers || {})}
+            ${deepContext}
             
-            CONTEXTO REQUERIDO:
-            - Usa tu conocimiento de la liga "${data.event.tournament.name}" para determinar si el ritmo actual es alto o bajo comparado con el promedio de esta competición.
-            - Considera el historial (Head-to-Head) histórico entre estos dos equipos para predecir si habrá remontada o dominio.
-
-            REQUISITOS OBLIGATORIOS DEL ANÁLISIS:
-            1. Predicción de Ganador del siguiente periodo (basado en momentum).
+            REQUISITOS OBLIGATORIOS POR DEPORTE:
             ${isBasketball ? `
-            2. PROYECCIÓN DE PUNTOS TOTALES: Ajusta tu predicción según el promedio de anotación de la liga ${data.event.tournament.name} y el ritmo actual.
-            3. ANÁLISIS DE JUGADORES: Props clave (Puntos/Rebotes) considerando la defensa rival.
+            - ANALIZA: Ritmo de anotación (Pace) + Impacto H2H.
+            - PROPS: Analiza rebotes y puntos basándote en el matchup defensivo y ausencias.
+            ` : isNFL ? `
+            - ANALIZA: Juego terrestre vs aéreo basándote en lesiones de la secundaria/línea.
+            - TOUCHDOWNS: Probabilidad de anotación en zona roja.
             ` : isTennis ? `
-            2. ANÁLISIS DE SETS/GAMES: Momentum del partido y superficie.
-            3. QUIEBRES DE SERVICIO: Probabilidad de break basada en presión.
+            - ANALIZA: Porcentaje de primer servicio y breaks.
             ` : `
-            2. ANÁLISIS DE CÓRNERS: ¿El ritmo y la necesidad de gol sugieren OVER/UNDER?
-            3. ANÁLISIS DE GOLES: Proyección ajustada al tiempo restante.
+            - ANALIZA: xG real basado en ataques peligrosos + consistencia H2H.
+            - CÓRNERS: ¿El equipo que pierde está presionando lo suficiente?
             `}
-            4. Dame un pick de valor ALTO final.`;
+            
+            DAME:
+            1. Un pick de valor "PREMIUM" (Probabilidad > 75%).
+            2. Análisis táctico profundo en 3 puntos clave (incluye H2H/Lesiones).
+            3. Proyección final del marcador.`;
 
         } else if (isScheduled) {
-            prompt = `Analiza este partido de ${isBasketball ? 'BALONCESTO' : isTennis ? 'TENIS' : 'FÚTBOL'} PRÓXIMO (Motor v2.3 - Análisis de Forma):
+            prompt = `Analiza este partido de ${isBasketball ? 'BALONCESTO' : isNFL ? 'FÚTBOL AMERICANO' : isTennis ? 'TENIS' : 'FÚTBOL'} PRÓXIMO (Motor v2.5 - Deep Analytics):
             Evento: ${data.event.homeTeam.name} vs ${data.event.awayTeam.name}
             Liga/País: ${data.event.tournament.name} (${data.event.tournament.category?.name})
             ${lineupsContext}
-            Líderes/Estrellas: ${JSON.stringify(data.bestPlayers || {})}
+            ${deepContext}
             
-            CONTEXTO DE FORMA REQUERIDO (OBLIGATORIO):
-            1. HISTORIAL H2H: ¿Quién domina los enfrentamientos directos recientes?
-            2. ÚLTIMOS 5 PARTIDOS: Analiza la racha actual (Ganados/Perdidos) de ambos equipos. ¿Vienen en racha positiva o negativa?
-            3. FACTOR LOCAL/VISITA: ¿Cómo se comporta ${data.event.homeTeam.name} en casa y ${data.event.awayTeam.name} de visita?
-            
-            REQUISITOS OBLIGATORIOS DEL ANÁLISIS:
-            1. Predicción de Ganador (Moneyline) basada estrictamente en la FORMA RECIENTE.
+            REQUISITOS DE ANÁLISIS POR DEPORTE:
             ${isBasketball ? `
-            2. PUNTOS TOTALES: Si ambos vienen anotando mucho en sus últimos 5 juegos, proyecta OVER. Si defienden bien, proyecta UNDER.
-            3. HANDICAP: Calcula el margen de victoria basado en el diferencial de puntos de sus últimos juegos.
-            ` : isTennis ? `
-            2. JUEGOS TOTALES: Basado en si sus últimos partidos fueron largos (3 sets) o cortos.
-            3. ESTADO FÍSICO: ¿Viene de partidos agotadores recientes?
+            - H2H & PACE: ¿Cómo afecta la historia reciente al ritmo de hoy?
+            - PLAYER PROPS: Proyecciones basadas en enfrentamientos directos previos.
+            ` : isNFL ? `
+            - MATCHUP: Duel de QB vs Secundaria + Impacto de lesiones reportadas.
             ` : `
-            2. MERCADO DE GOLES: Si en sus últimos 5 partidos hubo muchos goles, sugiere OVER.
-            3. AMBOS ANOTAN: ¿Suelen marcar y recibir goles recientemente?
+            - FORMA RECIENTE + H2H: ¿Es el local "padre" histórico del visitante?
+            - VALUE: ¿Las cuotas ignoran una ausencia clave o tendencia H2H?
             `}
-            4. Un Player Prop de alto valor estadístico.`;
+            
+            DAME:
+            1. Predicción del Ganador y Marcador Exacto más probable.
+            2. Top 3 Oportunidades de "Props" o mercados secundarios.
+            3. Índice de Confianza (0-100%).`;
         } else {
             prompt = `Analiza el resultado final (Post-Match v2.0):
             Evento: ${data.event.homeTeam.name} vs ${data.event.awayTeam.name}
@@ -217,29 +266,19 @@ export default function MatchDetailsPage() {
         }
     };
 
-    useEffect(() => {
-        const fetchDetails = async () => {
-            try {
-                const res = await fetch(`/api/match/${id}`);
-                const json = await res.json();
-                console.log("Match Data Loaded:", json); // Debugging
-                setData(json);
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDetails();
-        const interval = setInterval(fetchDetails, 30000); // Auto-refresh stats
-        return () => clearInterval(interval);
-    }, [id]);
-
     if (loading) return (
-        <div className="min-h-screen flex flex-col justify-center items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/10 border-t-primary"></div>
-            <p className="text-gray-400 animate-pulse">Cargando estadísticas en tiempo real...</p>
+        <div className="min-h-screen p-8 max-w-7xl mx-auto space-y-8">
+            <div className="flex items-center gap-2 text-gray-400">
+                <ArrowLeft className="w-5 h-5" />
+                <Skeleton className="h-4 w-20" />
+            </div>
+            <div className="h-[400px] w-full bg-white/5 rounded-[2rem] animate-pulse" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    <MatchCardSkeleton />
+                </div>
+                <AnalysisSkeleton />
+            </div>
         </div>
     );
 
@@ -385,6 +424,21 @@ export default function MatchDetailsPage() {
                                     </div>
                                 </div>
                             )}
+                        </div>
+
+                        {/* Win Probability Chart (NEW - Phase 5) */}
+                        <div className="lg:col-span-1">
+                            <WinProbabilityChart
+                                incidents={data.incidents}
+                                homeTeam={data.event.homeTeam.name}
+                                awayTeam={data.event.awayTeam.name}
+                                currentStatus={data.event.status.type}
+                            />
+
+                            {/* Social Feed (NEW - Phase 5) */}
+                            <div className="mt-8">
+                                <SocialFeed matchId={id as string} />
+                            </div>
                         </div>
 
                         {/* Away */}
@@ -654,10 +708,7 @@ export default function MatchDetailsPage() {
                                 className="w-full bg-primary text-black font-black uppercase text-xs px-6 py-4 rounded-xl hover:bg-white transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xl shadow-primary/20"
                             >
                                 {analyzing ? (
-                                    <>
-                                        <div className="animate-spin h-3 w-3 border-2 border-black border-t-transparent rounded-full" />
-                                        Analizando Probabilidades...
-                                    </>
+                                    <AnalysisSkeleton />
                                 ) : (
                                     <>
                                         <Zap className="w-4 h-4 fill-current" />
@@ -667,18 +718,46 @@ export default function MatchDetailsPage() {
                             </button>
                         </div>
                     ) : (
-                        <div className="bg-[#0a0a0a]/50 p-6 rounded-2xl border border-white/5 animate-in fade-in slide-in-from-bottom-2">
-                            <div className="prose prose-invert prose-sm max-w-none">
-                                <div className="whitespace-pre-wrap text-gray-300 leading-relaxed font-light">
-                                    {aiAnalysis}
+                        <div className="relative group/analysis">
+                            <div className={clsx(
+                                "bg-[#0a0a0a]/50 p-6 rounded-2xl border border-white/5 animate-in fade-in slide-in-from-bottom-2 transition-all duration-700",
+                                !isGold && "blur-md select-none pointer-events-none opacity-40 max-h-40 overflow-hidden"
+                            )}>
+                                <div className="prose prose-invert prose-sm max-w-none">
+                                    <div className="whitespace-pre-wrap text-gray-300 leading-relaxed font-light">
+                                        {aiAnalysis}
+                                    </div>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => setAiAnalysis(null)}
-                                className="mt-6 w-full py-3 rounded-lg border border-white/10 text-xs text-primary hover:bg-white/5 hover:text-white transition-colors"
-                            >
-                                Generar Nuevo Análisis
-                            </button>
+
+                            {!isGold && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-20">
+                                    <div className="w-16 h-16 bg-gradient-to-tr from-amber-400 to-primary rounded-2xl flex items-center justify-center mb-4 shadow-glow rotate-3">
+                                        <Lock className="w-8 h-8 text-black" />
+                                    </div>
+                                    <h4 className="text-xl font-black text-white italic tracking-tighter mb-2 uppercase">Análisis Bloqueado</h4>
+                                    <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest max-w-[200px] mb-6">
+                                        Actualiza a <span className="text-primary font-black">GOLD</span> para ver el análisis de élite y proyecciones exactas.
+                                    </p>
+                                    <button
+                                        onClick={handleUpgrade}
+                                        disabled={isUpgrading}
+                                        className="bg-primary text-black font-black uppercase text-[10px] px-8 py-3 rounded-xl hover:scale-110 transition-all shadow-glow flex items-center gap-2"
+                                    >
+                                        <Crown className="w-3.5 h-3.5" />
+                                        {isUpgrading ? 'Procesando...' : 'Desbloquear Ahora'}
+                                    </button>
+                                </div>
+                            )}
+
+                            {isGold && (
+                                <button
+                                    onClick={() => setAiAnalysis(null)}
+                                    className="mt-6 w-full py-3 rounded-lg border border-white/10 text-xs text-primary hover:bg-white/5 hover:text-white transition-colors"
+                                >
+                                    Generar Nuevo Análisis
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

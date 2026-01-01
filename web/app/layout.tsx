@@ -6,12 +6,44 @@ import { Footer } from "@/components/Footer";
 import LiveScoreWidget from "@/components/LiveScoreWidget";
 import { Particles } from "@/components/Particles";
 import GlobalSearch from "@/components/GlobalSearch";
+import { ClerkProvider } from '@clerk/nextjs';
+
+import QueryProvider from "@/components/QueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PickGenius | IA Sports Predictions",
-  description: "Predicciones deportivas de élite impulsadas por Inteligencia Artificial.",
+  title: "PickGenius Pro | AI Sports Betting Terminal",
+  description: "Predicciones deportivas de élite e inteligencia de mercado impulsada por IA. Analiza datos de fútbol, baloncesto, NFL y más con tecnología de vanguardia.",
+  keywords: ["predicciones deportivas", "inteligencia artificial", "apuestas deportivas", "NBA picks", "fútbol picks", "value bets"],
+  authors: [{ name: "PickGenius Team" }],
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    url: "https://pickgenius.com",
+    title: "PickGenius Pro | La Terminal de Inteligencia Deportiva",
+    description: "Multiplica tus aciertos con análisis de IA profunda, H2H y lesiones en tiempo real.",
+    siteName: "PickGenius Pro",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PickGenius Pro | AI Sports Terminal",
+    description: "Predicciones de élite impulsadas por IA.",
+    creator: "@PickGenius",
+  },
+  category: "sports",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -20,17 +52,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark scroll-smooth">
-      <body className={`${inter.className} antialiased min-h-screen bg-black text-foreground relative overflow-x-hidden`}>
-        <Particles />
-        <Navbar />
-        <GlobalSearch />
-        <main className="relative flex flex-col min-h-screen z-10">
-          {children}
-        </main>
-        <Footer />
-        <LiveScoreWidget />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="es">
+        <body className={`${inter.className} bg-[#050505] overflow-x-hidden`}>
+          <QueryProvider>
+            <Particles className="absolute inset-0 z-0 pointer-events-none" />
+            <div className="relative z-10 min-h-screen flex flex-col">
+              <Navbar />
+              <LiveScoreWidget />
+              <main className="flex-grow">
+                {children}
+              </main>
+              <Footer />
+              <GlobalSearch />
+            </div>
+          </QueryProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

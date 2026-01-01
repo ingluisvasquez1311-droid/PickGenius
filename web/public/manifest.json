@@ -1,0 +1,21 @@
+{
+    "name": "PickGenius Pro",
+    "short_name": "PickGenius",
+    "description": "Professional Sport Analytics & AI Predictions Terminal",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#050505",
+    "theme_color": "#FF4500",
+    "icons": [
+        {
+            "src": "/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

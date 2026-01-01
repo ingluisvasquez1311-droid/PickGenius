@@ -1,3 +1,9 @@
 {
-    "git.ignoreLimitWarning": true
+    "css.lint.unknownAtRules": "ignore",
+    "tailwindCSS.experimental.classRegex": [
+        [
+            "@utility\\s+([^\\s{]+)",
+            "([^\\s{]+)"
+        ]
+    ]
 }

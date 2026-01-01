@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+// Sentry temporarily disabled - import commented out
+// import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   images: {
@@ -37,25 +39,27 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    return [
-      {
-        source: '/api/proxy-image/team/:id',
-        destination: 'https://api.sofascore.app/api/v1/team/:id/image',
-      },
-      {
-        source: '/api/proxy-image/tournament/:id',
-        destination: 'https://api.sofascore.app/api/v1/unique-tournament/:id/image',
-      },
-      {
-        source: '/api/proxy-image/category/:id',
-        destination: 'https://api.sofascore.app/api/v1/category/:id/image',
-      },
-      {
-        source: '/api/proxy-image/player/:id',
-        destination: 'https://api.sofascore.app/api/v1/player/:id/image',
-      },
-    ];
+    return [];
   },
 };
 
+// Sentry temporarily disabled due to missing dependencies
+// import { withSentryConfig } from "@sentry/nextjs";
+
 export default nextConfig;
+
+// Sentry config commented out - restore when dependencies are fixed
+/*
+export default withSentryConfig(nextConfig, {
+  silent: true,
+  org: "pickgenius",
+  project: "javascript-nextjs",
+}, {
+  widenClientFileUpload: true,
+  transpileClientSDK: true,
+  tunnelRoute: "/monitoring",
+  hideSourceMaps: true,
+  disableLogger: true,
+  automaticVercelMonitors: true,
+});
+*/

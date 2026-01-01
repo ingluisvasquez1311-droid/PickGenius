@@ -1,0 +1,39 @@
+name: PickGenius CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: web/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        cd web
+        npm ci
+
+    - name: Build Next.js
+      run: |
+        cd web
+        npm run build
+      env:
+        NEXT_PUBLIC_GROQ_API_KEY: ${{ secrets.NEXT_PUBLIC_GROQ_API_KEY }}
+        NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        REDIS_URL: ${{ secrets.REDIS_URL }}

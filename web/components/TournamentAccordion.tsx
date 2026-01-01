@@ -37,20 +37,20 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
 
     return (
         <div className="overflow-hidden rounded-[2.5rem] border-2 border-white/5 bg-[#080808] shadow-2xl transition-all duration-500">
-            {/* Tournament Header - Industrial Style */}
+            {/* Tournament Header - Industrial Style (Compact) */}
             <div
                 onClick={onToggle}
-                className="p-6 bg-white/[0.03] flex items-center justify-between cursor-pointer hover:bg-white/5 border-b-2 border-white/5 group"
+                className="p-3 bg-white/[0.03] flex items-center justify-between cursor-pointer hover:bg-white/5 border-b-2 border-white/5 group"
             >
-                <div className="flex items-center gap-6">
-                    <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-primary transition-colors">
-                        <Star className="w-5 h-5 text-gray-600 group-hover:text-black transition-colors" />
+                <div className="flex items-center gap-4">
+                    <div className="p-2 bg-white/5 rounded-xl group-hover:bg-primary transition-colors">
+                        <Star className="w-4 h-4 text-gray-600 group-hover:text-black transition-colors" />
                     </div>
 
                     <div className="relative">
                         <Image
                             src={getCategoryImage(categoryId)}
-                            className="w-8 h-8 rounded-xl object-cover border-2 border-white/10"
+                            className="w-8 h-8 rounded-lg object-cover border-2 border-white/10"
                             alt=""
                             width={32}
                             height={32}
@@ -59,7 +59,7 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                         />
                         <Image
                             src={getTournamentImage(tournamentId)}
-                            className="w-5 h-5 rounded-lg absolute -bottom-1.5 -right-1.5 border-2 border-black bg-black"
+                            className="w-5 h-5 rounded-md absolute -bottom-1.5 -right-1.5 border-2 border-black bg-black"
                             alt=""
                             width={20}
                             height={20}
@@ -69,31 +69,26 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                     </div>
 
                     <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-600">
                             {group.category?.name || 'Mundo'}
                         </span>
-                        <h3 className={clsx("text-xl font-black text-white tracking-tighter uppercase italic transition-colors", hoverTextAccent)}>
+                        <h3 className={clsx("text-base font-black text-white tracking-tighter uppercase italic transition-colors", hoverTextAccent)}>
                             {group.info.name}
                         </h3>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
-                    {/* Dynamic Badges */}
-                    {group.events.length > 5 ? (
-                        <div className="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-600/10 border-2 border-red-600/20">
-                            <Flame className="w-4 h-4 text-red-600 animate-bounce" />
-                            <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">High Intensity</span>
-                        </div>
-                    ) : (
-                        <div className="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border-2 border-white/10">
-                            <Users className="w-4 h-4 text-gray-500" />
-                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{Math.floor(Math.random() * 2000) + 500} Scouts</span>
+                <div className="flex items-center gap-4">
+                    {/* Dynamic Badges - Scouts Removed */}
+                    {group.events.length > 5 && (
+                        <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/10 border border-red-600/20">
+                            <Flame className="w-3 h-3 text-red-600 animate-bounce" />
+                            <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">Hot</span>
                         </div>
                     )}
 
-                    <div className="p-2 bg-white/5 rounded-xl text-gray-500 group-hover:text-white transition-colors">
-                        {isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                    <div className="p-1.5 bg-white/5 rounded-lg text-gray-500 group-hover:text-white transition-colors">
+                        {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </div>
                 </div>
             </div>
@@ -120,8 +115,8 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                                             </span>
                                         </div>
                                         {/* Game Time Display */}
-                                        <div className={clsx("text-[10px] font-mono font-black ml-4 flex items-center gap-1", textAccent)}>
-                                            <Clock className="w-3 h-3" />
+                                        <div className={clsx("text-lg font-mono font-black ml-4 flex items-center gap-1.5", textAccent)}>
+                                            <Clock className="w-4 h-4" />
                                             {(() => {
                                                 // 1. Try explicit time if available (e.g. from some APIs)
                                                 if (event.status?.time) return event.status.time;
@@ -152,7 +147,7 @@ export default function TournamentAccordion({ id, group, isExpanded, onToggle, o
                                         <span className="text-2xl font-mono font-black text-white italic tracking-tighter">
                                             {new Date(event.startTimestamp * 1000).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false })}
                                         </span>
-                                        <span className="text-[9px] font-black uppercase text-gray-600 tracking-[0.4em]">Kickoff</span>
+                                        <span className="text-[9px] font-black uppercase text-gray-600 tracking-[0.4em]">HORA</span>
                                     </div>
                                 )}
                                 <Star className="w-5 h-5 text-gray-800 hover:text-yellow-500 transition-colors" />

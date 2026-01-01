@@ -3,8 +3,8 @@
  * Standardizes how we fetch images from external providers like Sofascore.
  */
 
-// Using local Next.js proxy via rewrites to avoid external proxy blocks and CORS issues
-const PROXY_PREFIX = '/api/proxy-image';
+// Using local Stealth Proxy (app/api/image-proxy) to bypass 403s
+const PROXY_PREFIX = '/api/image-proxy';
 
 export const getBlurDataURL = (color = '#111') => {
     const svg = `
@@ -20,27 +20,25 @@ export const getBlurDataURL = (color = '#111') => {
 };
 
 export const getTeamImage = (id: number | string) => {
-    if (!id) return getProxiedDefault('team');
-    return `${PROXY_PREFIX}/team/${id}`;
+    if (!id) return DEFAULT_IMAGES.team;
+    return `${PROXY_PREFIX}?path=team/${id}/image`;
 };
 
 export const getTeamLogo = getTeamImage;
 
-
-
 export const getTournamentImage = (id: number | string) => {
-    if (!id) return getProxiedDefault('tournament');
-    return `${PROXY_PREFIX}/tournament/${id}`;
+    if (!id) return DEFAULT_IMAGES.tournament;
+    return `${PROXY_PREFIX}?path=unique-tournament/${id}/image`;
 };
 
 export const getCategoryImage = (id: number | string) => {
-    if (!id) return getProxiedDefault('tournament');
-    return `${PROXY_PREFIX}/category/${id}`;
+    if (!id) return DEFAULT_IMAGES.tournament;
+    return `${PROXY_PREFIX}?path=category/${id}/image`;
 };
 
 export const getPlayerImage = (id: number | string) => {
-    if (!id) return getProxiedDefault('player');
-    return `${PROXY_PREFIX}/player/${id}`;
+    if (!id) return DEFAULT_IMAGES.player;
+    return `${PROXY_PREFIX}?path=player/${id}/image`;
 };
 
 const getProxiedDefault = (type: 'team' | 'tournament' | 'player') => {

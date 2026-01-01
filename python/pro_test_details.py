@@ -15,7 +15,7 @@ class MatchDetailScraper:
         self.browser_system = CacheBrowserSystem()
 
     async def scrape_match_details(self, sport, match_id):
-        print(f"🕵️‍♂️ Iniciando extracción API Directa para {sport} ID: {match_id}")
+        print(f"🕵️‍♂️ Iniciando extracción Deep Analytics para {sport} ID: {match_id}")
         await self.browser_system.init_browser()
         
         page = await self.browser_system.browser_context.new_page()
@@ -25,59 +25,59 @@ class MatchDetailScraper:
             await page.goto("https://www.sofascore.com", wait_until='networkidle')
             await page.wait_for_timeout(2000)
 
-            # 2. Navegar DIRECTO a la API de estadísticas
-            # Esta URL devuelve JSON puro. Al hacerlo desde el navegador, pasamos Cloudflare.
-            api_url = f"https://api.sofascore.com/api/v1/event/{match_id}/statistics"
-            print(f"🔗 Consultando API: {api_url}")
+            # 2. Definir Endpoints de Deep Analytics
+            endpoints = {
+                'statistics': f"https://api.sofascore.com/api/v1/event/{match_id}/statistics",
+                'h2h': f"https://api.sofascore.com/api/v1/event/{match_id}/h2h",
+                'incidents': f"https://api.sofascore.com/api/v1/event/{match_id}/incidents"
+            }
             
-            # Navegar a la API
-            response = await page.goto(api_url)
-            
-            # Extraer el JSON del body (el navegador lo renderiza como texto)
-            content = await page.evaluate("() => document.body.innerText")
-            
-            try:
-                data = json.loads(content)
-                print("✅ JSON recibido correctamente.")
-                
-                statistics = {}
-                # Procesar formato de API de Sofascore
-                if 'statistics' in data and len(data['statistics']) > 0:
-                     # Generalmente es groups -> statisticsItems
-                     for group in data['statistics'][0].get('groups', []):
-                         for item in group.get('statisticsItems', []):
-                             name = item.get('name')
-                             home = item.get('home')
-                             away = item.get('away')
-                             if name:
-                                 statistics[name] = {'home': home, 'away': away}
-                else:
-                    print("⚠️ JSON válido pero sin 'statistics'. Posiblemente no ha empezado o no hay cobertura.")
-                    print("Contenido raw:", content[:200])
+            deep_data = {
+                'statistics': {},
+                'h2h': {},
+                'incidents': []
+            }
 
-                if statistics:
-                    print(f"📊 Estadísticas procesadas: {len(statistics)} métricas.")
+            for key, url in endpoints.items():
+                print(f"🔗 Consultando {key}: {url}")
+                try:
+                    await page.goto(url)
+                    content = await page.evaluate("() => document.body.innerText")
+                    data = json.loads(content)
                     
-                    # Guardar en Redis
-                    key = f"match_detail:{sport}:{match_id}"
-                    # Guardamos también un flag de 'source: direct_api'
-                    self.redis.set(key, json.dumps({
-                        'id': match_id,
-                        'sport': sport,
-                        'statistics': statistics, # Formato simple { "Ball Possession": {home: 50, away: 50} }
-                        'raw_api_data': data, # Guardamos data cruda por si acaso
-                        'updated_at': datetime.now().isoformat(),
-                        'source': 'direct_api'
-                    }), ex=600) # 10 minutos
-                    
-                    print("💾 Guardado en Redis exitosamente.")
-                
-                return statistics
+                    if key == 'statistics':
+                        if 'statistics' in data and len(data['statistics']) > 0:
+                            for group in data['statistics'][0].get('groups', []):
+                                for item in group.get('statisticsItems', []):
+                                    deep_data['statistics'][item.get('name')] = {
+                                        'home': item.get('home'),
+                                        'away': item.get('away')
+                                    }
+                    elif key == 'h2h':
+                        deep_data['h2h'] = {
+                            'matches': data.get('matches', [])[:5], # Últimos 5 encuentros
+                            'summary': data.get('teamStats', {}) # Victorias/Empates/Derrotas
+                        }
+                    elif key == 'incidents':
+                        # Filtrar incidentes que parezcan lesiones o tarjetas importantes
+                        deep_data['incidents'] = data.get('incidents', [])
+                except Exception as e:
+                    print(f"⚠️ Error en {key}: {e}")
 
-            except json.JSONDecodeError:
-                print("❌ No se recibió un JSON válido. Posible bloqueo o URL incorrecta.")
-                print("Contenido recibido:", content[:100])
-                return None
+            # Guardar en Redis
+            if deep_data['statistics'] or deep_data['h2h']:
+                key = f"match_detail:{sport}:{match_id}"
+                save_payload = {
+                    'id': match_id,
+                    'sport': sport,
+                    **deep_data,
+                    'updated_at': datetime.now().isoformat(),
+                    'source': 'deep_analytics_api'
+                }
+                self.redis.set(key, json.dumps(save_payload), ex=600)
+                print(f"💾 Deep Analytics guardado en Redis para ID: {match_id}")
+            
+            return deep_data
 
         except Exception as e:
             print(f"❌ Error scraping details: {e}")

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Activity, ChevronDown, ChevronUp, X, ChevronRight, ArrowRight } from 'lucide-react';
 import clsx from 'clsx';
 import Link from 'next/link';
@@ -17,18 +18,18 @@ interface LiveMatch {
 }
 
 export default function LiveScoreWidget() {
-    const [liveMatches, setLiveMatches] = useState<LiveMatch[]>([]);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
     const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
-    const [refreshing, setRefreshing] = useState(false);
 
-    // Fetch live matches
-    const fetchLiveMatches = async () => {
-        setRefreshing(true);
-        try {
+    const {
+        data: liveMatches = [],
+        isLoading: loading,
+        isFetching: refreshing,
+        dataUpdatedAt
+    } = useQuery({
+        queryKey: ['live-matches'],
+        queryFn: async () => {
             const [footballRes, basketballRes] = await Promise.allSettled([
                 fetch('/api/live/football'),
                 fetch('/api/live/basketball')
@@ -66,21 +67,10 @@ export default function LiveScoreWidget() {
                 matches.push(...basketballMatches);
             }
 
-            setLiveMatches(matches);
-            setLastUpdated(new Date());
-        } catch (error) {
-            console.error("Error fetching live matches:", error);
-        } finally {
-            setLoading(false);
-            setRefreshing(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchLiveMatches();
-        const interval = setInterval(fetchLiveMatches, 30000);
-        return () => clearInterval(interval);
-    }, []);
+            return matches;
+        },
+        refetchInterval: 20000, // Refresh every 20 seconds
+    });
 
     if (isMinimized) return null;
     if (liveMatches.length === 0 && !loading) return null;
@@ -116,7 +106,7 @@ export default function LiveScoreWidget() {
                                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white">RADAR EN VIVO</h3>
                             </div>
                             <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-1">
-                                Sinc: {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                Sinc: {new Date(dataUpdatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                             </span>
                         </div>
                         <div className="flex items-center gap-1">

@@ -15,18 +15,37 @@ export const SubscribeModal = ({ isOpen, onClose }: SubscribeModalProps) => {
 
     if (!isOpen) return null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const emailInput = (e.target as any).querySelector('input[type="email"]');
+        const email = emailInput?.value;
+
+        if (!email) return;
+
         setIsSubmitting(true);
-        // Simulating API call
-        setTimeout(() => {
+        try {
+            const res = await fetch('/api/newsletter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            if (res.ok) {
+                setIsSuccess(true);
+                setTimeout(() => {
+                    setIsSuccess(false);
+                    onClose();
+                }, 2000);
+            } else {
+                const data = await res.json();
+                alert(data.error || "Error al suscribirse");
+            }
+        } catch (err) {
+            console.error("Subscription error:", err);
+            alert("Error crítico de conexión");
+        } finally {
             setIsSubmitting(false);
-            setIsSuccess(true);
-            setTimeout(() => {
-                setIsSuccess(false);
-                onClose();
-            }, 2000);
-        }, 1500);
+        }
     };
 
     return (

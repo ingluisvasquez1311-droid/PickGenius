@@ -13,25 +13,21 @@ import { SportsTabs } from '@/components/SportsTabs';
 import { TestimonialSlider } from '@/components/TestimonialSlider';
 import { SubscribeModal } from '@/components/SubscribeModal';
 
+import { useQuery } from '@tanstack/react-query';
+
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [news, setNews] = useState<any[]>([]);
-  const [loadingNews, setLoadingNews] = useState(true);
 
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const res = await fetch('/api/news');
-        const data = await res.json();
-        setNews(data.news || []);
-      } catch (error) {
-        console.error("Error fetching news:", error);
-      } finally {
-        setLoadingNews(false);
-      }
-    };
-    fetchNews();
-  }, []);
+  const { data: news = [], isLoading: loadingNews } = useQuery({
+    queryKey: ['news'],
+    queryFn: async () => {
+      const res = await fetch('/api/news');
+      if (!res.ok) throw new Error('Error al cargar noticias');
+      const data = await res.json();
+      return data.news || [];
+    },
+    staleTime: 1000 * 60 * 5, // News are stale after 5 minutes
+  });
 
   return (
     <div className="relative min-h-screen text-white selection:bg-primary selection:text-black">
@@ -114,7 +110,7 @@ export default function Home() {
                 <div key={i} className="h-80 rounded-[3rem] bg-white/5 animate-pulse border border-white/5"></div>
               ))
             ) : (
-              news.map((item) => (
+              news.map((item: any) => (
                 <div
                   key={item.id}
                   className="group relative bg-white/[0.02] border border-white/5 rounded-[3rem] overflow-hidden hover:border-primary/30 transition-all hover:-translate-y-2 block"

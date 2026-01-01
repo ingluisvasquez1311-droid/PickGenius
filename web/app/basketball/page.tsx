@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Trophy, Activity, Calendar, ChevronRight, ChevronDown, Star, Target, Zap, ArrowLeft, BarChart3, TrendingUp } from 'lucide-react';
+import { MatchCardSkeleton } from '@/components/Skeleton';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
@@ -9,40 +10,36 @@ import TopLeadersWidget from '@/components/TopLeadersWidget';
 import TournamentAccordion from '@/components/TournamentAccordion';
 import NextToStartWidget from '@/components/NextToStartWidget';
 
+import { useQuery } from '@tanstack/react-query';
+
 export default function BasketballHub() {
-    const [matches, setMatches] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'matches' | 'standings' | 'leaders'>('matches');
     const [activeFilter, setActiveFilter] = useState<'live' | 'scheduled'>('live');
     const [expandedTournaments, setExpandedTournaments] = useState<Record<number, boolean>>({});
     const router = useRouter();
 
-    useEffect(() => {
-        const fetchBasketball = async () => {
-            setLoading(true);
-            try {
-                const endpoint = activeFilter === 'live' ? '/api/live/basketball' : '/api/scheduled/basketball';
-                const res = await fetch(endpoint);
-                const data = await res.json();
-                const events = data.events || [];
-                setMatches(events);
+    const { data: matches = [], isLoading: loading } = useQuery({
+        queryKey: ['basketball-matches', activeFilter],
+        queryFn: async () => {
+            const endpoint = activeFilter === 'live' ? '/api/live/basketball' : '/api/scheduled/basketball';
+            const res = await fetch(endpoint);
+            if (!res.ok) throw new Error('Error al cargar partidos de baloncesto');
+            const data = await res.json();
+            const events = data.events || [];
 
-                // Auto-expand first 3 tournaments (usually NBA, EuroLeague)
-                const grouped = groupEvents(events);
-                const initialExpanded: Record<number, boolean> = {};
-                Object.keys(grouped).slice(0, 3).forEach(id => {
-                    initialExpanded[Number(id)] = true;
-                });
-                setExpandedTournaments(initialExpanded);
+            // Auto-expand first 3 tournaments if none are expanded
+            const grouped = groupEvents(events);
+            const initialExpanded: Record<number, boolean> = {};
+            Object.keys(grouped).slice(0, 3).forEach(id => {
+                initialExpanded[Number(id)] = true;
+            });
+            setExpandedTournaments(prev => Object.keys(prev).length === 0 ? initialExpanded : prev);
 
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchBasketball();
-    }, [activeFilter]);
+            return events;
+        },
+        staleTime: 30000,
+        refetchInterval: activeFilter === 'live' ? 30000 : 0,
+    });
 
     const groupEvents = (events: any[]) => {
         return events.reduce((acc: any, event: any) => {
@@ -177,9 +174,9 @@ export default function BasketballHub() {
                         {activeTab === 'matches' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-left-10 duration-700">
                                 {loading ? (
-                                    <div className="grid gap-6">
-                                        {Array(4).fill(0).map((_, i) => (
-                                            <div key={i} className="h-32 bg-white/[0.03] border-2 border-dashed border-white/10 rounded-[2.5rem] animate-pulse"></div>
+                                    <div className="grid gap-8">
+                                        {[1, 2, 3, 4].map((i) => (
+                                            <MatchCardSkeleton key={i} />
                                         ))}
                                     </div>
                                 ) : matches.length > 0 ? (
