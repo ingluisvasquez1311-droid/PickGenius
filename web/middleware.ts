@@ -18,7 +18,7 @@ export default function middleware(request: NextRequest, event: any) {
     const secretKey = process.env.CLERK_SECRET_KEY;
     const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-    if (process.env.NODE_ENV === 'production' && (!secretKey || !publishableKey || publishableKey.includes('include'))) {
+    if (process.env.NODE_ENV === 'production' && (!secretKey || !publishableKey || publishableKey.includes('include') || publishableKey.includes('dummy'))) {
         return NextResponse.next();
     }
 

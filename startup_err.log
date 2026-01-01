@@ -1,0 +1,10 @@
+﻿Ô£à Firebase initialized successfully
+Ô£à Groq AI configured as fallback (FREE 14,400 req/day)
+Ô£à Claude (Anthropic) configured as fallback AI
+============================================================
+­ƒÜÇ Server running on port 3001
+­ƒôè Health check: http://localhost:3001/health
+­ƒôû API docs: http://localhost:3001/
+============================================================
+Ô£à All services ready - using Sofascore for live data
+============================================================

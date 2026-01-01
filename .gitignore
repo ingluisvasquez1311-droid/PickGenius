@@ -1,14 +1,14 @@
 # dependencies
-node_modules/
-.pnp
+/node_modules
+/.pnp
 .pnp.js
 
 # testing
-coverage/
+/coverage
 
 # next.js
-.next/
-out/
+/.next/
+/out/
 
 # production
 /build
@@ -21,53 +21,13 @@ out/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
 # local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.backup.txt
-env_backup.txt
+.env*.local
 
 # vercel
-/.vercel
+.vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-ENV/
-env/
-python/browser_session/
-python/debug_screenshots/
-
-# Logs
-*.log
-logs/
-backend.log
-deploy.log
-log.txt
-oracle_debug.log
-server_error.log
-server_stderr.log
-server_stdout.log
-startup.log
-startup_err.log
-
-# Project specific
-git_history.txt
-redis_check.txt
-env_root_backup.txt
-
-# Data (Keep the folder structure but ignore large JSON files if preferred)
-# /data/betplay/history_*.json
-# /data/betplay/latest_betplay_odds.json

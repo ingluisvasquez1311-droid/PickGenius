@@ -53,7 +53,7 @@ export default function RootLayout({
 }>) {
   // Use a structurally valid fallback key to satisfy Clerk's validation during build
   // if NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not present in the environment.
-  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_Y2xlcmsuaW5jbHVkZWQuY29tJA";
+  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   return (
     <ClerkSafeProvider publishableKey={clerkPubKey}>

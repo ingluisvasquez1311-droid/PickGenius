@@ -1,0 +1,21 @@
+[2025-12-28T18:50:10.927Z] 🚀 INICIANDO DIAGNÓSTICO MAESTRO DEL ORÁCULO 🚀
+[2025-12-28T18:50:10.942Z] 📄 Cargando directamente desde archivo JSON...
+[2025-12-28T18:50:11.999Z] ✅ Firebase Admin Inicializado
+[2025-12-28T18:50:11.999Z] 
+2️⃣ Verificando datos en Firestore...
+[2025-12-28T18:50:13.984Z]  📊 Colección "events": TIENE DATOS ✅
+[2025-12-28T18:50:14.152Z]  📊 Colección "matches": VACÍA ❌
+[2025-12-28T18:50:14.340Z]  📊 Colección "predictions": TIENE DATOS ✅
+[2025-12-28T18:50:16.615Z] 
+🏆 PARTIDO ELEGIDO: Zhejiang Golden Bulls vs Nanjing Monkey Kings
+[2025-12-28T18:50:16.616Z] 📅 FECHA: 30/12/2025, 7:35:00 a. m.
+[2025-12-28T18:50:16.616Z] 
+3️⃣ Consultando al Oráculo Supremo (GPT-OSS 120B)...
+[2025-12-28T18:50:18.291Z] 
+✅ PREDICCIÓN FINALIZADA:
+[2025-12-28T18:50:18.291Z] {
+  "winner": "Zhejiang Golden Bulls",
+  "confidence": 0.78,
+  "reasoning": "Zhejiang enters the game with a superior offensive rating (115.2 vs 108.7), a solid 10‑5 home record, and a deeper bench that averages 8.3 points per reserve player. Nanjing relies heavily on its star forward, who is averaging 22.4 points but has struggled against teams with strong perimeter defense. Zhejiang's guard rotation shoots 41% from three-point range, while Nanjing's three-point defense sits at a vulnerable 35%. Recent head‑to‑head matchups show Zhejiang winning 3 of the last 4 meetings, and they have a +5.3 net rating advantage. Injuries are minimal for both squads, but Nanjing is missing its backup point guard, reducing their playmaking depth. All these factors point to Zhejiang covering the spread and likely securing the win.",
+  "bettingTip": "Bet on Zhejiang Golden Bulls to win and the total points over 210"
+}

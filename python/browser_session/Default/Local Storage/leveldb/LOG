@@ -1,0 +1,6 @@
+2025/12/29-19:54:55.700 4ee8 Reusing MANIFEST C:\Users\Daniel\PickGenius\python\browser_session\Default\Local Storage\leveldb/MANIFEST-000001
+2025/12/29-19:54:55.706 4ee8 Recovering log #31
+2025/12/29-19:54:55.708 4ee8 Reusing old log C:\Users\Daniel\PickGenius\python\browser_session\Default\Local Storage\leveldb/000031.log 
+2025/12/29-19:59:52.164 36c4 Level-0 table #35: started
+2025/12/29-19:59:52.180 36c4 Level-0 table #35: 16798 bytes OK
+2025/12/29-19:59:52.196 36c4 Delete type=0 #31

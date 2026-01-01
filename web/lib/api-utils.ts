@@ -100,6 +100,13 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
             if (!response.ok) {
                 trackRequest(false, `HTTP ${response.status}`);
                 Logger.error(`[SofaFetch Error] ${response.status}`, { url });
+
+                // Do NOT retry for 404 (Not Found) or 403 (Forbidden) as these are often terminal 
+                // for specific assets like odds or player images.
+                if (response.status === 404 || response.status === 403) {
+                    throw new Error(`External API responded with ${response.status}`);
+                }
+
                 throw new Error(`External API responded with ${response.status}`);
             }
 

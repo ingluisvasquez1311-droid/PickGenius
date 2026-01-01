@@ -1,0 +1,25 @@
+2025/12/29-20:03:10.772 4bf8 Reusing MANIFEST C:\Users\Daniel\PickGenius\python\browser_session\Default\IndexedDB\https_www.sofascore.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/12/29-20:03:10.773 4bf8 Recovering log #2236
+2025/12/29-20:03:10.773 4bf8 Reusing old log C:\Users\Daniel\PickGenius\python\browser_session\Default\IndexedDB\https_www.sofascore.com_0.indexeddb.leveldb/002236.log 
+2025/12/29-20:03:10.774 4bf8 Delete type=2 #2235
+2025/12/29-20:03:10.921 4a78 Level-0 table #2241: started
+2025/12/29-20:03:10.943 4a78 Level-0 table #2241: 3678 bytes OK
+2025/12/29-20:03:10.956 4a78 Delete type=0 #2236
+2025/12/29-20:03:10.956 4bf8 Manual compaction at level-0 from ' \x90\x02\x00\x00\x00' @ 72057594037927935 : 1 .. ' \x91\x02\x00\x00\x00' @ 0 : 0; will stop at ' \x90\x02\x00\x00\x05' @ 26174 : 1
+2025/12/29-20:03:10.957 4bf8 Compacting 1@0 + 1@1 files
+2025/12/29-20:03:10.991 4bf8 Generated table #2242@0: 185 keys, 3412 bytes
+2025/12/29-20:03:10.991 4bf8 Compacted 1@0 + 1@1 files => 3412 bytes
+2025/12/29-20:03:11.020 4bf8 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/12/29-20:03:11.021 4bf8 Delete type=2 #2241
+2025/12/29-20:03:11.021 4bf8 Manual compaction at level-0 from ' \x90\x02\x00\x00\x05' @ 26174 : 1 .. ' \x91\x02\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/12/29-20:03:11.186 4a78 Level-0 table #2244: started
+2025/12/29-20:03:11.225 4a78 Level-0 table #2244: 665 bytes OK
+2025/12/29-20:03:11.233 4a78 Delete type=2 #2238
+2025/12/29-20:03:11.233 4a78 Delete type=0 #2240
+2025/12/29-20:03:11.233 4bf8 Manual compaction at level-0 from ' \x91\x02\x00\x00\x00' @ 72057594037927935 : 1 .. ' \x92\x02\x00\x00\x00' @ 0 : 0; will stop at ' \x91\x02\x00\x00\x05' @ 26191 : 1
+2025/12/29-20:03:11.233 4bf8 Compacting 1@0 + 1@1 files
+2025/12/29-20:03:11.258 4bf8 Generated table #2245@0: 185 keys, 3413 bytes
+2025/12/29-20:03:11.258 4bf8 Compacted 1@0 + 1@1 files => 3413 bytes
+2025/12/29-20:03:11.271 4bf8 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/12/29-20:03:11.272 4bf8 Delete type=2 #2244
+2025/12/29-20:03:11.272 4bf8 Manual compaction at level-0 from ' \x91\x02\x00\x00\x05' @ 26191 : 1 .. ' \x92\x02\x00\x00\x00' @ 0 : 0; will stop at (end)

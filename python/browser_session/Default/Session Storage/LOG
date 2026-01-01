@@ -1,0 +1,13 @@
+2025/12/29-19:54:55.833 4ee8 Reusing MANIFEST C:\Users\Daniel\PickGenius\python\browser_session\Default\Session Storage/MANIFEST-000001
+2025/12/29-19:54:55.834 4ee8 Recovering log #103
+2025/12/29-19:54:55.834 4ee8 Level-0 table #107: started
+2025/12/29-19:54:55.855 4ee8 Level-0 table #107: 13516 bytes OK
+2025/12/29-19:54:55.855 4ee8 Recovering log #106
+2025/12/29-19:54:55.865 4ee8 Reusing old log C:\Users\Daniel\PickGenius\python\browser_session\Default\Session Storage/000106.log 
+2025/12/29-19:54:55.884 4ee8 Delete type=0 #103
+2025/12/29-19:58:42.546 4ee8 Level-0 table #109: started
+2025/12/29-19:58:42.593 4ee8 Level-0 table #109: 19579 bytes OK
+2025/12/29-19:58:42.601 4ee8 Delete type=0 #106
+2025/12/29-20:02:19.042 36c4 Level-0 table #111: started
+2025/12/29-20:02:19.088 36c4 Level-0 table #111: 18632 bytes OK
+2025/12/29-20:02:19.103 36c4 Delete type=0 #108

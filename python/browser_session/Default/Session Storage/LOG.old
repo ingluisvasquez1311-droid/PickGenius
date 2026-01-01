@@ -1,0 +1,41 @@
+2025/12/29-19:35:25.349 1c20 Reusing MANIFEST C:\Users\Daniel\PickGenius\python\browser_session\Default\Session Storage/MANIFEST-000001
+2025/12/29-19:35:25.350 1c20 Recovering log #90
+2025/12/29-19:35:25.352 1c20 Reusing old log C:\Users\Daniel\PickGenius\python\browser_session\Default\Session Storage/000090.log 
+2025/12/29-19:36:09.870 1c20 Level-0 table #93: started
+2025/12/29-19:36:09.917 1c20 Level-0 table #93: 14923 bytes OK
+2025/12/29-19:36:09.945 1c20 Delete type=0 #90
+2025/12/29-19:38:56.996 1c20 Level-0 table #95: started
+2025/12/29-19:38:57.011 1c20 Level-0 table #95: 17433 bytes OK
+2025/12/29-19:38:57.020 1c20 Delete type=0 #92
+2025/12/29-19:38:57.099 1c20 Compacting 4@0 + 1@1 files
+2025/12/29-19:38:57.125 1c20 Generated table #96@0: 3840 keys, 82284 bytes
+2025/12/29-19:38:57.125 1c20 Compacted 4@0 + 1@1 files => 82284 bytes
+2025/12/29-19:38:57.132 1c20 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/12/29-19:38:57.133 1c20 Delete type=2 #85
+2025/12/29-19:38:57.133 1c20 Delete type=2 #88
+2025/12/29-19:38:57.133 1c20 Delete type=2 #90
+2025/12/29-19:38:57.133 1c20 Delete type=2 #93
+2025/12/29-19:38:57.133 1c20 Delete type=2 #95
+2025/12/29-19:42:46.524 3c4 Level-0 table #98: started
+2025/12/29-19:42:46.542 3c4 Level-0 table #98: 18947 bytes OK
+2025/12/29-19:42:46.548 3c4 Delete type=0 #94
+2025/12/29-19:45:49.461 1c20 Level-0 table #100: started
+2025/12/29-19:45:49.478 1c20 Level-0 table #100: 15866 bytes OK
+2025/12/29-19:45:49.486 1c20 Delete type=0 #97
+2025/12/29-19:48:57.332 1c20 Level-0 table #102: started
+2025/12/29-19:48:57.354 1c20 Level-0 table #102: 17188 bytes OK
+2025/12/29-19:48:57.360 1c20 Delete type=0 #99
+2025/12/29-19:52:26.389 1c20 Level-0 table #104: started
+2025/12/29-19:52:26.455 1c20 Level-0 table #104: 17336 bytes OK
+2025/12/29-19:52:26.464 1c20 Delete type=0 #101
+2025/12/29-19:52:26.627 1c20 Compacting 4@0 + 1@1 files
+2025/12/29-19:52:26.652 1c20 Generated table #105@0: 4594 keys, 106148 bytes
+2025/12/29-19:52:26.652 1c20 Compacted 4@0 + 1@1 files => 106148 bytes
+2025/12/29-19:52:26.660 1c20 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/12/29-19:52:26.662 1c20 Delete type=2 #96
+2025/12/29-19:52:26.662 1c20 Delete type=2 #98
+2025/12/29-19:52:26.662 1c20 Delete type=2 #100
+2025/12/29-19:52:26.662 1c20 Delete type=2 #102
+2025/12/29-19:52:26.662 1c20 Delete type=2 #104
+2025/12/29-19:54:11.143 3c4 Level-0 table #107: started
+2025/12/29-19:54:11.666 3c4 Level-0 table #107: 13516 bytes OK

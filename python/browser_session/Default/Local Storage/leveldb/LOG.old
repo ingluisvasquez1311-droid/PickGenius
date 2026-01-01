@@ -1,0 +1,24 @@
+2025/12/29-19:35:25.333 1c20 Reusing MANIFEST C:\Users\Daniel\PickGenius\python\browser_session\Default\Local Storage\leveldb/MANIFEST-000001
+2025/12/29-19:35:25.339 1c20 Recovering log #21
+2025/12/29-19:35:25.341 1c20 Reusing old log C:\Users\Daniel\PickGenius\python\browser_session\Default\Local Storage\leveldb/000021.log 
+2025/12/29-19:35:39.685 3c4 Level-0 table #25: started
+2025/12/29-19:35:39.719 3c4 Level-0 table #25: 18951 bytes OK
+2025/12/29-19:35:39.723 3c4 Delete type=0 #21
+2025/12/29-19:40:18.523 3c4 Level-0 table #27: started
+2025/12/29-19:40:18.535 3c4 Level-0 table #27: 19456 bytes OK
+2025/12/29-19:40:18.543 3c4 Delete type=0 #24
+2025/12/29-19:45:28.091 3c4 Level-0 table #29: started
+2025/12/29-19:45:28.111 3c4 Level-0 table #29: 20258 bytes OK
+2025/12/29-19:45:28.127 3c4 Delete type=0 #26
+2025/12/29-19:45:28.172 3c4 Compacting 4@0 + 1@1 files
+2025/12/29-19:45:28.211 3c4 Generated table #30@0: 368 keys, 19018 bytes
+2025/12/29-19:45:28.211 3c4 Compacted 4@0 + 1@1 files => 19018 bytes
+2025/12/29-19:45:28.219 3c4 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/12/29-19:45:28.220 3c4 Delete type=2 #19
+2025/12/29-19:45:28.220 3c4 Delete type=2 #22
+2025/12/29-19:45:28.227 3c4 Delete type=2 #25
+2025/12/29-19:45:28.228 3c4 Delete type=2 #27
+2025/12/29-19:45:28.228 3c4 Delete type=2 #29
+2025/12/29-19:52:26.443 3c4 Level-0 table #32: started
+2025/12/29-19:52:26.463 3c4 Level-0 table #32: 19048 bytes OK
+2025/12/29-19:52:26.632 3c4 Delete type=0 #28
