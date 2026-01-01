@@ -51,8 +51,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_build_time_fallback_key";
+
   return (
-    <ClerkProvider>
+    <ClerkProvider publishableKey={clerkPubKey}>
       <html lang="es">
         <body className={`${inter.className} bg-[#050505] overflow-x-hidden`}>
           <QueryProvider>
