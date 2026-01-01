@@ -5,7 +5,7 @@ import { SofaScoreEventSchema, SofaScoreOddsSchema } from '@/lib/validations/sof
 export async function GET() {
     try {
         console.log("⚽ Fetching Live Football Data with Mass Odds...");
-        const rawData = await sofafetch('https://api.sofascore.app/api/v1/sport/football/events/live', {
+        const rawData = await sofafetch('https://api.sofascore.com/api/v1/sport/football/events/live', {
             revalidate: 0
         });
 
