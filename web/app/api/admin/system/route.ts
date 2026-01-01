@@ -1,4 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { currentUser } from '@clerk/nextjs/server';
+import { AUTHORIZED_ADMIN_EMAIL } from '@/lib/admin';
 import { globalCache } from '@/services/cacheService';
 import RedisManager from '@/lib/redis';
 import Logger from '@/lib/logger';
@@ -15,6 +17,11 @@ const execPromise = promisify(exec);
 
 export async function GET() {
     try {
+        const user = await currentUser();
+        const primaryEmail = user?.emailAddresses[0]?.emailAddress;
+        if (primaryEmail !== AUTHORIZED_ADMIN_EMAIL) {
+            return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+        }
         const stats = {
             bridge: {
                 status: process.env.NEXT_PUBLIC_API_URL ? 'online' : 'offline',
@@ -47,8 +54,13 @@ export async function GET() {
     }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
+        const user = await currentUser();
+        const primaryEmail = user?.emailAddresses[0]?.emailAddress;
+        if (primaryEmail !== AUTHORIZED_ADMIN_EMAIL) {
+            return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+        }
         const body = await req.json();
         const { action } = body;
 

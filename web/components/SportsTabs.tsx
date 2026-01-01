@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Globe, Activity, Target, Zap, Star, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
@@ -8,7 +8,7 @@ import clsx from 'clsx';
 const sports = [
     { id: 'football', name: 'Fútbol', icon: Globe, label: 'LTP / LIVE' },
     { id: 'basketball', name: 'NBA', icon: Activity, label: 'FULL SEASON' },
-    { id: 'nfl', name: 'NFL', icon: Target, label: 'PLAYOFFS' },
+    { id: 'nfl', name: 'NFL', icon: Target, label: 'PLAYOFFS', key: 'american-football' },
     { id: 'hockey', name: 'NHL', icon: Zap, label: 'PRO-ICE' },
     { id: 'baseball', name: 'MLB', icon: Star, label: 'WORLD SERIES' },
 ];
@@ -43,26 +43,53 @@ const sportsContent: Record<string, any> = {
 
 export const SportsTabs = () => {
     const [activeTab, setActiveTab] = useState('football');
+    const [liveCounts, setLiveCounts] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        const fetchCounts = async () => {
+            try {
+                const res = await fetch('/api/live/counts');
+                if (res.ok) {
+                    const data = await res.json();
+                    setLiveCounts(data);
+                }
+            } catch (error) {
+                console.error('Error fetching live counts:', error);
+            }
+        };
+
+        fetchCounts();
+        const interval = setInterval(fetchCounts, 60000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="space-y-12">
             {/* Navigation */}
             <div className="flex gap-2 overflow-x-auto pb-4 border-b border-white/10 no-scrollbar">
-                {sports.map((sport) => (
-                    <button
-                        key={sport.id}
-                        onClick={() => setActiveTab(sport.id)}
-                        className={clsx(
-                            "flex items-center gap-3 px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap",
-                            activeTab === sport.id
-                                ? "bg-white/10 text-primary border-b-2 border-primary"
-                                : "text-gray-500 hover:text-white hover:bg-white/5"
-                        )}
-                    >
-                        <sport.icon className={clsx("w-4 h-4", activeTab === sport.id ? "text-primary" : "text-gray-600")} />
-                        {sport.name}
-                    </button>
-                ))}
+                {sports.map((sport) => {
+                    const count = liveCounts[sport.key || sport.id] || 0;
+                    return (
+                        <button
+                            key={sport.id}
+                            onClick={() => setActiveTab(sport.id)}
+                            className={clsx(
+                                "flex items-center gap-3 px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap relative group",
+                                activeTab === sport.id
+                                    ? "bg-white/10 text-primary border-b-2 border-primary"
+                                    : "text-gray-500 hover:text-white hover:bg-white/5"
+                            )}
+                        >
+                            <sport.icon className={clsx("w-4 h-4", activeTab === sport.id ? "text-primary" : "text-gray-600")} />
+                            {sport.name}
+                            {count > 0 && (
+                                <span className="ml-2 px-2 py-0.5 bg-red-600 text-white rounded-md text-[9px] animate-pulse">
+                                    {count} LIVE
+                                </span>
+                            )}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Content */}

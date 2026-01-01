@@ -7,7 +7,10 @@ import { currentUser } from '@clerk/nextjs/server';
 export async function GET(req: NextRequest) {
     try {
         const user = await currentUser();
-        const isAdmin = user?.publicMetadata?.role === 'admin' || user?.emailAddresses[0]?.emailAddress === 'luisvasquez1311@gmail.com';
+        const primaryEmail = user?.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress
+            || user?.emailAddresses[0]?.emailAddress;
+
+        const isAdmin = primaryEmail === 'luisvasquez1311@gmail.com';
 
         if (!isAdmin) {
             return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });

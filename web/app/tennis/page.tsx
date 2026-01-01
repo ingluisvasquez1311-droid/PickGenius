@@ -15,6 +15,22 @@ export default function TennisHub() {
     const [expandedTournaments, setExpandedTournaments] = useState<Record<number, boolean>>({});
     const router = useRouter();
 
+    const fetchCounts = async () => {
+        const res = await fetch('/api/live/counts');
+        if (!res.ok) return {};
+        return await res.json();
+    };
+
+    const [liveCounts, setLiveCounts] = useState<Record<string, number>>({});
+
+    useEffect(() => {
+        fetchCounts().then(setLiveCounts);
+        const interval = setInterval(() => fetchCounts().then(setLiveCounts), 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const tennisLiveCount = liveCounts['tennis'] || 0;
+
     useEffect(() => {
         const fetchTennis = async () => {
             setLoading(true);
@@ -43,12 +59,18 @@ export default function TennisHub() {
     }, [activeFilter]);
 
     const groupEvents = (events: any[]) => {
+        if (!events || !Array.isArray(events)) return {};
         return events.reduce((acc: any, event: any) => {
-            const tId = event.tournament.uniqueId || event.tournament.id;
+            if (!event) return acc;
+
+            // Fallback for missing tournament info
+            const tournament = event.tournament || { name: 'Otros Partidos', id: 999999, category: { name: 'Varios' } };
+            const tId = tournament.uniqueId || tournament.id || 999999;
+
             if (!acc[tId]) {
                 acc[tId] = {
-                    info: event.tournament,
-                    category: event.tournament.category,
+                    info: tournament,
+                    category: tournament.category || { name: 'Mundo' },
                     events: []
                 };
             }
@@ -109,7 +131,9 @@ export default function TennisHub() {
                                     )}
                                 >
                                     <span className={clsx("w-2 h-2 rounded-full", activeFilter === 'live' ? "bg-white animate-pulse" : "bg-gray-800")}></span>
-                                    Live
+                                    Live {tennisLiveCount > 0 && (
+                                        <span className="ml-1.5 px-2 py-0.5 bg-white/20 rounded-md text-[9px]">{tennisLiveCount}</span>
+                                    )}
                                 </button>
                                 <button
                                     onClick={() => setActiveFilter('scheduled')}

@@ -31,7 +31,8 @@ export function Navbar() {
     const { user } = useUser();
     const [isUpgrading, setIsUpgrading] = useState(false);
 
-    const isGold = user?.publicMetadata?.isGold === true || user?.publicMetadata?.role === 'admin' || user?.emailAddresses[0]?.emailAddress === 'luisvasquez1311@gmail.com';
+    const isAuthorizedAdmin = user?.emailAddresses[0]?.emailAddress === 'luisvasquez1311@gmail.com';
+    const isGold = user?.publicMetadata?.isGold === true || isAuthorizedAdmin;
 
     const handleUpgrade = async () => {
         setIsUpgrading(true);
@@ -182,13 +183,15 @@ export function Navbar() {
                 {/* Right Actions */}
                 <div className="flex items-center gap-4">
                     {/* Admin Panel Button */}
-                    <Link
-                        href="/admin"
-                        className="hidden md:flex flex-col items-center justify-center px-6 py-2 border border-red-500/30 rounded-2xl hover:bg-red-500/10 transition-all group"
-                    >
-                        <span className="text-[7px] font-black text-red-500 uppercase tracking-[0.3em] leading-none mb-1">• ADMIN</span>
-                        <span className="text-[9px] font-black text-white uppercase tracking-widest leading-none">PANEL</span>
-                    </Link>
+                    {isAuthorizedAdmin && (
+                        <Link
+                            href="/admin"
+                            className="hidden md:flex flex-col items-center justify-center px-6 py-2 border border-red-500/30 rounded-2xl hover:bg-red-500/10 transition-all group"
+                        >
+                            <span className="text-[7px] font-black text-red-500 uppercase tracking-[0.3em] leading-none mb-1">• ADMIN</span>
+                            <span className="text-[9px] font-black text-white uppercase tracking-widest leading-none">PANEL</span>
+                        </Link>
+                    )}
 
                     {/* Notification Bell */}
                     <div className="relative">

@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import RedisManager from '@/lib/redis';
 import { sendEmail, buildWeeklyPicksTemplate } from '@/lib/email-service';
+import { currentUser } from '@clerk/nextjs/server';
+import { AUTHORIZED_ADMIN_EMAIL } from '@/lib/admin';
 
 /**
  * ADMIN ONLY: Triggers the weekly picks newsletter to all subscribers.
  */
 export async function POST(req: NextRequest) {
     try {
-        // En un entorno real, verificaríamos un token de admin o sesión
+        const user = await currentUser();
+        const primaryEmail = user?.emailAddresses[0]?.emailAddress;
+
         const authHeader = req.headers.get('authorization');
-        if (authHeader !== `Bearer ${process.env.ADMIN_SECRET_KEY}`) {
-            return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+        const isSecretMatch = authHeader === `Bearer ${process.env.ADMIN_SECRET_KEY}`;
+
+        if (primaryEmail !== AUTHORIZED_ADMIN_EMAIL && !isSecretMatch) {
+            return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });
         }
 
         const redis = RedisManager.getInstance();

@@ -26,7 +26,7 @@ export default function AdminDashboard() {
     const [logs, setLogs] = useState<string[]>([]);
     const [activeTab, setActiveTab] = useState<'system' | 'moderation' | 'users'>('system');
 
-    const isAdmin = user?.publicMetadata?.role === 'admin';
+    const isAdmin = user?.emailAddresses[0]?.emailAddress === 'luisvasquez1311@gmail.com';
 
     const addLog = (msg: string, type: 'info' | 'warn' | 'error' | 'success' = 'info') => {
         const time = new Date().toLocaleTimeString();
