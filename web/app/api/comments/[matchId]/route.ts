@@ -4,10 +4,10 @@ import { currentUser } from '@clerk/nextjs/server';
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { matchId: string } }
+    { params }: { params: Promise<{ matchId: string }> }
 ) {
     try {
-        const { matchId } = params;
+        const { matchId } = await params;
         const redis = RedisManager.getInstance();
         const key = `comments:${matchId}`;
 
@@ -23,10 +23,10 @@ export async function GET(
 
 export async function POST(
     req: NextRequest,
-    { params }: { params: { matchId: string } }
+    { params }: { params: Promise<{ matchId: string }> }
 ) {
     try {
-        const { matchId } = params;
+        const { matchId } = await params;
         const user = await currentUser();
 
         if (!user) {
@@ -78,10 +78,10 @@ export async function POST(
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { matchId: string } }
+    { params }: { params: Promise<{ matchId: string }> }
 ) {
     try {
-        const { matchId } = params;
+        const { matchId } = await params;
         const user = await currentUser();
         const { commentId } = await req.json();
 
