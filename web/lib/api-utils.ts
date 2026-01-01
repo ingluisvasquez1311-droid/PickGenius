@@ -32,16 +32,19 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
             Logger.info(`[Bridge] Routing request via tunnel`, { url: proxiedUrl });
 
             const response = await fetch(proxiedUrl, {
-                headers: { 'Cache-Control': 'no-cache' },
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'ngrok-skip-browser-warning': '1' // Bypass ngrok warning page
+                },
                 next: { revalidate }
             });
 
             if (response.ok) {
                 return await response.json();
             }
-            Logger.warn(`[Bridge Error] Status ${response.status} from tunnel. Falling back.`);
-        } catch (bridgeError) {
-            Logger.error(`[Bridge Critical] Tunnel unreachable`, bridgeError);
+            Logger.warn(`[Bridge Error] Status ${response.status} from tunnel. Falling back to direct fetch.`);
+        } catch (bridgeError: any) {
+            Logger.error(`[Bridge Critical] Tunnel unreachable: ${bridgeError.message}. Falling back.`);
             // Sentry.captureException(bridgeError, { tags: { source: 'bridge' } });
         }
     }
