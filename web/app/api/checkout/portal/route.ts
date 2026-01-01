@@ -22,6 +22,10 @@ export async function POST(req: Request) {
 
         const origin = req.headers.get('origin');
 
+        if (process.env.STRIPE_SECRET_KEY === undefined || process.env.STRIPE_SECRET_KEY === '') {
+            return NextResponse.json({ error: 'Stripe is not configured' }, { status: 503 });
+        }
+
         const session = await stripe.billingPortal.sessions.create({
             customer: stripeCustomerId,
             return_url: `${origin}/profile`,

@@ -13,6 +13,10 @@ export async function POST(req: Request) {
 
         const origin = req.headers.get('origin');
 
+        if (process.env.STRIPE_SECRET_KEY === undefined || process.env.STRIPE_SECRET_KEY === '') {
+            return NextResponse.json({ error: 'Stripe is not configured' }, { status: 503 });
+        }
+
         // Create Checkout Sessions from body params.
         const session = await stripe.checkout.sessions.create({
             line_items: [
