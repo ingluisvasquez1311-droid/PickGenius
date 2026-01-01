@@ -8,7 +8,7 @@ import {
     Shield, Flag, Target, ArrowRight,
     Diamond, Search, Sparkles, ShieldAlert, History
 } from 'lucide-react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@/components/ClerkSafeProvider';
 import Link from 'next/link';
 import LiveGameClock from '@/components/LiveGameClock'; // Componente de reloj en vivo
 import Image from 'next/image';
@@ -19,6 +19,7 @@ import WinProbabilityChart from '@/components/WinProbabilityChart';
 import SocialFeed from '@/components/SocialFeed';
 import { AnalysisSkeleton, MatchCardSkeleton, Skeleton } from '@/components/Skeleton';
 import { getTeamImage, getTournamentImage, getCategoryImage, getPlayerImage, getBlurDataURL } from '@/lib/image-utils';
+import { PremiumProjectionCard, SportType } from '@/components/PremiumProjectionCard';
 
 // Translation Helper
 const translateStat = (name: string) => {
@@ -106,6 +107,7 @@ export default function MatchDetailsPage() {
     const [analyzing, setAnalyzing] = useState(false);
     const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
     const [aiConfidence, setAiConfidence] = useState<number | null>(null);
+    const [projections, setProjections] = useState<any>({});
     const { user, isLoaded: authLoaded } = useUser();
     const [isUpgrading, setIsUpgrading] = useState(false);
 
@@ -141,6 +143,24 @@ export default function MatchDetailsPage() {
         }
     };
 
+    // Detect Sport for Context-Aware Prompts & UI
+    const sportSlug = data?.sport?.slug || data?.event?.sport?.slug || '';
+    const tournamentName = data?.event?.tournament?.name?.toLowerCase() || '';
+    const categoryName = data?.event?.tournament?.category?.name?.toLowerCase() || '';
+
+    const isBasketball = sportSlug.includes('basketball') || sportSlug.includes('basket') ||
+        tournamentName.includes('nba') || tournamentName.includes('basket') ||
+        categoryName.includes('basketball');
+
+    const isNFL = sportSlug.includes('american-football') || sportSlug.includes('nfl') ||
+        tournamentName.includes('nfl') || tournamentName.includes('super bowl');
+
+    const isTennis = sportSlug.includes('tennis') ||
+        tournamentName.includes('atp') || tournamentName.includes('wta') ||
+        tournamentName.includes('itf') || tournamentName.includes('challenger');
+
+    const isFootball = !isBasketball && !isTennis && !isNFL; // Soccer
+
     const generateAnalysis = async () => {
         if (!data || !data.event) return;
         setAnalyzing(true);
@@ -153,24 +173,6 @@ export default function MatchDetailsPage() {
         const awayLineup = data.lineups?.away?.players?.filter((p: any) => !p.substitute).map((p: any) => `${p.player.name} (${p.position || '?'})`).join(', ') || "No disponible";
         const lineupsContext = `Alineación Local: ${homeLineup}\nAlineación Visitante: ${awayLineup}`;
 
-        // Detect Sport for Context-Aware Prompts
-        const sportSlug = data.sport?.slug || data.event.sport?.slug || '';
-        const tournamentName = data.event.tournament?.name?.toLowerCase() || '';
-        const categoryName = data.event.tournament?.category?.name?.toLowerCase() || '';
-
-        const isBasketball = sportSlug.includes('basketball') || sportSlug.includes('basket') ||
-            tournamentName.includes('nba') || tournamentName.includes('basket') ||
-            categoryName.includes('basketball');
-
-        const isNFL = sportSlug.includes('american-football') || sportSlug.includes('nfl') ||
-            tournamentName.includes('nfl') || tournamentName.includes('super bowl');
-
-        const isTennis = sportSlug.includes('tennis') ||
-            tournamentName.includes('atp') || tournamentName.includes('wta') ||
-            tournamentName.includes('itf') || tournamentName.includes('challenger');
-
-        const isFootball = !isBasketball && !isTennis && !isNFL; // Soccer
-
         // NEW: Deep Analytics Context (H2H & Incidents)
         const h2hSummary = data.h2h?.teamStats ?
             `H2H Histórico: Local ${data.h2h.teamStats.homeWins}V - Empates ${data.h2h.teamStats.draws} - Visitante ${data.h2h.teamStats.awayWins}V` : "";
@@ -178,6 +180,16 @@ export default function MatchDetailsPage() {
             `Reportes de Lesiones/Ausencias Recientes: Detectados` : "Sin incidencias graves reportadas.";
 
         const deepContext = `\n--- DEEP ANALYTICS ---\n${h2hSummary}\n${injuryContext}\n`;
+
+        const projectionSchema = isBasketball
+            ? '{"item1": {"label": "Puntos Tot.", "value": "220-225"}, "item2": {"label": "Rebotes", "value": "42-45"}, "item3": {"label": "Triples", "value": "12-15"}}'
+            : isNFL
+                ? '{"item1": {"label": "Puntos", "value": "48-52"}, "item2": {"label": "Yardas Aire", "value": "280+"}, "item3": {"label": "TDs", "value": "5-6"}}'
+                : isTennis
+                    ? '{"item1": {"label": "Aces", "value": "10-12"}, "item2": {"label": "Dobles F.", "value": "3-4"}, "item3": {"label": "Breaks", "value": "4-5"}}'
+                    : isFootball
+                        ? '{"item1": {"label": "Córners", "value": "8-10"}, "item2": {"label": "Tiros Arco", "value": "10-12"}, "item3": {"label": "Tarjetas", "value": "3-4"}}'
+                        : '{"item1": {"label": "Acción 1", "value": "--"}, "item2": {"label": "Acción 2", "value": "--"}, "item3": {"label": "Acción 3", "value": "--"}}';
 
         let prompt = "";
 
@@ -208,7 +220,10 @@ export default function MatchDetailsPage() {
             DAME:
             1. Un pick de valor "PREMIUM" (Probabilidad > 75%).
             2. Análisis táctico profundo en 3 puntos clave (incluye H2H/Lesiones).
-            3. Proyección final del marcador.`;
+            3. Proyección final del marcador.
+            
+            IMPORTANTE: Incluye al final este bloque exacto para el sistema de radar:
+            [PROJECTIONS: ${projectionSchema}]`;
 
         } else if (isScheduled) {
             prompt = `Analiza este partido de ${isBasketball ? 'BALONCESTO' : isNFL ? 'FÚTBOL AMERICANO' : isTennis ? 'TENIS' : 'FÚTBOL'} PRÓXIMO (Motor v2.5 - Deep Analytics):
@@ -231,7 +246,10 @@ export default function MatchDetailsPage() {
             DAME:
             1. Predicción del Ganador y Marcador Exacto más probable.
             2. Top 3 Oportunidades de "Props" o mercados secundarios.
-            3. Índice de Confianza (0-100%).`;
+            3. Índice de Confianza (0-100%).
+            
+            IMPORTANTE: Incluye al final este bloque exacto para el sistema de radar:
+            [PROJECTIONS: ${projectionSchema}]`;
         } else {
             prompt = `Analiza el resultado final (Post-Match v2.0):
             Evento: ${data.event.homeTeam.name} vs ${data.event.awayTeam.name}
@@ -253,12 +271,25 @@ export default function MatchDetailsPage() {
 
             // Extract confidence if present [CONFIDENCE: XX]
             const confMatch = content.match(/\[CONFIDENCE:\s*(\d+)\]/i);
+            const projMatch = content.match(/\[PROJECTIONS:\s*({.*?})\]/i);
+
+            let cleanContent = content;
+
             if (confMatch) {
                 setAiConfidence(parseInt(confMatch[1]));
-                setAiAnalysis(content.replace(/\[CONFIDENCE:\s*\d+\]/i, '').trim());
-            } else {
-                setAiAnalysis(content);
+                cleanContent = cleanContent.replace(/\[CONFIDENCE:\s*\d+\]/i, '');
             }
+
+            if (projMatch) {
+                try {
+                    setProjections(JSON.parse(projMatch[1]));
+                    cleanContent = cleanContent.replace(/\[PROJECTIONS:\s*{.*?}\]/i, '');
+                } catch (e) {
+                    console.error("Error parsing projections JSON", e);
+                }
+            }
+
+            setAiAnalysis(cleanContent.trim());
         } catch (e) {
             console.error(e);
             setAiAnalysis("Error conectando con la IA. Intenta de nuevo.");
@@ -785,6 +816,15 @@ export default function MatchDetailsPage() {
                         ))}
                     </div>
                 </div>
+            )}
+            {/* Premium Projection Card */}
+            {(isGold || isAuthorizedAdmin) && (
+                <PremiumProjectionCard
+                    sport={isBasketball ? 'basketball' : isNFL ? 'nfl' : isTennis ? 'tennis' : 'football'}
+                    projections={projections}
+                    isVisible={!!aiAnalysis}
+                    confidence={aiConfidence || 85}
+                />
             )}
         </div>
     );

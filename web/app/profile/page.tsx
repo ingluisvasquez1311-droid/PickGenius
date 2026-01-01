@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@/components/ClerkSafeProvider';
 import { useState, useEffect } from 'react';
 import {
     User, Mail, Crown, Settings, ChevronRight,
