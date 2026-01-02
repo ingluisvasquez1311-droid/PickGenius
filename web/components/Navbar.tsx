@@ -16,6 +16,7 @@ import {
     SignUpButton,
     UserButton,
 } from '@clerk/nextjs';
+import { Logo } from './Logo'; // Import new Logo component
 import { SafeSignedIn as SignedIn, SafeSignedOut as SignedOut, useUser } from './ClerkSafeProvider';
 // Lucide icons merged above
 
@@ -104,20 +105,13 @@ export function Navbar() {
         <nav className="fixed top-6 left-0 right-0 z-[100] flex justify-center px-4">
             {/* --- PILL CONTAINER --- */}
             <div className={clsx(
-                "w-full max-w-7xl flex items-center justify-between px-6 py-3 rounded-full border border-white/10 transition-all duration-500",
-                isScrolled ? "bg-black/80 backdrop-blur-2xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5)]" : "bg-black/40 backdrop-blur-xl"
+                "w-full max-w-7xl flex items-center justify-between px-6 py-4 rounded-[2rem] border transition-all duration-700 glass-card",
+                isScrolled ? "translate-y-2 border-primary/20 shadow-[0_20px_80px_-20px_rgba(255,95,31,0.3)] bg-black/90" : "border-white/10 bg-black/40"
             )}>
 
                 {/* Brand / Logo */}
-                <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 bg-gradient-to-br from-primary to-green-500 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform relative overflow-hidden">
-                        <Trophy className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <span className="text-xl font-black tracking-tighter text-white italic">
-                            PICK<span className="text-primary">GENIUS</span>
-                        </span>
-                    </div>
+                <Link href="/" className="flex items-center gap-3 group">
+                    <Logo size="md" />
                 </Link>
 
                 {/* Desktop Navigation Items */}

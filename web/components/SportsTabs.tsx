@@ -93,36 +93,42 @@ export const SportsTabs = () => {
             </div>
 
             {/* Content */}
-            <div className="animate-in fade-in slide-in-from-bottom-5 duration-500">
-                <div className="grid md:grid-cols-2 gap-8 items-center bg-white/[0.02] border border-white/5 rounded-[3rem] p-8 md:p-12 overflow-hidden relative">
-                    <div className="space-y-6 relative z-10">
-                        <h3 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
+            <div className="animate-in fade-in slide-in-from-bottom-5 duration-700">
+                <div className="grid md:grid-cols-2 gap-8 items-center glass-card rounded-[3.5rem] p-8 md:p-16 overflow-hidden relative group/content hover:cyber-border">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 blur-[120px] rounded-full group-hover/content:bg-primary/20 transition-colors"></div>
+
+                    <div className="space-y-8 relative z-10">
+                        <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">
+                            DATA_STREAMING_ACTIVE
+                        </div>
+                        <h3 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter leading-[0.9]">
                             {sportsContent[activeTab].title}
                         </h3>
-                        <p className="text-gray-400 text-base md:text-lg font-medium leading-relaxed max-w-xl">
+                        <p className="text-gray-400 text-lg md:text-xl font-medium leading-relaxed max-w-xl italic border-l-2 border-primary/20 pl-8">
                             {sportsContent[activeTab].desc}
                         </p>
-                        <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {sportsContent[activeTab].features.map((feature: string, idx: number) => (
-                                <div key={idx} className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-primary">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                                    {feature}
+                                <div key={idx} className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5 group/feat hover:bg-white/10 transition-all">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_var(--color-primary)]" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-primary/80 group-hover/feat:text-primary transition-colors">{feature}</span>
                                 </div>
                             ))}
                         </div>
                         <Link
                             href={activeTab === 'nba' ? '/basketball' : activeTab === 'mlb' ? '/baseball' : activeTab === 'nhl' ? '/hockey' : `/${activeTab}`}
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-black uppercase tracking-widest transition-all mt-4 hover:border-primary hover:text-primary group"
+                            className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl bg-white border border-white/10 text-black text-xs font-black uppercase tracking-widest transition-all mt-6 hover:scale-105 active:scale-95 group/explore"
                         >
                             Explorar Radar {sports.find(s => s.id === activeTab)?.name}
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight className="w-5 h-5 group-hover/explore:translate-x-2 transition-transform" />
                         </Link>
                     </div>
 
                     <div className="hidden md:flex justify-center items-center relative">
-                        <div className="absolute inset-0 bg-primary/10 blur-[100px] rounded-full scale-75 animate-pulse" />
+                        <div className="absolute inset-0 bg-primary/15 blur-[120px] rounded-full scale-110 animate-pulse" />
+                        <div className="absolute inset-0 bg-secondary/10 blur-[100px] rounded-full translate-x-12" />
                         {React.createElement(sports.find(s => s.id === activeTab)?.icon || Globe, {
-                            className: "w-48 h-48 text-primary opacity-20 relative z-10 animate-float"
+                            className: "w-64 h-64 text-primary opacity-30 relative z-10 animate-float drop-shadow-[0_0_50px_rgba(255,95,31,0.5)]"
                         })}
                     </div>
                 </div>

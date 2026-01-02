@@ -19,8 +19,8 @@ export const metadata: Metadata = {
   authors: [{ name: "PickGenius Team" }],
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: "/logo-new.png",
+    apple: "/logo-new.png",
   },
   openGraph: {
     type: "website",
@@ -56,7 +56,7 @@ export default function RootLayout({
   const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   return (
-    <ClerkSafeProvider publishableKey={clerkPubKey}>
+    <ClerkSafeProvider publishableKey={clerkPubKey || ""}>
       <html lang="es">
         <body className={`${inter.className} bg-[#050505] overflow-x-hidden`}>
           <QueryProvider>

@@ -62,34 +62,37 @@ export default function AIConfidenceMeter({
     const strokeDashoffset = circumference - (displayConfidence / 100) * circumference;
 
     return (
-        <div className="flex flex-col items-center gap-2">
-            <div className="relative inline-flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2 group/meter">
+            <div className="relative inline-flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]">
+                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-50 group-hover/meter:opacity-100 transition-opacity duration-700 animate-pulse-slow"></div>
                 <svg
                     height={radius * 2}
                     width={radius * 2}
-                    className="transform -rotate-90"
+                    className="transform -rotate-90 relative z-10"
                 >
                     <defs>
-                        <linearGradient id="confidenceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#ef4444" /> {/* Red */}
-                            <stop offset="50%" stopColor="#eab308" /> {/* Yellow */}
-                            <stop offset="100%" stopColor="#22c55e" /> {/* Green */}
+                        <linearGradient id="confidenceGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#ef4444" stopOpacity="0.8" />
+                            <stop offset="50%" stopColor="#eab308" stopOpacity="0.9" />
+                            <stop offset="100%" stopColor="#22c55e" stopOpacity="1" />
                         </linearGradient>
-                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur stdDeviation="3" result="blur" />
+                        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="4" result="blur" />
                             <feComposite in="SourceGraphic" in2="blur" operator="over" />
                         </filter>
                     </defs>
 
                     {/* Background circle */}
                     <circle
-                        stroke="rgba(255, 255, 255, 0.1)"
+                        stroke="rgba(255, 255, 255, 0.05)"
                         fill="transparent"
                         strokeWidth={stroke}
                         r={normalizedRadius}
                         cx={radius}
                         cy={radius}
+                        className="group-hover/meter:stroke-white/10 transition-colors"
                     />
+
                     {/* Progress circle */}
                     <circle
                         stroke="url(#confidenceGradient)"
@@ -103,19 +106,30 @@ export default function AIConfidenceMeter({
                         cy={radius}
                         filter="url(#glow)"
                         className="transition-all duration-1000 ease-out"
-                        style={{ filter: `drop-shadow(0 0 5px ${getGlowColor(displayConfidence)})` }}
+                        style={{
+                            filter: `drop-shadow(0 0 10px ${getGlowColor(displayConfidence)})`,
+                            opacity: 0.9
+                        }}
                     />
                 </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <span className={clsx(fontSize, 'font-black italic transition-colors duration-1000', getColorClass(displayConfidence))}>
+
+                {/* Center Content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className={clsx(fontSize, 'font-black italic transition-colors duration-1000 tracking-tighter drop-shadow-md', getColorClass(displayConfidence))}>
                         {displayConfidence}%
                     </span>
+                    {size === 'lg' && (
+                        <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-1">WIN RATE</span>
+                    )}
                 </div>
             </div>
             {showLabel && (
-                <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">
-                    Confianza IA
-                </p>
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/5 backdrop-blur-sm group-hover/meter:bg-white/10 transition-all">
+                    <span className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", getColorClass(displayConfidence).replace('text-', 'bg-'))}></span>
+                    <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest group-hover/meter:text-gray-200 transition-colors">
+                        Confianza IA
+                    </p>
+                </div>
             )}
         </div>
     );

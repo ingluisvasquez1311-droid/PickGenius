@@ -4,15 +4,21 @@
   --color-background: #050505;
   --color-foreground: #ededed;
 
-  /* Brand Colors - Neon Orange Cyberpunk */
+  /* Brand Colors - Elite Cyberpunk */
   --color-primary: #FF5F1F;
   /* Neon Orange */
-  --color-secondary: #FF8C00;
-  /* Dark Orange */
-  --color-accent: #FFA500;
-  /* Bright Orange */
+  --color-secondary: #7C3AED;
+  /* Royal Purple */
+  --color-accent: #00F5FF;
+  /* Cyber Cyan */
+  --color-deep: #020202;
   --color-card: #0a0a0a;
-  --color-card-border: #1a1a1a;
+  --color-card-border: rgba(255, 255, 255, 0.08);
+
+  /* New Lighting Effects */
+  --glow-primary: rgba(255, 95, 31, 0.4);
+  --glow-secondary: rgba(124, 58, 237, 0.4);
+  --glow-accent: rgba(0, 245, 255, 0.4);
 
   /* Animations */
   --animate-float: float 3s ease-in-out infinite;
@@ -110,19 +116,25 @@ body {
 }
 
 @utility glass-card {
-  background-color: rgba(17, 17, 17, 0.8);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  background-color: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.82);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@utility text-glow {
-  text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+@utility glow-overlay {
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), var(--glow-primary) 0%, transparent 50%);
 }
 
-@utility text-glow-white {
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+@utility cyber-border {
+  border: 1px solid transparent;
+  background: linear-gradient(var(--color-card), var(--color-card)) padding-box,
+    linear-gradient(135deg, var(--color-primary), var(--color-secondary), var(--color-accent)) border-box;
+}
+
+@utility text-glow-primary {
+  text-shadow: 0 0 30px var(--glow-primary);
 }
 
 @utility checkered-bg {
@@ -142,8 +154,21 @@ body {
   transform: translateY(0);
 }
 
+
+.cyber-button {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  box-shadow: 0 10px 40px -10px var(--glow-primary);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cyber-button:hover {
+  filter: brightness(1.2);
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 20px 60px -10px var(--glow-primary);
+}
+
 @utility gradient-text {
-  background: linear-gradient(135deg, var(--color-primary), #a78bfa, var(--color-accent));
+  background: linear-gradient(135deg, var(--color-primary) 10%, var(--color-secondary) 50%, var(--color-accent) 90%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -180,7 +205,8 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 95, 31, 0.1); /* Primary color low opacity */
+  background: rgba(255, 95, 31, 0.1);
+  /* Primary color low opacity */
   border-radius: 9999px;
 }
 
@@ -190,8 +216,13 @@ body {
 
 /* Shimmer Effect for Loading States */
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .shimmer-container {
@@ -206,11 +237,9 @@ body {
   right: 0;
   bottom: 0;
   left: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.03),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.03),
+      transparent);
   animation: shimmer 2s infinite;
 }

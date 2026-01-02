@@ -5,20 +5,21 @@ import Link from 'next/link';
 
 export function Footer() {
     return (
-        <footer className="relative bg-black border-t border-white/5 pt-20 pb-10 px-6 md:px-8 overflow-hidden">
-            {/* Background Glow */}
+        <footer className="relative bg-[#050505] border-t border-white/5 pt-32 pb-16 px-6 md:px-8 overflow-hidden">
+            {/* Massive Ambient Background */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-primary/5 blur-[150px] rounded-full opacity-30"></div>
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
 
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 relative z-10">
 
                 {/* Brand & Mission */}
                 <div className="col-span-1 md:col-span-1 space-y-6">
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="bg-primary p-2 rounded-lg group-hover:rotate-12 transition-transform shadow-[0_0_15px_rgba(139,92,246,0.5)]">
-                            <Trophy className="w-5 h-5 text-white" />
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="bg-primary p-2.5 rounded-xl group-hover:rotate-12 transition-transform shadow-[0_0_30px_rgba(255,95,31,0.5)]">
+                            <Trophy className="w-6 h-6 text-black" />
                         </div>
-                        <span className="text-2xl font-black tracking-tighter text-white italic">
-                            PICK<span className="text-primary">GENIUS</span>
+                        <span className="text-3xl font-black tracking-tighter text-white italic uppercase">
+                            PICK<span className="text-primary text-glow-primary">GENIUS</span>
                         </span>
                     </Link>
                     <p className="text-gray-500 text-sm font-medium leading-relaxed">

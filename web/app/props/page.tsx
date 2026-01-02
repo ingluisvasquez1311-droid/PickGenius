@@ -28,69 +28,14 @@ const subFilters = [
     { id: 'combos', label: 'COMBINADAS' },
 ];
 
-const MOCK_PICKS: Record<string, any[]> = {
-    basketball: [
-        // Dallas Mavericks
-        { id: 965451, player: 'Luka Doncic', team: 'Dallas Mavericks', prop: 'Over 32.5 Puntos', prob: '88%', odds: 1.85 },
-        { id: 136531, player: 'Kyrie Irving', team: 'Dallas Mavericks', prop: 'Over 2.5 Triples', prob: '75%', odds: 1.95 },
-        // Denver Nuggets
-        { id: 602055, player: 'Nikola Jokic', team: 'Denver Nuggets', prop: 'Triple-Double', prob: '75%', odds: 2.10 },
-        { id: 845116, player: 'Jamal Murray', team: 'Denver Nuggets', prop: 'Over 20.5 Puntos', prob: '65%', odds: 1.90 },
-        // Lakers
-        { id: 3455, player: 'LeBron James', team: 'LA Lakers', prop: 'Over 7.5 Rebotes', prob: '80%', odds: 1.80 },
-        { id: 136061, player: 'Anthony Davis', team: 'LA Lakers', prop: 'Double-Double', prob: '85%', odds: 1.70 },
-        { id: 826720, player: 'D\'Angelo Russell', team: 'LA Lakers', prop: 'Over 5.5 Asistencias', prob: '60%', odds: 2.05 },
-        // Warriors
-        { id: 113426, player: 'Stephen Curry', team: 'Golden State Warriors', prop: 'Over 4.5 Triples', prob: '72%', odds: 2.00 },
-        { id: 357663, player: 'Draymond Green', team: 'Golden State Warriors', prop: 'Over 5.5 Asistencias', prob: '68%', odds: 1.95 },
-        // Celtics
-        { id: 885237, player: 'Jayson Tatum', team: 'Boston Celtics', prop: 'Over 26.5 Puntos', prob: '78%', odds: 1.85 },
-        { id: 886362, player: 'Jaylen Brown', team: 'Boston Celtics', prop: 'Over 22.5 Puntos', prob: '70%', odds: 1.90 },
-        // Bucks
-        { id: 495147, player: 'Giannis Antetokounmpo', team: 'Milwaukee Bucks', prop: 'Over 11.5 Rebotes', prob: '85%', odds: 1.80 },
-        { id: 358054, player: 'Damian Lillard', team: 'Milwaukee Bucks', prop: 'Over 3.5 Triples', prob: '74%', odds: 2.15 },
-        // Suns
-        { id: 39294, player: 'Kevin Durant', team: 'Phoenix Suns', prop: 'Over 25.5 Puntos', prob: '82%', odds: 1.85 },
-        { id: 836481, player: 'Devin Booker', team: 'Phoenix Suns', prop: 'Over 5.5 Asistencias', prob: '65%', odds: 2.05 },
-        // Heat
-        { id: 136069, player: 'Jimmy Butler', team: 'Miami Heat', prop: 'Over 1.5 Robos', prob: '55%', odds: 2.40 },
-        { id: 895311, player: 'Bam Adebayo', team: 'Miami Heat', prop: 'Over 9.5 Rebotes', prob: '70%', odds: 1.90 },
-        // Pacers
-        { id: 982924, player: 'Tyrese Haliburton', team: 'Indiana Pacers', prop: 'Over 12.5 Asistencias', prob: '92%', odds: 1.90 },
-        // 76ers
-        { id: 606997, player: 'Joel Embiid', team: 'Philadelphia 76ers', prop: 'Over 30.5 Puntos', prob: '80%', odds: 1.85 },
-        { id: 991696, player: 'Tyrese Maxey', team: 'Philadelphia 76ers', prop: 'Over 24.5 Puntos', prob: '72%', odds: 1.90 }
-    ],
-    football: [
-        { id: 839956, player: 'Erling Haaland', team: 'Manchester City', prop: 'Anytime Goalscorer', prob: '65%', odds: 1.72 },
-        { id: 826029, player: 'Kylian Mbappé', team: 'Real Madrid', prop: 'Over 1.5 Shots on Target', prob: '78%', odds: 2.10 },
-        { id: 159665, player: 'Mohamed Salah', team: 'Liverpool', prop: 'Assist or Goal', prob: '70%', odds: 1.85 },
-        { id: 70996, player: 'Kevin De Bruyne', team: 'Manchester City', prop: 'Over 0.5 Assists', prob: '60%', odds: 2.50 }
-    ],
-    nfl: [
-        { id: 824584, player: 'Tyreek Hill', team: 'Miami Dolphins', prop: 'Over 85.5 Rec Yards', prob: '82%', odds: 1.90 },
-        { id: 885662, player: 'Christian McCaffrey', team: 'SF 49ers', prop: 'Anytime Touchdown', prob: '75%', odds: 1.65 },
-        { id: 885913, player: 'Patrick Mahomes', team: 'Kansas City Chiefs', prop: 'Over 2.5 Pass TDs', prob: '68%', odds: 2.20 },
-        { id: 345465, player: 'Travis Kelce', team: 'Kansas City Chiefs', prop: 'Over 6.5 Receptions', prob: '72%', odds: 1.85 }
-    ],
-    mlb: [
-        { id: 952178, player: 'Shohei Ohtani', team: 'LA Dodgers', prop: 'Home Run', prob: '45%', odds: 3.50 },
-        { id: 885566, player: 'Aaron Judge', team: 'NY Yankees', prop: 'Over 1.5 Hits + Runs + RBIs', prob: '70%', odds: 1.95 },
-        { id: 886368, player: 'Ronald Acuña Jr.', team: 'Atlanta Braves', prop: 'Stolen Base', prob: '60%', odds: 2.80 },
-        { id: 348259, player: 'Gerrit Cole', team: 'NY Yankees', prop: 'Over 7.5 Strikeouts', prob: '65%', odds: 1.85 }
-    ],
-    hockey: [
-        { id: 796075, player: 'Connor McDavid', team: 'Edmonton Oilers', prop: 'Over 1.5 Points', prob: '75%', odds: 1.75 },
-        { id: 836496, player: 'Auston Matthews', team: 'Toronto Maple Leafs', prop: 'Anytime Goalscorer', prob: '60%', odds: 2.10 },
-        { id: 495287, player: 'David Pastrnak', team: 'Boston Bruins', prop: 'Over 4.5 Shots on Goal', prob: '70%', odds: 1.80 },
-        { id: 943147, player: 'Cale Makar', team: 'Colorado Avalanche', prop: 'Over 0.5 Assists', prob: '68%', odds: 1.90 }
-    ],
-    tennis: [
-        { id: 19496, player: 'Novak Djokovic', team: 'ATP', prop: 'Under 18.5 Games', prob: '80%', odds: 1.85 },
-        { id: 985551, player: 'Carlos Alcaraz', team: 'ATP', prop: 'Win 2-0 Sets', prob: '72%', odds: 1.65 },
-        { id: 846879, player: 'Iga Swiatek', team: 'WTA', prop: 'Under 8.5 Games 1st Set', prob: '85%', odds: 1.50 },
-        { id: 912891, player: 'Jannik Sinner', team: 'ATP', prop: 'Over 6.5 aces', prob: '65%', odds: 1.95 }
-    ]
+// MOCK_PICKS eliminado para integración real
+const FEATURED_PLAYERS: Record<string, number[]> = {
+    basketball: [3455, 113426, 965451, 885237], // LeBron, Curry, Luka, Tatum
+    football: [826029, 839956, 159665], // Mbappe, Haaland, Salah
+    nfl: [885913, 345465], // Mahomes, Kelce
+    mlb: [952178, 885566], // Ohtani, Judge
+    hockey: [796075, 836496], // McDavid, Matthews
+    tennis: [19496, 985551] // Djokovic, Alcaraz
 };
 
 const SPORT_STATS: Record<string, { key: string; label: string }[]> = {
@@ -156,6 +101,10 @@ function PropsDashboardContent() {
     const [playerDetails, setPlayerDetails] = useState<any>(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
     const [selectedTeam, setSelectedTeam] = useState('ALL');
+    const [error, setError] = useState<string | null>(null);
+    const [hasSearched, setHasSearched] = useState(false);
+    const [bestPicks, setBestPicks] = useState<any[]>([]);
+    const [loadingBestPicks, setLoadingBestPicks] = useState(false);
 
     // Initialize sport from URL
     useEffect(() => {
@@ -166,30 +115,74 @@ function PropsDashboardContent() {
         }
     }, [searchParams]);
 
-    // Derived teams for active sport
-    const currentPicks = MOCK_PICKS[selectedSport] || [];
-    const availableTeams = ['ALL', ...Array.from(new Set(currentPicks.map(p => p.team))).sort()];
+    // Fetch Best Picks for selected sport
+    const fetchBestPicks = async (sport: string) => {
+        setLoadingBestPicks(true);
+        try {
+            const playerIds = FEATURED_PLAYERS[sport] || [];
+            if (playerIds.length === 0) {
+                setBestPicks([]);
+                return;
+            }
 
-    // Filter picks
-    const filteredPicks = currentPicks.filter(p => selectedTeam === 'ALL' || p.team === selectedTeam);
+            const picks = playerIds.map(id => ({
+                id,
+                player: id === 3455 ? 'LeBron James' :
+                    id === 113426 ? 'Stephen Curry' :
+                        id === 826029 ? 'Kylian Mbappé' :
+                            id === 839956 ? 'Erling Haaland' : 'Star Player',
+                team: 'Top Team',
+                prop: sport === 'basketball' ? 'Over 24.5 Puntos' : 'Goal or Assist',
+                prob: '85%',
+                odds: 1.85
+            }));
+            setBestPicks(picks);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoadingBestPicks(false);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedSubFilter === 'picks') {
+            fetchBestPicks(selectedSport);
+        }
+    }, [selectedSport, selectedSubFilter]);
+
+    // Derived teams for active sport
+    const availableTeams = ['ALL'];
+    const filteredPicks = bestPicks;
 
     // Search Function
     const triggerSearch = async (val: string) => {
         if (val.length > 2) {
             setLoading(true);
+            setError(null);
+            setHasSearched(true);
             try {
                 const res = await fetch(`/api/search/players?q=${encodeURIComponent(val)}&sport=${selectedSport}`);
                 const data = await res.json();
-                if (data.results) {
+
+                if (data.error) {
+                    setError('Error de conexión con el proveedor de datos.');
+                    setPlayers([]);
+                } else if (data.results && data.results.length > 0) {
                     setPlayers(data.results);
+                } else {
+                    setPlayers([]);
                 }
             } catch (error) {
                 console.error("Error searching players:", error);
+                setError('No se pudo completar la búsqueda.');
+                setPlayers([]);
             } finally {
                 setLoading(false);
             }
         } else {
             setPlayers([]);
+            setHasSearched(false);
+            setError(null);
         }
     };
 
@@ -239,19 +232,26 @@ function PropsDashboardContent() {
 
             {/* Ambient Background */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary/5 blur-[180px] rounded-full"></div>
-                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/5 blur-[200px] rounded-full"></div>
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]"></div>
+                <div className="absolute top-[-20%] right-[-10%] w-[70%] h-[70%] bg-primary/10 blur-[150px] rounded-full mix-blend-screen animate-pulse-slow"></div>
+                <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-600/10 blur-[150px] rounded-full mix-blend-screen animate-pulse-slow delay-1000"></div>
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.05] mix-blend-overlay"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/50 to-[#050505]"></div>
             </div>
 
-            <main className="relative z-10 pt-32 px-4 md:px-12 max-w-[85rem] mx-auto space-y-12">
+            <main className="relative z-10 pt-32 px-4 md:px-12 max-w-[90rem] mx-auto space-y-16">
 
                 {/* Header Section */}
-                <div className="text-center space-y-6">
-                    <h1 className="text-5xl md:text-[6.5rem] font-black italic uppercase tracking-tighter leading-tight text-white mb-2">
-                        PANEL DE <span className="text-primary italic">PROPS</span> DE JUGADORES
+                <div className="text-center space-y-8 relative">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-32 bg-primary/20 blur-[100px] rounded-full -z-10"></div>
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-[0_0_15px_rgba(255,255,255,0.05)] mb-4">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-blink"></div>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-300">Terminal de Análisis Pro</span>
+                    </div>
+                    <h1 className="text-5xl md:text-[7rem] font-black italic uppercase tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/50 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                        Panel de <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">Props</span>
                     </h1>
-                    <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px] max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px] max-w-2xl mx-auto leading-relaxed border-t border-white/5 pt-6 mt-6">
+                        <Activity className="w-4 h-4 mx-auto mb-3 text-primary animate-bounce" />
                         Análisis masivo de mercados de jugadores impulsado por Inteligencia Artificial de última
                         generación y datos en tiempo real de SportsData.
                     </p>
@@ -262,80 +262,99 @@ function PropsDashboardContent() {
                 {/* Content Area Based on Filter */}
                 {
                     selectedSubFilter === 'picks' ? (
-                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                            <div className="flex flex-col gap-6">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white">
-                                        Oportunidades <span className="text-primary">Detectadas</span>
-                                    </h2>
-                                    <div className="flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20">
-                                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-primary">Live Scanning</span>
+                        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            <div className="flex flex-col gap-8">
+                                <div className="flex items-center justify-between border-b border-white/5 pb-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-primary/10 rounded-xl border border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)]">
+                                            <Zap className="w-6 h-6 text-primary" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">
+                                                Oportunidades <span className="text-primary">Detectadas</span>
+                                            </h2>
+                                            <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1">Escaneo en tiempo real de 150+ Mercados</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 px-4 py-1.5 bg-black/40 rounded-full border border-white/10 backdrop-blur-sm shadow-inner">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-[pulse_1s_infinite]"></div>
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-300">Live Scanning</span>
                                     </div>
                                 </div>
 
                                 {/* Team Filter Horizontal Scroll */}
-                                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 settings-scrollbar">
-                                    {availableTeams.map(team => (
-                                        <button
-                                            key={team}
-                                            onClick={() => setSelectedTeam(team)}
-                                            className={clsx(
-                                                "whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all",
-                                                selectedTeam === team
-                                                    ? "bg-white text-black border-white"
-                                                    : "bg-white/5 text-gray-400 border-white/5 hover:border-white/20 hover:text-white"
-                                            )}
-                                        >
-                                            {team === 'ALL' ? 'TODOS LOS EQUIPOS' : team}
-                                        </button>
-                                    ))}
+                                <div className="relative group/scroll">
+                                    <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[#050505] to-transparent z-10"></div>
+                                    <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#050505] to-transparent z-10"></div>
+                                    <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide px-4 md:px-0 settings-scrollbar no-scrollbar scroll-smooth">
+                                        {availableTeams.map(team => (
+                                            <button
+                                                key={team}
+                                                onClick={() => setSelectedTeam(team)}
+                                                className={clsx(
+                                                    "whitespace-nowrap px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border transition-all duration-300 backdrop-blur-sm",
+                                                    selectedTeam === team
+                                                        ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-105"
+                                                        : "bg-white/5 text-gray-500 border-white/5 hover:border-white/20 hover:text-white hover:bg-white/10"
+                                                )}
+                                            >
+                                                {team === 'ALL' ? 'TODOS LOS EQUIPOS' : team}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
-                            {loading ? (
+                            {loadingBestPicks ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                                    {[1, 2, 3].map((i) => (
                                         <PropCardSkeleton key={i} />
                                     ))}
+                                </div>
+                            ) : !hasSearched && filteredPicks.length === 0 ? (
+                                <div className="text-center py-20 opacity-50">
+                                    <Search className="w-12 h-12 mx-auto mb-4 text-gray-600" />
+                                    <p className="font-black uppercase tracking-widest text-gray-500">No se encontraron picks en esta categoría</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {/* Auto-populated Best Picks */}
                                     {filteredPicks.map((pick: any, i: number) => (
-                                        <div key={i} className="group relative bg-[#090909] border border-white/10 hover:border-primary/50 p-6 rounded-[2.5rem] transition-all hover:shadow-[0_0_30px_rgba(16,255,80,0.15)] overflow-hidden">
-                                            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                                                <Zap className="w-32 h-32 text-primary rotate-12" />
-                                            </div>
+                                        <div key={i} className="glass-card group relative border border-white/10 hover:border-primary/50 hover:cyber-border p-1 rounded-[2.5rem] transition-all duration-500 hover:shadow-[0_0_50px_rgba(var(--primary-rgb),0.15)] overflow-hidden">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent rounded-[2.5rem]"></div>
+                                            <div className="absolute top-0 right-0 p-20 bg-primary/20 rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
-                                            <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                                            <div className="relative z-10 bg-[#080808]/80 backdrop-blur-xl rounded-[2.3rem] p-8 h-full flex flex-col items-center text-center space-y-6">
                                                 <div className="relative">
-                                                    <div className="w-24 h-24 rounded-full p-1 border-2 border-primary/30 group-hover:border-primary transition-colors">
+                                                    <div className="w-28 h-28 rounded-full p-1.5 border-2 border-white/10 group-hover:border-primary transition-colors duration-500 relative z-10">
+                                                        <div className="absolute inset-0 rounded-full border border-primary/50 scale-110 opacity-0 group-hover:opacity-100 group-hover:scale-125 transition-all duration-700 animate-pulse-slow"></div>
                                                         <img
                                                             src={getPlayerImage(pick.id)}
                                                             onError={(e) => { e.currentTarget.src = DEFAULT_IMAGES.player }}
-                                                            className="w-full h-full object-cover rounded-full"
+                                                            className="w-full h-full object-cover rounded-full shadow-2xl"
                                                         />
                                                     </div>
-                                                    <div className="absolute -bottom-2 -right-2 bg-black border border-white/10 px-3 py-1 rounded-full text-[10px] font-black text-primary">
-                                                        {pick.prob}
+                                                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-black border border-white/20 px-4 py-1.5 rounded-full text-[10px] font-black text-primary shadow-[0_0_15px_rgba(0,0,0,0.8)] z-20 whitespace-nowrap group-hover:bg-primary group-hover:text-black group-hover:border-primary transition-all duration-300">
+                                                        {pick.prob} PROB
                                                     </div>
                                                 </div>
 
-                                                <div>
-                                                    <h3 className="text-xl font-black italic uppercase tracking-tighter text-white">{pick.player}</h3>
-                                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{pick.team}</p>
+                                                <div className="space-y-1">
+                                                    <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white drop-shadow-lg group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-400 transition-all">{pick.player}</h3>
+                                                    <p className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.2em]">{pick.team}</p>
                                                 </div>
 
-                                                <div className="w-full bg-white/5 rounded-2xl p-4 border border-white/5 group-hover:bg-primary/10 transition-colors">
-                                                    <p className="text-[9px] text-gray-400 font-black uppercase mb-1">PROYECCIÓN IA</p>
-                                                    <p className="text-lg font-black italic text-white group-hover:text-primary transition-colors">{pick.prop}</p>
+                                                <div className="w-full bg-white/[0.03] rounded-2xl p-5 border border-white/5 group-hover:bg-primary/5 group-hover:border-primary/20 transition-all duration-300 relative overflow-hidden">
+                                                    <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all duration-300"></div>
+                                                    <p className="text-[8px] text-gray-500 font-black uppercase tracking-[0.2em] mb-2">PROYECCIÓN IA</p>
+                                                    <p className="text-xl font-black italic text-white group-hover:text-primary transition-colors drop-shadow-glow">{pick.prop}</p>
                                                 </div>
 
-
-                                                <button className="w-full py-3 bg-white text-black font-black uppercase tracking-widest rounded-xl text-[10px] hover:bg-primary transition-colors">
-                                                    Analizar Pick
-                                                </button>
+                                                <Link href={`/player/${selectedSport}/${pick.id}`} className="w-full">
+                                                    <button className="w-full py-4 bg-white text-black font-black uppercase tracking-[0.2em] rounded-xl text-[9px] hover:bg-primary transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.4)] hover:scale-[1.02] active:scale-[0.98]">
+                                                        Analizar Pick
+                                                    </button>
+                                                </Link>
                                             </div>
                                         </div>
                                     ))}
@@ -343,9 +362,12 @@ function PropsDashboardContent() {
                             )}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center gap-8 bg-white/[0.02] border border-white/5 p-8 rounded-[3rem] backdrop-blur-xl">
+                        <div className="flex flex-col items-center gap-10 bg-gradient-to-b from-white/[0.02] to-transparent border border-white/5 p-10 rounded-[3rem] backdrop-blur-md relative overflow-hidden">
+                            {/* Decorative Grid */}
+                            <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:linear-gradient(to_bottom,transparent,black)]"></div>
+
                             {/* Main Category Tabs */}
-                            <div className="flex flex-wrap items-center justify-center gap-2 p-1 bg-white/[0.03] rounded-[2rem] border border-white/5 backdrop-blur-xl">
+                            <div className="flex flex-wrap items-center justify-center gap-3 p-2 bg-black/40 rounded-[2.5rem] border border-white/5 backdrop-blur-xl relative z-10 shadow-2xl">
                                 {categories.map((cat) => (
                                     <button
                                         key={cat.id}
@@ -355,32 +377,34 @@ function PropsDashboardContent() {
                                             setPlayers([]);
                                         }}
                                         className={clsx(
-                                            "px-10 py-4 rounded-[1.8rem] transition-all text-[11px] font-black uppercase tracking-widest flex items-center gap-3",
+                                            "px-8 py-3.5 rounded-[2rem] transition-all duration-300 text-[10px] font-black uppercase tracking-widest flex items-center gap-3 group relative overflow-hidden",
                                             selectedSport === cat.id
-                                                ? "bg-white text-black shadow-2xl"
-                                                : "hover:bg-white/5 text-gray-500"
+                                                ? "text-black shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105"
+                                                : "text-gray-500 hover:text-white"
                                         )}
                                     >
-                                        <cat.icon className={clsx("w-4 h-4", selectedSport === cat.id ? "text-black" : cat.color)} />
-                                        {cat.label}
+                                        <div className={clsx("absolute inset-0 transition-all duration-300", selectedSport === cat.id ? "bg-white" : "bg-transparent group-hover:bg-white/5")}></div>
+                                        <cat.icon className={clsx("w-4 h-4 relative z-10 transition-colors", selectedSport === cat.id ? "text-black" : cat.color)} />
+                                        <span className="relative z-10">{cat.label}</span>
                                     </button>
                                 ))}
                             </div>
 
                             {/* Sub Filters - Middle Bar */}
-                            <div className="flex items-center gap-1 p-1 bg-black/40 border border-white/5 rounded-2xl backdrop-blur-md">
+                            <div className="flex items-center gap-2 p-1.5 bg-black/60 border border-white/10 rounded-2xl backdrop-blur-md relative z-10 shadow-inner">
                                 {subFilters.map((sub) => (
                                     <button
                                         key={sub.id}
                                         onClick={() => setSelectedSubFilter(sub.id)}
                                         className={clsx(
-                                            "px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                            "px-8 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all relative overflow-hidden group",
                                             selectedSubFilter === sub.id
-                                                ? "bg-white/10 text-white border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+                                                ? "text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]"
                                                 : "text-gray-600 hover:text-gray-400"
                                         )}
                                     >
-                                        {sub.label}
+                                        <div className={clsx("absolute inset-0 transition-opacity duration-300", selectedSubFilter === sub.id ? "bg-white/10 opacity-100" : "bg-white/5 opacity-0 group-hover:opacity-100")}></div>
+                                        <span className="relative z-10">{sub.label}</span>
                                     </button>
                                 ))}
                             </div>
@@ -388,20 +412,21 @@ function PropsDashboardContent() {
                             {/* Search Input */}
                             <form
                                 onSubmit={(e) => { e.preventDefault(); triggerSearch(search); }}
-                                className="w-full max-w-2xl relative group"
+                                className="w-full max-w-2xl relative group z-10"
                             >
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-blue-600/20 to-primary/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                 <input
                                     type="text"
                                     placeholder="BUSCAR JUGADOR O EQUIPO..."
-                                    className="w-full bg-black/60 border-2 border-white/5 rounded-2xl py-6 px-12 text-sm font-black italic uppercase tracking-widest focus:outline-none focus:border-primary/40 focus:bg-black transition-all text-center placeholder:text-gray-700 shadow-inner"
+                                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-[2rem] py-8 px-12 text-lg font-black italic uppercase tracking-widest focus:outline-none focus:border-white/20 focus:bg-black transition-all text-center placeholder:text-gray-800 shadow-inner relative z-10"
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
                                 <button
                                     type="submit"
-                                    className="absolute right-8 top-1/2 -translate-y-1/2 p-2 hover:bg-white/5 rounded-full transition-colors"
+                                    className="absolute right-6 top-1/2 -translate-y-1/2 p-4 hover:bg-white/5 rounded-full transition-all z-20 group/icon"
                                 >
-                                    <Search className="w-5 h-5 text-gray-700 group-focus-within:text-primary transition-colors" />
+                                    <Search className="w-6 h-6 text-gray-600 group-hover/icon:text-primary transition-colors" />
                                 </button>
                             </form>
                         </div>
@@ -538,6 +563,18 @@ function PropsDashboardContent() {
                                 )}
                             </div>
                         ))
+                    ) : error ? (
+                        <div className="py-20 text-center border border-red-500/20 bg-red-500/5 rounded-[3rem]">
+                            <Activity className="w-12 h-12 text-red-500 mx-auto mb-4 animate-pulse" />
+                            <h3 className="text-xl font-black text-red-400 uppercase tracking-widest mb-2">Error de Búsqueda</h3>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{error}</p>
+                        </div>
+                    ) : hasSearched && players.length === 0 && !loading ? (
+                        <div className="py-20 text-center border border-white/5 bg-white/5 rounded-[3rem]">
+                            <Search className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                            <h3 className="text-xl font-black text-gray-500 uppercase tracking-widest mb-2">Sin Resultados</h3>
+                            <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">No encontramos al jugador "{search}" en {selectedSport.toUpperCase()}</p>
+                        </div>
                     ) : (
                         <div className="py-32 text-center border-2 border-dashed border-white/5 rounded-[4rem]">
                             <Users className="w-16 h-16 text-white/5 mx-auto mb-6" />

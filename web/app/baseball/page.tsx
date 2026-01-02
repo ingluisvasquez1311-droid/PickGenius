@@ -89,11 +89,15 @@ export default function BaseballHub() {
     };
 
     return (
-        <div className="min-h-screen bg-[#020202] text-white pt-24 pb-20 px-4 md:px-12 max-w-[1600px] mx-auto relative overflow-hidden">
-            {/* Brutalist Background Elements */}
-            <div className="fixed inset-0 pointer-events-none opacity-20">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-600/10 blur-[250px] -translate-y-1/2 translate-x-1/2 rounded-full"></div>
+        <div className="min-h-screen bg-[#050505] text-white pt-24 pb-20 px-4 md:px-12 max-w-[1600px] mx-auto relative overflow-hidden">
+            {/* Cyber-Glass Ambient Layers */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-20%] right-[-10%] w-[80%] h-[80%] bg-blue-600/20 blur-[180px] animate-pulse rounded-full opacity-60"></div>
+                <div className="absolute top-[10%] left-[-20%] w-[70%] h-[70%] bg-cyan-500/15 blur-[200px] rounded-full opacity-40"></div>
+                <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[60%] bg-indigo-500/10 blur-[180px] rounded-full opacity-30"></div>
+                <div className="absolute inset-0 checkered-bg opacity-[0.05]"></div>
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')] opacity-[0.02] mix-blend-overlay"></div>
+                <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-500/20 to-transparent blur-sm"></div>
             </div>
 
             <div className="relative z-10 flex flex-col gap-12">
@@ -101,45 +105,49 @@ export default function BaseballHub() {
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 border-b-2 border-white/10 pb-12">
                     <div className="space-y-4">
                         <div className="flex items-center gap-4">
-                            <Link href="/" className="group p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-blue-600 transition-all duration-500">
-                                <ArrowLeft className="w-6 h-6 text-gray-400 group-hover:text-white" />
+                            <Link href="/" className="group p-4 glass-card rounded-2xl hover:cyber-border transition-all duration-500">
+                                <ArrowLeft className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
                             </Link>
-                            <span className="text-[10px] font-black uppercase tracking-[0.8em] text-blue-500 bg-blue-500/10 px-4 py-1.5 rounded-full border border-blue-500/20">
-                                Diamond Analytics Engine
-                            </span>
+                            <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[10px] font-black uppercase tracking-[0.4em]">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                </span>
+                                DIAMOND_ENGINE_V4.5
+                            </div>
                         </div>
-                        <h1 className="text-7xl md:text-9xl font-black italic tracking-tighter uppercase leading-[0.8] flex flex-col">
-                            <span className="text-white">HUB</span>
-                            <span className="text-transparent" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.2)' }}>MLB MAJOR</span>
+                        <h1 className="text-7xl md:text-[12rem] font-black italic tracking-tighter uppercase leading-[0.8] flex flex-col">
+                            <span className="text-white drop-shadow-[0_0_80px_rgba(59,130,246,0.3)]">HUB</span>
+                            <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #3b82f6 10%, #06b6d4 50%, #eff6ff 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 200%', animation: 'var(--animate-gradient-shift)' }}>MLB MAJOR</span>
                         </h1>
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-1 bg-blue-600"></div>
-                            <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px]">Corte Métrico de Alta Fidelidad v4.5</p>
+                        <div className="flex items-center gap-4">
+                            <div className="h-px w-24 bg-gradient-to-r from-blue-500 to-transparent"></div>
+                            <p className="text-gray-500 font-black uppercase tracking-[0.5em] text-[10px]">Corte Métrico de Alta Fidelidad</p>
                         </div>
                     </div>
 
-                    {/* Industrial Navigation Controls */}
+                    {/* Cyber Navigation Controls */}
                     <div className="flex flex-col gap-6 w-full lg:w-auto">
                         <div className="flex flex-wrap gap-4">
-                            {/* Live/Scheduled Switcher */}
-                            <div className="flex bg-white/[0.02] border-2 border-white/10 p-1.5 rounded-[1.5rem] shadow-inner">
+                            {/* Live/Scheduled Switcher - Cyber Style */}
+                            <div className="flex glass-card p-1.5 rounded-[1.5rem] border border-white/10">
                                 <button
                                     onClick={() => setActiveFilter('live')}
                                     className={clsx(
                                         "px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center gap-3 transition-all duration-500",
-                                        activeFilter === 'live' ? "bg-red-600 text-white shadow-[0_0_25px_rgba(220,38,38,0.4)]" : "text-gray-600 hover:text-white"
+                                        activeFilter === 'live' ? "cyber-button text-black shadow-[0_0_25px_rgba(255,95,31,0.4)]" : "text-gray-600 hover:text-white hover:bg-white/5"
                                     )}
                                 >
-                                    <span className={clsx("w-2 h-2 rounded-full", activeFilter === 'live' ? "bg-white animate-pulse" : "bg-gray-800")}></span>
+                                    <span className={clsx("w-2 h-2 rounded-full", activeFilter === 'live' ? "bg-black animate-pulse shadow-[0_0_10px_black]" : "bg-gray-700")}></span>
                                     Live {baseballLiveCount > 0 && (
-                                        <span className="ml-1.5 px-2 py-0.5 bg-white/20 rounded-md text-[9px]">{baseballLiveCount}</span>
+                                        <span className="ml-1.5 px-2 py-0.5 bg-black/20 rounded-md text-[10px] font-mono">{baseballLiveCount}</span>
                                     )}
                                 </button>
                                 <button
                                     onClick={() => setActiveFilter('scheduled')}
                                     className={clsx(
                                         "px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center gap-3 transition-all duration-500",
-                                        activeFilter === 'scheduled' ? "bg-blue-600 text-white shadow-[0_0_25px_rgba(59,130,246,0.4)]" : "text-gray-600 hover:text-white"
+                                        activeFilter === 'scheduled' ? "bg-blue-500 text-black shadow-[0_0_25px_rgba(59,130,246,0.4)]" : "text-gray-600 hover:text-white hover:bg-white/5"
                                     )}
                                 >
                                     <Calendar className="w-4 h-4" />
@@ -147,9 +155,9 @@ export default function BaseballHub() {
                                 </button>
                             </div>
 
-                            <Link href="/props?sport=mlb" className="group flex items-center gap-4 px-8 py-4 bg-white/5 hover:bg-white/10 border-2 border-white/5 rounded-2xl transition-all duration-500">
-                                <Zap className="w-5 h-5 text-yellow-500 group-hover:scale-125 transition-transform" />
-                                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-white italic">Diamond Props</span>
+                            <Link href="/props?sport=mlb" className="group flex items-center gap-4 px-8 py-4 glass-card hover:cyber-border rounded-2xl transition-all duration-500">
+                                <Zap className="w-5 h-5 text-yellow-500 group-hover:scale-125 group-hover:rotate-12 transition-all animate-pulse" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-blue-500 italic">Diamond Props</span>
                                 <ChevronRight className="w-4 h-4 text-gray-700 group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </div>

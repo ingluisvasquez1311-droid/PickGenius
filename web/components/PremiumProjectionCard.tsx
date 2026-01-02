@@ -12,14 +12,16 @@ interface Projections {
     item3?: { label: string; value: string };
 }
 
-interface PremiumProjectionCardProps {
+export interface PremiumProjectionCardProps {
     sport: SportType;
     projections: Projections;
     isVisible: boolean;
     confidence?: number;
+    mvpName?: string; // New: MVP Player Name
+    marketType?: string; // New: Over/Under market context
 }
 
-export const PremiumProjectionCard = ({ sport, projections, isVisible, confidence = 85 }: PremiumProjectionCardProps) => {
+export const PremiumProjectionCard = ({ sport, projections, isVisible, confidence = 85, mvpName, marketType }: PremiumProjectionCardProps) => {
     if (!isVisible) return null;
 
     // Default items by sport if projections are missing
@@ -27,92 +29,126 @@ export const PremiumProjectionCard = ({ sport, projections, isVisible, confidenc
         switch (s) {
             case 'basketball':
                 return [
-                    { label: 'Puntos Tot.', value: '220-225', icon: Target, color: 'text-orange-500' },
-                    { label: 'Rebotes', value: '42-45', icon: Activity, color: 'text-blue-400' },
-                    { label: 'Triples', value: '12-15', icon: Zap, color: 'text-yellow-400' },
+                    { label: 'Puntos Tot.', value: '220.5', type: 'over' }, // Example default
+                    { label: 'Rebotes', value: '42.5', type: 'under' },
+                    { label: 'Triples', value: '12.5', type: 'over' },
                 ];
-            case 'baseball':
+            // ... (keep other defaults similar but we rely on props mostly)
+            default:
                 return [
-                    { label: 'Carreras', value: '8-10', icon: Trophy, color: 'text-white' },
-                    { label: 'Hits', value: '15-18', icon: Activity, color: 'text-blue-400' },
-                    { label: 'Strikeouts', value: '12-14', icon: Zap, color: 'text-primary' },
-                ];
-            case 'nfl':
-                return [
-                    { label: 'Puntos', value: '48-52', icon: Target, color: 'text-red-500' },
-                    { label: 'Yardas Aire', value: '280+', icon: Activity, color: 'text-blue-400' },
-                    { label: 'TDs', value: '5-6', icon: Zap, color: 'text-yellow-400' },
-                ];
-            case 'tennis':
-                return [
-                    { label: 'Aces', value: '10-12', icon: Zap, color: 'text-yellow-400' },
-                    { label: 'Dobles F.', value: '3-4', icon: ShieldAlert, color: 'text-red-500' },
-                    { label: 'Breaks', value: '4-5', icon: Target, color: 'text-primary' },
-                ];
-            default: // football / soccer
-                return [
-                    { label: 'Córners', value: '8-10', icon: Target, color: 'text-primary' },
-                    { label: 'Tiros Arco', value: '10-12', icon: Zap, color: 'text-blue-400' },
-                    { label: 'Tarjetas', value: '3-4', icon: ShieldAlert, color: 'text-red-500' },
+                    { label: 'Córners', value: '9.5', type: 'over' },
+                    { label: 'Tiros Arco', value: '8.5', type: 'over' },
+                    { label: 'Tarjetas', value: '3.5', type: 'under' },
                 ];
         }
     };
 
     const displayItems = [
-        projections.item1 || getDefaults(sport)[0],
-        projections.item2 || getDefaults(sport)[1],
-        projections.item3 || getDefaults(sport)[2],
+        projections.item1 || { label: 'Stat 1', value: '--' },
+        projections.item2 || { label: 'Stat 2', value: '--' },
+        projections.item3 || { label: 'Stat 3', value: '--' },
     ];
 
     return (
         <div className="fixed bottom-8 right-8 z-[100] animate-in slide-in-from-bottom-10 duration-700">
-            <div className="relative group">
-                {/* Glow Effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-600 to-red-600 rounded-[2.5rem] blur-xl opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+            <div className="relative group perspective-[1000px]">
+                {/* Holographic Glow Effect */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-purple-600 rounded-[2.5rem] blur-2xl opacity-30 group-hover:opacity-60 transition duration-1000 animate-tilt"></div>
 
-                <div className="relative glass-card bg-black/80 backdrop-blur-2xl border border-white/10 rounded-[2.2rem] p-6 shadow-2xl space-y-5 min-w-[340px]">
-                    <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-primary/20 p-2.5 rounded-xl border border-primary/20">
-                                <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+                <div className="relative glass-card bg-[#050505]/90 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-6 shadow-2xl space-y-6 min-w-[360px] transform transition-transform duration-500 hover:rotate-y-[2deg]">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-4 relative overflow-hidden">
+                        {/* Shimmer Effect on Header */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] animate-[shimmer_3s_infinite]"></div>
+
+                        <div className="flex items-center gap-4 relative z-10">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-primary/40 blur-lg rounded-xl animate-pulse"></div>
+                                <div className="bg-gradient-to-br from-primary/20 to-black p-3 rounded-xl border border-primary/30 relative">
+                                    <Sparkles className="w-5 h-5 text-primary animate-[spin_4s_linear_infinite]" />
+                                </div>
                             </div>
                             <div className="space-y-0.5">
-                                <h3 className="text-sm font-black text-white italic uppercase tracking-tighter">Radar {sport.toUpperCase()}</h3>
-                                <p className="text-[8px] font-black text-gray-500 uppercase tracking-[0.4em]">Proyección IA v4.0</p>
+                                <h3 className="text-sm font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
+                                    Radar {sport.toUpperCase()}
+                                    <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_var(--primary)]"></span>
+                                </h3>
+                                <p className="text-[7px] font-black text-gray-500 uppercase tracking-[0.4em] flex items-center gap-1">
+                                    <span className="w-2 h-[1px] bg-primary"></span>
+                                    AI PROJECTION ENGINE V5.0
+                                </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                            <span className="text-[9px] font-black text-primary uppercase tracking-widest italic">Live Edge</span>
-                        </div>
+                        {marketType && (
+                            <div className="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20 shadow-[inset_0_0_10px_rgba(var(--primary-rgb),0.2)]">
+                                <span className="text-[9px] font-black text-primary uppercase tracking-widest italic drop-shadow-glow">{marketType} MODE</span>
+                            </div>
+                        )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
-                        {displayItems.map((item: any, idx) => (
-                            <div key={idx} className="text-center space-y-2 group/item">
-                                <div className="flex justify-center">
-                                    {item.icon ? <item.icon className={clsx("w-5 h-5", item.color || "text-white")} /> : <Activity className="w-5 h-5 text-primary" />}
-                                </div>
-                                <div className="space-y-0.5">
-                                    <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest truncate">{item.label}</p>
-                                    <p className="text-lg font-black text-white italic tracking-tighter group-hover/item:scale-110 transition-transform">
-                                        {item.value}
-                                    </p>
+                    {/* MVP SECTION - NEW */}
+                    {mvpName && (
+                        <div className="flex items-center gap-4 bg-white/[0.03] p-3 rounded-2xl border border-white/5 relative overflow-hidden group/mvp">
+                            <div className="absolute -right-2 -top-2 text-white/5">
+                                <Trophy className="w-16 h-16 rotate-12" />
+                            </div>
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 p-[1px] shrink-0 shadow-lg relative z-10">
+                                <div className="w-full h-full bg-black rounded-[0.7rem] flex items-center justify-center relative overflow-hidden">
+                                    <Trophy className="w-6 h-6 text-amber-500" />
                                 </div>
                             </div>
-                        ))}
+                            <div className="space-y-1 relative z-10">
+                                <p className="text-[7px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-1">
+                                    <Sparkles className="w-2 h-2" />
+                                    MVP PROJECTED
+                                </p>
+                                <p className="text-lg font-black text-white italic tracking-tighter leading-none">{mvpName}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-3 gap-3 relative z-10">
+                        {displayItems.map((item: any, idx) => {
+                            const isOver = item.value.toLowerCase().includes('over') || item.label.toLowerCase().includes('mas');
+                            const isUnder = item.value.toLowerCase().includes('under') || item.label.toLowerCase().includes('menos');
+
+                            return (
+                                <div key={idx} className="group/item relative p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-primary/30 transition-all duration-300 hover:bg-white/[0.05]">
+                                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary/20 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+                                    <div className="text-center space-y-2">
+                                        <div className="flex justify-center transform group-hover/item:scale-110 transition-transform duration-300">
+                                            {item.icon ? (
+                                                <item.icon className={clsx("w-5 h-5 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]", item.color || "text-white")} />
+                                            ) : (
+                                                <Activity className="w-5 h-5 text-primary" />
+                                            )}
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest truncate group-hover/item:text-primary transition-colors">{item.label}</p>
+                                            <p className="text-lg font-black text-white italic tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 group-hover/item:from-white group-hover/item:to-white">
+                                                {item.value}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
 
-                    <div className="pt-2">
-                        <div className="bg-primary/5 rounded-2xl p-3 border border-primary/10 flex items-center gap-3 group/value">
-                            <TrendingUp className="w-4 h-4 text-primary" />
-                            <div className="flex-1">
-                                <div className="flex justify-between items-center mb-1">
+                    <div className="pt-2 relative z-10">
+                        <div className="bg-gradient-to-r from-primary/10 via-black to-black rounded-2xl p-4 border border-primary/20 flex items-center gap-4 group/value relative overflow-hidden">
+                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/value:opacity-100 transition-opacity"></div>
+                            <div className="bg-black/50 p-2 rounded-xl border border-primary/20">
+                                <TrendingUp className="w-5 h-5 text-primary group-hover/value:rotate-12 transition-transform" />
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <div className="flex justify-between items-center">
                                     <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Confianza del Algoritmo</span>
-                                    <span className="text-[9px] font-black text-primary italic">{confidence}%</span>
+                                    <span className="text-[10px] font-black text-primary italic drop-shadow-glow">{confidence}%</span>
                                 </div>
-                                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                                    <div className={`h-full bg-primary shadow-glow-sm`} style={{ width: `${confidence}%` }}></div>
+                                <div className="h-1.5 bg-black/50 rounded-full overflow-hidden border border-white/5">
+                                    <div className="h-full bg-gradient-to-r from-primary to-blue-500 shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)] relative">
+                                        <div className="absolute top-0 bottom-0 right-0 w-4 bg-white/50 blur-md transform translate-x-full animate-[shimmer_2s_infinite]"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

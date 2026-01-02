@@ -85,11 +85,15 @@ export default function BasketballHub() {
     };
 
     return (
-        <div className="min-h-screen bg-[#020202] text-white pt-24 pb-20 px-4 md:px-12 max-w-[1600px] mx-auto relative overflow-hidden">
-            {/* Brutalist Background Elements */}
-            <div className="fixed inset-0 pointer-events-none opacity-20">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#FF4500]/10 blur-[250px] -translate-y-1/2 translate-x-1/2 rounded-full"></div>
+        <div className="min-h-screen bg-[#050505] text-white pt-24 pb-20 px-4 md:px-12 max-w-[1600px] mx-auto relative overflow-hidden">
+            {/* Cyber-Glass Ambient Layers */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-20%] right-[-10%] w-[80%] h-[80%] bg-[#FF4500]/20 blur-[180px] animate-pulse rounded-full opacity-60"></div>
+                <div className="absolute top-[10%] left-[-20%] w-[70%] h-[70%] bg-secondary/15 blur-[200px] rounded-full opacity-40"></div>
+                <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[60%] bg-accent/10 blur-[180px] rounded-full opacity-30"></div>
+                <div className="absolute inset-0 checkered-bg opacity-[0.05]"></div>
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')] opacity-[0.02] mix-blend-overlay"></div>
+                <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-full h-[2px] bg-gradient-to-r from-transparent via-[#FF4500]/20 to-transparent blur-sm"></div>
             </div>
 
             <div className="relative z-10 flex flex-col gap-12">
@@ -97,20 +101,24 @@ export default function BasketballHub() {
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 border-b-2 border-white/10 pb-12">
                     <div className="space-y-4">
                         <div className="flex items-center gap-4">
-                            <Link href="/" className="group p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-[#FF4500] transition-all duration-500">
-                                <ArrowLeft className="w-6 h-6 text-gray-400 group-hover:text-black" />
+                            <Link href="/" className="group p-4 glass-card rounded-2xl hover:cyber-border transition-all duration-500">
+                                <ArrowLeft className="w-6 h-6 text-gray-400 group-hover:text-[#FF4500]" />
                             </Link>
-                            <span className="text-[10px] font-black uppercase tracking-[0.8em] text-[#FF4500] bg-[#FF4500]/10 px-4 py-1.5 rounded-full border border-[#FF4500]/20">
-                                Global Hoops Engine
-                            </span>
+                            <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-[#FF4500]/10 border border-[#FF4500]/20 text-[#FF4500] text-[10px] font-black uppercase tracking-[0.4em]">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF4500] opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF4500]"></span>
+                                </span>
+                                HOOPS_ENGINE_V5.2
+                            </div>
                         </div>
-                        <h1 className="text-7xl md:text-9xl font-black italic tracking-tighter uppercase leading-[0.8] flex flex-col">
-                            <span className="text-white">HUB</span>
-                            <span className="text-transparent" style={{ WebkitTextStroke: '2px rgba(255,255,255,0.2)' }}>BALONCESTO</span>
+                        <h1 className="text-7xl md:text-[12rem] font-black italic tracking-tighter uppercase leading-[0.8] flex flex-col">
+                            <span className="text-white drop-shadow-[0_0_80px_rgba(255,69,0,0.3)]">HUB</span>
+                            <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #FF4500 10%, #FF6B00 50%, #00F5FF 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 200%', animation: 'var(--animate-gradient-shift)' }}>BALONCESTO</span>
                         </h1>
-                        <div className="flex items-center gap-3">
-                            <div className="w-12 h-1 bg-[#FF4500]"></div>
-                            <p className="text-gray-500 font-bold uppercase tracking-[0.3em] text-[10px]">Motor de Análisis de Alta Resolución v5.2</p>
+                        <div className="flex items-center gap-4">
+                            <div className="h-px w-24 bg-gradient-to-r from-[#FF4500] to-transparent"></div>
+                            <p className="text-gray-500 font-black uppercase tracking-[0.5em] text-[10px]">Sistema Ultra-Fidelidad</p>
                         </div>
                     </div>
 
@@ -118,17 +126,17 @@ export default function BasketballHub() {
                     <div className="flex flex-col gap-6 w-full lg:w-auto">
                         <div className="flex flex-wrap gap-4">
                             {/* Live/Scheduled Switcher */}
-                            <div className="flex bg-white/[0.02] border-2 border-white/10 p-1.5 rounded-[1.5rem] shadow-inner">
+                            <div className="flex glass-card p-1.5 rounded-[1.5rem] border border-white/10">
                                 <button
                                     onClick={() => setActiveFilter('live')}
                                     className={clsx(
                                         "px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center gap-3 transition-all duration-500",
-                                        activeFilter === 'live' ? "bg-red-600 text-white shadow-[0_0_25px_rgba(220,38,38,0.4)]" : "text-gray-600 hover:text-white"
+                                        activeFilter === 'live' ? "cyber-button text-black shadow-[0_0_25px_rgba(255,95,31,0.4)]" : "text-gray-600 hover:text-white hover:bg-white/5"
                                     )}
                                 >
-                                    <span className={clsx("w-2 h-2 rounded-full", activeFilter === 'live' ? "bg-white animate-pulse" : "bg-gray-800")}></span>
+                                    <span className={clsx("w-2 h-2 rounded-full", activeFilter === 'live' ? "bg-black animate-pulse shadow-[0_0_10px_black]" : "bg-gray-700")}></span>
                                     Live {basketballLiveCount > 0 && (
-                                        <span className="ml-1.5 px-2 py-0.5 bg-white/20 rounded-md text-[10px]">{basketballLiveCount}</span>
+                                        <span className="ml-1.5 px-2 py-0.5 bg-black/20 rounded-md text-[10px] font-mono">{basketballLiveCount}</span>
                                     )}
                                 </button>
                                 <button
@@ -143,15 +151,15 @@ export default function BasketballHub() {
                                 </button>
                             </div>
 
-                            <Link href="/props?sport=basketball" className="group flex items-center gap-4 px-8 py-4 bg-white/5 hover:bg-white/10 border-2 border-white/5 rounded-2xl transition-all duration-500">
-                                <Zap className="w-5 h-5 text-yellow-500 group-hover:scale-125 transition-transform" />
-                                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-white italic">Elite Props</span>
+                            <Link href="/props?sport=basketball" className="group flex items-center gap-4 px-8 py-4 glass-card hover:cyber-border rounded-2xl transition-all duration-500">
+                                <Zap className="w-5 h-5 text-yellow-500 group-hover:scale-125 group-hover:rotate-12 transition-all animate-pulse" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-[#FF4500] italic">Elite Props</span>
                                 <ChevronRight className="w-4 h-4 text-gray-700 group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </div>
 
-                        {/* Blocky Tabs */}
-                        <div className="flex w-full items-stretch h-14 bg-white/5 border-2 border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                        {/* Ultra-Premium Tabs */}
+                        <div className="flex w-full items-stretch h-14 glass-card border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                             {['PARTIDOS', 'TABLAS', 'ÉLITE'].map((tabLabel, idx) => {
                                 const tabId = ['matches', 'standings', 'leaders'][idx];
                                 const TabIcon = [Activity, Trophy, Target][idx];
@@ -160,16 +168,15 @@ export default function BasketballHub() {
                                         key={tabId}
                                         onClick={() => setActiveTab(tabId as any)}
                                         className={clsx(
-                                            "flex-1 px-6 font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 transition-all duration-300 relative group",
-                                            activeTab === tabId ? "bg-[#FF4500] text-black" : "text-gray-500 hover:bg-white/5 hover:text-white"
+                                            "flex-1 px-6 font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 transition-all duration-500 relative group",
+                                            activeTab === tabId ? "bg-gradient-to-r from-[#FF4500] to-[#FF6B00] text-black shadow-[0_0_20px_rgba(255,69,0,0.4)]" : "text-gray-500 hover:bg-white/5 hover:text-white"
                                         )}
                                     >
-                                        <TabIcon className={clsx("w-4 h-4", activeTab === tabId ? "text-black" : "text-gray-600")} />
+                                        <TabIcon className={clsx("w-4 h-4 transition-transform", activeTab === tabId ? "text-black scale-110" : "text-gray-600 group-hover:scale-105")} />
                                         <span className="relative z-10">{tabLabel}</span>
-                                        <div className={clsx(
-                                            "absolute bottom-0 left-0 right-0 h-1 bg-black transition-transform duration-500 origin-left",
-                                            activeTab === tabId ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                                        )}></div>
+                                        {activeTab === tabId && (
+                                            <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
+                                        )}
                                     </button>
                                 );
                             })}
