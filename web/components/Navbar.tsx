@@ -15,13 +15,14 @@ import WalletModal from './WalletModal';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useCredits } from '@/hooks/useCredits';
 import {
-    SignInButton,
-    SignUpButton,
-    UserButton,
-} from '@clerk/nextjs';
-import { Logo } from './Logo'; // Import new Logo component
-import { SafeSignedIn as SignedIn, SafeSignedOut as SignedOut, useUser } from './ClerkSafeProvider';
-// Lucide icons merged above
+    SafeSignInButton as SignInButton,
+    SafeSignUpButton as SignUpButton,
+    SafeUserButton as UserButton,
+    SafeSignedIn as SignedIn,
+    SafeSignedOut as SignedOut,
+    useUser
+} from '@/components/ClerkSafeProvider';
+import { Logo } from './Logo';
 
 export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);

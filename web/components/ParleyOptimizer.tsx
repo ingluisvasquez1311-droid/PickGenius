@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@/components/ClerkSafeProvider';
 import { useQuery } from '@tanstack/react-query';
 import { useBankroll } from '@/hooks/useBankroll';
 import {

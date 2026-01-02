@@ -66,3 +66,39 @@ export function SafeSignedOut({ children }: { children: React.ReactNode }) {
     if (isSignedIn) return null;
     return <>{children}</>;
 }
+
+export function SafeSignInButton(props: any) {
+    const isClerkEnabled = typeof window !== 'undefined' &&
+        !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('include');
+
+    if (!isClerkEnabled) {
+        return <div onClick={() => console.warn('Auth Disabled')} style={{ cursor: 'pointer' }}>{props.children || 'Sign In'}</div>;
+    }
+    const { SignInButton } = require('@clerk/nextjs');
+    return <SignInButton {...props} />;
+}
+
+export function SafeSignUpButton(props: any) {
+    const isClerkEnabled = typeof window !== 'undefined' &&
+        !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('include');
+
+    if (!isClerkEnabled) {
+        return <div onClick={() => console.warn('Auth Disabled')} style={{ cursor: 'pointer' }}>{props.children || 'Sign Up'}</div>;
+    }
+    const { SignUpButton } = require('@clerk/nextjs');
+    return <SignUpButton {...props} />;
+}
+
+export function SafeUserButton(props: any) {
+    const isClerkEnabled = typeof window !== 'undefined' &&
+        !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('include');
+
+    if (!isClerkEnabled) {
+        return <div className="w-8 h-8 rounded-full bg-gray-700 border border-white/10" title="Mock User (Auth Disabled)" />;
+    }
+    const { UserButton } = require('@clerk/nextjs');
+    return <UserButton {...props} />;
+}
