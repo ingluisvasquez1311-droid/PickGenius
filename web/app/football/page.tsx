@@ -26,7 +26,13 @@ export default function FootballHub() {
             const res = await fetch(endpoint);
             if (!res.ok) throw new Error('Error al cargar partidos de fútbol');
             const data = await res.json();
-            return data.events || [];
+            const events = data.events || [];
+
+            // FILTER: Remove finished games from scheduled view
+            if (activeFilter === 'scheduled') {
+                return events.filter((e: any) => e.status?.type !== 'finished');
+            }
+            return events;
         },
         staleTime: 30000,
         refetchInterval: activeFilter === 'live' ? 30000 : 0,
@@ -115,8 +121,7 @@ export default function FootballHub() {
                                 FOOTBALL_ENGINE_V4.0
                             </div>
                         </div>
-                        <h1 className="text-7xl md:text-[12rem] font-black italic tracking-tighter uppercase leading-[0.8] flex flex-col">
-                            <span className="text-white drop-shadow-[0_0_80px_rgba(255,95,31,0.3)]">HUB</span>
+                        <h1 className="text-4xl md:text-[12rem] font-black italic tracking-tighter uppercase leading-[0.85] flex flex-col">
                             <span className="gradient-text">FÚTBOL</span>
                         </h1>
                         <div className="flex items-center gap-4">

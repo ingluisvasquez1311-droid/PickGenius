@@ -28,15 +28,20 @@ export default function BasketballHub() {
             const data = await res.json();
             const events = data.events || [];
 
+            // FILTER FILTER: Remove finished games from scheduled view
+            const filteredEvents = activeFilter === 'scheduled'
+                ? events.filter((e: any) => e.status?.type !== 'finished')
+                : events;
+
             // Auto-expand first 3 tournaments if none are expanded
-            const grouped = groupEvents(events);
+            const grouped = groupEvents(filteredEvents);
             const initialExpanded: Record<number, boolean> = {};
             Object.keys(grouped).slice(0, 3).forEach(id => {
                 initialExpanded[Number(id)] = true;
             });
             setExpandedTournaments(prev => Object.keys(prev).length === 0 ? initialExpanded : prev);
 
-            return events;
+            return filteredEvents;
         },
         staleTime: 30000,
         refetchInterval: activeFilter === 'live' ? 30000 : 0,
@@ -113,8 +118,7 @@ export default function BasketballHub() {
                                 HOOPS_ENGINE_V5.2
                             </div>
                         </div>
-                        <h1 className="text-7xl md:text-[12rem] font-black italic tracking-tighter uppercase leading-[0.8] flex flex-col">
-                            <span className="text-white drop-shadow-[0_0_80px_rgba(255,69,0,0.3)]">HUB</span>
+                        <h1 className="text-4xl md:text-[12rem] font-black italic tracking-tighter uppercase leading-[0.85] flex flex-col">
                             <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #FF4500 10%, #FF6B00 50%, #00F5FF 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 200%', animation: 'var(--animate-gradient-shift)' }}>BALONCESTO</span>
                         </h1>
                         <div className="flex items-center gap-4">
@@ -186,9 +190,9 @@ export default function BasketballHub() {
                 </div>
 
                 {/* Content Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
                     {/* Main Feed */}
-                    <div className="lg:col-span-8 space-y-10">
+                    <div className="lg:col-span-8 space-y-6 lg:space-y-10">
                         <div className="flex items-center gap-6">
                             <h2 className="text-4xl font-black italic uppercase tracking-tighter">
                                 {activeTab === 'matches' ? 'En la Pintura' : activeTab === 'standings' ? 'Jerarquía Global' : 'Elite de la Liga'}
@@ -236,7 +240,7 @@ export default function BasketballHub() {
                         )}
 
                         {activeTab === 'standings' && (
-                            <div className="bg-[#080808] border-2 border-white/10 p-12 rounded-[3.5rem] relative overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-700">
+                            <div className="bg-[#080808] border-2 border-white/10 p-6 lg:p-12 rounded-[2rem] lg:rounded-[3.5rem] relative overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-700">
                                 <div className="absolute top-0 right-0 p-12 opacity-10">
                                     <Trophy className="w-48 h-48 text-[#FF4500]" />
                                 </div>

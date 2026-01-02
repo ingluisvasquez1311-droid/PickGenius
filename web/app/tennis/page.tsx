@@ -39,7 +39,13 @@ export default function TennisHub() {
                 const res = await fetch(endpoint);
                 const data = await res.json();
                 const events = data.events || [];
-                setMatches(events);
+
+                // FILTER: Remove finished games from scheduled view
+                const filteredEvents = activeFilter === 'scheduled'
+                    ? events.filter((e: any) => e.status?.type !== 'finished')
+                    : events;
+
+                setMatches(filteredEvents);
 
                 // Auto-expand first 3 tournaments (usually Grand Slams/Masters)
                 const grouped = groupEvents(events);
@@ -116,8 +122,7 @@ export default function TennisHub() {
                                 TENNIS_ENGINE_V3.8
                             </div>
                         </div>
-                        <h1 className="text-7xl md:text-[12rem] font-black italic tracking-tighter uppercase leading-[0.8] flex flex-col">
-                            <span className="text-white drop-shadow-[0_0_80px_rgba(0,255,136,0.3)]">HUB</span>
+                        <h1 className="text-4xl md:text-[12rem] font-black italic tracking-tighter uppercase leading-[0.85] flex flex-col">
                             <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #00FF88 10%, #10b981 50%, #6ee7b7 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 200%', animation: 'var(--animate-gradient-shift)' }}>TENIS ELITE</span>
                         </h1>
                         <div className="flex items-center gap-4">
@@ -165,7 +170,7 @@ export default function TennisHub() {
                 </div>
 
                 {/* Content Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
                     {/* Main Feed */}
                     <div className="lg:col-span-8 space-y-10">
                         <div className="flex items-center gap-6">
@@ -216,7 +221,7 @@ export default function TennisHub() {
                         {/* Court Vision Widget */}
                         <div className="relative group">
                             <div className="absolute -inset-1 bg-gradient-to-r from-[#00FF88] to-[#00CC66] rounded-[3rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                            <div className="relative bg-[#080808] border-2 border-white/10 rounded-[3rem] p-10 space-y-6">
+                            <div className="relative bg-[#080808] border-2 border-white/10 rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-10 space-y-6">
                                 <NextToStartWidget sport="tennis" />
                                 <div className="flex items-center gap-4 border-b border-white/5 pb-6 mt-6">
                                     <div className="p-3 bg-[#00FF88] text-black rounded-2xl shadow-glow-sm">
