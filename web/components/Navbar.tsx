@@ -6,12 +6,14 @@ import {
     Home, Zap, Radio, Menu, Trophy, X,
     Target, Flame, Newspaper, Plus, Bell,
     User, LayoutDashboard, Globe, Activity, Star,
-    Circle, Diamond, Crown, Wallet
+    Circle, Diamond, Crown, Wallet, Coins
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import ParleyOptimizer from './ParleyOptimizer';
+import WalletModal from './WalletModal';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useCredits } from '@/hooks/useCredits';
 import {
     SignInButton,
     SignUpButton,
@@ -27,7 +29,9 @@ export function Navbar() {
     const [isMoreOpen, setIsMoreOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isOptimizerOpen, setIsOptimizerOpen] = useState(false);
+    const [isWalletOpen, setIsWalletOpen] = useState(false);
     const { notifications, hasUnread, markAllAsRead } = useNotifications();
+    const { balance } = useCredits();
     const pathname = usePathname();
     const { user } = useUser();
     const [isUpgrading, setIsUpgrading] = useState(false);
@@ -67,6 +71,9 @@ export function Navbar() {
         { name: 'BALONCESTO', href: '/basketball', icon: Activity, color: 'text-[#FF4500]' },
         { name: 'FÚTBOL', href: '/football', icon: Circle, color: 'text-white' },
         { name: 'VALUE BETS', href: '/value', icon: Diamond, color: 'text-cyan-400' },
+        { name: 'PLAYER PROPS', href: '/props', icon: User, color: 'text-primary' },
+        { name: 'SMART PARLEY', href: '#', icon: Target, isSpecial: true, color: 'text-red-600' },
+        { name: 'RACHAS', href: '/streaks', icon: Flame, color: 'text-orange-500' },
         { name: 'BANKROLL', href: '/bankroll', icon: Wallet, color: 'text-green-500' },
         { name: 'RANKING', href: '/leaderboard', icon: Trophy, color: 'text-amber-400' },
         { name: 'MI PERFIL', href: '/profile', icon: User, color: 'text-blue-400', isPrivate: true },
@@ -89,7 +96,7 @@ export function Navbar() {
 
                 {/* Desktop Navigation Items */}
                 <div className="hidden xl:flex items-center gap-1">
-                    {navItems.map((item) => (
+                    {navItems.map((item: any) => (
                         <div key={item.name} className="relative group/item">
                             {item.name === '+ MÁS' ? (
                                 <div
@@ -159,6 +166,20 @@ export function Navbar() {
                             <span className="text-[9px] font-black text-white uppercase tracking-widest leading-none">PANEL</span>
                         </Link>
                     )}
+
+                    {/* Credits Display */}
+                    <button
+                        onClick={() => setIsWalletOpen(true)}
+                        className="hidden md:flex items-center gap-3 px-5 py-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all hover:border-primary/30 group"
+                    >
+                        <div className="w-6 h-6 rounded-lg bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                            <Coins className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <div className="text-left">
+                            <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">BALANCE</p>
+                            <p className="text-[10px] font-black text-white uppercase tracking-tighter leading-none">{balance.toLocaleString()} PGc</p>
+                        </div>
+                    </button>
 
                     {/* Notification Bell */}
                     <div className="relative">
@@ -300,6 +321,7 @@ export function Navbar() {
             )}
             {/* Parley Optimizer Modal */}
             <ParleyOptimizer isOpen={isOptimizerOpen} onClose={() => setIsOptimizerOpen(false)} />
+            <WalletModal isOpen={isWalletOpen} onClose={() => setIsWalletOpen(false)} />
         </nav>
     );
 }

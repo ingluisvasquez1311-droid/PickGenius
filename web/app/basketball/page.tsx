@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import TopLeadersWidget from '@/components/TopLeadersWidget';
 import TournamentAccordion from '@/components/TournamentAccordion';
 import NextToStartWidget from '@/components/NextToStartWidget';
+import InjuryTracker from '@/components/InjuryTracker';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -274,13 +275,9 @@ export default function BasketballHub() {
                             <div className="absolute -inset-1 bg-gradient-to-r from-[#FF4500] to-yellow-500 rounded-[3rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                             <div className="relative bg-[#080808] border-2 border-white/10 rounded-[3rem] p-8">
                                 <NextToStartWidget sport="basketball" />
-                                <div className="flex items-center gap-4 mb-8 mt-8">
-                                    <div className="p-3 bg-[#FF4500] text-black rounded-2xl shadow-glow-sm pointer-events-none">
-                                        <TrendingUp className="w-6 h-6" />
-                                    </div>
-                                    <h3 className="text-2xl font-black italic uppercase tracking-tighter">DATA TRENDS</h3>
+                                <div className="mt-8">
+                                    <InjuryTracker sport="basketball" />
                                 </div>
-                                <TopLeadersWidget />
                             </div>
                         </div>
 

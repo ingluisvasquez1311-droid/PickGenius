@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import TopLeadersFootballWidget from '@/components/TopLeadersFootballWidget';
 import TournamentAccordion from '@/components/TournamentAccordion';
 import NextToStartWidget from '@/components/NextToStartWidget';
+import InjuryTracker from '@/components/InjuryTracker';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -273,13 +274,9 @@ export default function FootballHub() {
                             <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-600 rounded-[3rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                             <div className="relative bg-[#080808] border-2 border-white/10 rounded-[3rem] p-8">
                                 <NextToStartWidget sport="football" />
-                                <div className="flex items-center gap-4 mb-8 mt-8">
-                                    <div className="p-3 bg-primary text-black rounded-2xl shadow-glow-sm">
-                                        <BarChart3 className="w-6 h-6" />
-                                    </div>
-                                    <h3 className="text-2xl font-black italic uppercase tracking-tighter">ANÁLISIS DE ÉLITE</h3>
+                                <div className="mt-8">
+                                    <InjuryTracker sport="football" />
                                 </div>
-                                <TopLeadersFootballWidget />
                             </div>
                         </div>
 
