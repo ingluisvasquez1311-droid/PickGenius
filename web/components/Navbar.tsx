@@ -73,6 +73,7 @@ export function Navbar() {
         { name: 'VALUE BETS', href: '/value', icon: Diamond, color: 'text-cyan-400' },
         { name: 'PLAYER PROPS', href: '/props', icon: User, color: 'text-primary' },
         { name: 'SMART PARLEY', href: '#', icon: Target, isSpecial: true, color: 'text-red-600' },
+        { name: 'TOOLS PRO', href: '/tools', icon: Target, color: 'text-green-500' },
         { name: 'RACHAS', href: '/streaks', icon: Flame, color: 'text-orange-500' },
         { name: 'BANKROLL', href: '/bankroll', icon: Wallet, color: 'text-green-500' },
         { name: 'RANKING', href: '/leaderboard', icon: Trophy, color: 'text-amber-400' },

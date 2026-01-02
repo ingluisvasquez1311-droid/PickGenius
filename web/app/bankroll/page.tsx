@@ -26,8 +26,10 @@ export default function BankrollDashboard() {
         match: '',
         stake: '',
         odds: '',
-        type: 'W' as 'W' | 'L' | 'P'
+        type: 'W' as 'W' | 'L' | 'P',
+        winProb: '55' // Default win probability for Kelly
     });
+    const [useHalfKelly, setUseHalfKelly] = useState(true);
 
     // Chart Data Transformation
     const chartData = useMemo(() => {
@@ -71,9 +73,23 @@ export default function BankrollDashboard() {
             type: newBet.type
         });
 
-        setNewBet({ match: '', stake: '', odds: '', type: 'W' });
+        setNewBet({ match: '', stake: '', odds: '', type: 'W', winProb: '55' });
         setIsAddOpen(false);
     };
+
+    // Kelly Criterion Helper
+    const kellyStake = useMemo(() => {
+        const b = Number(newBet.odds) - 1;
+        const p = Number(newBet.winProb) / 100;
+        const q = 1 - p;
+        if (b <= 0 || p <= 0) return 0;
+
+        let f = (b * p - q) / b;
+        if (useHalfKelly) f = f / 2;
+
+        const suggested = Math.max(0, f * currentBankroll);
+        return suggested;
+    }, [newBet.odds, newBet.winProb, currentBankroll, useHalfKelly]);
 
     if (!isLoaded) return (
         <div className="min-h-screen bg-[#050505] flex items-center justify-center">
