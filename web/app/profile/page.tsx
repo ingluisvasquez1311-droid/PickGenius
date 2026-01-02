@@ -12,17 +12,16 @@ import {
 import Link from 'next/link';
 import clsx from 'clsx';
 import { SignOutButton } from '@clerk/nextjs';
-import { ACHIEVEMENTS } from '@/lib/gamification';
+import { useBankroll } from '@/hooks/useBankroll';
+import { useGamification } from '@/hooks/useGamification';
+import * as LucideIcons from 'lucide-react';
 
 export default function UserDashboard() {
     const { user, isLoaded } = useUser();
+    const { entries, totalProfit, winRate } = useBankroll();
+    const { points, level, achievements, progress } = useGamification();
     const [isGeneratingPortal, setIsGeneratingPortal] = useState(false);
     const [copied, setCopied] = useState(false);
-    const [stats, setStats] = useState({
-        streak: 0,
-        accuracy: 0,
-        totalPicks: 0
-    });
 
     if (!isLoaded) return null;
 
@@ -129,9 +128,9 @@ export default function UserDashboard() {
                     <div className="lg:col-span-2 space-y-8 animate-fade-in-up delay-100">
                         {/* Stats Overview */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <StatCard icon={Trophy} label="Racha Actual" value="7" unit="Wins" color="primary" />
-                            <StatCard icon={TrendingUp} label="Efectividad" value="82" unit="%" color="green-500" />
-                            <StatCard icon={Activity} label="Picks Totales" value="148" unit="" color="blue-500" />
+                            <StatCard icon={LucideIcons.Trophy} label="Win Rate" value={winRate.toFixed(1)} unit="%" color="primary" />
+                            <StatCard icon={LucideIcons.TrendingUp} label="Total Profit" value={`$${totalProfit.toFixed(0)}`} unit="" color="green-500" />
+                            <StatCard icon={LucideIcons.Activity} label="Picks" value={entries.length} unit="" color="blue-500" />
                         </div>
 
                         {/* Recent Activity */}
@@ -147,27 +146,35 @@ export default function UserDashboard() {
                                 </div>
 
                                 <div className="space-y-4 relative z-10">
-                                    {[1, 2, 3].map((i) => (
-                                        <div key={i} className="group flex items-center justify-between p-6 bg-white/[0.03] border border-white/5 rounded-[2rem] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300">
+                                    {entries.slice(0, 5).map((entry) => (
+                                        <div key={entry.id} className="group flex items-center justify-between p-6 bg-white/[0.03] border border-white/5 rounded-[2rem] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300">
                                             <div className="flex items-center gap-6">
                                                 <div className="text-center min-w-[3rem]">
-                                                    <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">31 DIC</p>
-                                                    <p className="text-sm font-black text-white">13:20</p>
+                                                    <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">
+                                                        {new Date(entry.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                                                    </p>
+                                                    <p className="text-sm font-black text-white italic">@{entry.odds.toFixed(2)}</p>
                                                 </div>
                                                 <div className="w-px h-10 bg-white/10 group-hover:bg-primary/50 transition-colors" />
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-                                                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">NBA Basketball</p>
+                                                        <span className={clsx("w-1.5 h-1.5 rounded-full", entry.type === 'W' ? 'bg-green-500' : 'bg-red-500')}></span>
+                                                        <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">STAKE: ${entry.stake}</p>
                                                     </div>
-                                                    <h4 className="text-base font-black uppercase italic text-white group-hover:text-primary transition-colors">Lakers vs Celtics • Over 225.5</h4>
+                                                    <h4 className="text-base font-black uppercase italic text-white group-hover:text-primary transition-colors">{entry.match}</h4>
                                                 </div>
                                             </div>
-                                            <div className="px-5 py-2.5 bg-green-500/10 border border-green-500/20 rounded-xl text-[9px] font-black text-green-500 uppercase tracking-widest shadow-[0_0_10px_rgba(34,197,94,0.1)]">
-                                                GANADO
+                                            <div className={clsx(
+                                                "px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm",
+                                                entry.type === 'W' ? "bg-green-500/10 text-green-500 border border-green-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
+                                            )}>
+                                                {entry.type === 'W' ? 'GANADO' : entry.type === 'L' ? 'PERDIDO' : 'PUSH'}
                                             </div>
                                         </div>
                                     ))}
+                                    {entries.length === 0 && (
+                                        <p className="text-center py-10 text-gray-600 text-[10px] font-black uppercase">No hay actividad reciente.</p>
+                                    )}
                                 </div>
 
                                 {!isGold && (
@@ -198,22 +205,25 @@ export default function UserDashboard() {
                                     <Star className="w-5 h-5 text-amber-500 fill-amber-500/20" /> Logros Desbloqueados
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {ACHIEVEMENTS.map((ach) => (
-                                        <div key={ach.id} className={clsx(
-                                            "p-6 rounded-[2rem] border flex flex-col items-center gap-4 transition-all duration-300 text-center group hover:scale-[1.02]",
-                                            ach.unlocked
-                                                ? "bg-gradient-to-br from-white/10 to-white/5 border-white/10 hover:border-primary/30"
-                                                : "bg-[#050505] opacity-40 border-white/5 grayscale"
-                                        )}>
-                                            <div className={clsx(
-                                                "w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-colors",
-                                                ach.unlocked ? "bg-primary/20 text-primary group-hover:bg-primary group-hover:text-black" : "bg-white/5 text-gray-600"
+                                    {achievements.map((ach) => {
+                                        const Icon = (LucideIcons as any)[ach.icon] || LucideIcons.Trophy;
+                                        return (
+                                            <div key={ach.id} className={clsx(
+                                                "p-6 rounded-[2rem] border flex flex-col items-center gap-4 transition-all duration-300 text-center group hover:scale-[1.02]",
+                                                ach.unlocked
+                                                    ? `bg-gradient-to-br from-white/10 to-white/5 border-white/10 hover:border-primary/30`
+                                                    : "bg-[#050505] opacity-40 border-white/5 grayscale"
                                             )}>
-                                                <Trophy className="w-5 h-5" />
+                                                <div className={clsx(
+                                                    "w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-colors",
+                                                    ach.unlocked ? `${ach.color.replace('text', 'bg')}/20 ${ach.color} group-hover:bg-primary group-hover:text-black` : "bg-white/5 text-gray-600"
+                                                )}>
+                                                    <Icon className="w-5 h-5" />
+                                                </div>
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-gray-300 group-hover:text-white">{ach.title}</p>
                                             </div>
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-300 group-hover:text-white">{ach.title}</p>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>

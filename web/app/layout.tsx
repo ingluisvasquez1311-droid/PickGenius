@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import LiveScoreWidget from "@/components/LiveScoreWidget";
 import { Particles } from "@/components/Particles";
 import GlobalSearch from "@/components/GlobalSearch";
+import NotificationScanner from "@/components/NotificationScanner";
 import { ClerkSafeProvider } from "@/components/ClerkSafeProvider";
 
 import QueryProvider from "@/components/QueryProvider";
@@ -69,6 +70,7 @@ export default function RootLayout({
               </main>
               <Footer />
               <GlobalSearch />
+              <NotificationScanner />
             </div>
           </QueryProvider>
         </body>

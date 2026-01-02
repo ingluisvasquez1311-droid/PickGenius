@@ -6,11 +6,12 @@ import {
     Home, Zap, Radio, Menu, Trophy, X,
     Target, Flame, Newspaper, Plus, Bell,
     User, LayoutDashboard, Globe, Activity, Star,
-    Circle, Diamond, Crown
+    Circle, Diamond, Crown, Wallet
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import ParleyOptimizer from './ParleyOptimizer';
+import { useNotifications } from '@/hooks/useNotifications';
 import {
     SignInButton,
     SignUpButton,
@@ -26,8 +27,7 @@ export function Navbar() {
     const [isMoreOpen, setIsMoreOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isOptimizerOpen, setIsOptimizerOpen] = useState(false);
-    const [notifications, setNotifications] = useState<any[]>([]);
-    const [hasUnread, setHasUnread] = useState(false);
+    const { notifications, hasUnread, markAllAsRead } = useNotifications();
     const pathname = usePathname();
     const { user } = useUser();
     const [isUpgrading, setIsUpgrading] = useState(false);
@@ -60,42 +60,15 @@ export function Navbar() {
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
-
-        // Load notifications from localStorage
-        const saved = localStorage.getItem('pg_notifications');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            setNotifications(parsed);
-            setHasUnread(parsed.some((n: any) => !n.read));
-        } else {
-            // Initial mock notifications if none saved
-            const initial = [
-                { id: 1, title: 'GOOOL - Real Madrid', body: 'Vinicius Jr (88\') adelanta a los blancos.', time: 'Hace 2m', type: 'goal', read: false },
-                { id: 2, title: 'Value Bet Detectada', body: 'New York Knicks vs Celtics: Over 220.5', time: 'Hace 15m', type: 'value', read: false },
-                { id: 3, title: 'Final del Partido', body: 'Lakers 112 - 105 Suns. Tu predicción fue CORRECTA.', time: 'Hace 1h', type: 'win', read: false },
-            ];
-            setNotifications(initial);
-            setHasUnread(true);
-            localStorage.setItem('pg_notifications', JSON.stringify(initial));
-        }
-
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-
-    const markAllAsRead = () => {
-        const updated = notifications.map(n => ({ ...n, read: true }));
-        setNotifications(updated);
-        setHasUnread(false);
-        localStorage.setItem('pg_notifications', JSON.stringify(updated));
-    };
 
     const navItems = [
         { name: 'BALONCESTO', href: '/basketball', icon: Activity, color: 'text-[#FF4500]' },
         { name: 'FÚTBOL', href: '/football', icon: Circle, color: 'text-white' },
         { name: 'VALUE BETS', href: '/value', icon: Diamond, color: 'text-cyan-400' },
-        { name: 'PLAYER PROPS', href: '/props', icon: User, color: 'text-primary' },
-        { name: 'SMART PARLEY', href: '#', icon: Target, isSpecial: true, color: 'text-red-600' },
-        { name: 'RACHAS', href: '/streaks', icon: Flame, color: 'text-orange-500' },
+        { name: 'BANKROLL', href: '/bankroll', icon: Wallet, color: 'text-green-500' },
+        { name: 'RANKING', href: '/leaderboard', icon: Trophy, color: 'text-amber-400' },
         { name: 'MI PERFIL', href: '/profile', icon: User, color: 'text-blue-400', isPrivate: true },
         { name: 'BLOG', href: '/blog', icon: Newspaper, color: 'text-gray-400' },
         { name: '+ MÁS', href: '/more', icon: Plus, color: 'text-gray-500' },

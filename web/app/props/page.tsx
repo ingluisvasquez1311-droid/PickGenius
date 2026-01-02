@@ -105,6 +105,8 @@ function PropsDashboardContent() {
     const [hasSearched, setHasSearched] = useState(false);
     const [bestPicks, setBestPicks] = useState<any[]>([]);
     const [loadingBestPicks, setLoadingBestPicks] = useState(false);
+    const [inlineAnalysis, setInlineAnalysis] = useState<Record<string, any>>({});
+    const [analyzingId, setAnalyzingId] = useState<string | null>(null);
 
     // Initialize sport from URL
     useEffect(() => {
@@ -195,22 +197,50 @@ function PropsDashboardContent() {
     }, [search]);
 
     // Fetch details when expanding
-    const handleExpand = async (id: string) => {
+    const handleExpand = async (player: any) => {
+        const id = player.id;
         if (expandedPlayer === id) {
             setExpandedPlayer(null);
             return;
         }
-        setExpandedPlayer(id);
+        setExpandedPlayer(id.toString());
         setPlayerDetails(null);
         setLoadingDetails(true);
         try {
             const res = await fetch(`/api/player/${id}`);
             const data = await res.json();
             setPlayerDetails(data);
+            // Trigger AI Analysis automatically
+            fetchInlineAnalysis({ ...player, lastMatches: data.lastMatches });
         } catch (e) {
             console.error(e);
         } finally {
             setLoadingDetails(false);
+        }
+    };
+
+    const fetchInlineAnalysis = async (player: any) => {
+        if (inlineAnalysis[player.id] || analyzingId === player.id) return;
+
+        setAnalyzingId(player.id);
+        try {
+            const res = await fetch('/api/player-analysis', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    playerName: player.name,
+                    position: player.position,
+                    team: player.team,
+                    sport: player.sport || selectedSport,
+                    lastMatches: playerDetails?.lastMatches || []
+                })
+            });
+            const result = await res.json();
+            setInlineAnalysis(prev => ({ ...prev, [player.id]: result }));
+        } catch (e) {
+            console.error("Inline Analysis Error:", e);
+        } finally {
+            setAnalyzingId(null);
         }
     };
 
@@ -445,7 +475,7 @@ function PropsDashboardContent() {
                                 {/* Main Row */}
                                 <div
                                     className="p-8 flex items-center justify-between cursor-pointer"
-                                    onClick={() => handleExpand(player.id)}
+                                    onClick={() => handleExpand(player)}
                                 >
                                     <div className="flex items-center gap-8">
                                         <div className="relative">
@@ -507,56 +537,103 @@ function PropsDashboardContent() {
                                                 ))}
                                             </div>
                                         ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                                {(SPORT_STATS[player.sport] || SPORT_STATS[selectedSport] || SPORT_STATS.basketball).map((stat: any) => {
-                                                    const stats = calculateStats(playerDetails?.lastMatches, stat.key);
-                                                    return (
-                                                        <div key={stat.key} className="bg-black/60 border border-white/5 rounded-[2rem] p-6 space-y-6 group/card hover:border-primary/40 transition-all">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-8 h-8 bg-white/5 rounded-full flex items-center justify-center">
-                                                                        <Activity className="w-4 h-4 text-primary" />
-                                                                    </div>
-                                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{stat.label}</span>
-                                                                </div>
-                                                                <span className="text-2xl font-black italic text-white tracking-tighter">--</span>
-                                                            </div>
-
-                                                            <div className="grid grid-cols-2 gap-3">
-                                                                <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-center">
-                                                                    <p className="text-[8px] font-black text-gray-600 uppercase mb-1">PROMEDIO</p>
-                                                                    <p className="text-xl font-black italic text-primary">{stats.avg}</p>
-                                                                </div>
-                                                                <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-center flex flex-col items-center justify-center">
-                                                                    <p className="text-[8px] font-black text-gray-600 uppercase mb-1">TENDENCIA</p>
-                                                                    {stats.trend === 'up' ? <TrendingUp className="w-6 h-6 text-green-500" /> : <TrendingDown className="w-6 h-6 text-red-500" />}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Sparkline Visual */}
-                                                            <div className="h-10 flex items-end gap-1 px-1">
-                                                                {stats.history.slice(-10).map((val: any, i: number) => {
-                                                                    const numVal = Number(val) || 0;
-                                                                    const avgVal = parseFloat(stats.avg as string) || 1;
-                                                                    return (
-                                                                        <div
-                                                                            key={i}
-                                                                            className="flex-1 bg-white/10 rounded-t-sm transition-all group-hover/card:bg-primary/30"
-                                                                            style={{ height: `${Math.min(100, (numVal / (avgVal * 2)) * 100)}%` }}
-                                                                        ></div>
-                                                                    );
-                                                                })}
-                                                            </div>
-
-                                                            <Link href={`/player/${selectedSport}/${player.id}`}>
-                                                                <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest rounded-xl text-[10px] flex items-center justify-center gap-2 hover:bg-primary transition-all">
-                                                                    <Zap className="w-4 h-4 fill-black" />
-                                                                    IA ANALYZE
-                                                                </button>
-                                                            </Link>
+                                            <div className="space-y-10">
+                                                {/* Oracle AI Insights */}
+                                                {analyzingId === player.id.toString() ? (
+                                                    <div className="p-12 bg-white/[0.02] border border-primary/20 rounded-[3rem] flex flex-col items-center justify-center gap-6 animate-pulse shadow-[0_0_30px_rgba(var(--primary-rgb),0.05)]">
+                                                        <div className="relative">
+                                                            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+                                                            <Zap className="w-12 h-12 text-primary animate-spin relative z-10" />
                                                         </div>
-                                                    );
-                                                })}
+                                                        <div className="text-center space-y-2">
+                                                            <h4 className="text-xl font-black italic uppercase tracking-tighter text-white">Consultando El Oráculo</h4>
+                                                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.5em]">Procesando 150+ métricas de rendimiento</p>
+                                                        </div>
+                                                    </div>
+                                                ) : inlineAnalysis[player.id] && (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                                                        {inlineAnalysis[player.id].predictions?.slice(0, 3).map((pred: any, i: number) => (
+                                                            <div key={i} className="bg-gradient-to-br from-white/[0.03] to-transparent border border-white/10 p-6 rounded-[2rem] relative overflow-hidden group/pred hover:border-primary/30 transition-all">
+                                                                <div className="absolute top-0 right-0 p-4">
+                                                                    <div className="px-2 py-0.5 bg-primary/20 rounded text-[8px] font-black text-primary border border-primary/30">
+                                                                        {pred.confidence}% CONF.
+                                                                    </div>
+                                                                </div>
+                                                                <div className="space-y-4">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                                                                            <Target className="w-4 h-4 text-gray-400 group-hover/pred:text-primary transition-colors" />
+                                                                        </div>
+                                                                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{pred.category}</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className={clsx(
+                                                                            "text-2xl font-black italic tracking-tighter uppercase",
+                                                                            pred.pick === 'Over' ? "text-primary" : "text-orange-400"
+                                                                        )}>
+                                                                            {pred.pick} {pred.line}
+                                                                        </p>
+                                                                    </div>
+                                                                    <p className="text-[10px] text-gray-400 font-medium leading-relaxed">
+                                                                        {pred.reason}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                    {(SPORT_STATS[player.sport] || SPORT_STATS[selectedSport] || SPORT_STATS.basketball).map((stat: any) => {
+                                                        const stats = calculateStats(playerDetails?.lastMatches, stat.key);
+                                                        return (
+                                                            <div key={stat.key} className="bg-black/60 border border-white/5 rounded-[2rem] p-6 space-y-6 group/card hover:border-primary/40 transition-all">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-8 h-8 bg-white/5 rounded-full flex items-center justify-center">
+                                                                            <Activity className="w-4 h-4 text-primary" />
+                                                                        </div>
+                                                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{stat.label}</span>
+                                                                    </div>
+                                                                    <span className="text-2xl font-black italic text-white tracking-tighter">--</span>
+                                                                </div>
+
+                                                                <div className="grid grid-cols-2 gap-3">
+                                                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-center">
+                                                                        <p className="text-[8px] font-black text-gray-600 uppercase mb-1">PROMEDIO</p>
+                                                                        <p className="text-xl font-black italic text-primary">{stats.avg}</p>
+                                                                    </div>
+                                                                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5 text-center flex flex-col items-center justify-center">
+                                                                        <p className="text-[8px] font-black text-gray-600 uppercase mb-1">TENDENCIA</p>
+                                                                        {stats.trend === 'up' ? <TrendingUp className="w-6 h-6 text-green-500" /> : <TrendingDown className="w-6 h-6 text-red-500" />}
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Sparkline Visual */}
+                                                                <div className="h-10 flex items-end gap-1 px-1">
+                                                                    {stats.history.slice(-10).map((val: any, i: number) => {
+                                                                        const numVal = Number(val) || 0;
+                                                                        const avgVal = parseFloat(stats.avg as string) || 1;
+                                                                        return (
+                                                                            <div
+                                                                                key={i}
+                                                                                className="flex-1 bg-white/10 rounded-t-sm transition-all group-hover/card:bg-primary/30"
+                                                                                style={{ height: `${Math.min(100, (numVal / (avgVal * 2)) * 100)}%` }}
+                                                                            ></div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+
+                                                                <Link href={`/player/${selectedSport}/${player.id}`}>
+                                                                    <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest rounded-xl text-[10px] flex items-center justify-center gap-2 hover:bg-primary transition-all">
+                                                                        <Zap className="w-4 h-4 fill-black" />
+                                                                        IA ANALYZE
+                                                                    </button>
+                                                                </Link>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
                                         )}
                                     </div>

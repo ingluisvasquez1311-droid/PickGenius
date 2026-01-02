@@ -54,26 +54,35 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
     const MAX_RETRIES = 3;
     let attempt = 0;
 
-    // Fixed Chrome User-Agent to match Client Hints perfectly (Updated to Chrome 131)
-    const STEALTH_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
-
     while (attempt < MAX_RETRIES) {
         attempt++;
 
+        // Select a random UA and generate matching Sec-Ch-Ua
+        const uaIndex = Math.floor(Math.random() * USER_AGENTS.length);
+        const selectedUA = USER_AGENTS[uaIndex];
+
+        // Basic mapping for Chrome-based UAs in our list
+        const isEdge = selectedUA.includes('Edg/');
+        const chromeVersion = selectedUA.includes('Chrome/120') ? '120' : '119';
+        const brandStr = isEdge
+            ? `"Not_A Brand";v="8", "Chromium";v="${chromeVersion}", "Microsoft Edge";v="${chromeVersion}"`
+            : `"Not_A Brand";v="24", "Chromium";v="${chromeVersion}", "Google Chrome";v="${chromeVersion}"`;
+
         const headers = {
-            'User-Agent': STEALTH_UA,
+            'User-Agent': selectedUA,
             'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Language': 'en-US,en;q=0.9,es-ES;q=0.8,es;q=0.7',
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
             'Origin': 'https://www.sofascore.com',
             'Referer': 'https://www.sofascore.com/',
-            'Sec-Ch-Ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
-            'Sec-Ch-Ua-Mobile': '?0',
-            'Sec-Ch-Ua-Platform': '"Windows"',
+            'Sec-Ch-Ua': brandStr,
+            'Sec-Ch-Ua-Mobile': selectedUA.includes('iPhone') ? '?1' : '?0',
+            'Sec-Ch-Ua-Platform': selectedUA.includes('Macintosh') ? '"macOS"' : selectedUA.includes('iPhone') ? '"iOS"' : '"Windows"',
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-site',
+            'Pragma': 'no-cache',
         };
 
         try {
@@ -83,16 +92,16 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
                 signal: AbortSignal.timeout(10000)
             });
 
-            if (response.status === 429 || response.status >= 500) {
+            if (response.status === 429 || response.status === 403 || response.status >= 500) {
                 if (attempt === MAX_RETRIES) {
                     trackRequest(false, `External API Error: ${response.status}`);
                     throw new Error(`External API responded with ${response.status} after ${MAX_RETRIES} attempts`);
                 }
 
-                const jitter = Math.random() * 200;
+                const jitter = Math.random() * 500;
                 const backoff = Math.pow(2, attempt - 1) * 1000 + jitter;
 
-                Logger.warn(`[SofaFetch] Retrying after ${response.status}`, { url, attempt, backoff });
+                Logger.warn(`[SofaFetch] Retrying after ${response.status} (Identity rotated)`, { url, attempt, backoff });
                 await new Promise(resolve => setTimeout(resolve, backoff));
                 continue;
             }
@@ -101,9 +110,7 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
                 trackRequest(false, `HTTP ${response.status}`);
                 Logger.error(`[SofaFetch Error] ${response.status}`, { url });
 
-                // Do NOT retry for 404 (Not Found) or 403 (Forbidden) as these are often terminal 
-                // for specific assets like odds or player images.
-                if (response.status === 404 || response.status === 403) {
+                if (response.status === 404) {
                     throw new Error(`External API responded with ${response.status}`);
                 }
 

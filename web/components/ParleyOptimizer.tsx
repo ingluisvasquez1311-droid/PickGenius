@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useQuery } from '@tanstack/react-query';
+import { useBankroll } from '@/hooks/useBankroll';
 import {
     X, Zap, Shield, TrendingUp, BarChart3,
     ChevronRight, Target, Activity, Flame, Star,
@@ -29,6 +30,7 @@ const sportsList = [
 
 export default function ParleyOptimizer({ isOpen, onClose, sport: initialSport = 'football' }: ParleyOptimizerProps) {
     const { user } = useUser();
+    const { addEntry, currentBankroll } = useBankroll();
     const [selectedRisk, setSelectedRisk] = useState<string>('safe');
     const [currentSport, setCurrentSport] = useState(initialSport);
     const [searchTerm, setSearchTerm] = useState(''); // New State for Search
@@ -36,6 +38,7 @@ export default function ParleyOptimizer({ isOpen, onClose, sport: initialSport =
     const [result, setResult] = useState<any>(null);
     const [stake, setStake] = useState<string>("100");
     const [payout, setPayout] = useState<number>(0);
+    const [isSaving, setIsSaving] = useState(false);
 
     // Initial Matches Query (for social feed context mainly)
     const { data: matches = [], isLoading: matchesLoading } = useQuery({
@@ -105,6 +108,26 @@ export default function ParleyOptimizer({ isOpen, onClose, sport: initialSport =
             console.error("Error sharing parley:", err);
         } finally {
             setLoading(false);
+        }
+    };
+    const handleSaveToBankroll = () => {
+        if (!result) return;
+        setIsSaving(true);
+        try {
+            const parleyMatchName = `COMBINADA: ${result.picks.map((p: any) => p.match.split(' vs ')[0]).join(' + ')}`;
+            addEntry({
+                id: Date.now(),
+                date: new Date().toISOString(),
+                match: parleyMatchName,
+                stake: parseFloat(stake),
+                odds: parseFloat(result.odds.replace('x', '')),
+                type: 'W' // Win for the demo flow
+            });
+            alert("¡Parley registrado en tu Bankroll exitosamente! Revisa tu ROI en la sección BANKROLL.");
+        } catch (err) {
+            console.error("Error saving to bankroll:", err);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -293,9 +316,27 @@ export default function ParleyOptimizer({ isOpen, onClose, sport: initialSport =
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-4 mt-4">
-                                        <button onClick={handleShare} className="flex-1 py-4 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all">Compartir</button>
-                                        <button onClick={() => setResult(null)} className="flex-1 py-4 bg-primary hover:bg-white hover:text-black text-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-glow">Nueva Combinada</button>
+                                    <div className="flex flex-col md:flex-row gap-4 mt-4">
+                                        <button
+                                            onClick={handleShare}
+                                            className="flex-1 py-4 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/10 transition-all"
+                                        >
+                                            Compartir
+                                        </button>
+                                        <button
+                                            onClick={handleSaveToBankroll}
+                                            disabled={isSaving}
+                                            className="flex-1 py-4 bg-purple-600/20 hover:bg-purple-600/40 rounded-xl text-[10px] font-black text-purple-400 uppercase tracking-widest border border-purple-500/30 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Shield className="w-4 h-4" />
+                                            {isSaving ? 'Guardando...' : 'Log a Bankroll'}
+                                        </button>
+                                        <button
+                                            onClick={() => setResult(null)}
+                                            className="flex-1 py-4 bg-primary hover:bg-white hover:text-black text-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-glow"
+                                        >
+                                            Nueva Combinada
+                                        </button>
                                     </div>
                                 </div>
                             )}
