@@ -15,13 +15,13 @@ const normalizeSport = (slug: string) => {
 };
 
 // Internal ID -> Sofascore Slug Mapping
-const SPORT_MAPPING: Record<string, string> = {
-    'basketball': 'basketball',
-    'football': 'football', // Soccer
-    'nfl': 'american-football',
-    'mlb': 'baseball',
-    'hockey': 'ice-hockey',
-    'tennis': 'tennis'
+const SPORT_MAPPING: Record<string, string[]> = {
+    'basketball': ['basketball'],
+    'football': ['football', 'soccer'], // Handle both
+    'nfl': ['american-football'],
+    'mlb': ['baseball'],
+    'hockey': ['ice-hockey'],
+    'tennis': ['tennis']
 };
 
 export async function GET(request: Request) {
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
         }
 
         const rawResults = data.results || [];
-        const requiredSlug = targetSport ? SPORT_MAPPING[targetSport] : null;
+        const requiredSlugs = targetSport ? SPORT_MAPPING[targetSport] : null;
 
         const players = rawResults
             .filter((item: any) => {
@@ -55,10 +55,17 @@ export async function GET(request: Request) {
                     if (!isPlayer) return false;
 
                     // Sport filter
-                    if (requiredSlug) {
+                    if (requiredSlugs) {
                         const p = item.entity || item;
-                        const itemSlug = p.sport?.slug || item.sport?.slug;
-                        return itemSlug === requiredSlug;
+                        // Deep search for sport slug
+                        const itemSlug =
+                            p.sport?.slug ||
+                            p.team?.sport?.slug ||
+                            item.sport?.slug ||
+                            item.entity?.sport?.slug;
+
+                        if (!itemSlug) return true; // If no sport found, be lenient
+                        return requiredSlugs.includes(itemSlug);
                     }
                     return true;
                 } catch (e) {
@@ -68,11 +75,13 @@ export async function GET(request: Request) {
             .map((item: any) => {
                 try {
                     const p = item.entity || item;
+                    const sportSlug = p.sport?.slug || p.team?.sport?.slug || item.sport?.slug || 'unknown';
+
                     return {
                         id: p.id,
                         name: p.name || 'Unknown Player',
                         slug: p.slug || '',
-                        sport: p.sport ? normalizeSport(p.sport.slug) : 'unknown',
+                        sport: normalizeSport(sportSlug),
                         team: p.team ? p.team.name : (p.teamName || 'Free Agent'),
                         position: p.position || '',
                         image: `/api/image-proxy?path=player/${p.id}/image`,
