@@ -18,7 +18,7 @@ export async function GET(request: Request) {
             targetUrl.match(/\.(png|jpg|jpeg|webp|gif|svg|avif)$/i);
 
         if (isImage) {
-            const response = await sofafetch(targetUrl, { binary: true });
+            const response = await sofafetch(targetUrl, { binary: true, skipBridge: true });
 
             if (!(response instanceof Response)) {
                 return NextResponse.json({ error: 'Proxy received invalid response for image' }, { status: 502 });
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
             });
         }
 
-        const data = await sofafetch(targetUrl);
+        const data = await sofafetch(targetUrl, { skipBridge: true });
         return NextResponse.json(data);
     } catch (error: any) {
         console.error(`[Proxy Bridge Error]:`, error.message);

@@ -86,7 +86,7 @@ export default function InjuryTracker({ sport = 'basketball' }: { sport?: string
                 <div className="space-y-4 relative z-10">
                     <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-2">Alertas Críticas de Bajas</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {data?.criticalAlerts.map((alert, i) => (
+                        {(data?.criticalAlerts || []).map((alert, i) => (
                             <div key={i} className="p-6 bg-black/40 border border-white/5 rounded-[2rem] hover:border-red-500/40 transition-all space-y-4 group">
                                 <div className="flex justify-between items-start">
                                     <div className="space-y-1">

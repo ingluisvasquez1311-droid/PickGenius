@@ -15,19 +15,20 @@ interface FetchOptions {
     revalidate?: number;
     referer?: string;
     binary?: boolean;
+    skipBridge?: boolean;
 }
 
 /**
  * Performs a highly-stealthed fetch request to Sofascore with automatic retry logic.
  */
 export async function sofafetch(url: string, options: FetchOptions = {}) {
-    const { revalidate = 0, referer = 'https://www.sofascore.com/' } = options;
+    const { revalidate = 0, referer = 'https://www.sofascore.com/', skipBridge = false } = options;
 
     // --- HOME-IP BRIDGE LOGIC ---
     const bridgeUrl = process.env.NEXT_PUBLIC_API_URL;
     const isVercel = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.VERCEL;
 
-    if (isVercel && bridgeUrl && !url.includes('/api/proxy') && url.includes('sofascore')) {
+    if (!skipBridge && isVercel && bridgeUrl && !url.includes('/api/proxy') && url.includes('sofascore')) {
         try {
             const proxiedUrl = `${bridgeUrl.replace(/\/$/, '')}/api/proxy?url=${encodeURIComponent(url)}`;
             Logger.info(`[Bridge] Routing request via tunnel`, { url: proxiedUrl });
@@ -68,7 +69,7 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
             ? `"Not_A Brand";v="8", "Chromium";v="${chromeVersion}", "Microsoft Edge";v="${chromeVersion}"`
             : `"Not_A Brand";v="24", "Chromium";v="${chromeVersion}", "Google Chrome";v="${chromeVersion}"`;
 
-        const headers = {
+        const headers: Record<string, string> = {
             'User-Agent': selectedUA,
             'Accept': 'application/json, text/plain, */*',
             'Accept-Language': 'en-US,en;q=0.9,es-ES;q=0.8,es;q=0.7',
@@ -85,11 +86,14 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
             'Pragma': 'no-cache',
         };
 
+        // INTEGRATION: Standard Fetch with Rotation
+        // We rely on Home-IP Bridge (Ngrok) or direct fetch.
+
         try {
             const response = await fetch(url, {
                 headers,
                 next: { revalidate },
-                signal: AbortSignal.timeout(10000)
+                signal: AbortSignal.timeout(15000)
             });
 
             if (response.status === 429 || response.status === 403 || response.status >= 500) {

@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import {
     Scale, TrendingUp, AlertTriangle,
-    Zap, Check, ExternalLink, Filter
+    Zap, Check, ExternalLink, Filter, Lock, Crown
 } from 'lucide-react';
 import clsx from 'clsx';
+import Link from 'next/link';
 
 interface SureBet {
     id: string;
@@ -19,7 +20,7 @@ interface SureBet {
     totalStake: number;
 }
 
-export default function SureBetsFinder() {
+export default function SureBetsFinder({ isPro = false }: { isPro?: boolean }) {
     const [minProfit, setMinProfit] = useState(2);
     const [selectedSport, setSelectedSport] = useState<'all' | 'football' | 'basketball' | 'tennis'>('all');
 
@@ -143,73 +144,100 @@ export default function SureBetsFinder() {
                     </div>
                 </div>
 
-                {/* Sure Bets List */}
-                <div className="space-y-4">
-                    {filteredBets.length > 0 ? filteredBets.map((bet) => (
-                        <div key={bet.id} className="p-6 bg-white/[0.02] border border-white/5 hover:border-green-500/30 rounded-[2rem] transition-all space-y-6 group">
-                            {/* Event Info */}
-                            <div className="flex justify-between items-start">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-black italic uppercase text-white group-hover:text-green-500 transition-colors">
-                                        {bet.event}
-                                    </p>
-                                    <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">
-                                        {bet.league}
-                                    </p>
-                                </div>
-                                <div className="px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-xl">
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-2xl font-black italic text-green-500">+{bet.profit.toFixed(1)}</span>
-                                        <span className="text-[10px] font-black text-green-500 uppercase">%</span>
-                                    </div>
-                                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest text-center">Profit</p>
-                                </div>
+                {/* Sure Bets List Container with Paywall */}
+                <div className="relative">
+                    {/* PAYWALL OVERLAY */}
+                    {!isPro && (
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md rounded-[2rem] border border-white/10 text-center space-y-6">
+                            <div className="p-4 bg-gradient-to-tr from-amber-500/20 to-yellow-500/20 rounded-full border border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.2)] animate-pulse">
+                                <Lock className="w-8 h-8 text-amber-500" />
                             </div>
-
-                            {/* Two Outcomes Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {[bet.outcome1, bet.outcome2].map((outcome, idx) => (
-                                    <div key={idx} className="p-5 bg-black/40 border border-white/10 rounded-xl space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-xs font-black text-white uppercase italic">{outcome.market}</span>
-                                            <span className="px-2 py-1 bg-white/5 rounded-lg text-xs font-mono text-gray-400">@{outcome.odds}</span>
-                                        </div>
-                                        <div className="flex justify-between items-baseline">
-                                            <div>
-                                                <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Casa</p>
-                                                <p className="text-sm font-bold text-gray-400">{outcome.bookmaker}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Stake</p>
-                                                <p className="text-sm font-black italic text-white">
-                                                    ${idx === 0 ? bet.stake1.toFixed(2) : bet.stake2.toFixed(2)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                            <div className="space-y-2 max-w-md px-6">
+                                <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white">
+                                    Contenido <span className="text-amber-500">GOD MODE</span>
+                                </h3>
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                    El Arbitraje Deportivo es una herramienta profesional. Desbloquea retornos garantizados ahora.
+                                </p>
                             </div>
-
-                            {/* Action Bar */}
-                            <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                                <div className="flex items-center gap-2 text-[9px] font-black text-gray-500 uppercase">
-                                    <Check className="w-3 h-3 text-green-500" />
-                                    Inversión Total: ${bet.totalStake}
-                                </div>
-                                <button className="px-6 py-3 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-xl text-[10px] font-black text-green-500 uppercase tracking-widest transition-all flex items-center gap-2">
-                                    Ejecutar Arbitraje
-                                    <ExternalLink className="w-3 h-3" />
-                                </button>
-                            </div>
-                        </div>
-                    )) : (
-                        <div className="py-20 text-center bg-white/[0.01] rounded-3xl border border-dashed border-white/5">
-                            <AlertTriangle className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-                            <p className="text-[10px] font-black text-gray-700 uppercase tracking-[0.3em]">
-                                No hay sure bets disponibles con estos filtros
-                            </p>
+                            <Link href="/pricing" className="group relative px-8 py-3 bg-white text-black rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform overflow-hidden">
+                                <span className="absolute inset-0 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <Crown className="w-4 h-4" /> Desbloquear Acceso
+                                </span>
+                            </Link>
                         </div>
                     )}
+
+                    {/* Sure Bets List (Blurred if not Pro) */}
+                    <div className={clsx("space-y-4", !isPro && "opacity-50 blur-sm pointer-events-none select-none grayscale-[0.5]")}>
+                        {filteredBets.length > 0 ? filteredBets.map((bet) => (
+                            <div key={bet.id} className="p-6 bg-white/[0.02] border border-white/5 hover:border-green-500/30 rounded-[2rem] transition-all space-y-6 group">
+                                {/* Event Info */}
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-black italic uppercase text-white group-hover:text-green-500 transition-colors">
+                                            {bet.event}
+                                        </p>
+                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">
+                                            {bet.league}
+                                        </p>
+                                    </div>
+                                    <div className="px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-xl">
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-2xl font-black italic text-green-500">+{bet.profit.toFixed(1)}</span>
+                                            <span className="text-[10px] font-black text-green-500 uppercase">%</span>
+                                        </div>
+                                        <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest text-center">Profit</p>
+                                    </div>
+                                </div>
+
+                                {/* Two Outcomes Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[bet.outcome1, bet.outcome2].map((outcome, idx) => (
+                                        <div key={idx} className="p-5 bg-black/40 border border-white/10 rounded-xl space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-xs font-black text-white uppercase italic">{outcome.market}</span>
+                                                <span className="px-2 py-1 bg-white/5 rounded-lg text-xs font-mono text-gray-400">@{outcome.odds}</span>
+                                            </div>
+                                            <div className="flex justify-between items-baseline">
+                                                <div>
+                                                    <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Casa</p>
+                                                    <p className="text-sm font-bold text-gray-400">{outcome.bookmaker}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Stake</p>
+                                                    <p className="text-sm font-black italic text-white">
+                                                        ${idx === 0 ? bet.stake1.toFixed(2) : bet.stake2.toFixed(2)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Action Bar */}
+                                <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                                    <div className="flex items-center gap-2 text-[9px] font-black text-gray-500 uppercase">
+                                        <Check className="w-3 h-3 text-green-500" />
+                                        Inversión Total: ${bet.totalStake}
+                                    </div>
+                                    <button className="px-6 py-3 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-xl text-[10px] font-black text-green-500 uppercase tracking-widest transition-all flex items-center gap-2">
+                                        Ejecutar Arbitraje
+                                        <ExternalLink className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            </div>
+                        )) : (
+                            <div className="py-20 text-center bg-white/[0.01] rounded-3xl border border-dashed border-white/5">
+                                <AlertTriangle className="w-12 h-12 text-gray-700 mx-auto mb-4" />
+                                <p className="text-[10px] font-black text-gray-700 uppercase tracking-[0.3em]">
+                                    No hay sure bets disponibles con estos filtros
+                                </p>
+                            </div>
+                        )}
+
+                    </div>
                 </div>
 
                 {/* Disclaimer */}

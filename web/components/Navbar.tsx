@@ -80,6 +80,7 @@ export function Navbar() {
         { name: 'RANKING', href: '/leaderboard', icon: Trophy, color: 'text-amber-400' },
         { name: 'MI PERFIL', href: '/profile', icon: User, color: 'text-blue-400', isPrivate: true },
         { name: 'BLOG', href: '/blog', icon: Newspaper, color: 'text-gray-400' },
+        { name: 'GOD MODE', href: '/pricing', icon: Crown, isSpecial: true, isPremium: true },
         { name: '+ MÁS', href: '/more', icon: Plus, color: 'text-gray-500' },
     ];
 
@@ -139,6 +140,17 @@ export function Navbar() {
                                     {item.name}
                                     <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                                 </button>
+                            ) : item.isPremium ? (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="flex items-center gap-2 px-6 py-2.5 mx-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/50 text-amber-500 hover:text-white hover:border-amber-400 relative group overflow-hidden"
+                                >
+                                    <span className="absolute inset-0 bg-yellow-400/20 blur-xl opacity-0 group-hover:opacity-50 transition-opacity"></span>
+                                    <item.icon className="w-3.5 h-3.5 text-yellow-500 group-hover:text-white relative z-10" />
+                                    <span className="relative z-10">{item.name}</span>
+                                    {!isGold && <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-yellow-500 animate-ping"></span>}
+                                </Link>
                             ) : (
                                 <Link
                                     key={item.href}
