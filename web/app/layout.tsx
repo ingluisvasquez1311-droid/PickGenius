@@ -10,6 +10,7 @@ import NotificationScanner from "@/components/NotificationScanner";
 import { ClerkSafeProvider } from "@/components/ClerkSafeProvider";
 
 import QueryProvider from "@/components/QueryProvider";
+import GeniusCopilot from "@/components/GeniusCopilot";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -71,6 +72,7 @@ export default function RootLayout({
               <GlobalSearch />
               <NotificationScanner />
               <LiveScoreWidget />
+              <GeniusCopilot />
             </div>
 
           </QueryProvider>

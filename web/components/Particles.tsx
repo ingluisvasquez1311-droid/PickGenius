@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
-export const Particles = ({ className }: { className?: string }) => {
+export const Particles = ({ className, quantity = 50 }: { className?: string; quantity?: number }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -15,7 +15,7 @@ export const Particles = ({ className }: { className?: string }) => {
 
         let animationFrameId: number;
         let particles: Particle[] = [];
-        const particleCount = 50;
+        const particleCount = quantity;
 
         class Particle {
             x: number;
