@@ -1,7 +1,14 @@
 "use client";
 
 import React, { createContext, useContext } from 'react';
-import { ClerkProvider, SignedIn, SignedOut, useUser as useClerkUser } from '@clerk/nextjs';
+import {
+    ClerkProvider,
+    useUser as useClerkUser,
+    SignInButton as ClerkSignInButton,
+    SignUpButton as ClerkSignUpButton,
+    UserButton as ClerkUserButton,
+    SignOutButton as ClerkSignOutButton
+} from '@clerk/nextjs';
 
 /**
  * A safe wrapper for Clerk. If the publishable key is missing or a fake one,
@@ -18,17 +25,23 @@ const MockClerkContext = createContext<{
     isLoaded: true
 });
 
+// Helper to validate key existence
+const hasValidClerkKey = () => {
+    const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+    return !!key && !key.includes('include');
+};
+
+const isClerkEnabled = hasValidClerkKey();
+
 export function useUser() {
     const context = useContext(MockClerkContext);
-    const isClerkEnabled = typeof window !== 'undefined' &&
-        !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('include');
 
     // Return mock context if Clerk is disabled
     if (!isClerkEnabled) return context;
 
     try {
         // Only call the clerk hook if env exists
+        // eslint-disable-next-line
         const clerk = useClerkUser();
         return clerk;
     } catch (e) {
@@ -37,9 +50,10 @@ export function useUser() {
 }
 
 export function ClerkSafeProvider({ children, publishableKey }: { children: React.ReactNode, publishableKey: string }) {
-    const isClerkEnabled = publishableKey && !publishableKey.includes('include');
+    // Double check runtime prop just in case
+    const isValid = isClerkEnabled && !!publishableKey && !publishableKey.includes('include');
 
-    if (!isClerkEnabled) {
+    if (!isValid) {
         return (
             <MockClerkContext.Provider value={{ isSignedIn: false, user: null, isLoaded: true }}>
                 {children}
@@ -68,37 +82,29 @@ export function SafeSignedOut({ children }: { children: React.ReactNode }) {
 }
 
 export function SafeSignInButton(props: any) {
-    const isClerkEnabled = typeof window !== 'undefined' &&
-        !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('include');
-
     if (!isClerkEnabled) {
-        return <div onClick={() => console.warn('Auth Disabled')} style={{ cursor: 'pointer' }}>{props.children || 'Sign In'}</div>;
+        return <div onClick={() => console.warn('Auth Disabled (No Key)')} style={{ cursor: 'pointer' }}>{props.children || 'Sign In'}</div>;
     }
-    const { SignInButton } = require('@clerk/nextjs');
-    return <SignInButton {...props} />;
+    return <ClerkSignInButton {...props} />;
 }
 
 export function SafeSignUpButton(props: any) {
-    const isClerkEnabled = typeof window !== 'undefined' &&
-        !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('include');
-
     if (!isClerkEnabled) {
-        return <div onClick={() => console.warn('Auth Disabled')} style={{ cursor: 'pointer' }}>{props.children || 'Sign Up'}</div>;
+        return <div onClick={() => console.warn('Auth Disabled (No Key)')} style={{ cursor: 'pointer' }}>{props.children || 'Sign Up'}</div>;
     }
-    const { SignUpButton } = require('@clerk/nextjs');
-    return <SignUpButton {...props} />;
+    return <ClerkSignUpButton {...props} />;
 }
 
 export function SafeUserButton(props: any) {
-    const isClerkEnabled = typeof window !== 'undefined' &&
-        !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-        !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('include');
-
     if (!isClerkEnabled) {
         return <div className="w-8 h-8 rounded-full bg-gray-700 border border-white/10" title="Mock User (Auth Disabled)" />;
     }
-    const { UserButton } = require('@clerk/nextjs');
-    return <UserButton {...props} />;
+    return <ClerkUserButton {...props} />;
+}
+
+export function SafeSignOutButton(props: any) {
+    if (!isClerkEnabled) {
+        return <div onClick={() => console.warn('Auth Disabled (No Key)')} style={{ cursor: 'pointer' }}>{props.children || 'Sign Out'}</div>;
+    }
+    return <ClerkSignOutButton {...props} />;
 }

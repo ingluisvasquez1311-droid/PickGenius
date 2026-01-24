@@ -16,7 +16,7 @@ export default function GlobalSearch() {
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
-    // Keyboard shortcut Cmd+K / Ctrl+K
+    // Keyboard shortcut Cmd+K / Ctrl+K & Custom Event
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -25,8 +25,15 @@ export default function GlobalSearch() {
             }
             if (e.key === 'Escape') setIsOpen(false);
         };
+
+        const handleOpenSearch = () => setIsOpen(true);
+
         window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        window.addEventListener('open-search', handleOpenSearch);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('open-search', handleOpenSearch);
+        };
     }, []);
 
     // Keyboard navigation for results

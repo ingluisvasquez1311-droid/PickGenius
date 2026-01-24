@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { Share2, Copy, Check, Download, QrCode } from 'lucide-react';
 import { useReferrals } from '@/hooks/useReferrals';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@/components/ClerkSafeProvider';
 import { useState } from 'react';
 import clsx from 'clsx';
 

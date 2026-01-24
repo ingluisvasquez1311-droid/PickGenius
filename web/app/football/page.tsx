@@ -65,20 +65,41 @@ export default function FootballHub() {
 
     const groupEvents = (events: any[]) => {
         if (!events || !Array.isArray(events)) return {};
+
         return events.reduce((acc: any, event: any) => {
             if (!event) return acc;
 
-            // Fallback for missing tournament info
-            const tournament = event.tournament || { name: 'Otros Partidos', id: 999999, category: { name: 'Varios' } };
-            const tId = tournament.uniqueId || tournament.id || 999999;
+            // Extract tournament info with robust fallbacks
+            const tournament = event.tournament || {};
+            const category = tournament.category || event.category || { name: 'Mundo' };
+
+            // CRITICAL FIX: Use a composite key to guarantee uniqueness
+            // If tournament ID missing, use Category + Tournament Name
+            let tId = tournament.uniqueId || tournament.id;
+
+            // If no ID exists, create a synthetic ID based on names to prevent merging
+            if (!tId) {
+                const tName = tournament.name || 'Torneo Desconocido';
+                const cName = category.name || 'General';
+                // Simple hash-like string generator for the key
+                tId = `${cName}-${tName}`.replace(/\s+/g, '-').toLowerCase();
+            }
+
+            // Fallback for display details
+            const cleanTournament = {
+                ...tournament,
+                name: tournament.name || 'Liga Regional',
+                id: tId
+            };
 
             if (!acc[tId]) {
                 acc[tId] = {
-                    info: tournament,
-                    category: tournament.category || { name: 'Mundo' },
+                    info: cleanTournament,
+                    category: category,
                     events: []
                 };
             }
+
             acc[tId].events.push(event);
             return acc;
         }, {});
@@ -143,7 +164,7 @@ export default function FootballHub() {
                                     )}
                                 >
                                     <span className={clsx("w-2 h-2 rounded-full", activeFilter === 'live' ? "bg-black animate-pulse shadow-[0_0_10px_black]" : "bg-gray-700")}></span>
-                                    Live {footballLiveCount > 0 && (
+                                    En Vivo {footballLiveCount > 0 && (
                                         <span className="ml-1.5 px-2 py-0.5 bg-black/20 rounded-md text-[10px] font-mono">{footballLiveCount}</span>
                                     )}
                                 </button>
@@ -203,7 +224,7 @@ export default function FootballHub() {
                                     <div className="flex-1 h-[2px] bg-gradient-to-r from-white/20 to-transparent"></div>
                                     <div className="flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/10">
                                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Live Engine Ready</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Motor En Vivo Listo</span>
                                     </div>
                                 </div>
 
@@ -288,15 +309,15 @@ export default function FootballHub() {
                         {/* System Info Brutalist */}
                         <div className="bg-white/5 border-2 border-dashed border-white/10 rounded-[3rem] p-10 space-y-6">
                             <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-600">
-                                <span>Status</span>
-                                <span className="text-green-500">Online</span>
+                                <span>Estado</span>
+                                <span className="text-green-500">En Línea</span>
                             </div>
                             <div className="space-y-2">
                                 <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                                     <div className="h-full bg-primary w-[88%] shadow-glow-sm"></div>
                                 </div>
                                 <div className="flex justify-between text-[9px] font-black text-gray-500 uppercase tracking-widest">
-                                    <span>AI Efficiency</span>
+                                    <span>Eficiencia IA</span>
                                     <span className="text-primary italic">88.4%</span>
                                 </div>
                             </div>

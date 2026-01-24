@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import KellyCalculator from '@/components/KellyCalculator';
 import SureBetsFinder from '@/components/SureBetsFinder';
+import SmartAlerts from '@/components/SmartAlerts';
 import { useBankroll } from '@/hooks/useBankroll';
 import { Scale, TrendingUp, Bell, Zap } from 'lucide-react';
 import clsx from 'clsx';
@@ -68,17 +69,7 @@ export default function ToolsPage() {
                         <SureBetsFinder />
                     )}
                     {activeTab === 'alerts' && (
-                        <div className="glass-card p-1 rounded-[3rem]">
-                            <div className="bg-[#050505]/90 backdrop-blur-3xl rounded-[2.8rem] p-20 text-center space-y-6">
-                                <Bell className="w-16 h-16 text-gray-700 mx-auto" />
-                                <h3 className="text-3xl font-black italic uppercase tracking-tighter text-gray-500">
-                                    Smart Alerts <span className="text-primary">PRO</span>
-                                </h3>
-                                <p className="text-sm font-bold text-gray-600 uppercase tracking-widest max-w-md mx-auto">
-                                    Sistema de alertas personalizadas por umbrales de cuotas • Próximamente
-                                </p>
-                            </div>
-                        </div>
+                        <SmartAlerts />
                     )}
                 </div>
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@/components/ClerkSafeProvider';
 
 export interface Referral {
     code: string;

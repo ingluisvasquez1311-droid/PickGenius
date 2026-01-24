@@ -6,9 +6,10 @@ import {
     Home, Zap, Radio, Menu, Trophy, X,
     Target, Flame, Newspaper, Plus, Bell,
     User, LayoutDashboard, Globe, Activity, Star,
-    Circle, Diamond, Crown, Wallet, Coins
+    Circle, Diamond, Crown, Wallet, Coins, Search, Command
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import ParleyOptimizer from './ParleyOptimizer';
 import WalletModal from './WalletModal';
@@ -39,6 +40,19 @@ export function Navbar() {
 
     const isAuthorizedAdmin = user?.emailAddresses[0]?.emailAddress === 'luisvasquez1311@gmail.com';
     const isGold = user?.publicMetadata?.isGold === true || isAuthorizedAdmin;
+
+    // Global Live Count for all sports
+    const { data: liveCounts = {} } = useQuery({
+        queryKey: ['live-counts'],
+        queryFn: async () => {
+            const res = await fetch('/api/live/counts');
+            if (!res.ok) return {};
+            return await res.json();
+        },
+        refetchInterval: 30000,
+    });
+
+    const totalLive = Object.values(liveCounts).reduce((acc: number, count: any) => acc + (Number(count) || 0), 0);
 
     const handleUpgrade = async () => {
         setIsUpgrading(true);
@@ -94,8 +108,17 @@ export function Navbar() {
             )}>
 
                 {/* Brand / Logo */}
-                <Link href="/" className="flex items-center gap-3 group">
+                <Link href="/" className="flex items-center gap-4 group">
                     <Logo size="md" />
+                    {totalLive > 0 && (
+                        <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full animate-in fade-in slide-in-from-left-4 duration-1000">
+                            <span className="relative flex h-1.5 w-1.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
+                            </span>
+                            <span className="text-[8px] font-black text-red-500 uppercase tracking-widest">{totalLive} EN VIVO</span>
+                        </div>
+                    )}
                 </Link>
 
                 {/* Desktop Navigation Items */}
@@ -171,6 +194,19 @@ export function Navbar() {
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-4">
+                    {/* Search Trigger */}
+                    <button
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-search'))}
+                        className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-gray-400 hover:text-white"
+                    >
+                        <Search className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Buscar</span>
+                        <div className="flex items-center gap-1 ml-2 px-1.5 py-0.5 bg-black/40 rounded-md border border-white/5">
+                            <Command className="w-2.5 h-2.5 text-gray-500" />
+                            <span className="text-[8px] font-black text-gray-500">K</span>
+                        </div>
+                    </button>
+
                     {/* Admin Panel Button */}
                     {isAuthorizedAdmin && (
                         <Link

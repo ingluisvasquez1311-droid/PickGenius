@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@/components/ClerkSafeProvider';
 import { Send, MessageSquare, Crown, Trash2, Clock, ShieldCheck, Zap, Flag, ArrowDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';

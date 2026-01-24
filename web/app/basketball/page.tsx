@@ -1,23 +1,18 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
-import { Trophy, Activity, Calendar, ChevronRight, ChevronDown, Star, Target, Zap, ArrowLeft, BarChart3, TrendingUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Trophy, Activity, Calendar, ChevronDown, Zap, Globe, Star, BarChart3, TrendingUp, Target } from 'lucide-react';
 import { MatchCardSkeleton } from '@/components/Skeleton';
 import Link from 'next/link';
 import clsx from 'clsx';
-import { useRouter } from 'next/navigation';
 import TopLeadersWidget from '@/components/TopLeadersWidget';
-import TournamentAccordion from '@/components/TournamentAccordion';
 import NextToStartWidget from '@/components/NextToStartWidget';
 import InjuryTracker from '@/components/InjuryTracker';
-
 import { useQuery } from '@tanstack/react-query';
 
 export default function BasketballHub() {
-    const [activeTab, setActiveTab] = useState<'matches' | 'standings' | 'leaders'>('matches');
     const [activeFilter, setActiveFilter] = useState<'live' | 'scheduled'>('live');
-    const [expandedTournaments, setExpandedTournaments] = useState<Record<number, boolean>>({});
-    const router = useRouter();
+    const [expandedTournaments, setExpandedTournaments] = useState<Record<string, boolean>>({});
 
     const { data: matches = [], isLoading: loading } = useQuery({
         queryKey: ['basketball-matches', activeFilter],
@@ -28,18 +23,10 @@ export default function BasketballHub() {
             const data = await res.json();
             const events = data.events || [];
 
-            // FILTER FILTER: Remove finished games from scheduled view
+            // FILTER: Remove finished games from scheduled view
             const filteredEvents = activeFilter === 'scheduled'
                 ? events.filter((e: any) => e.status?.type !== 'finished')
                 : events;
-
-            // Auto-expand first 3 tournaments if none are expanded
-            const grouped = groupEvents(filteredEvents);
-            const initialExpanded: Record<number, boolean> = {};
-            Object.keys(grouped).slice(0, 3).forEach(id => {
-                initialExpanded[Number(id)] = true;
-            });
-            setExpandedTournaments(prev => Object.keys(prev).length === 0 ? initialExpanded : prev);
 
             return filteredEvents;
         },
@@ -62,28 +49,49 @@ export default function BasketballHub() {
 
     const groupEvents = (events: any[]) => {
         if (!events || !Array.isArray(events)) return {};
+
         return events.reduce((acc: any, event: any) => {
             if (!event) return acc;
 
-            // Fallback for missing tournament info
-            const tournament = event.tournament || { name: 'Otros Partidos', id: 999999, category: { name: 'Varios' } };
-            const tId = tournament.uniqueId || tournament.id || 999999;
+            const tournament = event.tournament || {};
+            const category = tournament.category || event.category || { name: 'Mundo' };
+            let tId = tournament.uniqueId || tournament.id;
+
+            if (!tId) {
+                const tName = tournament.name || 'Torneo Desconocido';
+                const cName = category.name || 'General';
+                tId = `${cName}-${tName}`.replace(/\s+/g, '-').toLowerCase();
+            }
+
+            const cleanTournament = {
+                ...tournament,
+                name: tournament.name || 'Liga Regional',
+                id: tId
+            };
 
             if (!acc[tId]) {
                 acc[tId] = {
-                    info: tournament,
-                    category: tournament.category || { name: 'Mundo' },
+                    info: cleanTournament,
+                    category: category,
                     events: []
                 };
             }
+
             acc[tId].events.push(event);
             return acc;
         }, {});
     };
 
-    const groupedMatches = useMemo(() => groupEvents(matches), [matches]);
+    const groupedEvents = useMemo(() => groupEvents(matches), [matches]);
+    const sortedTournamentIds = Object.keys(groupedEvents).sort((a, b) => {
+        const nameA = groupedEvents[a].info.name.toLowerCase();
+        const nameB = groupedEvents[b].info.name.toLowerCase();
+        if (nameA.includes('nba') && !nameB.includes('nba')) return -1;
+        if (!nameA.includes('nba') && nameB.includes('nba')) return 1;
+        return 0;
+    });
 
-    const toggleTournament = (id: number) => {
+    const toggleTournament = (id: any) => {
         setExpandedTournaments(prev => ({
             ...prev,
             [id]: !prev[id]
@@ -91,222 +99,245 @@ export default function BasketballHub() {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white pt-24 pb-20 px-4 md:px-12 max-w-[1600px] mx-auto relative overflow-hidden">
-            {/* Cyber-Glass Ambient Layers */}
+        <div className="min-h-screen bg-[#050505] text-white selection:bg-[#FF4500] selection:text-black font-sans pb-20">
+            {/* Ambient Background */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-20%] right-[-10%] w-[80%] h-[80%] bg-[#FF4500]/20 blur-[180px] animate-pulse rounded-full opacity-60"></div>
-                <div className="absolute top-[10%] left-[-20%] w-[70%] h-[70%] bg-secondary/15 blur-[200px] rounded-full opacity-40"></div>
-                <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[60%] bg-accent/10 blur-[180px] rounded-full opacity-30"></div>
-                <div className="absolute inset-0 checkered-bg opacity-[0.05]"></div>
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')] opacity-[0.02] mix-blend-overlay"></div>
-                <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-full h-[2px] bg-gradient-to-r from-transparent via-[#FF4500]/20 to-transparent blur-sm"></div>
+                <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-[#FF4500]/10 blur-[150px] rounded-full mix-blend-screen animate-pulse-slow"></div>
+                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full mix-blend-screen animate-pulse-slow delay-1000"></div>
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay"></div>
             </div>
 
-            <div className="relative z-10 flex flex-col gap-12">
-                {/* Massive Brutalist Header */}
-                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 border-b-2 border-white/10 pb-12">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <Link href="/" className="group p-4 glass-card rounded-2xl hover:cyber-border transition-all duration-500">
-                                <ArrowLeft className="w-6 h-6 text-gray-400 group-hover:text-[#FF4500]" />
-                            </Link>
-                            <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-[#FF4500]/10 border border-[#FF4500]/20 text-[#FF4500] text-[10px] font-black uppercase tracking-[0.4em]">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF4500] opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF4500]"></span>
-                                </span>
-                                HOOPS_ENGINE_V5.2
-                            </div>
+            <main className="relative z-10 pt-28 px-4 md:px-8 max-w-[100rem] mx-auto space-y-12">
+
+                {/* HERO SECTION - SPANISH */}
+                <div className="relative rounded-[3rem] overflow-hidden border border-white/10 bg-[#0a0a0a] group">
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2090&auto=format&fit=crop')] bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-[2s]"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
+
+                    <div className="relative z-10 p-10 md:p-20 space-y-8 max-w-4xl">
+                        <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-[#FF4500]/10 border border-[#FF4500]/20 backdrop-blur-md">
+                            <Activity className="w-4 h-4 text-[#FF4500] animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FF4500]">Inteligencia Baloncesto</span>
                         </div>
-                        <h1 className="text-4xl md:text-[12rem] font-black italic tracking-tighter uppercase leading-[0.85] flex flex-col">
-                            <span className="gradient-text" style={{ background: 'linear-gradient(135deg, #FF4500 10%, #FF6B00 50%, #00F5FF 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '200% 200%', animation: 'var(--animate-gradient-shift)' }}>BALONCESTO</span>
+
+                        <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-[0.9]">
+                            VISIÓN DE <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF4500] to-orange-400">CANCHA</span> <br />
+                            <span className="text-white/20">PRO TERM.</span>
                         </h1>
-                        <div className="flex items-center gap-4">
-                            <div className="h-px w-24 bg-gradient-to-r from-[#FF4500] to-transparent"></div>
-                            <p className="text-gray-500 font-black uppercase tracking-[0.5em] text-[10px]">Sistema Ultra-Fidelidad</p>
-                        </div>
-                    </div>
 
-                    {/* Industrial Navigation Controls */}
-                    <div className="flex flex-col gap-6 w-full lg:w-auto">
-                        <div className="flex flex-wrap gap-4">
-                            {/* Live/Scheduled Switcher */}
-                            <div className="flex glass-card p-1.5 rounded-[1.5rem] border border-white/10">
-                                <button
-                                    onClick={() => setActiveFilter('live')}
-                                    className={clsx(
-                                        "px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center gap-3 transition-all duration-500",
-                                        activeFilter === 'live' ? "cyber-button text-black shadow-[0_0_25px_rgba(255,95,31,0.4)]" : "text-gray-600 hover:text-white hover:bg-white/5"
-                                    )}
-                                >
-                                    <span className={clsx("w-2 h-2 rounded-full", activeFilter === 'live' ? "bg-black animate-pulse shadow-[0_0_10px_black]" : "bg-gray-700")}></span>
-                                    Live {basketballLiveCount > 0 && (
-                                        <span className="ml-1.5 px-2 py-0.5 bg-black/20 rounded-md text-[10px] font-mono">{basketballLiveCount}</span>
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => setActiveFilter('scheduled')}
-                                    className={clsx(
-                                        "px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center gap-3 transition-all duration-500",
-                                        activeFilter === 'scheduled' ? "bg-[#FF4500] text-black shadow-[0_0_25px_rgba(255,69,0,0.4)]" : "text-gray-600 hover:text-white"
-                                    )}
-                                >
-                                    <Calendar className="w-4 h-4" />
-                                    Tip-Off
-                                </button>
+                        <div className="flex flex-wrap gap-6 pt-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <Trophy className="w-6 h-6 text-[#FF4500]" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-black italic text-white">NBA</p>
+                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Cobertura Elite</p>
+                                </div>
                             </div>
-
-                            <Link href="/props?sport=basketball" className="group flex items-center gap-4 px-8 py-4 glass-card hover:cyber-border rounded-2xl transition-all duration-500">
-                                <Zap className="w-5 h-5 text-yellow-500 group-hover:scale-125 group-hover:rotate-12 transition-all animate-pulse" />
-                                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-[#FF4500] italic">Elite Props</span>
-                                <ChevronRight className="w-4 h-4 text-gray-700 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                        </div>
-
-                        {/* Ultra-Premium Tabs */}
-                        <div className="flex w-full items-stretch h-14 glass-card border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-                            {['PARTIDOS', 'TABLAS', 'ÉLITE'].map((tabLabel, idx) => {
-                                const tabId = ['matches', 'standings', 'leaders'][idx];
-                                const TabIcon = [Activity, Trophy, Target][idx];
-                                return (
-                                    <button
-                                        key={tabId}
-                                        onClick={() => setActiveTab(tabId as any)}
-                                        className={clsx(
-                                            "flex-1 px-6 font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 transition-all duration-500 relative group",
-                                            activeTab === tabId ? "bg-gradient-to-r from-[#FF4500] to-[#FF6B00] text-black shadow-[0_0_20px_rgba(255,69,0,0.4)]" : "text-gray-500 hover:bg-white/5 hover:text-white"
-                                        )}
-                                    >
-                                        <TabIcon className={clsx("w-4 h-4 transition-transform", activeTab === tabId ? "text-black scale-110" : "text-gray-600 group-hover:scale-105")} />
-                                        <span className="relative z-10">{tabLabel}</span>
-                                        {activeTab === tabId && (
-                                            <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
-                                        )}
-                                    </button>
-                                );
-                            })}
+                            <div className="w-px h-12 bg-white/10"></div>
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <Zap className="w-6 h-6 text-yellow-400" />
+                                </div>
+                                <div>
+                                    <p className="text-2xl font-black italic text-white">{basketballLiveCount}</p>
+                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">En Vivo</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Content Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12">
-                    {/* Main Feed */}
-                    <div className="lg:col-span-8 space-y-6 lg:space-y-10">
-                        <div className="flex items-center gap-6">
-                            <h2 className="text-4xl font-black italic uppercase tracking-tighter">
-                                {activeTab === 'matches' ? 'En la Pintura' : activeTab === 'standings' ? 'Jerarquía Global' : 'Elite de la Liga'}
-                            </h2>
-                            <div className="flex-1 h-[2px] bg-gradient-to-r from-white/20 to-transparent"></div>
-                            <div className="flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/10">
-                                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Hoops Radar Active</span>
-                            </div>
+                {/* CONTENT GRID */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                    {/* LEFT COLUMN: MATCHES (8 cols) */}
+                    <div className="lg:col-span-8 space-y-8">
+
+                        {/* Filter Tabs */}
+                        <div className="flex items-center gap-2 p-1.5 bg-white/5 border border-white/5 rounded-2xl w-fit backdrop-blur-md">
+                            {[
+                                { id: 'live', label: 'EN VIVO', icon: Zap, activeColor: 'bg-[#FF4500] text-black' },
+                                { id: 'scheduled', label: 'PROGRAMADOS', icon: Calendar, activeColor: 'bg-white text-black' }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveFilter(tab.id as 'live' | 'scheduled')}
+                                    className={clsx(
+                                        "px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all",
+                                        activeFilter === tab.id
+                                            ? `${tab.activeColor} shadow-lg`
+                                            : "text-gray-400 hover:text-white hover:bg-white/5"
+                                    )}
+                                >
+                                    <tab.icon className={clsx("w-3.5 h-3.5", activeFilter === tab.id && (tab.id === 'live' ? "animate-pulse" : ""))} />
+                                    {tab.label}
+                                </button>
+                            ))}
                         </div>
 
-                        {activeTab === 'matches' && (
-                            <div className="space-y-8 animate-in fade-in slide-in-from-left-10 duration-700">
-                                {loading ? (
-                                    <div className="grid gap-8">
-                                        {[1, 2, 3, 4].map((i) => (
-                                            <MatchCardSkeleton key={i} />
-                                        ))}
-                                    </div>
-                                ) : matches.length > 0 ? (
-                                    <div className="grid gap-8">
-                                        {Object.entries(groupedMatches).map(([id, group]: [string, any]) => (
-                                            <TournamentAccordion
-                                                key={id}
-                                                id={id}
-                                                group={group}
-                                                isExpanded={expandedTournaments[Number(id)]}
-                                                onToggle={() => toggleTournament(Number(id))}
-                                                onClickMatch={(mid: number) => router.push(`/match/${mid}`)}
-                                                mode={activeFilter}
-                                                accentColor="orange"
-                                            />
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-white/10 rounded-[4rem] bg-white/[0.01]">
-                                        <div className="p-8 bg-white/5 rounded-full border border-white/10 mb-8">
-                                            <Activity className="w-16 h-16 text-gray-700" />
-                                        </div>
-                                        <h3 className="text-2xl font-black italic uppercase tracking-tighter text-gray-500 mb-2">Sin actividad detectada</h3>
-                                        <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">El radar está limpio en este cuadrante</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === 'standings' && (
-                            <div className="bg-[#080808] border-2 border-white/10 p-6 lg:p-12 rounded-[2rem] lg:rounded-[3.5rem] relative overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-700">
-                                <div className="absolute top-0 right-0 p-12 opacity-10">
-                                    <Trophy className="w-48 h-48 text-[#FF4500]" />
+                        {/* Matches Feed */}
+                        <div className="space-y-4 min-h-[500px]">
+                            {loading ? (
+                                Array(3).fill(0).map((_, i) => <MatchCardSkeleton key={i} />)
+                            ) : matches.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-96 bg-white/[0.02] rounded-[3rem] border border-white/5">
+                                    <Trophy className="w-16 h-16 text-white/10 mb-4" />
+                                    <p className="text-gray-500 font-black uppercase tracking-widest text-sm">No hay partidos activos</p>
                                 </div>
-                                <div className="relative z-10 space-y-8">
-                                    <h3 className="text-5xl font-black uppercase italic tracking-tighter">POSICIONES <span className="text-[#FF4500]">NBA & EURO</span></h3>
-                                    <p className="text-gray-400 font-bold uppercase tracking-widest text-sm max-w-xl leading-relaxed">
-                                        Monitorizando la competitividad en las ligas más exigentes del planeta.
-                                    </p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-8">
-                                        {['Western Conference', 'Eastern Conference', 'EuroLeague', 'Liga ACB', 'Lega Basket', 'BSN'].map(league => (
-                                            <div key={league} className="group p-8 bg-white/5 border-2 border-white/5 hover:border-[#FF4500]/40 hover:bg-[#FF4500]/5 rounded-[2rem] transition-all duration-500 cursor-pointer">
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center p-2 group-hover:bg-[#FF4500] transition-colors">
-                                                        <Star className="w-full h-full text-gray-500 group-hover:text-black" />
+                            ) : (
+                                sortedTournamentIds.map(tournamentId => {
+                                    const { info, events } = groupedEvents[tournamentId];
+                                    const isExpanded = expandedTournaments[tournamentId] ?? true;
+                                    const isNBA = info.name.toLowerCase().includes('nba');
+
+                                    return (
+                                        <div key={tournamentId} className={clsx(
+                                            "rounded-[2.5rem] overflow-hidden transition-all duration-500 border",
+                                            isExpanded ? "bg-[#080808] border-white/10" : "bg-white/[0.02] border-white/5 hover:bg-white/[0.04]"
+                                        )}>
+                                            <button
+                                                onClick={() => toggleTournament(tournamentId)}
+                                                className="w-full flex items-center justify-between p-6 md:p-8"
+                                            >
+                                                <div className="flex items-center gap-6">
+                                                    <div className="relative">
+                                                        <div className={clsx(
+                                                            "w-14 h-14 rounded-2xl flex items-center justify-center border shadow-lg",
+                                                            isNBA ? "bg-[#1D428A] border-[#C8102E]" : "bg-white/5 border-white/10"
+                                                        )}>
+                                                            {isNBA ? (
+                                                                <img src="https://cdn.nba.com/logos/leagues/logo-nba.svg" alt="NBA" className="w-8 h-8 opacity-90" />
+                                                            ) : (
+                                                                <Trophy className="w-6 h-6 text-gray-400" />
+                                                            )}
+                                                        </div>
+                                                        {activeFilter === 'live' && (
+                                                            <div className="absolute -top-1 -right-1 flex h-3 w-3">
+                                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF4500] opacity-75"></span>
+                                                                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#FF4500]"></span>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <ChevronRight className="w-5 h-5 text-gray-700 group-hover:text-[#FF4500] transition-colors" />
+                                                    <div className="text-left space-y-1">
+                                                        <h3 className="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-white">
+                                                            {info.name}
+                                                        </h3>
+                                                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                                                            <Globe className="w-3 h-3" />
+                                                            {info.category?.name || 'Internacional'}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <span className="text-xs font-black uppercase tracking-[0.2em] text-gray-300 group-hover:text-white">{league}</span>
+                                                <div className={clsx(
+                                                    "w-10 h-10 rounded-full border border-white/10 flex items-center justify-center transition-all duration-300",
+                                                    isExpanded ? "bg-white text-black rotate-180" : "bg-white/5 text-gray-400"
+                                                )}>
+                                                    <ChevronDown className="w-5 h-5" />
+                                                </div>
+                                            </button>
+
+                                            <div className={clsx(
+                                                "grid transition-all duration-500 ease-in-out",
+                                                isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                                            )}>
+                                                <div className="overflow-hidden">
+                                                    <div className="p-4 md:p-6 pt-0 space-y-3">
+                                                        {events.map((event: any) => (
+                                                            <Link
+                                                                key={event.id}
+                                                                href={`/match/${event.id}`}
+                                                                className="block group/match"
+                                                            >
+                                                                <div className="bg-white/[0.03] hover:bg-[#FF4500]/5 border border-white/5 hover:border-[#FF4500]/30 rounded-[2rem] p-5 flex items-center justify-between transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+                                                                    {/* HOME TEAM */}
+                                                                    <div className="flex-1 flex items-center gap-4">
+                                                                        <div className="text-right flex-1">
+                                                                            <span className="text-sm md:text-lg font-black italic uppercase text-white group-hover/match:text-[#FF4500] transition-colors">
+                                                                                {event.homeTeam.name}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="w-12 h-12 bg-white/5 rounded-xl p-2 flex items-center justify-center">
+                                                                            <div className="text-[10px] font-black text-gray-600 uppercase">{event.homeTeam.name.substring(0, 3)}</div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* SCORE / VS */}
+                                                                    <div className="px-6 flex flex-col items-center gap-1">
+                                                                        {event.status.type === 'inprogress' ? (
+                                                                            <>
+                                                                                <div className="text-2xl font-black text-white font-mono tracking-widest bg-black/40 px-4 py-1 rounded-lg border border-white/10">
+                                                                                    {event.homeScore?.display || 0} - {event.awayScore?.display || 0}
+                                                                                </div>
+                                                                                <span className="text-[9px] font-bold text-[#FF4500] animate-pulse">Q{event.status.period || 1} • {event.status.displayTime || 'LIVE'}</span>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <span className="text-xl font-black text-gray-700 italic">VS</span>
+                                                                                <span className="text-[9px] font-bold text-gray-500">
+                                                                                    {new Date(event.startTimestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                                </span>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+
+                                                                    {/* AWAY TEAM */}
+                                                                    <div className="flex-1 flex items-center gap-4">
+                                                                        <div className="w-12 h-12 bg-white/5 rounded-xl p-2 flex items-center justify-center">
+                                                                            <div className="text-[10px] font-black text-gray-600 uppercase">{event.awayTeam.name.substring(0, 3)}</div>
+                                                                        </div>
+                                                                        <div className="text-left flex-1">
+                                                                            <span className="text-sm md:text-lg font-black italic uppercase text-white group-hover/match:text-[#FF4500] transition-colors">
+                                                                                {event.awayTeam.name}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'leaders' && (
-                            <div className="animate-in fade-in zoom-in-95 duration-700">
-                                <TopLeadersWidget />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Sidebar Performance */}
-                    <div className="lg:col-span-4 space-y-8">
-                        <div className="relative group">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-[#FF4500] to-yellow-500 rounded-[3rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                            <div className="relative bg-[#080808] border-2 border-white/10 rounded-[3rem] p-8">
-                                <NextToStartWidget sport="basketball" />
-                                <div className="mt-8">
-                                    <InjuryTracker sport="basketball" />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* System Info Brutalist */}
-                        <div className="bg-white/5 border-2 border-dashed border-white/10 rounded-[3rem] p-10 space-y-6">
-                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-600">
-                                <span>Hoops Node</span>
-                                <span className="text-orange-500 italic">Connected</span>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                    <div className="h-full bg-[#FF4500] w-[94%] shadow-glow-sm"></div>
-                                </div>
-                                <div className="flex justify-between text-[9px] font-black text-gray-500 uppercase tracking-widest">
-                                    <span>Sync Velocity</span>
-                                    <span className="text-white italic">Premium High</span>
-                                </div>
-                            </div>
-                            <p className="text-[10px] text-gray-500 font-bold leading-relaxed uppercase tracking-wider">
-                                Análisis de posesión y eficiencia por jugador activo. Sincronización milimétrica.
-                            </p>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
+
+                    {/* RIGHT COLUMN: WIDGETS (4 cols) */}
+                    <div className="lg:col-span-4 space-y-6">
+                        {/* NBA Leaders Widget with new design */}
+                        <div className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-6 space-y-6 text-center">
+                            <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+                                <Star className="w-5 h-5 text-yellow-500" />
+                                <h3 className="text-lg font-black italic uppercase text-white">Mejores Jugadores</h3>
+                            </div>
+                            <TopLeadersWidget />
+                        </div>
+
+                        {/* Next to Start Widget */}
+                        <div className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-6 space-y-6 text-center">
+                            <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+                                <Calendar className="w-5 h-5 text-blue-400" />
+                                <h3 className="text-lg font-black italic uppercase text-white">Próximamente</h3>
+                            </div>
+                            <NextToStartWidget sport="basketball" />
+                        </div>
+
+                        {/* Injury Tracker */}
+                        <div className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-6 space-y-6 text-center">
+                            <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+                                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                                <h3 className="text-lg font-black italic uppercase text-white">Reporte de Bajas</h3>
+                            </div>
+                            <InjuryTracker />
+                        </div>
+                    </div>
+
                 </div>
-            </div>
-        </div >
+            </main>
+        </div>
     );
 }

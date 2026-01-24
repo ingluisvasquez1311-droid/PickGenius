@@ -29,6 +29,6 @@ export async function GET(
 
     } catch (error) {
         console.error(`Error fetching scheduled ${sport}:`, error);
-        return NextResponse.json({ events: [] }, { status: 500 });
+        return NextResponse.json({ events: [], error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
     }
 }

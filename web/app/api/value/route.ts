@@ -3,16 +3,25 @@ import fs from 'fs';
 import path from 'path';
 import Groq from "groq-sdk";
 
-const getGroqClient = () => {
-    const keys = (process.env.GROQ_API_KEYS || "").split(",").map(k => k.trim()).filter(Boolean);
-    if (keys.length === 0) throw new Error("No Groq API keys found");
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    return new Groq({ apiKey: randomKey });
+// 1. OBTENER TODAS LAS CLAVES DISPONIBLES (Parseo Robusto)
+const getAllKeys = () => {
+    const raw = process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || "";
+    return raw.replace(/["']/g, "")
+        .split(/[,;\s\n]+/)
+        .map(k => k.trim())
+        .filter(k => k.startsWith('gsk_'));
 };
+
+const MODELS = [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-70b-versatile",
+    "mixtral-8x7b-32768"
+];
 
 async function getLatestBetPlayOdds(sportFilter: string) {
     try {
-        const betplayDir = path.join(process.cwd(), '..', 'data', 'betplay');
+        const rootDir = process.cwd().includes('web') ? path.join(process.cwd(), '..') : process.cwd();
+        const betplayDir = path.join(rootDir, 'data', 'betplay');
         const latestFile = path.join(betplayDir, "latest_betplay_odds.json");
 
         if (!fs.existsSync(latestFile)) return [];
@@ -44,16 +53,16 @@ export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
         const sport = searchParams.get('sport') || 'all';
+        const allKeys = getAllKeys();
 
-        const groq = getGroqClient();
         const betplayEvents = await getLatestBetPlayOdds(sport);
 
         if (betplayEvents.length === 0) {
             return NextResponse.json({ valueBets: [] });
         }
 
-        // Tomar una muestra representativa (ej: los primeros 15 eventos con cuotas)
-        const sampleEvents = betplayEvents.slice(0, 15);
+        // Tomar una muestra representativa (ej: los primeros 25 eventos con cuotas)
+        const sampleEvents = betplayEvents.slice(0, 25);
 
         const systemPrompt = `Eres el Motor "Value Hunter Pro" de PickGenius. Tu única función es identificar errores matemáticos en las cuotas de las casas de apuestas.
 
@@ -90,18 +99,36 @@ export async function GET(req: NextRequest) {
 
         const userPrompt = `Analiza estos eventos reales de Kambi/BetPlay para ${sport.toUpperCase()} y extrae el valor matemático oculto. DATA: ${JSON.stringify(sampleEvents)}`;
 
-        const completion = await groq.chat.completions.create({
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userPrompt }
-            ],
-            model: "llama-3.3-70b-versatile",
-            temperature: 0.3,
-            response_format: { type: "json_object" }
-        });
+        // Retry Logic
+        for (const model of MODELS) {
+            const shuffledKeys = [...allKeys].sort(() => 0.5 - Math.random());
+            const maxAttempts = Math.min(3, shuffledKeys.length);
 
-        const result = JSON.parse(completion.choices[0]?.message?.content || '{"valueBets": []}');
-        return NextResponse.json(result);
+            for (let i = 0; i < maxAttempts; i++) {
+                const apiKey = shuffledKeys[i];
+                try {
+                    const groq = new Groq({ apiKey });
+                    const completion = await groq.chat.completions.create({
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: userPrompt }
+                        ],
+                        model: model,
+                        temperature: 0.3,
+                        response_format: { type: "json_object" }
+                    });
+
+                    const result = JSON.parse(completion.choices[0]?.message?.content || '{"valueBets": []}');
+                    return NextResponse.json(result);
+
+                } catch (error: any) {
+                    // Try next
+                    console.warn(`Value API Warn: ${model} failed, trying next.`);
+                }
+            }
+        }
+
+        throw new Error("All models failed for Value Bets");
 
     } catch (error: any) {
         console.error("Value API Error:", error);

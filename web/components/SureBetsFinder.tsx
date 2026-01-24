@@ -20,7 +20,7 @@ interface SureBet {
     totalStake: number;
 }
 
-export default function SureBetsFinder({ isPro = false }: { isPro?: boolean }) {
+export default function SureBetsFinder({ isPro = true }: { isPro?: boolean }) {
     const [minProfit, setMinProfit] = useState(2);
     const [selectedSport, setSelectedSport] = useState<'all' | 'football' | 'basketball' | 'tennis'>('all');
 

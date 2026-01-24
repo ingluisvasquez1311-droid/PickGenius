@@ -49,32 +49,33 @@ export const viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  // Use a structurally valid fallback key to satisfy Clerk's validation during build
-  // if NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not present in the environment.
-  const clerkPubKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
+}) {
   return (
-    <ClerkSafeProvider publishableKey={clerkPubKey || ""}>
-      <html lang="es">
-        <body className={`${inter.className} bg-[#050505] overflow-x-hidden`}>
+    <html lang="es">
+      <body className={inter.className}>
+        <ClerkSafeProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}>
           <QueryProvider>
-            <Particles className="absolute inset-0 z-0 pointer-events-none" />
-            <div className="relative z-10 min-h-screen flex flex-col">
+
+            <div className="flex flex-col min-h-screen relative overflow-x-hidden">
+              <Particles className="absolute inset-0 z-0 pointer-events-none" quantity={200} />
+              <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+
               <Navbar />
-              <LiveScoreWidget />
-              <main className="flex-grow">
+              <main className="flex-grow z-10 pt-20">
                 {children}
               </main>
               <Footer />
+
               <GlobalSearch />
               <NotificationScanner />
+              <LiveScoreWidget />
             </div>
+
           </QueryProvider>
-        </body>
-      </html>
-    </ClerkSafeProvider>
+        </ClerkSafeProvider>
+      </body>
+    </html>
   );
 }

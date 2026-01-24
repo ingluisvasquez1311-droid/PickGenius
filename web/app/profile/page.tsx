@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from '@/components/ClerkSafeProvider';
+import { useUser, SafeSignOutButton as SignOutButton } from '@/components/ClerkSafeProvider';
 import { useState, useEffect } from 'react';
 import {
     User, Mail, Crown, Settings, ChevronRight,
@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import clsx from 'clsx';
-import { SignOutButton } from '@clerk/nextjs';
 import { useBankroll } from '@/hooks/useBankroll';
 import { useGamification } from '@/hooks/useGamification';
+import { LevelProgressBar } from '@/components/LevelProgressBar';
 import * as LucideIcons from 'lucide-react';
 
 export default function UserDashboard() {
@@ -126,6 +126,9 @@ export default function UserDashboard() {
 
                     {/* Left & Center: Progress & History */}
                     <div className="lg:col-span-2 space-y-8 animate-fade-in-up delay-100">
+                        {/* Gamification Level Bar */}
+                        <LevelProgressBar level={level} progress={progress} points={points} />
+
                         {/* Stats Overview */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <StatCard icon={LucideIcons.Trophy} label="Win Rate" value={winRate.toFixed(1)} unit="%" color="primary" />

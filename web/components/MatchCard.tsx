@@ -63,84 +63,91 @@ export const MatchCard: React.FC<MatchCardProps> = ({
 
             <div className="relative z-10 flex flex-col gap-4">
                 {/* Header: League & Status */}
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <div className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", isLive ? "bg-red-500" : "bg-gray-600")} />
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">
-                            {match.league_name || 'Liga Pro'}
+                <div className="flex justify-between items-center px-1">
+                    <div className="flex items-center gap-2 max-w-[60%]">
+                        <div className={clsx("w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0", isLive ? "bg-red-500" : "bg-gray-600")} />
+                        <span className="text-[9px] font-black uppercase tracking-[0.1em] text-gray-500 truncate">
+                            {match.league_name || 'Torneo'}
                         </span>
                     </div>
                     {isLive && (
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 flex-shrink-0">
                             <Activity className="w-2.5 h-2.5 text-red-500 animate-pulse" />
-                            <span className="text-[8px] font-black text-red-500 uppercase tracking-widest">LIVE</span>
+                            <span className="text-[8px] font-black text-red-500 uppercase tracking-widest leading-none">LIVE</span>
                         </div>
                     )}
                     {!isLive && !isFinished && match.start_time && (
-                        <div className="flex items-center gap-1.5 text-gray-500">
+                        <div className="flex items-center gap-1.5 text-gray-500 flex-shrink-0">
                             <Clock className="w-2.5 h-2.5" />
                             <span className="text-[9px] font-black uppercase tracking-wider">{match.start_time}</span>
                         </div>
                     )}
                 </div>
 
-                {/* Teams Area */}
-                <div className="flex items-center justify-between gap-4 py-2">
-                    <div className="flex-1 flex flex-col items-center gap-3 text-center">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-2 group-hover:border-white/20 transition-colors">
+                {/* Teams Area - Compact & Safe */}
+                <div className="flex items-center justify-between gap-3 py-3">
+                    {/* HOME TEAM */}
+                    <div className="flex-1 flex flex-col items-center gap-2 text-center min-w-[30%]">
+                        <div className="w-10 h-10 md:w-14 md:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-2 group-hover:border-white/20 transition-all group-hover:scale-105 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                             {match.home_logo ? (
-                                <img src={match.home_logo} alt={match.home_team} className="w-full h-full object-contain" />
+                                <img src={match.home_logo} alt={match.home_team} className="w-full h-full object-contain drop-shadow-md" />
                             ) : (
-                                <Trophy className="w-6 h-6 text-gray-600" />
+                                <Trophy className="w-5 h-5 text-gray-600" />
                             )}
                         </div>
-                        <span className="text-sm font-black italic uppercase tracking-tighter text-white truncate w-full">
-                            {match.home_team}
+                        <span className="text-[10px] md:text-xs font-black italic uppercase tracking-tight text-gray-200 leading-tight w-full line-clamp-2 min-h-[2.5em] flex items-center justify-center">
+                            {match.home_team.replace(/FC|CF|Club/g, '').trim()}
                         </span>
                     </div>
 
-                    <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                        <div className="text-3xl font-black italic tracking-tighter text-white/90">
+                    {/* SCOREBOARD */}
+                    <div className="flex flex-col items-center justify-center gap-1 shrink-0 min-w-[50px]">
+                        <div className="text-2xl md:text-3xl font-black italic tracking-tighter text-white">
                             {isLive || isFinished ? (
-                                <div className="flex gap-2">
-                                    <span className={clsx(Number(match.home_score) > Number(match.away_score) && "text-primary")}>{match.home_score}</span>
-                                    <span className="text-gray-700">:</span>
-                                    <span className={clsx(Number(match.away_score) > Number(match.home_score) && "text-primary")}>{match.away_score}</span>
+                                <div className="flex gap-1.5 items-center justify-center">
+                                    <span className={clsx(Number(match.home_score) > Number(match.away_score) ? "text-primary drop-shadow-[0_0_8px_rgba(255,100,0,0.5)]" : "text-gray-300")}>
+                                        {match.home_score}
+                                    </span>
+                                    <span className="text-gray-600 text-lg">:</span>
+                                    <span className={clsx(Number(match.away_score) > Number(match.home_score) ? "text-primary drop-shadow-[0_0_8px_rgba(255,100,0,0.5)]" : "text-gray-300")}>
+                                        {match.away_score}
+                                    </span>
                                 </div>
                             ) : (
-                                <span className="text-xs text-gray-600 uppercase tracking-widest not-italic font-black">VS</span>
+                                <span className="text-[10px] text-gray-600 uppercase tracking-widest not-italic font-black bg-white/5 px-2 py-1 rounded-md">VS</span>
                             )}
                         </div>
-                        {isLive && <div className="text-[10px] font-black text-primary uppercase animate-pulse">Minuto {Math.floor(Math.random() * 90)}'</div>}
+                        {isLive && (
+                            <div className="flex items-center gap-1">
+                                <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse"></span>
+                                <span className="text-[8px] font-black text-green-500 uppercase tracking-wide">
+                                    {/* MOCK MINUTE IF NO REAL DATA, BUT PREFER REAL */}
+                                    ACTIVO
+                                </span>
+                            </div>
+                        )}
                     </div>
 
-                    <div className="flex-1 flex flex-col items-center gap-3 text-center">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-2 group-hover:border-white/20 transition-colors">
+                    {/* AWAY TEAM */}
+                    <div className="flex-1 flex flex-col items-center gap-2 text-center min-w-[30%]">
+                        <div className="w-10 h-10 md:w-14 md:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-2 group-hover:border-white/20 transition-all group-hover:scale-105 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                             {match.away_logo ? (
-                                <img src={match.away_logo} alt={match.away_team} className="w-full h-full object-contain" />
+                                <img src={match.away_logo} alt={match.away_team} className="w-full h-full object-contain drop-shadow-md" />
                             ) : (
-                                <Trophy className="w-6 h-6 text-gray-600" />
+                                <Trophy className="w-5 h-5 text-gray-600" />
                             )}
                         </div>
-                        <span className="text-sm font-black italic uppercase tracking-tighter text-white truncate w-full">
-                            {match.away_team}
+                        <span className="text-[10px] md:text-xs font-black italic uppercase tracking-tight text-gray-200 leading-tight w-full line-clamp-2 min-h-[2.5em] flex items-center justify-center">
+                            {match.away_team.replace(/FC|CF|Club/g, '').trim()}
                         </span>
                     </div>
                 </div>
 
-                {/* Footer: Action/Odds */}
-                <div className="mt-2 flex justify-between items-center border-t border-white/5 pt-4">
-                    <div className="flex gap-2">
-                        {match.odds && (
-                            <div className="flex items-center gap-1.5 px-3 py-1 bg-white/[0.02] border border-white/5 rounded-xl">
-                                <span className="text-[8px] font-black text-gray-500 uppercase">W1</span>
-                                <span className="text-[10px] font-black text-primary">{match.odds.home}</span>
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-2 text-primary group-hover:translate-x-1 transition-transform">
-                        <span className="text-[9px] font-black uppercase tracking-widest">Abrir Tactical Analytics</span>
-                        <ChevronRight className="w-3 h-3" />
+                {/* Footer: Action Button Only (Cleaner) */}
+                <div className="mt-1 flex justify-center border-t border-white/5 pt-3">
+                    <div className="flex items-center gap-2 text-gray-500 group-hover:text-primary transition-colors text-[9px] font-black uppercase tracking-widest">
+                        <span>ANÁLISIS TÁCTICO</span>
+                        <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </div>
                 </div>
             </div>

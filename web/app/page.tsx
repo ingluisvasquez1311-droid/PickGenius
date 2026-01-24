@@ -15,9 +15,13 @@ import { SubscribeModal } from '@/components/SubscribeModal';
 
 import { useQuery } from '@tanstack/react-query';
 
+import { LiveTicker } from '@/components/LiveTicker';
+import { MarketSentiment } from '@/components/MarketSentiment';
+
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // ... (keep usage of useQuery) ...
   const { data: news = [], isLoading: loadingNews } = useQuery({
     queryKey: ['news'],
     queryFn: async () => {
@@ -26,15 +30,21 @@ export default function Home() {
       const data = await res.json();
       return data.news || [];
     },
-    staleTime: 1000 * 60 * 5, // News are stale after 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
   return (
     <div className="relative min-h-screen text-white selection:bg-primary selection:text-black">
       <SubscribeModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
+      {/* Live Ticker Feed */}
+      <div className="pt-24 pb-0 relative z-20">
+        <LiveTicker />
+      </div>
+
       {/* --- DESIGN SYSTEM: AMBIENT LAYERS --- */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* ... (keep ambient layers) ... */}
         {/* Deep Blobs */}
         <div className="absolute top-[-20%] right-[-10%] w-[80%] h-[80%] bg-primary/20 blur-[180px] animate-pulse rounded-full opacity-60"></div>
         <div className="absolute top-[10%] left-[-20%] w-[70%] h-[70%] bg-secondary/15 blur-[200px] rounded-full opacity-40"></div>
@@ -48,10 +58,11 @@ export default function Home() {
         <div className="absolute top-[40%] left-1/2 -translate-x-1/2 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/20 to-transparent blur-sm"></div>
       </div>
 
-      <main className="relative z-10 pt-32 pb-32 px-4 md:px-12 max-w-[100rem] mx-auto space-y-40">
+      <main className="relative z-10 pt-12 pb-32 px-4 md:px-12 max-w-[100rem] mx-auto space-y-32">
 
         {/* --- HERO SECTION --- */}
         <section className="text-center space-y-12 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+          {/* ... (keep hero content) ... */}
           <div className="flex flex-col items-center gap-6">
             <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl group cursor-default">
               <span className="relative flex h-2.5 w-2.5">
@@ -88,8 +99,13 @@ export default function Home() {
             </div>
           </div>
 
+          {/* --- MARKET SENTIMENT WIDGET --- */}
+          <div className="pt-20">
+            <MarketSentiment />
+          </div>
+
           {/* --- STATS GRID --- */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-20">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-10 border-t border-white/5">
             <StatsCounter target={8500} label="Eventos Cierre/Mes" prefix="+" />
             <StatsCounter target={94} label="Sincro-Score Precisión" suffix="%" />
             <StatsCounter target={50} label="Ligas Globales Web" prefix="+" />
@@ -148,7 +164,7 @@ export default function Home() {
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
                           <Zap className="w-4 h-4 text-primary animate-pulse" />
-                          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">AI DEEP ANALYSIS</span>
+                          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">ANÁLISIS PROFUNDO IA</span>
                         </div>
                         <div className={clsx(
                           "px-3 py-1 rounded-full text-[9px] font-mono font-black uppercase tracking-widest bg-black/40",
@@ -196,19 +212,19 @@ export default function Home() {
                 title: "ALTA FIDELIDAD",
                 desc: "Procesamos datos de más de 50 ligas con latencia de milisegundos para darte la señal antes que el mercado.",
                 icon: Globe,
-                tag: "GLOBAL-SYSTEM"
+                tag: "SISTEMA-GLOBAL"
               },
               {
                 title: "ESTRATEGIAS IA",
                 desc: "Nuestra red neuronal PickGenius calcula parleys y props con un ROI promedio mensual del 42.8%.",
                 icon: Target,
-                tag: "QUANT-ENGINE"
+                tag: "MOTOR-CUÁNTICO"
               },
               {
-                title: "IN-PLAY RADAR",
+                title: "RADAR EN VIVO",
                 desc: "Detectamos cambios tácticos y fatiga en vivo. Análisis que ni los narradores profesionales ven.",
                 icon: Activity,
-                tag: "REAL-TIME"
+                tag: "TIEMPO-REAL"
               }
             ].map((item, i) => (
               <div key={i} className="group p-10 glass-card rounded-[3rem] hover:cyber-border transition-all space-y-8 relative overflow-hidden">

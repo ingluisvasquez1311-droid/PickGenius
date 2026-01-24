@@ -25,18 +25,21 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
     const { revalidate = 0, referer = 'https://www.sofascore.com/', skipBridge = false } = options;
 
     // --- HOME-IP BRIDGE LOGIC ---
+    // If we are on Vercel or have a bridge URL configured, we use it to avoid 403s.
     const bridgeUrl = process.env.NEXT_PUBLIC_API_URL;
     const isVercel = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.VERCEL;
 
-    if (!skipBridge && isVercel && bridgeUrl && !url.includes('/api/proxy') && url.includes('sofascore')) {
+    // Only use bridge if we are NOT already inside the proxy route to avoid loops
+    if (!skipBridge && bridgeUrl && !url.includes('/api/proxy') && url.includes('sofascore')) {
         try {
+            // We use the local API/Proxy as a relay if configured
             const proxiedUrl = `${bridgeUrl.replace(/\/$/, '')}/api/proxy?url=${encodeURIComponent(url)}`;
-            Logger.info(`[Bridge] Routing request via tunnel`, { url: proxiedUrl });
+            // Logger.info(`[Bridge] Routing request via tunnel`, { url: proxiedUrl });
 
             const response = await fetch(proxiedUrl, {
                 headers: {
                     'Cache-Control': 'no-cache',
-                    'ngrok-skip-browser-warning': '1' // Bypass ngrok warning page
+                    'ngrok-skip-browser-warning': '1'
                 },
                 next: { revalidate }
             });
@@ -45,10 +48,9 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
                 if (options.binary) return response;
                 return await response.json();
             }
-            Logger.warn(`[Bridge Error] Status ${response.status} from tunnel. Falling back to direct fetch.`);
+            // Logger.warn(`[Bridge Error] Status ${response.status}. Falling back.`);
         } catch (bridgeError: any) {
-            Logger.error(`[Bridge Critical] Tunnel unreachable: ${bridgeError.message}. Falling back.`);
-            // Sentry.captureException(bridgeError, { tags: { source: 'bridge' } });
+            // Logger.error(`[Bridge Critical] Tunnel unreachable.`);
         }
     }
 
@@ -69,21 +71,16 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
             ? `"Not_A Brand";v="8", "Chromium";v="${chromeVersion}", "Microsoft Edge";v="${chromeVersion}"`
             : `"Not_A Brand";v="24", "Chromium";v="${chromeVersion}", "Google Chrome";v="${chromeVersion}"`;
 
+        // MOBILE APP SIMULATION: Mimic official Android app headers
         const headers: Record<string, string> = {
-            'User-Agent': selectedUA,
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9,es-ES;q=0.8,es;q=0.7',
-            'Cache-Control': 'no-cache',
+            'User-Agent': 'Sofascore/858 (Android 14; Pixel 7 Pro)', // Fake App UA
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
-            'Origin': 'https://www.sofascore.com',
-            'Referer': 'https://www.sofascore.com/',
-            'Sec-Ch-Ua': brandStr,
-            'Sec-Ch-Ua-Mobile': selectedUA.includes('iPhone') ? '?1' : '?0',
-            'Sec-Ch-Ua-Platform': selectedUA.includes('Macintosh') ? '"macOS"' : selectedUA.includes('iPhone') ? '"iOS"' : '"Windows"',
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-site',
+            'Cache-Control': 'no-cache',
             'Pragma': 'no-cache',
+            'X-Sofascore-App-Ver': '6.4.2', // Fake current version
+            'X-Sofascore-Platform': 'android',
         };
 
         // INTEGRATION: Standard Fetch with Rotation
@@ -93,11 +90,24 @@ export async function sofafetch(url: string, options: FetchOptions = {}) {
             const response = await fetch(url, {
                 headers,
                 next: { revalidate },
-                signal: AbortSignal.timeout(15000)
+                signal: AbortSignal.timeout(30000)
             });
 
             if (response.status === 429 || response.status === 403 || response.status >= 500) {
                 if (attempt === MAX_RETRIES) {
+                    // FALLBACK: Try Public Proxy (AllOrigins) as a last resort for 403/429
+                    try {
+                        Logger.warn(`[SofaFetch] Max retries reached. Attempting fallback proxy for: ${url}`);
+                        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                        const proxyRes = await fetch(proxyUrl);
+                        const proxyData = await proxyRes.json();
+                        if (proxyData.contents) {
+                            return JSON.parse(proxyData.contents);
+                        }
+                    } catch (proxyError) {
+                        Logger.error(`[SofaFetch Proxy] Fallback failed`, { url });
+                    }
+
                     trackRequest(false, `External API Error: ${response.status}`);
                     throw new Error(`External API responded with ${response.status} after ${MAX_RETRIES} attempts`);
                 }

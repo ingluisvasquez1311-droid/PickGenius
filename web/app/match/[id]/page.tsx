@@ -21,6 +21,7 @@ import { AnalysisSkeleton, MatchCardSkeleton, Skeleton } from '@/components/Skel
 import { getTeamImage, getTournamentImage, getCategoryImage, getPlayerImage, getBlurDataURL } from '@/lib/image-utils';
 import { PremiumProjectionCard, SportType } from '@/components/PremiumProjectionCard';
 import { PlayerModal } from '@/components/PlayerModal'; // Import Modal
+import { AIAnalysisCard } from '@/components/AIAnalysisCard';
 import { useQuery } from '@tanstack/react-query';
 
 // Translation Helper
@@ -194,10 +195,10 @@ export default function MatchDetailsPage() {
             Tiempo: ${data.event.status.description}
             Estadísticas Clave: ${JSON.stringify(data.statistics?.[0]?.groups || [])}
             ${lineupsContext}
-            ${deepContext}
+            ${h2hSummary}
             MVP Stats Candidates: ${JSON.stringify(data.bestPlayers || {})}
             
-            REQUISITOS OBLIGATORIOS:
+            REQUISITOS OBLIGATORIOS (RESPONDE ÚNICAMENTE EN ESPAÑOL):
             1. IDENTIFICA EL MVP: ¿Qué jugador está dominando o tiene la mejor proyección basada en la data de "MVP Stats"?
             2. TENDENCIA DE MERCADO: ¿El partido tiende a OVER (Alta) o UNDER (Baja) en puntos/goles?
             
@@ -214,9 +215,9 @@ export default function MatchDetailsPage() {
             Evento: ${data.event.homeTeam.name} vs ${data.event.awayTeam.name}
             Liga/País: ${data.event.tournament.name} (${data.event.tournament.category?.name})
             ${lineupsContext}
-            ${deepContext}
+            ${h2hSummary}
             
-            REQUISITOS:
+            REQUISITOS (RESPONDE ÚNICAMENTE EN ESPAÑOL):
             1. SELECCIONA TU MVP: Basado en H2H y forma reciente, ¿quién será el jugador clave?
             2. DEFINE EL MERCADO: ¿Es un juego de Ataque (OVER) o Defensa (UNDER)?
             
@@ -228,7 +229,7 @@ export default function MatchDetailsPage() {
             IMPORTANTE: Incluye al final este bloque exacto para el sistema de radar:
             [PROJECTIONS: ${projectionSchema}]`;
         } else {
-            prompt = `Analiza el resultado final (Post-Match v2.0):
+            prompt = `Analiza el resultado final (Post-Match v2.0) (RESPONDE EN ESPAÑOL):
             Evento: ${data.event.homeTeam.name} vs ${data.event.awayTeam.name}
             Resultado: ${data.event.homeScore?.current ?? 0} - ${data.event.awayScore?.current ?? 0}
             ${lineupsContext}
@@ -652,26 +653,11 @@ export default function MatchDetailsPage() {
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="space-y-4">
-                                        {/* Analysis Content */}
-                                        <div className={clsx(
-                                            "prose prose-invert prose-sm max-w-none text-[12px] leading-relaxed text-gray-300 font-medium bg-white/5 p-4 rounded-2xl border border-white/5",
-                                            !isGold && "blur-sm select-none opacity-50 mask-gradient"
-                                        )}>
-                                            {aiAnalysis}
-                                        </div>
-
-                                        {/* Lock Overlay */}
-                                        {!isGold && (
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm rounded-[2.4rem] z-20 space-y-3">
-                                                <div className="p-3 bg-amber-500 rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.5)] animate-bounce-short">
-                                                    <Lock className="w-6 h-6 text-black" />
-                                                </div>
-                                                <h4 className="text-sm font-black text-white uppercase italic tracking-wider">Contenido Elite</h4>
-                                                <button onClick={handleUpgrade} className="text-[9px] font-black pointer-events-auto text-amber-500 hover:text-white uppercase tracking-widest underline">Desbloquear Acceso Total</button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <AIAnalysisCard
+                                        content={aiAnalysis || ''}
+                                        isGold={isGold}
+                                        onUpgrade={handleUpgrade}
+                                    />
                                 )}
                             </div>
                         </div>

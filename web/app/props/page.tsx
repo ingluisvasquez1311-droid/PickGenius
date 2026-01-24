@@ -29,14 +29,6 @@ const subFilters = [
 ];
 
 // MOCK_PICKS eliminado para integración real
-const FEATURED_PLAYERS: Record<string, number[]> = {
-    basketball: [3455, 113426, 965451, 885237], // LeBron, Curry, Luka, Tatum
-    football: [826029, 839956, 159665], // Mbappe, Haaland, Salah
-    nfl: [885913, 345465], // Mahomes, Kelce
-    mlb: [952178, 885566], // Ohtani, Judge
-    hockey: [796075, 836496], // McDavid, Matthews
-    tennis: [19496, 985551] // Djokovic, Alcaraz
-};
 
 const SPORT_STATS: Record<string, { key: string; label: string }[]> = {
     basketball: [
@@ -117,30 +109,21 @@ function PropsDashboardContent() {
         }
     }, [searchParams]);
 
-    // Fetch Best Picks for selected sport
+    // Fetch Best Picks for selected sport (AI Powered)
     const fetchBestPicks = async (sport: string) => {
         setLoadingBestPicks(true);
         try {
-            const playerIds = FEATURED_PLAYERS[sport] || [];
-            if (playerIds.length === 0) {
-                setBestPicks([]);
-                return;
-            }
+            const res = await fetch(`/api/props/best?sport=${sport}`);
+            const data = await res.json();
 
-            const picks = playerIds.map(id => ({
-                id,
-                player: id === 3455 ? 'LeBron James' :
-                    id === 113426 ? 'Stephen Curry' :
-                        id === 826029 ? 'Kylian Mbappé' :
-                            id === 839956 ? 'Erling Haaland' : 'Star Player',
-                team: 'Top Team',
-                prop: sport === 'basketball' ? 'Over 24.5 Puntos' : 'Goal or Assist',
-                prob: '85%',
-                odds: 1.85
-            }));
-            setBestPicks(picks);
+            if (data.picks && Array.isArray(data.picks)) {
+                setBestPicks(data.picks);
+            } else {
+                setBestPicks([]);
+            }
         } catch (e) {
-            console.error(e);
+            console.error("Error fetching AI props:", e);
+            setBestPicks([]);
         } finally {
             setLoadingBestPicks(false);
         }
