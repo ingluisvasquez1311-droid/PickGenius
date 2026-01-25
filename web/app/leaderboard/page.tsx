@@ -9,6 +9,7 @@ import {
 import { useGamification } from '@/hooks/useGamification';
 import { useBankroll } from '@/hooks/useBankroll';
 import { useUser } from '@/components/ClerkSafeProvider';
+import PicksArenaWidget from '@/components/PicksArenaWidget';
 import clsx from 'clsx';
 
 interface LeaderboardUser {
@@ -104,120 +105,134 @@ export default function LeaderboardPage() {
                     </div>
                 </div>
 
-                {/* Filters & Top 3 Highlights */}
-                <div className="space-y-12">
-                    <div className="flex flex-col md:flex-row gap-6 justify-between items-center">
-                        <div className="relative group w-full md:w-96">
-                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-                            <input
-                                type="text"
-                                placeholder="BUSCAR ANALISTA..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-12 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-primary/50 transition-all"
-                            />
+                {/* Grid Layout: Rankings (Left) + Arena (Right) */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-12">
+                        {/* Filters */}
+                        <div className="flex flex-col md:flex-row gap-6 justify-between items-center">
+                            <div className="relative group w-full md:w-96">
+                                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                                <input
+                                    type="text"
+                                    placeholder="BUSCAR ANALISTA..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-12 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-primary/50 transition-all"
+                                />
+                            </div>
+                            <div className="flex gap-2">
+                                {['GLOBAL', 'AMIGOS', 'POR DEPORTE'].map((t, i) => (
+                                    <button key={t} className={clsx(
+                                        "px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase transition-all",
+                                        i === 0 ? "bg-white text-black" : "bg-white/5 text-gray-500 hover:text-white"
+                                    )}>
+                                        {t}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            {['GLOBAL', 'AMIGOS', 'POR DEPORTE'].map((t, i) => (
-                                <button key={t} className={clsx(
-                                    "px-6 py-3 rounded-xl text-[9px] font-black tracking-widest uppercase transition-all",
-                                    i === 0 ? "bg-white text-black" : "bg-white/5 text-gray-500 hover:text-white"
-                                )}>
-                                    {t}
-                                </button>
-                            ))}
+
+                        {/* Rankings Table */}
+                        <div className="glass-card p-1 rounded-[3rem] border-white/5 overflow-hidden">
+                            <div className="bg-[#080808]/90 backdrop-blur-3xl p-2 rounded-[2.8rem]">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-white/5">
+                                                <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] w-24">RANK</th>
+                                                <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">ANALISTA</th>
+                                                <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] text-center">NIVEL</th>
+                                                <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] text-center">PUNTOS XP</th>
+                                                <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] text-center">WIN RATE</th>
+                                                <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] text-center">ROI</th>
+                                                <th className="px-8 py-8 text-right text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">TREND</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/[0.02]">
+                                            {filteredPlayers.map((player) => (
+                                                <tr
+                                                    key={player.rank}
+                                                    className={clsx(
+                                                        "group hover:bg-white/[0.02] transition-all",
+                                                        player.name.includes("TÚ") && "bg-primary/[0.03]"
+                                                    )}
+                                                >
+                                                    <td className="px-8 py-10">
+                                                        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/5 text-xl font-black italic tracking-tighter group-hover:bg-primary group-hover:text-black transition-all">
+                                                            {player.rank}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-8 py-10">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="relative">
+                                                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-transparent p-[1px]">
+                                                                    <div className="w-full h-full bg-black rounded-2xl flex items-center justify-center overflow-hidden">
+                                                                        {player.isAI ? <Zap className="w-6 h-6 text-primary" /> : <User className="w-6 h-6 text-gray-600" />}
+                                                                    </div>
+                                                                </div>
+                                                                {player.rank <= 3 && (
+                                                                    <div className="absolute -top-2 -right-2 p-1.5 bg-primary rounded-lg text-black">
+                                                                        <Crown className="w-3 h-3" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <p className="text-sm font-black italic uppercase tracking-tight text-white group-hover:text-primary transition-colors flex items-center gap-2">
+                                                                    {player.name}
+                                                                    {player.isAI && <span className="px-2 py-0.5 bg-primary/20 text-primary text-[8px] font-black rounded-md">AI PRO</span>}
+                                                                </p>
+                                                                <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
+                                                                    {player.isAI ? 'Algoritmo de Predicción' : 'Elite Analyst'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-8 py-10 text-center">
+                                                        <span className="text-lg font-black italic text-gray-400">Lvl {player.level}</span>
+                                                    </td>
+                                                    <td className="px-8 py-10 text-center">
+                                                        <span className="text-lg font-black italic text-white">{player.points.toLocaleString()}</span>
+                                                    </td>
+                                                    <td className="px-8 py-10 text-center">
+                                                        <div className="flex flex-col items-center gap-1">
+                                                            <span className="text-lg font-black italic text-green-400">{player.winRate.toFixed(1)}%</span>
+                                                            <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
+                                                                <div className="h-full bg-green-500" style={{ width: `${player.winRate}%` }}></div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-8 py-10 text-center">
+                                                        <span className={clsx(
+                                                            "text-lg font-black italic",
+                                                            player.roi >= 0 ? "text-primary" : "text-red-500"
+                                                        )}>
+                                                            {player.roi >= 0 ? '+' : ''}{player.roi.toFixed(1)}%
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-8 py-10 text-right">
+                                                        <div className="flex justify-end">
+                                                            {player.trend === 'up' && <ArrowUp className="w-5 h-5 text-green-500" />}
+                                                            {player.trend === 'down' && <ArrowDown className="w-5 h-5 text-red-500" />}
+                                                            {player.trend === 'stable' && <Activity className="w-5 h-5 text-gray-600" />}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Rankings Table */}
-                    <div className="glass-card p-1 rounded-[3rem] border-white/5 overflow-hidden">
-                        <div className="bg-[#080808]/90 backdrop-blur-3xl p-2 rounded-[2.8rem]">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="border-b border-white/5">
-                                            <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] w-24">RANK</th>
-                                            <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">ANALISTA</th>
-                                            <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] text-center">NIVEL</th>
-                                            <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] text-center">PUNTOS XP</th>
-                                            <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] text-center">WIN RATE</th>
-                                            <th className="px-8 py-8 text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] text-center">ROI</th>
-                                            <th className="px-8 py-8 text-right text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">TREND</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-white/[0.02]">
-                                        {filteredPlayers.map((player) => (
-                                            <tr
-                                                key={player.rank}
-                                                className={clsx(
-                                                    "group hover:bg-white/[0.02] transition-all",
-                                                    player.name.includes("TÚ") && "bg-primary/[0.03]"
-                                                )}
-                                            >
-                                                <td className="px-8 py-10">
-                                                    <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/5 text-xl font-black italic tracking-tighter group-hover:bg-primary group-hover:text-black transition-all">
-                                                        {player.rank}
-                                                    </div>
-                                                </td>
-                                                <td className="px-8 py-10">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="relative">
-                                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-transparent p-[1px]">
-                                                                <div className="w-full h-full bg-black rounded-2xl flex items-center justify-center overflow-hidden">
-                                                                    {player.isAI ? <Zap className="w-6 h-6 text-primary" /> : <User className="w-6 h-6 text-gray-600" />}
-                                                                </div>
-                                                            </div>
-                                                            {player.rank <= 3 && (
-                                                                <div className="absolute -top-2 -right-2 p-1.5 bg-primary rounded-lg text-black">
-                                                                    <Crown className="w-3 h-3" />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <p className="text-sm font-black italic uppercase tracking-tight text-white group-hover:text-primary transition-colors flex items-center gap-2">
-                                                                {player.name}
-                                                                {player.isAI && <span className="px-2 py-0.5 bg-primary/20 text-primary text-[8px] font-black rounded-md">AI PRO</span>}
-                                                            </p>
-                                                            <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">
-                                                                {player.isAI ? 'Algoritmo de Predicción' : 'Elite Analyst'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-8 py-10 text-center">
-                                                    <span className="text-lg font-black italic text-gray-400">Lvl {player.level}</span>
-                                                </td>
-                                                <td className="px-8 py-10 text-center">
-                                                    <span className="text-lg font-black italic text-white">{player.points.toLocaleString()}</span>
-                                                </td>
-                                                <td className="px-8 py-10 text-center">
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <span className="text-lg font-black italic text-green-400">{player.winRate.toFixed(1)}%</span>
-                                                        <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
-                                                            <div className="h-full bg-green-500" style={{ width: `${player.winRate}%` }}></div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-8 py-10 text-center">
-                                                    <span className={clsx(
-                                                        "text-lg font-black italic",
-                                                        player.roi >= 0 ? "text-primary" : "text-red-500"
-                                                    )}>
-                                                        {player.roi >= 0 ? '+' : ''}{player.roi.toFixed(1)}%
-                                                    </span>
-                                                </td>
-                                                <td className="px-8 py-10 text-right">
-                                                    <div className="flex justify-end">
-                                                        {player.trend === 'up' && <ArrowUp className="w-5 h-5 text-green-500" />}
-                                                        {player.trend === 'down' && <ArrowDown className="w-5 h-5 text-red-500" />}
-                                                        {player.trend === 'stable' && <Activity className="w-5 h-5 text-gray-600" />}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div className="lg:col-span-1 space-y-6">
+                        <PicksArenaWidget />
+                        <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/5 text-center space-y-4">
+                            <Flame className="w-12 h-12 text-primary mx-auto opacity-50" />
+                            <h3 className="text-xl font-black italic uppercase text-white">Torneo Mensual</h3>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                El ganador recibe $500 USD en créditos + Status GOLD vitalicio.
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -22,6 +22,7 @@ import { getTeamImage, getTournamentImage, getCategoryImage, getPlayerImage, get
 import { PremiumProjectionCard, SportType } from '@/components/PremiumProjectionCard';
 import { PlayerModal } from '@/components/PlayerModal'; // Import Modal
 import { AIAnalysisCard } from '@/components/AIAnalysisCard';
+import MomentumChart from '@/components/MomentumChart';
 import { useQuery } from '@tanstack/react-query';
 
 // Translation Helper
@@ -533,6 +534,18 @@ export default function MatchDetailsPage() {
                                 })()}
                             </div>
                         </div>
+
+                        {/* NEW: MOMENTUM CHART (Only In-Progress) */}
+                        {event.status.type === 'inprogress' && (
+                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                                <MomentumChart
+                                    homeTeam={event.homeTeam.name}
+                                    awayTeam={event.awayTeam.name}
+                                    currentScore={{ home: event.homeScore?.current || 0, away: event.awayScore?.current || 0 }}
+                                    status={event.status.type}
+                                />
+                            </div>
+                        )}
 
                         {/* Lineups */}
                         {data.lineups && (data.lineups.home?.players?.length > 0 || data.lineups.away?.players?.length > 0) && (
