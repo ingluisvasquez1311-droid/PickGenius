@@ -6,7 +6,7 @@ echo ===================================================
 echo.
 echo [1/3] Iniciando la Base de Datos Redis y Scraper Engine...
 echo (Se abrira una ventana de navegador VISIBLE para capturar datos en vivo)
-start "PickGenius Engine (Python)" cmd /k ".venv\Scripts\python.exe python/background_service.py"
+start "PickGenius Engine (Python)" cmd /k "set PYTHONIOENCODING=utf-8 && .venv\Scripts\python.exe python/genius_sync.py"
 
 echo.
 echo [2/3] Iniciando Servidor Web (Next.js)...
